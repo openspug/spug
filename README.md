@@ -7,6 +7,7 @@
 [![Element](https://img.shields.io/badge/Element-2.x-green.svg?style=plastic)](http://element-cn.eleme.io/#/zh-CN/)
 
 Spug is an open source O & M management system developed with Python + Flask + Element. The system is separated from the front and the back of the system to help small and medium-sized enterprises manage the hosts, tasks, deployment, configuration files, monitoring and alarming
+
 Spug是一款使用Python+Flask+Element组件开发的开源运维管理系统,系统前后端分离,帮助中小型企业完成主机、任务、发布部署、配置文件、监控、报警等管理。
 
 #### Demo演示地址：<https://spug.qbangmang.com/login>
