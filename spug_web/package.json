@@ -1,0 +1,39 @@
+{
+  "name": "element-starter",
+  "description": "A Vue.js project",
+  "author": "yi.shyang@ele.me",
+  "private": true,
+  "scripts": {
+    "dev": "webpack-dev-server -d --inline --hot --env.dev",
+    "build": "rimraf dist && webpack -p --progress --hide-modules"
+  },
+  "dependencies": {
+    "axios": "^0.16.1",
+    "echarts": "^4.0.2",
+    "element-ui": "^2.0.8",
+    "vue": "^2.5.2",
+    "vue-router": "^2.3.1"
+  },
+  "engines": {
+    "node": ">=6"
+  },
+  "devDependencies": {
+    "autoprefixer": "^6.6.0",
+    "babel-core": "^6.21.0",
+    "babel-eslint": "^7.1.1",
+    "babel-loader": "^6.4.0",
+    "babel-preset-env": "^1.6.0",
+    "css-loader": "^0.27.0",
+    "file-loader": "^0.10.1",
+    "html-loader": "^0.4.5",
+    "html-webpack-plugin": "^2.24.1",
+    "postcss-loader": "^1.3.3",
+    "rimraf": "^2.5.4",
+    "style-loader": "^0.13.2",
+    "url-loader": "^0.5.8",
+    "vue-loader": "^11.1.4",
+    "vue-template-compiler": "^2.5.2",
+    "webpack": "^2.2.0",
+    "webpack-dev-server": "^2.4.4"
+  }
+}
