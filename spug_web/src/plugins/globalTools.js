@@ -3,7 +3,6 @@
  */
 // import Vue from 'vue'
 import axios from 'axios'
-import io from 'socket.io-client'
 import envs from '../config/env';
 
 

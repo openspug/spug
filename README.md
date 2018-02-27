@@ -40,18 +40,20 @@ $ docker run -d -e REGISTRY_SERVER="hub.docker.com:5000" -p 80:80 hub.qbangmang.
 
 
 # 可选参数：
-$ -e MYSQL_DATABASE="spug"        	//指定数据库名称
-  -e MYSQL_USER="spuguser"         	//指定数据库用户名
-  -e MYSQL_PASSWORD="spugpwd"    	//指定数据库密码
-  -e REGISTRY_USER="hubuser"    	//指定私有镜像仓库用户名
-  -e REGISTRY_PASSWORD="hubpwd" 	//指定私有镜像仓库密码
+$ -e MYSQL_DATABASE="spug"        	       //指定数据库名称
+  -e MYSQL_USER="spuguser"         	       //指定数据库用户名
+  -e MYSQL_PASSWORD="spugpwd"    	         //指定数据库密码
+  -e REGISTRY_SERVER="hub.docker.com:5000" //指定私有镜像仓库
+  -e REGISTRY_USER="hubuser"    	         //指定私有镜像仓库用户名
+  -e REGISTRY_PASSWORD="hubpwd" 	         //指定私有镜像仓库密码
 ```
 
-更多Dockerfile [Dockerfile](https://github.com/openspug/)
+更多Dockerfile [Dockerfile](https://github.com/openspug/spug/docs/Dockerfile)
 
 
 ### 详细安装步骤
 ----------------------------
+
     [文档](https://github.com/openspug/spug/wiki/)
 
 
@@ -84,14 +86,15 @@ $ -e MYSQL_DATABASE="spug"        	//指定数据库名称
 ### Docs 开发者文档
 ----------------------------
 
+ * [Project structure 项目结构](https://github.com/openspug/spug/docs/project_structure.md)
 
 ### Contributor 贡献者
 ----------------------------
 #### 1.0.1
 - zyupo <张玉坡> 项目发起者
 - Yooke <雷二猛> Spug架构师、熟悉多种开发语言。
-- junun <刘军>
-- yuyc  <于颜川>
+- junun <刘军>   部分功能开发
+- yuyc  <于颜川> 部分功能开发
 
 
 ### 开发者群
