@@ -37,4 +37,4 @@ sleep 2
 if [ $REQUIRE_INIT_OPS == true ]; then
     /usr/bin/python3 /scripts/init_spug.py
 fi 
-gunicorn --threads=32 main:app
+gunicorn --threads=32 main:app -b 0.0.0.0:3000

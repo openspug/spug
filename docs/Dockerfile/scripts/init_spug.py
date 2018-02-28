@@ -1,6 +1,6 @@
 import sys
 import os
-sys.path.append('/ops_api')
+sys.path.append('/spug/spug_api')
 import random
 import string
 from public import db
@@ -25,7 +25,7 @@ with open(os.path.join(BASE_DIR, 'libs', 'sql', 'permissions.sql'), 'r') as f:
 
 # create default admin
 username = 'admin'
-password = ''.join(random.sample(string.ascii_letters + string.digits, 8))
+password = 'spug'
 User(username=username, password=password, nickname='Administrator', is_supper=True).save()
 
 print('*' * 80)

@@ -36,16 +36,18 @@ Spug是一款使用Python+Flask+Element组件开发的开源运维管理系统,�
 ----------------------------
 ```
 $ docker pull hub.qbangmang.com/spug:1.0.1
-$ docker run -d -e REGISTRY_SERVER="hub.docker.com:5000" -p 80:80 hub.qbangmang.com/spug:1.0.1
+$ docker run -d -e REGISTRY_SERVER="hub.qbangmang.com:5000" -p 80:80 hub.qbangmang.com/spug:1.0.1
 
+$ 访问：http://主机ip
+$ 默认账号密码：admin/spug
 
 # 可选参数：
-$ -e MYSQL_DATABASE="spug"        	       //指定数据库名称
-  -e MYSQL_USER="spuguser"         	       //指定数据库用户名
-  -e MYSQL_PASSWORD="spugpwd"    	         //指定数据库密码
-  -e REGISTRY_SERVER="hub.docker.com:5000" //指定私有镜像仓库
-  -e REGISTRY_USER="hubuser"    	         //指定私有镜像仓库用户名
-  -e REGISTRY_PASSWORD="hubpwd" 	         //指定私有镜像仓库密码
+$ -e MYSQL_DATABASE="spug"                    //指定数据库名称
+  -e MYSQL_USER="spuguser"                    //指定数据库用户名
+  -e MYSQL_PASSWORD="spugpwd"                 //指定数据库密码
+  -e REGISTRY_SERVER="hub.qbangmang.com:5000" //指定私有镜像仓库
+  -e REGISTRY_USER="hubuser"                  //指定私有镜像仓库用户名
+  -e REGISTRY_PASSWORD="hubpwd"               //指定私有镜像仓库密码
 ```
 
 更多Dockerfile [Dockerfile](https://github.com/openspug/spug/docs/Dockerfile)
@@ -65,8 +67,10 @@ $ -e MYSQL_DATABASE="spug"        	       //指定数据库名称
 
    2. Start server 启动服务端：
    $ cd spug/spug_api
-   $ pip install -r requirements.txt
-   $ python main.py
+   $ pip install -r requirements.txt  //安装依赖包
+   $ python manage.py init_db         //初始化数据库
+   $ python manage.py create_admin    //创建管理员
+   $ python main.py                   //启动服务
 
    3. Start web  启动前端：
    $ cd spug/spug_web
@@ -86,7 +90,7 @@ $ -e MYSQL_DATABASE="spug"        	       //指定数据库名称
 ### Docs 开发者文档
 ----------------------------
 
- * [Project structure 项目结构](https://github.com/openspug/spug/docs/project_structure.md)
+ * [Project structure 项目结构](https://github.com/openspug/spug/blob/master/docs/project_structure.md)
 
 ### Contributor 贡献者
 ----------------------------
