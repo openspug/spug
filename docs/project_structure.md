@@ -1,150 +1,150 @@
-## ÏîÄ¿½á¹¹
+## é¡¹ç›®ç»“æž„
 
 
 ```
-©À©¤©¤ docs                             // ÎÄµµÏà¹ØÄ¿Â¼
-©À©¤©¤ spug_api                         // ºó¶Ë½Ó¿ÚÄ¿Â¼
-©¦   ©¸©¤©¤ apps                         // ºó¶Ë×ÓÄ£¿éÄ¿Â¼
-©¦   ©¦   ©À©¤©¤ account                  // ÓÃ»§¹ÜÀíÄ£¿é
-©¦   ©¦   ©¦   ©¸©¤©¤ __init__.py          // ÓÃ»§Ä£¿éÀ¶Í¼Â·ÓÉ
-©¦   ©¦   ©¦   ©¸©¤©¤ models.py            // ÓÃ»§Ä£¿éÊý¾ÝÄ£ÐÍ
-©¦   ©¦   ©¦   ©¸©¤©¤ role.py              // ÓÃ»§È¨ÏÞ²Ù×÷Ïà¹Ø·½·¨
-©¦   ©¦   ©¦   ©¸©¤©¤ user.py              // ÓÃ»§²Ù×÷Ïà¹Ø·½·¨
-©¦   ©¦   ©À©¤©¤ apis                     // ¹«ÓÃ½Ó¿ÚÄ£¿é
-©¦   ©¦   ©¦   ©¸©¤©¤ __init__.py          // ¶¨Òå½Ó¿ÚÏà¹ØÀ¶Í¼Â·ÓÉ
-©¦   ©¦   ©¦   ©¸©¤©¤ config.py            // ¿Í»§¶Ë»ñÈ¡ÅäÖÃÎÄ¼þÏà¹Ø·½·¨
-©¦   ©¦   ©¦   ©¸©¤©¤ files.py		     // ÎÄ¼þÉÏ´«Ïà¹Ø·½·¨
-©¦   ©¦   ©¦   ©¸©¤©¤ utils.py			 //
-©¦   ©¦   ©À©¤©¤ assets                   // ×Ê²ú¹ÜÀíÄ£¿é
-©¦   ©¦   ©¦   ©¸©¤©¤ __init__.py          // ×Ê²úÄ£¿éÀ¶Í¼Â·ÓÉ
-©¦   ©¦   ©¦   ©¸©¤©¤ host.py              // Ö÷»ú¹ÜÀíÏà¹Ø·½·¨
-©¦   ©¦   ©¦   ©¸©¤©¤ host_exec.py	     // Ö÷»úÅúÁ¿Ö´ÐÐÏà¹Ø·½·¨
-©¦   ©¦   ©¦   ©¸©¤©¤ models.py            // ×Ê²úÄ£¿éÊý¾ÝÄ£ÐÍ
-©¦   ©¦   ©¦   ©¸©¤©¤ utils.py			 //
-©¦   ©¦   ©À©¤©¤ common                   // ¹«ÓÃ¶ÓÁÐÄ£¿é
-©¦   ©¦   ©¦   ©¸©¤©¤ __init__.py          // ¹«ÓÃ¶ÓÁÐÄ£¿éÀ¶Í¼Â·ÓÉ
-©¦   ©¦   ©¦   ©¸©¤©¤ queue.py			 // ¹«ÓÃ¶ÓÁÐ·½·¨
-©¦   ©¦   ©À©¤©¤ configuration            // ÅäÖÃ¹ÜÀíÄ£¿é
-©¦   ©¦   ©¦   ©¸©¤©¤ __init__.py          // ÅäÖÃ¹ÜÀíÄ£¿éÀ¶Í¼Â·ÓÉ
-©¦   ©¦   ©¦   ©¸©¤©¤ app.py               // Ó¦ÓÃÅäÖÃ¹ÜÀí
-©¦   ©¦   ©¦   ©¸©¤©¤ config.py            // 
-©¦   ©¦   ©¦   ©¸©¤©¤ environment.py       // »·¾³ÅäÖÃÏà¹Ø·½·¨
-©¦   ©¦   ©¦   ©¸©¤©¤ models.py            // ÅäÖÃ¹ÜÀíÊý¾ÝÄ£ÐÍ
-©¦   ©¦   ©¦   ©¸©¤©¤ service.py           // ÅäÖÃ¹ÜÀí-·þÎñÅäÖÃÏà¹Ø·½·¨
-©¦   ©¦   ©À©¤©¤ deploy                   // Ó¦ÓÃ·¢²¼Ä£¿é
-©¦   ©¦   ©¦   ©¸©¤©¤ __init__.py          // Ó¦ÓÃ·¢²¼Ä£¿éÀ¶Í¼Â·ÓÉ
-©¦   ©¦   ©¦   ©¸©¤©¤ app.py               // 
-©¦   ©¦   ©¦   ©¸©¤©¤ config.py            // 
-©¦   ©¦   ©¦   ©¸©¤©¤ container.py	     // 
-©¦   ©¦   ©¦   ©¸©¤©¤ exec.py              // Ó¦ÓÃ·¢²¼-Ö´ÐÐ·¢²¼Ïà¹Ø·½·¨
-©¦   ©¦   ©¦   ©¸©¤©¤ field.py             // Ó¦ÓÃ·¢²¼-×Ö¶Î¹ÜÀíÏà¹Ø·½·¨
-©¦   ©¦   ©¦   ©¸©¤©¤ host.py              // 
-©¦   ©¦   ©¦   ©¸©¤©¤ image.py             // Ó¦ÓÃ·¢²¼-¾µÏñ¹ÜÀíÏà¹Ø·½·¨
-©¦   ©¦   ©¦   ©¸©¤©¤ menu.py              // Ó¦ÓÃ·¢²¼-²Ëµ¥¹ÜÀíÏà¹Ø×é¼þ
-©¦   ©¦   ©¦   ©¸©¤©¤ models.py            // Ó¦ÓÃ·¢²¼Êý¾ÝÄ£ÐÍ
-©¦   ©¦   ©¦   ©¸©¤©¤ publish.py           // Ó¦ÓÃ·¢²¼-·¢²¼Ïà¹Ø·½·¨
-©¦   ©¦   ©¦   ©¸©¤©¤ utils.py             // 
-©¦   ©¦   ©À©¤©¤ home            		 // Ê×Ò³Ä£¿é
-©¦   ©¦   ©¦   ©¸©¤©¤ __init__.py          // Ê×Ò³À¶Í¼Â·ÓÉ
-©¦   ©¦   ©¦   ©¸©¤©¤ homes.py			 // Ê×Ò³Õ¹Ê¾Êý¾Ý·½·¨
-©¦   ©¦   ©À©¤©¤ schedule                 // ÈÎÎñ¹ÜÀíÄ£¿é
-©¦   ©¦   ©¦   ©¸©¤©¤ __init__.py          // ÈÎÎñ¹ÜÀíÀ¶Í¼Â·ÓÉ
-©¦   ©¦   ©¦   ©¸©¤©¤ agent.py			 // ÈÎÎñ¹ÜÀí-Ö´ÐÐ¶ÔÏóÏà¹Ø·½·¨
-©¦   ©¦   ©¦   ©¸©¤©¤ history.py           // ÈÎÎñ¹ÜÀí-ÈÎÎñÀúÊ·
-©¦   ©¦   ©¦   ©¸©¤©¤ job.py               // ÈÎÎñ¹ÜÀí-ÈÎÎñÁÐ±íÏà¹Ø
-©¦   ©¦   ©¦   ©¸©¤©¤ models.py            // ÈÎÎñ¹ÜÀíÊý¾ÝÄ£ÐÍ
-©¦   ©¦   ©¦   ©¸©¤©¤ scheduler.py	     // ÈÎÎñ¹ÜÀí·½·¨
-©¦   ©¦   ©À©¤©¤ setting                  // 
-©¦   ©¦   ©¦   ©¸©¤©¤ __init__.py          // 
-©¦   ©¦   ©¦   ©¸©¤©¤ models.py            // 
-©¦   ©¦   ©¦   ©¸©¤©¤ utils.py             // 
-©¦   ©¦   ©À©¤©¤ __init__.py              // 
-©¦   ©¦   ©¦
-©¦   ©¸©¤©¤ libs                         // ÏµÍ³¹«ÓÃ¿âÄ¿Â¼
-©¦   ©¦   ©À©¤©¤ scripts                  // ¹«ÓÃ½Å±¾Ä¿Â¼
-©¦   ©¦   ©¦   ©¸©¤©¤ entrypoint.sh        // ÈÝÆ÷Æô¶¯½Å±¾
-©¦   ©¦   ©À©¤©¤ sql                      // sqlÄ¿Â¼
-©¦   ©¦   ©¦   ©¸©¤©¤ permissions.sql      // ÏµÍ³È¨ÏÞSQLÎÄ¼þ
-©¦   ©¦   ©À©¤©¤ ssh                      // ssh¹ÜÀíÄ¿Â¼
-©¦   ©¦   ©¦   ©¸©¤©¤ __init__.py          // ¹«ÓÃsshÏà¹Ø·½·¨
-©¦   ©¦   ©À©¤©¤ template                 // ÏµÍ³Ä£°åÄ¿Â¼
-©¦   ©¦   ©¦   ©¸©¤©¤ host.xls             // Ö÷»ú¹ÜÀí-Ö÷»úµ¼Èë-Ä£°å
-©¦   ©¦   ©À©¤©¤ __init__.py              //
-©¦   ©¦   ©À©¤©¤ decorators.py            // ¹«ÓÃ¼ì²éÈ¨ÏÞÎÄ¼þ
-©¦   ©¦   ©À©¤©¤ middleware.py            // ÏµÍ³¹«¹²ÉèÖÃÎÄ¼þ
-©¦   ©¦   ©À©¤©¤ model.py                 // ÏµÍ³¹«ÓÃÀà
-©¦   ©¦   ©À©¤©¤ tool.py                  // ÏµÍ³¹«ÓÃ¹¤¾ßÎÄ¼þ
-©¦   ©¦   ©À©¤©¤ utils.py                 //
-©¦   ©¸©¤©¤ storage                      // ÏµÍ³¹«ÓÃÄ¿Â¼
-©¦   ©¦   ©À©¤©¤ exec_tmp                 // Ö´ÐÐÄ¿Â¼
-©¦   ©¦   ©À©¤©¤ images                   // ¾µÏñÄ¿Â¼
-©¦   ©¦   ©À©¤©¤ publish_tmp              // ·¢²¼Ä¿Â¼
-©¦   ©¸©¤©¤ config.py.example            // ºó¶ËÅäÖÃÎÄ¼þÄ£°å
-©¦   ©¸©¤©¤ main.py                      // ºó¶ËÈë¿ÚÎÄ¼þ£¬¼ÓÔØËùÓÐÄ£¿é
-©¦   ©¸©¤©¤ manage.py                    // ÏµÍ³¹ÜÀíÎÄ¼þ
-©¦   ©¸©¤©¤ public.py                    // ÏµÍ³¹«ÓÃ
-©¦   ©¸©¤©¤ requirements.txt             // ºó¶ËÒÀÀµ°üÎÄ¼þ
-©¦
-©¦
-©À©¤©¤ spug_web                         // Ç°¶ËÄ¿Â¼
-©¦   ©¸©¤©¤ dist                         // ÏîÄ¿±àÒëºóµÄ¾²Ì¬×ÊÔ´Ä¿Â¼
-©¦   ©¸©¤©¤ src                          // Ç°¶ËÏîÄ¿Ô´ÂëÄ¿Â¼
-©¦   ©¦   ©À©¤©¤ assets                   // ¾²Ì¬×ÊÔ´Ä¿Â¼
-©¦   ©¦   ©À©¤©¤ components               // Ç°¶Ë×ÓÄ£¿éUI×é¼þÄ¿Â¼
-©¦   ©¦   ©¦   ©À©¤©¤ account              // ÓÃ»§¹ÜÀíÄ¿Â¼
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ Permission.vue   // È¨ÏÞ¹ÜÀí×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ PublishPermission.vue // ½ÇÉ«È¨ÏÞ-·¢²¼È¨ÏÞ×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ Role.vue		 // ½ÇÉ«È¨ÏÞ×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ routes.js        // ÓÃ»§¹ÜÀíÂ·ÓÉ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ TagTd.vue        // È¨ÏÞ¹ÜÀí±êÇ©
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ User.vue		 // ÓÃ»§ÁÐ±í×é¼þ
-©¦   ©¦   ©¦   ©À©¤©¤ assets               // Ö÷»ú¹ÜÀíÄ¿Â¼
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ Host.vue         // Ö÷»úÁÐ±í×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ HostExec.vue	 // ÅúÁ¿Ö´ÐÐ×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ route.js		 // Ö÷»ú¹ÜÀíÂ·ÓÉ
-©¦   ©¦   ©¦   ©À©¤©¤ configuration        // ÅäÖÃ¹ÜÀíÄ¿Â¼
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ App.vue          // Ó¦ÓÃÅäÖÃÁÐ±í×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ AppConfig.vue    // Ó¦ÓÃÅäÖÃ-ÅäÖÃ×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ AppRel.vue       // Ó¦ÓÃÅäÖÃ-¹ØÏµÅäÖÃ×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ ConfigEdie.vue   // 
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ Environment.vue  // »·¾³ÅäÖÃ×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ route.js		 // ÅäÖÃ¹ÜÀíÂ·ÓÉ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ Service.vue      // ·þÎñ¹ÜÀí×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ ServiceConfig.vue// ·þÎñÅäÖÃ-ÅäÖÃ×é¼þ
-©¦   ©¦   ©¦   ©À©¤©¤ publish              // Ó¦ÓÃ·¢²¼Ä¿Â¼
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ App.vue          // Ó¦ÓÃÁÐ±í×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ AppConfig.vue    // Ó¦ÓÃÁÐ±í-Ó¦ÓÃÉèÖÃ×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ AppMenu.vue      // 
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ AppSetting.vue   // Ó¦ÓÃÁÐ±í-ÈÝÆ÷ÉèÖÃ×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ ColorInput.vue   // ·¢²¼Ö´ÐÐÃüÁîÐÐ×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ Deploy.vue       // Ó¦ÓÃ·¢²¼-²¿Êð×é¼þ 
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ Field.vue        // Ó¦ÓÃ·¢²¼-×Ö¶Î¹ÜÀí×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ Image.vue        // Ó¦ÓÃ·¢²¼-¾µÏñ¹ÜÀí×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ Menu.vue         // Ó¦ÓÃ·¢²¼-²Ëµ¥¹ÜÀí×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ MenuExec.vue	 //
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ route.js		 // Ó¦ÓÃ·¢²¼Â·ÓÉ
-©¦   ©¦   ©¦   ©À©¤©¤ schedule             // ÈÎÎñ¹ÜÀíÄ¿Â¼
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ Job.vue          // ÈÎÎñÁÐ±í×é¼þ
-©¦   ©¦   ©¦   ©¦   ©¸©¤©¤ JobSetting.vue   // ÈÎÎñ¹ÜÀí-ÉèÖÃ´¥·¢Æ÷×é¼þ
-©¦   ©¦   ©¦   ©À©¤©¤ Deny.vue             // È«¾ÖÈ¨ÏÞ¾Ü¾ø×é¼þ
-©¦   ©¦   ©¦   ©À©¤©¤ Home.vue             // ÏµÍ³Home×é¼þ
-©¦   ©¦   ©¦   ©À©¤©¤ Layout.vue           // ²Ëµ¥Éú³É×é¼þ
-©¦   ©¦   ©¦   ©À©¤©¤ Login.vue            // ÏµÍ³µÇÂ¼×é¼þ
-©¦   ©¦   ©À©¤©¤ config                   // ÅäÖÃÄ¿Â¼
-©¦   ©¦   ©¦   ©À©¤©¤ env.js               // ÏîÄ¿³£¹æÅäÖÃ
-©¦   ©¦   ©¦   ©À©¤©¤ menu.js              // ²Ëµ¥¼°Ãæ°üÐ¼ÅäÖÃ
-©¦   ©¦   ©À©¤©¤ plugins                  // ÏîÄ¿À©Õ¹Ä¿Â¼
-©¦   ©¦   ©¦   ©À©¤©¤ globalTools.js       // È«¾Ö±äÁ¿
-©¦   ©¦   ©À©¤©¤ App.vue                  //
-©¦   ©¦   ©À©¤©¤ index.html               // Ê×Ò³ÎÄ¼þ
-©¦   ©¦   ©À©¤©¤ main.js                  // Èë¿ÚÎÄ¼þ£¬¼ÓÔØ¸÷ÖÖ¹«¹²×é¼þ
-©¦   ©¦   ©À©¤©¤ router.js                // ¹«¹²Â·ÓÉ
-©¦   ©¸©¤©¤ .babelrc                     // ES6Óï·¨±àÒëÅäÖÃ
-©¦   ©¸©¤©¤ Makefile                     //
-©¦   ©¸©¤©¤ package.json                 // ÏîÄ¿¼°¹¤¾ßµÄÒÀÀµÅäÖÃÎÄ¼þ
-©¦   ©¸©¤©¤ postcss.config.js            //
-©¦   ©¸©¤©¤ ReadME.md                    // Ç°¶ËREADME
-©¦   ©¸©¤©¤ webpack.config.js            //
+â”œâ”€â”€ docs                             // æ–‡æ¡£ç›¸å…³ç›®å½•
+â”œâ”€â”€ spug_api                         // åŽç«¯æŽ¥å£ç›®å½•
+â”‚   â””â”€â”€ apps                         // åŽç«¯å­æ¨¡å—ç›®å½•
+â”‚   â”‚   â”œâ”€â”€ account                  // ç”¨æˆ·ç®¡ç†æ¨¡å—
+â”‚   â”‚   â”‚   â””â”€â”€ __init__.py          // ç”¨æˆ·æ¨¡å—è“å›¾è·¯ç”±
+â”‚   â”‚   â”‚   â””â”€â”€ models.py            // ç”¨æˆ·æ¨¡å—æ•°æ®æ¨¡åž‹
+â”‚   â”‚   â”‚   â””â”€â”€ role.py              // ç”¨æˆ·æƒé™æ“ä½œç›¸å…³æ–¹æ³•
+â”‚   â”‚   â”‚   â””â”€â”€ user.py              // ç”¨æˆ·æ“ä½œç›¸å…³æ–¹æ³•
+â”‚   â”‚   â”œâ”€â”€ apis                     // å…¬ç”¨æŽ¥å£æ¨¡å—
+â”‚   â”‚   â”‚   â””â”€â”€ __init__.py          // å®šä¹‰æŽ¥å£ç›¸å…³è“å›¾è·¯ç”±
+â”‚   â”‚   â”‚   â””â”€â”€ config.py            // å®¢æˆ·ç«¯èŽ·å–é…ç½®æ–‡ä»¶ç›¸å…³æ–¹æ³•
+â”‚   â”‚   â”‚   â””â”€â”€ files.py             // æ–‡ä»¶ä¸Šä¼ ç›¸å…³æ–¹æ³•
+â”‚   â”‚   â”‚   â””â”€â”€ utils.py             //
+â”‚   â”‚   â”œâ”€â”€ assets                   // èµ„äº§ç®¡ç†æ¨¡å—
+â”‚   â”‚   â”‚   â””â”€â”€ __init__.py          // èµ„äº§æ¨¡å—è“å›¾è·¯ç”±
+â”‚   â”‚   â”‚   â””â”€â”€ host.py              // ä¸»æœºç®¡ç†ç›¸å…³æ–¹æ³•
+â”‚   â”‚   â”‚   â””â”€â”€ host_exec.py         // ä¸»æœºæ‰¹é‡æ‰§è¡Œç›¸å…³æ–¹æ³•
+â”‚   â”‚   â”‚   â””â”€â”€ models.py            // èµ„äº§æ¨¡å—æ•°æ®æ¨¡åž‹
+â”‚   â”‚   â”‚   â””â”€â”€ utils.py             //
+â”‚   â”‚   â”œâ”€â”€ common                   // å…¬ç”¨é˜Ÿåˆ—æ¨¡å—
+â”‚   â”‚   â”‚   â””â”€â”€ __init__.py          // å…¬ç”¨é˜Ÿåˆ—æ¨¡å—è“å›¾è·¯ç”±
+â”‚   â”‚   â”‚   â””â”€â”€ queue.py             // å…¬ç”¨é˜Ÿåˆ—æ–¹æ³•
+â”‚   â”‚   â”œâ”€â”€ configuration            // é…ç½®ç®¡ç†æ¨¡å—
+â”‚   â”‚   â”‚   â””â”€â”€ __init__.py          // é…ç½®ç®¡ç†æ¨¡å—è“å›¾è·¯ç”±
+â”‚   â”‚   â”‚   â””â”€â”€ app.py               // åº”ç”¨é…ç½®ç®¡ç†
+â”‚   â”‚   â”‚   â””â”€â”€ config.py            // 
+â”‚   â”‚   â”‚   â””â”€â”€ environment.py       // çŽ¯å¢ƒé…ç½®ç›¸å…³æ–¹æ³•
+â”‚   â”‚   â”‚   â””â”€â”€ models.py            // é…ç½®ç®¡ç†æ•°æ®æ¨¡åž‹
+â”‚   â”‚   â”‚   â””â”€â”€ service.py           // é…ç½®ç®¡ç†-æœåŠ¡é…ç½®ç›¸å…³æ–¹æ³•
+â”‚   â”‚   â”œâ”€â”€ deploy                   // åº”ç”¨å‘å¸ƒæ¨¡å—
+â”‚   â”‚   â”‚   â””â”€â”€ __init__.py          // åº”ç”¨å‘å¸ƒæ¨¡å—è“å›¾è·¯ç”±
+â”‚   â”‚   â”‚   â””â”€â”€ app.py               // 
+â”‚   â”‚   â”‚   â””â”€â”€ config.py            // 
+â”‚   â”‚   â”‚   â””â”€â”€ container.py         // 
+â”‚   â”‚   â”‚   â””â”€â”€ exec.py              // åº”ç”¨å‘å¸ƒ-æ‰§è¡Œå‘å¸ƒç›¸å…³æ–¹æ³•
+â”‚   â”‚   â”‚   â””â”€â”€ field.py             // åº”ç”¨å‘å¸ƒ-å­—æ®µç®¡ç†ç›¸å…³æ–¹æ³•
+â”‚   â”‚   â”‚   â””â”€â”€ host.py              // 
+â”‚   â”‚   â”‚   â””â”€â”€ image.py             // åº”ç”¨å‘å¸ƒ-é•œåƒç®¡ç†ç›¸å…³æ–¹æ³•
+â”‚   â”‚   â”‚   â””â”€â”€ menu.py              // åº”ç”¨å‘å¸ƒ-èœå•ç®¡ç†ç›¸å…³ç»„ä»¶
+â”‚   â”‚   â”‚   â””â”€â”€ models.py            // åº”ç”¨å‘å¸ƒæ•°æ®æ¨¡åž‹
+â”‚   â”‚   â”‚   â””â”€â”€ publish.py           // åº”ç”¨å‘å¸ƒ-å‘å¸ƒç›¸å…³æ–¹æ³•
+â”‚   â”‚   â”‚   â””â”€â”€ utils.py             // 
+â”‚   â”‚   â”œâ”€â”€ home                     // é¦–é¡µæ¨¡å—
+â”‚   â”‚   â”‚   â””â”€â”€ __init__.py          // é¦–é¡µè“å›¾è·¯ç”±
+â”‚   â”‚   â”‚   â””â”€â”€ homes.py             // é¦–é¡µå±•ç¤ºæ•°æ®æ–¹æ³•
+â”‚   â”‚   â”œâ”€â”€ schedule                 // ä»»åŠ¡ç®¡ç†æ¨¡å—
+â”‚   â”‚   â”‚   â””â”€â”€ __init__.py          // ä»»åŠ¡ç®¡ç†è“å›¾è·¯ç”±
+â”‚   â”‚   â”‚   â””â”€â”€ agent.py             // ä»»åŠ¡ç®¡ç†-æ‰§è¡Œå¯¹è±¡ç›¸å…³æ–¹æ³•
+â”‚   â”‚   â”‚   â””â”€â”€ history.py           // ä»»åŠ¡ç®¡ç†-ä»»åŠ¡åŽ†å²
+â”‚   â”‚   â”‚   â””â”€â”€ job.py               // ä»»åŠ¡ç®¡ç†-ä»»åŠ¡åˆ—è¡¨ç›¸å…³
+â”‚   â”‚   â”‚   â””â”€â”€ models.py            // ä»»åŠ¡ç®¡ç†æ•°æ®æ¨¡åž‹
+â”‚   â”‚   â”‚   â””â”€â”€ scheduler.py         // ä»»åŠ¡ç®¡ç†æ–¹æ³•
+â”‚   â”‚   â”œâ”€â”€ setting                  // 
+â”‚   â”‚   â”‚   â””â”€â”€ __init__.py          // 
+â”‚   â”‚   â”‚   â””â”€â”€ models.py            // 
+â”‚   â”‚   â”‚   â””â”€â”€ utils.py             // 
+â”‚   â”‚   â”œâ”€â”€ __init__.py              // 
+â”‚   â”‚   â”‚
+â”‚   â””â”€â”€ libs                         // ç³»ç»Ÿå…¬ç”¨åº“ç›®å½•
+â”‚   â”‚   â”œâ”€â”€ scripts                  // å…¬ç”¨è„šæœ¬ç›®å½•
+â”‚   â”‚   â”‚   â””â”€â”€ entrypoint.sh        // å®¹å™¨å¯åŠ¨è„šæœ¬
+â”‚   â”‚   â”œâ”€â”€ sql                      // sqlç›®å½•
+â”‚   â”‚   â”‚   â””â”€â”€ permissions.sql      // ç³»ç»Ÿæƒé™SQLæ–‡ä»¶
+â”‚   â”‚   â”œâ”€â”€ ssh                      // sshç®¡ç†ç›®å½•
+â”‚   â”‚   â”‚   â””â”€â”€ __init__.py          // å…¬ç”¨sshç›¸å…³æ–¹æ³•
+â”‚   â”‚   â”œâ”€â”€ template                 // ç³»ç»Ÿæ¨¡æ¿ç›®å½•
+â”‚   â”‚   â”‚   â””â”€â”€ host.xls             // ä¸»æœºç®¡ç†-ä¸»æœºå¯¼å…¥-æ¨¡æ¿
+â”‚   â”‚   â”œâ”€â”€ __init__.py              //
+â”‚   â”‚   â”œâ”€â”€ decorators.py            // å…¬ç”¨æ£€æŸ¥æƒé™æ–‡ä»¶
+â”‚   â”‚   â”œâ”€â”€ middleware.py            // ç³»ç»Ÿå…¬å…±è®¾ç½®æ–‡ä»¶
+â”‚   â”‚   â”œâ”€â”€ model.py                 // ç³»ç»Ÿå…¬ç”¨ç±»
+â”‚   â”‚   â”œâ”€â”€ tool.py                  // ç³»ç»Ÿå…¬ç”¨å·¥å…·æ–‡ä»¶
+â”‚   â”‚   â”œâ”€â”€ utils.py                 //
+â”‚   â””â”€â”€ storage                      // ç³»ç»Ÿå…¬ç”¨ç›®å½•
+â”‚   â”‚   â”œâ”€â”€ exec_tmp                 // æ‰§è¡Œç›®å½•
+â”‚   â”‚   â”œâ”€â”€ images                   // é•œåƒç›®å½•
+â”‚   â”‚   â”œâ”€â”€ publish_tmp              // å‘å¸ƒç›®å½•
+â”‚   â””â”€â”€ config.py.example            // åŽç«¯é…ç½®æ–‡ä»¶æ¨¡æ¿
+â”‚   â””â”€â”€ main.py                      // åŽç«¯å…¥å£æ–‡ä»¶ï¼ŒåŠ è½½æ‰€æœ‰æ¨¡å—
+â”‚   â””â”€â”€ manage.py                    // ç³»ç»Ÿç®¡ç†æ–‡ä»¶
+â”‚   â””â”€â”€ public.py                    // ç³»ç»Ÿå…¬ç”¨
+â”‚   â””â”€â”€ requirements.txt             // åŽç«¯ä¾èµ–åŒ…æ–‡ä»¶
+â”‚
+â”‚
+â”œâ”€â”€ spug_web                         // å‰ç«¯ç›®å½•
+â”‚   â””â”€â”€ dist                         // é¡¹ç›®ç¼–è¯‘åŽçš„é™æ€èµ„æºç›®å½•
+â”‚   â””â”€â”€ src                          // å‰ç«¯é¡¹ç›®æºç ç›®å½•
+â”‚   â”‚   â”œâ”€â”€ assets                   // é™æ€èµ„æºç›®å½•
+â”‚   â”‚   â”œâ”€â”€ components               // å‰ç«¯å­æ¨¡å—UIç»„ä»¶ç›®å½•
+â”‚   â”‚   â”‚   â”œâ”€â”€ account              // ç”¨æˆ·ç®¡ç†ç›®å½•
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ Permission.vue   // æƒé™ç®¡ç†ç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ PublishPermission.vue // è§’è‰²æƒé™-å‘å¸ƒæƒé™ç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ Role.vue         // è§’è‰²æƒé™ç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ routes.js        // ç”¨æˆ·ç®¡ç†è·¯ç”±
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ TagTd.vue        // æƒé™ç®¡ç†æ ‡ç­¾
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ User.vue         // ç”¨æˆ·åˆ—è¡¨ç»„ä»¶
+â”‚   â”‚   â”‚   â”œâ”€â”€ assets               // ä¸»æœºç®¡ç†ç›®å½•
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ Host.vue         // ä¸»æœºåˆ—è¡¨ç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ HostExec.vue     // æ‰¹é‡æ‰§è¡Œç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ route.js         // ä¸»æœºç®¡ç†è·¯ç”±
+â”‚   â”‚   â”‚   â”œâ”€â”€ configuration        // é…ç½®ç®¡ç†ç›®å½•
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ App.vue          // åº”ç”¨é…ç½®åˆ—è¡¨ç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ AppConfig.vue    // åº”ç”¨é…ç½®-é…ç½®ç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ AppRel.vue       // åº”ç”¨é…ç½®-å…³ç³»é…ç½®ç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ ConfigEdie.vue   // 
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ Environment.vue  // çŽ¯å¢ƒé…ç½®ç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ route.js         // é…ç½®ç®¡ç†è·¯ç”±
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ Service.vue      // æœåŠ¡ç®¡ç†ç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ ServiceConfig.vue// æœåŠ¡é…ç½®-é…ç½®ç»„ä»¶
+â”‚   â”‚   â”‚   â”œâ”€â”€ publish              // åº”ç”¨å‘å¸ƒç›®å½•
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ App.vue          // åº”ç”¨åˆ—è¡¨ç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ AppConfig.vue    // åº”ç”¨åˆ—è¡¨-åº”ç”¨è®¾ç½®ç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ AppMenu.vue      // 
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ AppSetting.vue   // åº”ç”¨åˆ—è¡¨-å®¹å™¨è®¾ç½®ç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ ColorInput.vue   // å‘å¸ƒæ‰§è¡Œå‘½ä»¤è¡Œç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ Deploy.vue       // åº”ç”¨å‘å¸ƒ-éƒ¨ç½²ç»„ä»¶ 
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ Field.vue        // åº”ç”¨å‘å¸ƒ-å­—æ®µç®¡ç†ç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ Image.vue        // åº”ç”¨å‘å¸ƒ-é•œåƒç®¡ç†ç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ Menu.vue         // åº”ç”¨å‘å¸ƒ-èœå•ç®¡ç†ç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ MenuExec.vue     //
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ route.js         // åº”ç”¨å‘å¸ƒè·¯ç”±
+â”‚   â”‚   â”‚   â”œâ”€â”€ schedule             // ä»»åŠ¡ç®¡ç†ç›®å½•
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ Job.vue          // ä»»åŠ¡åˆ—è¡¨ç»„ä»¶
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ JobSetting.vue   // ä»»åŠ¡ç®¡ç†-è®¾ç½®è§¦å‘å™¨ç»„ä»¶
+â”‚   â”‚   â”‚   â”œâ”€â”€ Deny.vue             // å…¨å±€æƒé™æ‹’ç»ç»„ä»¶
+â”‚   â”‚   â”‚   â”œâ”€â”€ Home.vue             // ç³»ç»ŸHomeç»„ä»¶
+â”‚   â”‚   â”‚   â”œâ”€â”€ Layout.vue           // èœå•ç”Ÿæˆç»„ä»¶
+â”‚   â”‚   â”‚   â”œâ”€â”€ Login.vue            // ç³»ç»Ÿç™»å½•ç»„ä»¶
+â”‚   â”‚   â”œâ”€â”€ config                   // é…ç½®ç›®å½•
+â”‚   â”‚   â”‚   â”œâ”€â”€ env.js               // é¡¹ç›®å¸¸è§„é…ç½®
+â”‚   â”‚   â”‚   â”œâ”€â”€ menu.js              // èœå•åŠé¢åŒ…å±‘é…ç½®
+â”‚   â”‚   â”œâ”€â”€ plugins                  // é¡¹ç›®æ‰©å±•ç›®å½•
+â”‚   â”‚   â”‚   â”œâ”€â”€ globalTools.js       // å…¨å±€å˜é‡
+â”‚   â”‚   â”œâ”€â”€ App.vue                  //
+â”‚   â”‚   â”œâ”€â”€ index.html               // é¦–é¡µæ–‡ä»¶
+â”‚   â”‚   â”œâ”€â”€ main.js                  // å…¥å£æ–‡ä»¶ï¼ŒåŠ è½½å„ç§å…¬å…±ç»„ä»¶
+â”‚   â”‚   â”œâ”€â”€ router.js                // å…¬å…±è·¯ç”±
+â”‚   â””â”€â”€ .babelrc                     // ES6è¯­æ³•ç¼–è¯‘é…ç½®
+â”‚   â””â”€â”€ Makefile                     //
+â”‚   â””â”€â”€ package.json                 // é¡¹ç›®åŠå·¥å…·çš„ä¾èµ–é…ç½®æ–‡ä»¶
+â”‚   â””â”€â”€ postcss.config.js            //
+â”‚   â””â”€â”€ ReadME.md                    // å‰ç«¯README
+â”‚   â””â”€â”€ webpack.config.js            //
 
 
 ```
