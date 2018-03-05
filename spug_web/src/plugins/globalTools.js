@@ -122,7 +122,7 @@ tools.install = function (Vue, router) {
     };
     // 路由导航钩子
     router.beforeEach((to, from, next) => {
-        if (['/', '/login', '/deny'].includes(to.path)) {
+        if (['/', '/login', '/deny','/account/person','/account/personset','/home','/welcome'].includes(to.path)) {
             next()
         } else if (to.meta.hasOwnProperty('permission') && Vue.prototype.has_permission(to.meta.permission)) {
             next()

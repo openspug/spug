@@ -4,6 +4,7 @@
 
 import Home from './components/Home.vue'
 import Deny from './components/Deny.vue'
+import Welcome from './components/Welcome.vue'
 import Login from './components/Login.vue'
 import Layout from './components/Layout.vue'
 import account_routes from './components/account/routes'
@@ -67,6 +68,9 @@ export default [
     }, {
         path: '/deny',
         component: Deny
+    },  {
+        path: '/welcome',
+        component: Welcome
     }, {
         path: '/',
         component: Layout,

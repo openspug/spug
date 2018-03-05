@@ -7,7 +7,7 @@
             <div class="layout-logo" v-if="!isCollapse">Spug运维平台</div>
             <div class="layout-logo" v-else>S</div>
             <el-menu :collapse="isCollapse" :default-active="current_index" @select="handleSelect" unique-opened router>
-                <template v-for="item in menus">
+                <template v-for="item in menus" v-if="has_permission(item.permission)">
                     <el-submenu v-if="item.subs" :index="item.key">
                         <template slot="title">
                             <i :class="item.icon"></i>
@@ -28,7 +28,13 @@
                     <i class="fa fa-sign-out" @click="logout"></i>
                 </div>
                 <div class="i-button">
-                    <i class="fa fa-user"></i>
+                    <el-dropdown trigger="click" @command="handleCommand">
+                        <span class="el-dropdown-link "> <i class="fa fa-user"></i> {{ login_user }}<i class="el-icon-arrow-down el-icon--right"></i></span>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item command="person">个人信息</el-dropdown-item>
+                            <el-dropdown-item command="set_person">设置</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
                 </div>
                 <div class="i-button">
                     <i class="fa fa-envelope"></i>
@@ -54,7 +60,8 @@
             return {
                 current_index: undefined,
                 isCollapse: false,
-                menus: menu.menus
+                menus: menu.menus,
+                login_user: undefined,
             }
         },
         methods: {
@@ -64,18 +71,34 @@
                     this.$router.push({name: 'login'})
                 })
             },
+            handleCommand(command) {
+                if (command === 'person') {
+                    this.$router.push({path: '/account/person'})
+                }
+                if (command === 'set_person'){
+                    this.$router.push({path: '/account/personset'})
+                }
+            },
             routerChange() {
                 this.current_index = this.$route.path;
             },
             handleSelect(path) {
                 this.current_index = path
+            },
+            back_login(){
+                let token = localStorage.getItem('token');
+                if (!token || token.length !== 32) {
+                    this.$router.push({name: 'login'})
+                }
+            },
+            personInfo(){
+                this.login_user = localStorage.getItem('nickname');
             }
         },
         created() {
-            let token = localStorage.getItem('token');
-            if (!token || token.length !== 32) {
-                this.$router.push({name: 'login'})
-            }
+            this.back_login();
+            this.personInfo();
+
         }
     }
 </script>

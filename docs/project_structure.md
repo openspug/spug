@@ -75,10 +75,6 @@
 │   │   ├── model.py                 // 系统公用类
 │   │   ├── tool.py                  // 系统公用工具文件
 │   │   ├── utils.py                 //
-│   └── storage                      // 系统公用目录
-│   │   ├── exec_tmp                 // 执行目录
-│   │   ├── images                   // 镜像目录
-│   │   ├── publish_tmp              // 发布目录
 │   └── config.py.example            // 后端配置文件模板
 │   └── main.py                      // 后端入口文件，加载所有模块
 │   └── manage.py                    // 系统管理文件

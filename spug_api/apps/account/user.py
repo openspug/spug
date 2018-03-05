@@ -64,7 +64,7 @@ def delete(u_id):
 @require_permission('account_user_edit | account_user_disable')
 def put(u_id):
     form, error = JsonParser('nickname', 'is_active',
-                             Argument('role_id', type=int, help='请选择角色'),
+                             Argument('role_id', type=int, required=False, help='请选择角色'),
                              Argument('email', nullable=True),
                              Argument('password', nullable=False, required=False),
                              Argument('mobile', nullable=True)).parse()
@@ -79,6 +79,27 @@ def put(u_id):
     return json_response(message=error)
 
 
+@blueprint.route('/modifypwd', methods=['POST'])
+def modify_pwd():
+    form, error = JsonParser('password', 'newpassword').parse()
+    if error is None:
+        if g.user.verify_password(form.password):
+            g.user.password = form.newpassword
+            g.user.save()
+            return json_response()
+        else:
+            return json_response(message='原密码错误')
+    return json_response(message=error)
+
+
+@blueprint.route('/<int:u_id>', methods=['GET'])
+def get_person(u_id):
+    if u_id:
+        u_info = User.query.get_or_404(u_id)
+        return json_response(u_info)
+    return json_response(message='user_id不能为空')
+
+
 @blueprint.route('/login/', methods=['POST'])
 def login():
     form, error = JsonParser('username', 'password').parse()
@@ -91,7 +112,9 @@ def login():
                     user.access_token = token
                     user.token_expired = time.time() + 8 * 60 * 60
                     user.save()
-                    return json_response({'token': token, 'is_supper': user.is_supper, 'permissions': list(user.permissions)})
+                    user_data = user.to_json()
+                    user_data.update({'token': token, 'permissions': list(user.permissions)})
+                    return json_response(user_data)
                 else:
                     login_limit[form.username] += 1
                     if login_limit[form.username] >= 3:

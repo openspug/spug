@@ -87,7 +87,9 @@
                         localStorage.setItem('token', res.result['token']);
                         localStorage.setItem('is_supper', res.result['is_supper']);
                         localStorage.setItem('permissions', res.result['permissions']);
-                        this.$router.push('/')
+                        localStorage.setItem('user_id', res.result['id']);
+                        localStorage.setItem('nickname', res.result['nickname']);
+                        this.$router.push('/welcome');
                     }, response => {
                         this.error = response.result
                     }).finally(() => this.loading = false)

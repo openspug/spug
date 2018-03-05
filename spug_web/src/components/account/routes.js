@@ -2,8 +2,10 @@
  * Created by aka on 2017/5/22.
  */
 
-import User from './User.vue'
-import Role from './Role.vue'
+import User from './User.vue';
+import Role from './Role.vue';
+import PersonSet from './PersonSet.vue';
+import Person from './Person.vue';
 
 export default [
     {
@@ -19,5 +21,13 @@ export default [
         meta: {
             permission: 'account_role_view'
         }
+    },
+    {
+        path: 'person',
+        component: Person,
+    },
+    {
+        path: 'personset',
+        component: PersonSet,
     }
 ]

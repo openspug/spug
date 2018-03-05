@@ -6,9 +6,9 @@
 [![Node](https://img.shields.io/badge/node-6.x-green.svg?style=plastic)](https://nodejs.org/)
 [![Element](https://img.shields.io/badge/Element-2.x-green.svg?style=plastic)](http://element-cn.eleme.io/#/zh-CN/)
 
-Spug is an open source O & M management system developed with Python + Flask + Element. The system is separated from the front and the back of the system to help small and medium-sized enterprises manage the hosts, tasks, deployment, configuration files, monitoring and alarming
+Spug is an open source O & M management system developed with Python + Flask + Vue + Element. The system is separated from the front and the back of the system to help small and medium-sized enterprises manage the hosts, tasks, deployment, configuration files, monitoring and alarming
 
-Spug是一款使用Python+Flask+Element组件开发的开源运维管理系统,系统前后端分离,帮助中小型企业完成主机、任务、发布部署、配置文件、监控、报警等管理。
+Spug是一款使用Python+Flask+Vue+Element组件开发的开源运维管理系统,系统前后端分离,帮助中小型企业完成主机、任务、发布部署、配置文件、监控、报警等管理。
 
 #### Demo演示地址：<https://spug.qbangmang.com/login>
 
@@ -50,7 +50,7 @@ $ -e MYSQL_DATABASE="spug"                    //指定数据库名称
   -e REGISTRY_PASSWORD="hubpwd"               //指定私有镜像仓库密码
 ```
 
-更多Dockerfile [Dockerfile](https://github.com/openspug/spug/docs/Dockerfile)
+更多Dockerfile [Dockerfile](https://github.com/openspug/spug/tree/master/docs/Dockerfile)
 
 
 ### 详细安装步骤
@@ -68,6 +68,7 @@ $ -e MYSQL_DATABASE="spug"                    //指定数据库名称
    2. Start server 启动服务端：
    $ cd spug/spug_api
    $ pip install -r requirements.txt  //安装依赖包
+   $ mv config.py.example config.py   //编辑配置文件
    $ python manage.py init_db         //初始化数据库
    $ python manage.py create_admin    //创建管理员
    $ python main.py                   //启动服务
@@ -91,6 +92,9 @@ $ -e MYSQL_DATABASE="spug"                    //指定数据库名称
 ----------------------------
 
  * [Project structure 项目结构](https://github.com/openspug/spug/blob/master/docs/project_structure.md)
+ * [前端UI组件](http://element-cn.eleme.io/2.1/#/zh-CN/component/installation)
+ * [后端Flask文档](http://flask.pocoo.org/)
+
 
 ### Contributor 贡献者
 ----------------------------
