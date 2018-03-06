@@ -85,8 +85,11 @@ $ -e MYSQL_DATABASE="spug"                    //指定数据库名称
 
 ### Preview 预览
 ----------------------------
-
-
+![image](https://github.com/openspug/spug/blob/master/docs/demo/login.gif)
+![image](https://github.com/openspug/spug/blob/master/docs/demo/user.gif)
+![image](https://github.com/openspug/spug/blob/master/docs/demo/host.gif)
+![image](https://github.com/openspug/spug/blob/master/docs/demo/publish.gif)
+![image](https://github.com/openspug/spug/blob/master/docs/demo/tasks.gif)
 
 ### Docs 开发者文档
 ----------------------------

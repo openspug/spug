@@ -1,8 +1,8 @@
 // 环境配置
 
-// 后端的接口地址
+// 后端API接口地址
 const envs = {
-    apiServer: 'http://192.168.1.101:3000',
+    apiServer: 'http://127.0.0.1:3000',
     request_timeout: 12000,
 };
 
