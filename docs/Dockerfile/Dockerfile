@@ -9,8 +9,7 @@ RUN apk add --no-cache --virtual .build-deps python3-dev gcc musl-dev libffi-dev
     && apk del .build-deps 
 RUN cd /spug/spug_web/ && npm i -d --registry=https://registry.npm.taobao.org \
     && npm run build \
-    && mv /var/lib/nginx/html /var/lib/nginx/html.bak && mv /spug/spug_web/dist /var/lib/nginx/html \
-    && rm -rf /spug/spug_web
+    && mv /var/lib/nginx/html /var/lib/nginx/html.bak && mv /spug/spug_web/dist /var/lib/nginx/html 
 	
 ADD default.conf /etc/nginx/conf.d/default.conf
 ADD entrypoint.sh /entrypoint.sh
