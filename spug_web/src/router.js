@@ -20,6 +20,11 @@ const routes = [
         component: Home
     },
     {
+        path: '/welcome',
+        name: 'welcome',
+        component: Welcome
+    },
+    {
         path: 'account',
         routes: account_routes
     },
@@ -68,9 +73,6 @@ export default [
     }, {
         path: '/deny',
         component: Deny
-    },  {
-        path: '/welcome',
-        component: Welcome
     }, {
         path: '/',
         component: Layout,
