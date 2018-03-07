@@ -2,7 +2,7 @@
     <div>
         <el-row>
             <el-col :span="8">
-                <el-select v-model="job_group" @change="group_Search()" clearable placeholder="任务属组">
+                <el-select v-model="job_group" @change="group_Search()" clearable placeholder="任务分组">
                     <el-option v-for="item in groups" :key="item" :value="item"></el-option>
                 </el-select>
             </el-col>
@@ -15,7 +15,7 @@
             <el-table :data="tableData.data" v-loading="tableLoading"
                       :default-sort = "{prop: 'next_run_time'}"
                        style="width: 100%; margin-top: 20px">
-                <el-table-column prop="group" label="属组" sortable></el-table-column>
+                <el-table-column prop="group" label="分组" sortable></el-table-column>
                 <el-table-column prop="name" label="名称" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="desc" label="描述" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="command" label="任务命令" show-overflow-tooltip></el-table-column>
@@ -59,11 +59,11 @@
         </el-row>
         <el-dialog title="任务编辑" :visible.sync="dialogAddVisible" :close-on-click-modal="false">
             <el-form label-width="80px">
-                <el-form-item label="任务属组" required>
-                    <el-select v-model="form.group" placeholder="选择任务属组">
+                <el-form-item label="任务分组" required>
+                    <el-select v-model="form.group" placeholder="选择任务分组">
                         <el-option v-for="g in groups" :value="g" :key="g"></el-option>
                     </el-select>
-                    <el-button style="margin-left: 15px" type="text" @click="addGroup">添加任务属组</el-button>
+                    <el-button style="margin-left: 15px" type="text" @click="addGroup">添加任务分组</el-button>
                 </el-form-item>
                 <el-form-item label="任务名称" required>
                     <el-input v-model="form.name" placeholder="请输入任务名称"></el-input>
