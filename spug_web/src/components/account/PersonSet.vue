@@ -133,8 +133,8 @@
         },
         methods: {
             //获取用户信息
-            getPersonInfo(user_id) {
-                this.$http.get(`/api/account/users/${user_id}`).then((response) => {
+            getPersonInfo() {
+                this.$http.get(`/api/account/users/self`).then((response) => {
                     this.personInfo = response.result;
                 }, (response) => this.$layer_message(response.result))
             },
@@ -147,24 +147,30 @@
             },
 
             modifyPwd: function () {
-                this.$http.post(`/api/account/users/modifypwd`, this.pwdInfo).then(response => {
+                if (this.pwdInfo.newpassword !== this.pwdInfo.surepassword) {
+                    this.$layer_message('两次输入密码不一致');
+                    return
+                }
+                this.$http.post(`/api/account/users/setting/password`, this.pwdInfo).then(() => {
                     this.$layer_message('修改成功', 'success');
+                    this.logout();
                 }, response => this.$layer_message(response.result));
             },
             modifyPerson: function () {
-                console.log(this.personInfo);
-                this.$http.put(`/api/account/users/${this.personInfo.id}`, this.personInfo).then(response => {
+                this.$http.post(`/api/account/users/setting/info`, this.personInfo).then(() => {
                     this.$layer_message('保存成功', 'success');
-                    localStorage.setItem('nickname', response.result['nickname']);
+                    localStorage.setItem('nickname', this.personInfo['nickname']);
                 }, response => this.$layer_message(response.result));
             },
-            getPerson(){
-                let user_id = localStorage.getItem('user_id');
-                this.getPersonInfo(user_id);
+            logout() {
+              this.$http.get('/api/account/users/logout/').finally(() => {
+                localStorage.removeItem('token');
+                this.$router.push({name: 'login'})
+              })
             }
         },
         mounted() {
-            this.getPerson();
+            this.getPersonInfo();
         }
     }
 </script>

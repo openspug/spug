@@ -79,25 +79,41 @@ def put(u_id):
     return json_response(message=error)
 
 
-@blueprint.route('/modifypwd', methods=['POST'])
-def modify_pwd():
-    form, error = JsonParser('password', 'newpassword').parse()
+@blueprint.route('/setting/password', methods=['POST'])
+def setting_password():
+    form, error = JsonParser(
+        Argument('password', help='请输入原密码'),
+        Argument('newpassword', help='请输入心密码')
+    ).parse()
     if error is None:
         if g.user.verify_password(form.password):
             g.user.password = form.newpassword
             g.user.save()
-            return json_response()
         else:
             return json_response(message='原密码错误')
     return json_response(message=error)
 
 
-@blueprint.route('/<int:u_id>', methods=['GET'])
-def get_person(u_id):
-    if u_id:
-        u_info = User.query.get_or_404(u_id)
-        return json_response(u_info)
-    return json_response(message='user_id不能为空')
+@blueprint.route('/setting/info', methods=['POST'])
+def setting_info():
+    form, error = JsonParser(
+        Argument('nickname', help='请输入昵称'),
+        Argument('mobile', help='请输入手机号码'),
+        Argument('email', help='请输入电子邮件地址'),
+    ).parse()
+    if error is None:
+        g.user.update(**form)
+    return json_response(message=error)
+
+
+@blueprint.route('/self', methods=['GET'])
+def get_self():
+    return json_response({
+        'username': g.user.username,
+        'nickname': g.user.nickname,
+        'mobile': g.user.mobile,
+        'email': g.user.email,
+    })
 
 
 @blueprint.route('/login/', methods=['POST'])
@@ -112,9 +128,12 @@ def login():
                     user.access_token = token
                     user.token_expired = time.time() + 8 * 60 * 60
                     user.save()
-                    user_data = user.to_json()
-                    user_data.update({'token': token, 'permissions': list(user.permissions)})
-                    return json_response(user_data)
+                    return json_response({
+                        'token': token,
+                        'is_supper': user.is_supper,
+                        'nickname': user.nickname,
+                        'permissions': list(user.permissions)
+                    })
                 else:
                     login_limit[form.username] += 1
                     if login_limit[form.username] >= 3:

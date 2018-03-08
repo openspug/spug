@@ -40,7 +40,7 @@
         methods: {
             //获取用户信息
             getPersonInfo(user_id) {
-                this.$http.get(`/api/account/users/${user_id}`).then((response) => {
+                this.$http.get(`/api/account/users/self`).then((response) => {
                     this.personInfo = response.result;
                 }, (response) => this.$layer_message(response.result))
             },
