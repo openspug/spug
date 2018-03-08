@@ -3,6 +3,13 @@
                :close-on-click-modal="false">
         <table v-if="codes !== undefined" class="role_table">
             <tr class="el-table__row">
+                <td rowspan="1">首页</td>
+                <td rowspan="1">首页</td>
+                <tag-td :item="codes['home_view']"></tag-td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr class="el-table__row">
                 <td rowspan="4">用户管理</td>
                 <td rowspan="2">用户列表</td>
                 <tag-td :item="codes['account_user_view']"></tag-td>
@@ -44,7 +51,7 @@
                 <tag-td :item="codes['assets_host_exec_tpl_view']"></tag-td>
             </tr>
             <tr>
-                 <tag-td :item="codes['assets_host_exec_tpl_add']"></tag-td>
+                <tag-td :item="codes['assets_host_exec_tpl_add']"></tag-td>
                 <tag-td :item="codes['assets_host_exec_tpl_edit']"></tag-td>
                 <tag-td :item="codes['assets_host_exec_tpl_del']"></tag-td>
             </tr>

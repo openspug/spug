@@ -1,7 +1,7 @@
 let menu = {
     menus: [
         {
-            key: '/home', desc: '首页', icon: 'fa fa-home'
+            key: '/home', desc: '首页', icon: 'fa fa-home', permission: 'home_view',
         },
         {
             key: '1', desc: '用户管理', icon: 'fa fa-address-card', permission: 'account_user_view|account_role_view', subs: [

@@ -11,6 +11,7 @@ blueprint = Blueprint(__name__, __name__)
 
 
 @blueprint.route('/', methods=['GET'])
+@require_permission('home_view')
 def get():
     user_total = User.query.count()
     host_total = Host.query.count()

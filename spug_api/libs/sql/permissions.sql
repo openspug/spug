@@ -1,3 +1,6 @@
+-- 首页查看
+INSERT INTO account_permissions (id, name, `desc`) VALUES (100, 'home_view', '首页查看');
+
 -- 用户管理 -> 用户列表
 INSERT INTO account_permissions (id, name, `desc`) VALUES (101, 'account_user_view', '获取用户列表');
 INSERT INTO account_permissions (id, name, `desc`) VALUES (102, 'account_user_add', '添加用户');
@@ -29,7 +32,6 @@ INSERT INTO account_permissions (id, name, `desc`) VALUES (308, 'assets_host_exe
 INSERT INTO account_permissions (id, name, `desc`) VALUES (309, 'assets_host_exec_tpl_add', '添加模板');
 INSERT INTO account_permissions (id, name, `desc`) VALUES (310, 'assets_host_exec_tpl_edit', '编辑模板');
 INSERT INTO account_permissions (id, name, `desc`) VALUES (311, 'assets_host_exec_tpl_del', '删除模板');
-
 
 -- 应用发布 -> 应用列表
 INSERT INTO account_permissions (id, name, `desc`) VALUES (401, 'publish_app_view', '获取应用列表');
@@ -63,21 +65,6 @@ INSERT INTO account_permissions (id, name, `desc`) VALUES (606, 'publish_image_v
 INSERT INTO account_permissions (id, name, `desc`) VALUES (607, 'publish_image_var_edit', '镜像设置 - 编辑');
 INSERT INTO account_permissions (id, name, `desc`) VALUES (608, 'publish_image_var_del', '镜像设置 - 删除');
 
--- 应用发布 -> 菜单管理
-INSERT INTO account_permissions (id, name, `desc`) VALUES (1101, 'publish_menu_view', '自定义菜单 - 查看');
-INSERT INTO account_permissions (id, name, `desc`) VALUES (1102, 'publish_menu_add', '自定义菜单 - 添加');
-INSERT INTO account_permissions (id, name, `desc`) VALUES (1103, 'publish_menu_edit', '自定义菜单 - 编辑');
-INSERT INTO account_permissions (id, name, `desc`) VALUES (1104, 'publish_menu_del', '自定义菜单 - 删除');
-INSERT INTO account_permissions (id, name, `desc`) VALUES (1105, 'publish_menu_rel_view', '关联配置 - 查看');
-INSERT INTO account_permissions (id, name, `desc`) VALUES (1106, 'publish_menu_rel_edit', '关联配置 - 编辑');
-
--- 应用发布 -> 字段管理
-INSERT INTO account_permissions (id, name, `desc`) VALUES (1201, 'publish_field_view', '自定义字段 - 查看');
-INSERT INTO account_permissions (id, name, `desc`) VALUES (1202, 'publish_field_add', '自定义字段 - 添加');
-INSERT INTO account_permissions (id, name, `desc`) VALUES (1203, 'publish_field_edit', '自定义字段 - 编辑');
-INSERT INTO account_permissions (id, name, `desc`) VALUES (1204, 'publish_field_del', '自定义字段 - 删除');
-INSERT INTO account_permissions (id, name, `desc`) VALUES (1205, 'publish_field_rel_view', '关联配置 - 查看');
-INSERT INTO account_permissions (id, name, `desc`) VALUES (1206, 'publish_field_rel_edit', '关联配置 - 编辑');
 
 -- 配置管理 -> 环境管理
 INSERT INTO account_permissions (id, name, `desc`) VALUES (701, 'config_environment_view', '获取环境列表');
@@ -110,3 +97,19 @@ INSERT INTO account_permissions (id, name, `desc`) VALUES (1002, 'job_task_add',
 INSERT INTO account_permissions (id, name, `desc`) VALUES (1003, 'job_task_edit', '编辑任务');
 INSERT INTO account_permissions (id, name, `desc`) VALUES (1004, 'job_task_del', '删除任务');
 INSERT INTO account_permissions (id, name, `desc`) VALUES (1005, 'job_task_log', '任务日志');
+
+-- 应用发布 -> 菜单管理
+INSERT INTO account_permissions (id, name, `desc`) VALUES (1101, 'publish_menu_view', '自定义菜单 - 查看');
+INSERT INTO account_permissions (id, name, `desc`) VALUES (1102, 'publish_menu_add', '自定义菜单 - 添加');
+INSERT INTO account_permissions (id, name, `desc`) VALUES (1103, 'publish_menu_edit', '自定义菜单 - 编辑');
+INSERT INTO account_permissions (id, name, `desc`) VALUES (1104, 'publish_menu_del', '自定义菜单 - 删除');
+INSERT INTO account_permissions (id, name, `desc`) VALUES (1105, 'publish_menu_rel_view', '关联配置 - 查看');
+INSERT INTO account_permissions (id, name, `desc`) VALUES (1106, 'publish_menu_rel_edit', '关联配置 - 编辑');
+
+-- 应用发布 -> 字段管理
+INSERT INTO account_permissions (id, name, `desc`) VALUES (1201, 'publish_field_view', '自定义字段 - 查看');
+INSERT INTO account_permissions (id, name, `desc`) VALUES (1202, 'publish_field_add', '自定义字段 - 添加');
+INSERT INTO account_permissions (id, name, `desc`) VALUES (1203, 'publish_field_edit', '自定义字段 - 编辑');
+INSERT INTO account_permissions (id, name, `desc`) VALUES (1204, 'publish_field_del', '自定义字段 - 删除');
+INSERT INTO account_permissions (id, name, `desc`) VALUES (1205, 'publish_field_rel_view', '关联配置 - 查看');
+INSERT INTO account_permissions (id, name, `desc`) VALUES (1206, 'publish_field_rel_edit', '关联配置 - 编辑');
