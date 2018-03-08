@@ -42,7 +42,7 @@
             getPersonInfo(user_id) {
                 this.$http.get(`/api/account/users/${user_id}`).then((response) => {
                     this.personInfo = response.result;
-                }, (response) => this.$layer_message(response.result)).finally()
+                }, (response) => this.$layer_message(response.result))
             },
             getPerson(){
                 let user_id = localStorage.getItem('user_id');

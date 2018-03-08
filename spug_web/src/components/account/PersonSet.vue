@@ -136,7 +136,7 @@
             getPersonInfo(user_id) {
                 this.$http.get(`/api/account/users/${user_id}`).then((response) => {
                     this.personInfo = response.result;
-                }, (response) => this.$layer_message(response.result)).finally()
+                }, (response) => this.$layer_message(response.result))
             },
             //重置密码表单
             cancelPerson: function () {
@@ -149,14 +149,14 @@
             modifyPwd: function () {
                 this.$http.post(`/api/account/users/modifypwd`, this.pwdInfo).then(response => {
                     this.$layer_message('修改成功', 'success');
-                }, response => this.$layer_message(response.result)).finally();
+                }, response => this.$layer_message(response.result));
             },
             modifyPerson: function () {
                 console.log(this.personInfo);
                 this.$http.put(`/api/account/users/${this.personInfo.id}`, this.personInfo).then(response => {
                     this.$layer_message('保存成功', 'success');
                     localStorage.setItem('nickname', response.result['nickname']);
-                }, response => this.$layer_message(response.result)).finally();
+                }, response => this.$layer_message(response.result));
             },
             getPerson(){
                 let user_id = localStorage.getItem('user_id');
