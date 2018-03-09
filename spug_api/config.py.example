@@ -4,9 +4,9 @@ import os
 DEBUG = True
 TIME_ZONE = timezone('Asia/Shanghai')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DOCKER_URL = 'unix:///var/run/docker.sock'
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:redhat@127.0.0.1/doms'
-# SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'test.db')
+#SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:redhat@127.0.0.1/doms'
+SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'test.db')
+SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_ECHO = False
 
 DOCKER_REGISTRY_SERVER = 'localhost:5000'
