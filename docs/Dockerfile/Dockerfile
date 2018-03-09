@@ -4,7 +4,7 @@ RUN echo -e "http://mirrors.aliyun.com/alpine/v3.6/main\nhttp://mirrors.aliyun.c
 RUN apk update && apk add --no-cache ca-certificates python3 nginx mariadb nodejs-npm git 
 RUN apk add --no-cache --virtual .build-deps python3-dev gcc musl-dev libffi-dev openssl-dev make \
     && git clone https://github.com/openspug/spug.git /spug \
-    && git pull \
+    && cd /spug && git pull \
     && pip3 install --no-cache-dir -r /spug/spug_api/requirements.txt \
     && pip3 install --no-cache-dir gunicorn \	
     && apk del .build-deps 

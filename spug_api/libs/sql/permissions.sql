@@ -1,5 +1,5 @@
--- 首页查看
-INSERT INTO account_permissions (id, name, `desc`) VALUES (100, 'home_view', '首页查看');
+-- Dashboard
+INSERT INTO account_permissions (id, name, `desc`) VALUES (100, 'home_view', 'Dashboard');
 
 -- 用户管理 -> 用户列表
 INSERT INTO account_permissions (id, name, `desc`) VALUES (101, 'account_user_view', '获取用户列表');

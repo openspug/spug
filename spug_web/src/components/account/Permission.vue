@@ -3,8 +3,8 @@
                :close-on-click-modal="false">
         <table v-if="codes !== undefined" class="role_table">
             <tr class="el-table__row">
-                <td rowspan="1">首页</td>
-                <td rowspan="1">首页</td>
+                <td rowspan="1">Dashboard</td>
+                <td rowspan="1">Dashboard</td>
                 <tag-td :item="codes['home_view']"></tag-td>
                 <td></td>
                 <td></td>
