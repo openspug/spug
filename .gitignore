@@ -1,0 +1,10 @@
+.idea/
+*.pyc
+/.git/
+.DS_Store
+/spug_web/node_modules/
+/spug_web/dist/
+/spug_web/npm-debug.log
+/spug_api/config.py
+/spug_api/test.db
+/venv/
