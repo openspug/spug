@@ -1,6 +1,9 @@
 <template>
     <div>
-        <el-select v-model="env_id" @change="fetchEnabledHosts">
+        <el-select v-model="app_id" @change="fetchEnabledHosts">
+            <el-option v-for="item in apps" :key="item.id" :value="item.id" :label="item.name"></el-option>
+        </el-select>
+        <el-select v-model="env_id" @change="fetchEnabledHosts" style="margin-left: 15px">
             <el-option v-for="item in environments" :key="item.id" :value="item.id" :label="item.name"></el-option>
         </el-select>
         <el-button v-if="has_permission('publish_app_publish_deploy') && (TopDeployMenus.length === 0 || hideDeployBtn)"
@@ -218,6 +221,7 @@
         },
         data() {
             return {
+                apps: [],
                 env_id: '',
                 environments: [],
                 btnCtrLoading: {},
@@ -230,7 +234,7 @@
                 deploy_message: '',
                 deploy_restart: false,
                 deploy_histories: undefined,
-                app_id: this.$route.params['app_id'],
+                app_id: Number(this.$route.params['app_id']),
                 tableData: [],
                 treeData: [],
                 updateHosts: [],
@@ -526,6 +530,9 @@
                     this.$layer_message('请在配置管理的环境管理中先创建发布环境')
                 }
             }, res => this.$layer_message(res.result));
+            this.$http.get('/api/deploy/apps/').then(res => {
+                this.apps = res.result;
+            }, res => this.$layer_message(res.result))
             // select 组件在初始化时会自动调用，固这里不需要在调用 fetchEnabledHosts()
             // this.fetchEnabledHosts()
         }
