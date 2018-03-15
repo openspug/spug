@@ -83,7 +83,7 @@ def put(u_id):
 def setting_password():
     form, error = JsonParser(
         Argument('password', help='请输入原密码'),
-        Argument('newpassword', help='请输入心密码')
+        Argument('newpassword', help='请输入新密码')
     ).parse()
     if error is None:
         if g.user.verify_password(form.password):

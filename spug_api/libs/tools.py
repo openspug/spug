@@ -104,7 +104,10 @@ class Argument(object):
                 value = self.type[0](value)
             elif self.type[0] == dict:
                 value = json.loads(value)
-        except ValueError:
+            elif self.type[0] == bool:
+                assert value.lower() in ['true', 'false']
+                value = value.lower() == 'true'
+        except (ValueError, AssertionError):
             raise ParseError(self.help or 'Type Error: %s type must be %s' % (self.name, self.type[0]))
 
         if self.filter:
