@@ -107,7 +107,7 @@
                     form['trigger_args'] += this.handleCronArgs(this.cron_trigger_args.hour);  //hour
                     form['trigger_args'] += this.handleCronArgs(this.cron_trigger_args.minute);  //minute
                     form['trigger_args'] += ';';  //second
-                    if (this.cron_trigger_args.range.length) {
+                    if (this.cron_trigger_args.range && this.cron_trigger_args.range.length) {
                         form['trigger_args'] += this.cron_trigger_args.range[0].format() + ';'; //start_date
                         form['trigger_args'] += this.cron_trigger_args.range[1].format()    //end_date
                     } else {
