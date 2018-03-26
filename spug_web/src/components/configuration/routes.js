@@ -4,6 +4,7 @@
 import App from './App.vue'
 import Service from './Service.vue'
 import Environment from './Environment.vue'
+import RelationChart from './RelationChart.vue'
 
 export default [
     {
@@ -25,6 +26,13 @@ export default [
         component: Environment,
         meta: {
             permission: 'config_environment_view'
+        }
+    },
+    {
+        path: 'relationship',
+        component: RelationChart,
+        meta: {
+            permission: 'config_app_view'
         }
     }
 ];

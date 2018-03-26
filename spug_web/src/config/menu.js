@@ -24,7 +24,8 @@ let menu = {
             key: '4', desc: '配置管理', icon: 'fa fa-cogs', permission: 'config_environment_view|config_service_view|config_app_view', subs: [
                 {key: '/configuration/environment', permission: 'config_environment_view', desc: '环境管理'},
                 {key: '/configuration/service', permission: 'config_service_view', desc: '服务配置'},
-                {key: '/configuration/app', permission: 'config_app_view', desc: '应用配置'}
+                {key: '/configuration/app', permission: 'config_app_view', desc: '应用配置'},
+                {key: '/configuration/relationship', permission: 'config_app_view', desc: '配置关系'}
             ]
         }, {
             key: '5', desc: '任务管理', icon: 'fa fa-calendar', permission: 'job_task_view', subs: [
