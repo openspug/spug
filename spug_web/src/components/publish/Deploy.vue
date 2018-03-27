@@ -270,7 +270,7 @@
                 this.dialogLoading = true;
                 let host_ids = this.$refs['tree'].getCheckedKeys();
                 this.$http.post(`/api/deploy/apps/${this.app_id}/bind/hosts`, {
-                    ids: host_ids,
+                    ids: host_ids.filter(x => x),
                     env_id: this.env_id
                 }).then(() => {
                     this.fetchEnabledHosts();
