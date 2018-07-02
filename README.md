@@ -111,6 +111,7 @@ $ -e MYSQL_DATABASE="spug"                    //指定数据库名称
 ### 开发者群
 ----------------------------
 QQ群号:
+
 ![image](https://github.com/openspug/spug/blob/master/docs/demo/spug.png)
 
 ### License & Copyright
