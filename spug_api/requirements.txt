@@ -17,7 +17,7 @@ itsdangerous==0.24
 Jinja2==2.9.6
 lml==0.0.1
 MarkupSafe==1.0
-paramiko==2.2.1
+paramiko==2.2.3
 pyasn1==0.3.4
 pycparser==2.18
 pyexcel==0.5.3
