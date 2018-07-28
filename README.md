@@ -35,8 +35,8 @@ Spug是一款使用Python+Flask+Vue+Element组件开发的开源运维管理系�
 ### 快速启动
 ----------------------------
 ```
-$ docker pull hub.qbangmang.com/spug:1.0.1
-$ docker run -d -e REGISTRY_SERVER="hub.qbangmang.com:5000" -p 80:80 hub.qbangmang.com/spug:1.0.1
+$ docker pull hub.qbangmang.com/spug
+$ docker run -d -e REGISTRY_SERVER="hub.qbangmang.com:5000" -p 80:80 hub.qbangmang.com/spug
 
 $ 访问：http://主机ip
 $ 默认账号密码：admin/spug
