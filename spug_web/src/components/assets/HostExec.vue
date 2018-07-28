@@ -21,7 +21,7 @@
                 <el-col :span="16">
                     <el-form :inline="true" :model="tpl_query">
                         <el-form-item>
-                            <el-input v-model="tpl_query.name_field" placeholder="请输入模板名称"></el-input>
+                            <el-input v-model="tpl_query.name_field" clearable placeholder="请输入模板名称"></el-input>
                         </el-form-item>
                         <el-select v-model="tpl_query.type_field" placeholder="模板类型" clearable>
                             <el-option v-for="v in tpl_options" :value="v" :key="v"></el-option>
@@ -64,15 +64,27 @@
             </div>
         </el-tab-pane>
 
-        <el-dialog title="主机列表" :visible.sync="dialog_host_view" :close-on-click-modal="false">
+        <el-dialog title="主机列表" :visible.sync="dialog_host_view" width="80%" :close-on-click-modal="false">
             <el-row>
-                <el-col :span="8">
-                    <el-select v-model="host_zone" @change="zone_Search()" clearable placeholder="区域">
-                        <el-option v-for="item in zone_options" :key="item" :value="item"></el-option>
-                    </el-select>
+                <el-col :span="16">
+                    <!--<el-select v-model="host_zone" @change="zone_Search()" clearable placeholder="区域">-->
+                    <!--<el-option v-for="item in zone_options" :key="item" :value="item"></el-option>-->
+                    <!--</el-select>-->
+                    <el-form :inline="true" :model="host_query">
+                        <el-form-item>
+                            <el-input v-model="host_query.name_field" clearable placeholder="主机名称"></el-input>
+                        </el-form-item>
+                        <el-select v-model="host_query.zone_field" @change="zone_Search()" clearable placeholder="区域">
+                            <el-option v-for="item in zone_options" :key="item" :value="item"></el-option>
+                        </el-select>
+
+                        <el-form-item>
+                            <el-button type="primary" icon="search" @click="get_hosts()">查询</el-button>
+                        </el-form-item>
+                    </el-form>
                 </el-col>
             </el-row>
-            <el-table :data="hosts.data"  ref="multipleTable"  @selection-change="handleSelectionChange"
+            <el-table :data="hosts.data"  ref="multipleTable"  v-loading="hostLoading" @selection-change="handleSelectionChange"
                       @row-click="handleClickRow" style="width: 100%">
                 <el-table-column type="selection" width="50">
                 </el-table-column>
@@ -81,6 +93,14 @@
                 <el-table-column prop="type" label="类型"></el-table-column>
                 <el-table-column prop="ssh_ip" label="SSH连接"></el-table-column>
             </el-table>
+            <!--主机列表分页-->
+            <div class="pagination-bar" v-if="hosts.total > 10">
+                <el-pagination
+                        @current-change="hostCurrentChange"
+                        :current-page="hostCurrentPage" layout="total, prev, pager, next"
+                        :total="hosts.total">
+                </el-pagination>
+            </div>
             <div slot="footer">
                 <el-button @click="dialog_host_view=false">取消</el-button>
                 <el-button type="primary" @click="save_select_host">确定</el-button>
@@ -112,10 +132,13 @@
             </div>
         </el-dialog>
 
-        <el-dialog title="执行模板" :visible.sync="dialog_exec_tpl_view" :close-on-click-modal="false">
+        <el-dialog title="执行模板" :visible.sync="dialog_exec_tpl_view" :close-on-click-modal="false" width="80%">
             <el-row>
                 <el-col :span="16">
                     <el-form :inline="true" :model="tpl_query">
+                        <el-form-item>
+                            <el-input v-model="tpl_query.name_field" clearable placeholder="请输入模板名称"></el-input>
+                        </el-form-item>
 
                         <el-select v-model="tpl_query.type_field" placeholder="模板类型">
                             <el-option v-for="v in tpl_options" :value="v" :key="v"></el-option>
@@ -127,7 +150,8 @@
                 </el-col>
             </el-row>
 
-            <el-table ref="singleTable" highlight-current-row :data="tpl.data"   @current-change="handleSelectChange"
+            <el-table ref="singleTable" highlight-current-row :data="tpl.data"
+                      @current-change="handleSelectChange"
                       v-loading="tableLoading" style="width: 100%; margin-top: 20px">
                 <el-table-column prop="tpl_name" label="模板名称"></el-table-column>
                 <el-table-column prop="tpl_type" label="模板类型"></el-table-column>
@@ -169,11 +193,17 @@
                 hosts: [],
                 tpl:[],
                 currentPage: 1,
+                hostCurrentPage: 1,
                 tpl_query: {
                     name_field: '',
                     type_field: '',
                 },
+                host_query: {
+                    name_field: '',
+                    zone_field: '',
+                },
                 tableLoading: false,
+                hostLoading: true,
                 editLoading:false,
                 btnDelLoading: {},
                 exec_command: '',
@@ -229,12 +259,12 @@
                 this.$refs.multipleTable.toggleRowSelection(row)
             },
             get_hosts (page) {
-                if (!page) page = -1;
-                this.tableLoading = true;
+                if (!page) page = 1;
+                this.hostLoading = true;
                 let api_uri = '/api/assets/hosts/';
-                this.$http.get(api_uri, {params: {page: page, host_zone: this.host_zone}}).then(res => {
+                this.$http.get(api_uri, {params: {page: page, host_query: this.host_query}}).then(res => {
                     this.hosts = res.result
-                }, res => this.$layer_message(res.result)).finally(() => this.tableLoading = false)
+                }, res => this.$layer_message(res.result)).finally(() => this.hostLoading = false)
             },
             get_tpl (page) {
                 if (!page) page = 1;
@@ -365,6 +395,10 @@
             handleCurrentChange(val) {
                 this.currentPage = val;
                 this.get_tpl(this.currentPage);
+            },
+            hostCurrentChange(val) {
+                this.hostCurrentPage = val;
+                this.get_hosts(this.hostCurrentPage);
             },
         },
 

@@ -1,13 +1,20 @@
 <template>
     <div>
         <el-row>
-            <el-col :span="8">
-                <el-select v-model="host_zone" @change="zone_Search()" clearable placeholder="区域">
-                    <el-option v-for="item in zone_options" :key="item" :value="item"></el-option>
-                </el-select>
-
+            <el-col :span="16">
+                <el-form :inline="true" :model="host_query">
+                    <el-form-item>
+                        <el-input v-model="host_query.name_field" clearable placeholder="主机名称"></el-input>
+                    </el-form-item>
+                    <el-select v-model="host_query.zone_field" @change="zone_Search()" clearable placeholder="区域">
+                        <el-option v-for="item in zone_options" :key="item" :value="item"></el-option>
+                    </el-select>
+                    <el-form-item>
+                        <el-button type="primary" icon="search" @click="fetch()">查询</el-button>
+                    </el-form-item>
+                </el-form>
             </el-col>
-            <el-col :span="8" :offset="8" style="text-align: right">
+            <el-col :span="8"  style="text-align: right">
                 <el-button @click="refresh()">刷新</el-button>
                 <el-button v-if="has_permission('assets_host_add')" type="primary" @click="handleAdd">添加主机</el-button>
             </el-col>
@@ -58,7 +65,7 @@
             </el-pagination>
         </div>
 
-        <el-dialog :title="title" :visible.sync="dialogVisible" :close-on-click-modal="false">
+        <el-dialog :title="title" :visible.sync="dialogVisible" width="80%" :close-on-click-modal="false">
             <el-tabs v-model="activeName" >
                 <el-tab-pane label="单条记录" name="first">
                     <el-form :model="form" label-width="80px">
@@ -130,6 +137,10 @@
         data () {
             return {
                 host_zone: '',
+                host_query: {
+                    name_field: '',
+                    zone_field: '',
+                },
                 dialogVisible: false,
                 btnSaveLoading: false,
                 btnDelLoading: {},
@@ -177,7 +188,7 @@
                 if (!page) page = 1;
                 this.tableLoading = true;
                 let api_uri = '/api/assets/hosts/';
-                this.$http.get(api_uri, {params: {page: page, host_zone: this.host_zone}}).then(res => {
+                this.$http.get(api_uri, {params: {page: page, host_query: this.host_query}}).then(res => {
                     this.hosts = res.result
                 }, res => this.$layer_message(res.result)).finally(() => this.tableLoading = false)
             },

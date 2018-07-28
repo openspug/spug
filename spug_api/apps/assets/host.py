@@ -19,17 +19,19 @@ blueprint = Blueprint(__name__, __name__)
 def get():
     form, error = JsonParser(Argument('page', type=int, default=1, required=False),
                              Argument('pagesize', type=int, default=10, required=False),
-                             Argument('host_zone', type=str, required=False),).parse(request.args)
+                             Argument('host_query', type=dict, required=False), ).parse(request.args)
     if error is None:
+        print('host_ng', form)
+        host_data = Host.query
         if form.page == -1:
-            hosts_data = Host.query.all()
-            return json_response({'data': [x.to_json() for x in hosts_data], 'total': -1})
-        elif form.host_zone:
-            hosts = Host.query.filter_by(zone=form.host_zone)
-        else:
-            hosts = Host.query
-        hosts_data = hosts.limit(form.pagesize).offset((form.page - 1) * form.pagesize).all()
-        return json_response({'data': [x.to_json() for x in hosts_data], 'total': hosts.count()})
+            return json_response({'data': [x.to_json() for x in host_data.all()], 'total': -1})
+        if form.host_query.get('name_field'):
+            host_data = host_data.filter(Host.name.like('%{}%'.format(form.host_query['name_field'])))
+        if form.host_query.get('zone_field'):
+            host_data = host_data.filter_by(zone=form.host_query['zone_field'])
+
+        result = host_data.limit(form.pagesize).offset((form.page - 1) * form.pagesize).all()
+        return json_response({'data': [x.to_json() for x in result], 'total': host_data.count()})
     return json_response(message=error)
 
 
