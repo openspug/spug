@@ -2,13 +2,6 @@
 #
 set -e
 
-REQUIRE_INIT_OPS=false
-
-# env check
-if [ -z $REGISTRY_SERVER ]; then
-    echo 'Please set REGISTRY_SERVER by -e REGISTRY_SERVER=<docker registry server>'
-    exit 1
-fi
 
 # init db
 if [ ! -d /var/lib/mysql/mysql ]; then
@@ -34,7 +27,6 @@ cd /spug/spug_api
 nginx
 nohup /usr/bin/mysqld_safe --datadir=/var/lib/mysql --user=root &
 sleep 2
-if [ $REQUIRE_INIT_OPS == true ]; then
-    /usr/bin/python3 /scripts/init_spug.py
-fi 
+
+/usr/bin/python3 /scripts/init_spug.py
 gunicorn --threads=32 main:app -b 0.0.0.0:3000
