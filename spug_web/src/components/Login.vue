@@ -62,8 +62,8 @@
                 loading: false,
                 error: '',
                 form: {
-                    username: '',
-                    password: ''
+                    username: 'admin',
+                    password: 'spug'
                 },
                 rules: {
                     username: [

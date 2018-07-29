@@ -12,6 +12,8 @@ Spug是一款使用Python+Flask+Vue+Element组件开发的开源运维管理系�
 
 #### Demo演示地址：<https://spug.qbangmang.com/login>
 
+#### Demo账号密码：<admin/spug>
+
 
 
 ### Feature 功能
@@ -36,16 +38,18 @@ Spug是一款使用Python+Flask+Vue+Element组件开发的开源运维管理系�
 ----------------------------
 ```
 $ docker pull hub.qbangmang.com/spug
-$ docker run -d -e REGISTRY_SERVER="hub.qbangmang.com:5000" -p 80:80 hub.qbangmang.com/spug
+$ docker run -d -p 80:80 hub.qbangmang.com/spug
 
 $ 访问：http://主机ip
 $ 默认账号密码：admin/spug
 
 # 可选参数：
+$ docker run -d -e REGISTRY_SERVER="hub.qbangmang.com" -p 80:80 hub.qbangmang.com/spug
+
 $ -e MYSQL_DATABASE="spug"                    //指定数据库名称
   -e MYSQL_USER="spuguser"                    //指定数据库用户名
   -e MYSQL_PASSWORD="spugpwd"                 //指定数据库密码
-  -e REGISTRY_SERVER="hub.qbangmang.com:5000" //指定私有镜像仓库
+  -e REGISTRY_SERVER="hub.qbangmang.com"      //指定私有镜像仓库
   -e REGISTRY_USER="hubuser"                  //指定私有镜像仓库用户名
   -e REGISTRY_PASSWORD="hubpwd"               //指定私有镜像仓库密码
 ```

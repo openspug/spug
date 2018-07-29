@@ -17,7 +17,7 @@
             <el-table-column prop="desc" label="描述" show-overflow-tooltip></el-table-column>
             <el-table-column label="操作" width="150">
                 <template slot-scope="scope">
-                    <el-button size="small" type="primary" @click="go_deploy(scope.row)" style="margin-right: 15px">发布
+                    <el-button size="small" type="primary" @click="go_deploy(scope.row)" style="margin-right: 15px">管理
                     </el-button>
                     <el-dropdown trigger="click" @command="do_action" v-if="has_permission('publish_app_edit|publish_app_del|publish_app_ctr_view|publish_app_var_view|publish_app_menu_view')">
                         <el-button type="text">更多<i class="el-icon-caret-bottom el-icon--right"></i></el-button>
