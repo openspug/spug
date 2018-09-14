@@ -21,7 +21,6 @@ def get():
                              Argument('pagesize', type=int, default=10, required=False),
                              Argument('host_query', type=dict, required=False), ).parse(request.args)
     if error is None:
-        print('host_ng', form)
         host_data = Host.query
         if form.page == -1:
             return json_response({'data': [x.to_json() for x in host_data.all()], 'total': -1})

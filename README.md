@@ -83,7 +83,7 @@ $ -e MYSQL_DATABASE="spug"                    //指定数据库名称
    $ npm run dev
 
    4. Visit 访问：
-   $ http://$HOST:8010 (http://你的主机IP:8080 来访问 Spug)
+   $ http://$HOST:8080 (http://你的主机IP:8080 来访问 Spug)
 
 ```
 

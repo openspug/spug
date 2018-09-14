@@ -217,10 +217,9 @@ class CommonQueue(object):
             if q:
                 q.destroy()
             return
-        for t, q in self._queues.items():
-            if q.finished:
-                q.destroy()
-                self._queues.pop(t)
+        for t, q in [(t, q) for t, q in self._queues.items() if q.finished]:
+            q.destroy()
+            self._queues.pop(t)
 
 
 QueuePool = CommonQueue()
