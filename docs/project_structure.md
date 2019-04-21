@@ -58,7 +58,10 @@
 │   │   │   └── __init__.py          // 
 │   │   │   └── models.py            // 
 │   │   │   └── utils.py             // 
-│   │   ├── __init__.py              // 
+│   │   ├── system                   // 系统设置模块
+│   │   │   └── __init__.py          // 系统设置路由
+│   │   │   └── models.py            // 系统设置数据模型
+│   │   │   └── notify.py            // 通知设置相关方法
 │   │   │
 │   └── libs                         // 系统公用库目录
 │   │   ├── scripts                  // 公用脚本目录
@@ -122,6 +125,8 @@
 │   │   │   ├── schedule             // 任务管理目录
 │   │   │   │   └── Job.vue          // 任务列表组件
 │   │   │   │   └── JobSetting.vue   // 任务管理-设置触发器组件
+│   │   │   ├── system               // 系统设置
+│   │   │   │   └── Notify.vue       // 通知设置列表
 │   │   │   ├── Deny.vue             // 全局权限拒绝组件
 │   │   │   ├── Home.vue             // 系统Home组件
 │   │   │   ├── Layout.vue           // 菜单生成组件
