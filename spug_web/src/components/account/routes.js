@@ -1,5 +1,6 @@
 /**
- * Created by aka on 2017/5/22.
+ * Created by zyupo on 2017/04/20.
+ * https://github.com/openspug/spug
  */
 
 import User from './User.vue';

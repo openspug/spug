@@ -1,5 +1,6 @@
 /**
- * Created by Yooke on 2017/2/13.
+ * Created by zyupo on 2017/04/20.
+ * https://github.com/openspug/spug
  */
 
 import Home from './components/Home.vue'
@@ -12,6 +13,7 @@ import publish_routes from './components/publish/routes'
 import configuration_routes from './components/configuration/routes'
 import assets_routes from './components/assets/routes'
 import schedule_routes from './components/schedule/routes'
+import system_routes from './components/system/routes'
 
 const routes = [
     {
@@ -43,6 +45,10 @@ const routes = [
     {
         path: 'schedule',
         routes: schedule_routes
+    },
+    {
+        path: 'system',
+        routes: system_routes
     },
     {
         path: '*',

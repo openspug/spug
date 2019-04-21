@@ -16,6 +16,7 @@ args = AttrDict(
     group=Argument('group', help='请选择分组名称！'),
     name=Argument('name', help='请输入应用名称！'),
     desc=Argument('desc', help='请输入应用描述！'),
+    notify_way_id=Argument('notify_way_id', type=int, help='请选择通知方式！'),
     identify=Argument('identify', help='请输入应用标识！'),
     image_id=Argument('image_id', type=int, help='请选择应用使用的Docker镜像！')
 )
@@ -36,7 +37,13 @@ def get():
             apps = query.filter(App.id.in_(app_ids.split(','))).all()
         else:
             apps = []
-    return json_response(apps)
+    data_list = []
+    for i in apps:
+        data = i.to_json()
+        data['notify_way_name'] = i.notify_way.name if i.notify_way else ''
+        data['images'] = i.image.name
+        data_list.append(data)
+    return json_response(data_list)
 
 
 @blueprint.route('/', methods=['POST'])

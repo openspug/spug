@@ -9,6 +9,7 @@ from apps import apis
 from apps import schedule
 from apps import home
 from apps import common
+from apps import system
 
 middleware.init_app(app)
 account.register_blueprint(app)
@@ -19,6 +20,7 @@ apis.register_blueprint(app)
 schedule.register_blueprint(app)
 home.register_blueprint(app)
 common.register_blueprint(app)
+system.register_blueprint(app)
 
 
 if __name__ == '__main__':

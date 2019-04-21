@@ -13,6 +13,7 @@ blueprint = Blueprint(__name__, __name__)
 def get():
     return json_response(Image.query.all())
 
+
 @blueprint.route('/add', methods=['POST'])
 @require_permission('publish_image_add')
 def add():

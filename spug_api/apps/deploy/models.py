@@ -1,5 +1,6 @@
 from public import db
 from libs.model import ModelMixin
+from apps.system.models import NotifyWay
 
 
 class Image(db.Model, ModelMixin):
@@ -73,8 +74,10 @@ class App(db.Model, ModelMixin):
     group = db.Column(db.String(50))
 
     image_id = db.Column(db.Integer, db.ForeignKey('deploy_images.id'))
+    notify_way_id = db.Column(db.Integer, db.ForeignKey('notify_way.id'))
 
     image = db.relationship(Image)
+    notify_way = db.relationship(NotifyWay)
     menus = db.relationship('DeployMenu', secondary='deploy_app_menu_rel')
     fields = db.relationship('DeployField', secondary='deploy_app_field_rel')
 
@@ -119,6 +122,7 @@ class DeployMenu(db.Model, ModelMixin):
 
     def __repr__(self):
         return '<DeployMenu %r>' % self.name
+
 
 class AppMenuRel(db.Model, ModelMixin):
     __tablename__ = 'deploy_app_menu_rel'

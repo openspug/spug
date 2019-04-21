@@ -9,7 +9,7 @@ click==6.7
 cryptography==2.0.3
 docker==2.5.1
 docker-pycreds==0.2.1
-Flask==0.12.2
+Flask ~> 0.12.3
 Flask-Excel==0.0.7
 Flask-SQLAlchemy==2.2
 idna==2.6

@@ -187,6 +187,13 @@
                 <tag-td :item="codes['job_task_log']"></tag-td>
                 <td></td>
             </tr>
+            <tr>
+                <td rowspan="1">系统管理</td>
+                <td rowspan="1">通知设置</td>
+                <tag-td :item="codes['system_notify_view']"></tag-td>
+                <tag-td :item="codes['system_notify_add']"></tag-td>
+                <tag-td :item="codes['system_notify_edit']"></tag-td>
+            </tr>
         </table>
         <el-table v-else v-loading="loading"></el-table>
         <div slot="footer">

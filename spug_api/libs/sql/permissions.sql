@@ -113,3 +113,9 @@ INSERT INTO account_permissions (id, name, `desc`) VALUES (1203, 'publish_field_
 INSERT INTO account_permissions (id, name, `desc`) VALUES (1204, 'publish_field_del', '自定义字段 - 删除');
 INSERT INTO account_permissions (id, name, `desc`) VALUES (1205, 'publish_field_rel_view', '关联配置 - 查看');
 INSERT INTO account_permissions (id, name, `desc`) VALUES (1206, 'publish_field_rel_edit', '关联配置 - 编辑');
+
+-- 系统管理 -> 通知设置
+INSERT INTO account_permissions (id, name, `desc`) VALUES (1301, 'system_notify_view', '系统通知列表');
+INSERT INTO account_permissions (id, name, `desc`) VALUES (1302, 'system_notify_add', '添加通知设置');
+INSERT INTO account_permissions (id, name, `desc`) VALUES (1303, 'system_notify_edit', '编辑通知设置');
+INSERT INTO account_permissions (id, name, `desc`) VALUES (1304, 'system_notify_del', '删除通知设置');

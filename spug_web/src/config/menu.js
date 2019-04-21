@@ -1,3 +1,7 @@
+/**
+ * Created by zyupo on 2017/04/20.
+ * https://github.com/openspug/spug
+ */
 let menu = {
     menus: [
         {
@@ -42,6 +46,11 @@ let menu = {
             key: '7', desc: '告警管理', icon: 'fa fa-bell-o', subs: [
                 {key: 'alarm_role', desc: '报警规则'},
                 {key: 'alarm_contact', desc: '报警联系人'},
+            ]
+        },
+        {
+            key: '8', desc: '系统管理', icon: 'el-icon-setting',  permission: 'system_notify_view',  subs: [
+                {key: '/system/notify', permission: 'system_notify_view', desc: '通知设置'},
             ]
         },
     ]

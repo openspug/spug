@@ -12,3 +12,15 @@ class GlobalConfig(db.Model, ModelMixin):
 
     def __repr__(self):
         return '<GlobalConfig %r>' % self.name
+
+
+class NoticeWay(db.Model, ModelMixin):
+    __tablename__ = 'notice_way'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+    value = db.Column(db.Text)
+    desc = db.Column(db.String(255))
+
+    def __repr__(self):
+        return '<NoticeWay %r>' % self.name

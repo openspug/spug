@@ -223,3 +223,21 @@ class Git(object):
 
     def __repr__(self):
         return '<Git %r>' % self.work_tree
+
+
+def send_ding_msg(token_url='', contacts=[], msg=''):
+    payload = {
+        "msgtype": "text",
+        "text": {
+            "content": msg,
+            "isAtAll": False
+        },
+        "at": {
+            "atMobiles": contacts
+        }
+    }
+    req = requests.post(token_url, json=payload)
+    if req.status_code == 200:
+        return True
+    else:
+        return False

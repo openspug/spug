@@ -1,8 +1,10 @@
 /**
- * Created by aka on 2017/5/22.
+ * Created by zyupo on 2017/04/20.
+ * https://github.com/openspug/spug
  */
 
 import App from './App.vue'
+import AppAdd from './AppAdd.vue'
 import Deploy from './Deploy.vue'
 import Image from './Image.vue'
 import Field from './Field.vue'
@@ -14,6 +16,14 @@ export default [
         component: App,
         meta: {
             permission: 'publish_app_view'
+        }
+    },
+    {
+        path: 'app_add',
+        name: 'app_add',
+        component: AppAdd,
+        meta: {
+            permission: 'publish_app_add'
         }
     },
     {

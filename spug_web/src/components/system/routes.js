@@ -2,14 +2,16 @@
  * Created by zyupo on 2017/04/20.
  * https://github.com/openspug/spug
  */
-import Job from './Job.vue'
+
+import Notify from './Notify.vue';
+
 
 export default [
     {
-        path: 'job',
-        component: Job,
+        path: 'notify',
+        component: Notify,
         meta: {
-            permission: 'job_task_view'
+            permission: 'system_notify_view'
         }
     }
 ]

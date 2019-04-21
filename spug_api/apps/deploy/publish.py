@@ -15,6 +15,9 @@ import tarfile
 import uuid
 import time
 import os
+from apps.system.models import NotifyWay
+from libs.utils import send_ding_msg
+
 
 blueprint = Blueprint(__name__, __name__)
 
@@ -113,10 +116,12 @@ def do_update(q, form, host_id):
             send_message('启动容器成功！', update=True)
         # 执行发布操作
         send_message('正在执行应用更新 . . . ')
+        send_publish_message(pro.notify_way_id, pro.name + ' 开始更新 . . .')
         exec_code, exec_output = ctr.exec_command_with_base64(hooks['应用发布'], form.deploy_message, timeout=120,
                                                               with_exit_code=True)
         if exec_code != 0:
             send_message('执行应用更新失败，退出状态码：{0}'.format(exec_code), level='error')
+            send_publish_message(pro.notify_way_id, pro.name + ' 发布失败！')
             send_message(exec_output, level='console')
             return
         else:
@@ -127,6 +132,7 @@ def do_update(q, form, host_id):
             ctr.restart(timeout=3)
             send_message('重启容器成功！', update=True)
         # 整个流程正常结束
+        send_publish_message(pro.notify_way_id, pro.name + ' 发布成功')
         send_message('完成发布！', level='success')
         deploy_success = True
     except Exception as e:
@@ -154,3 +160,9 @@ class PublishMessage(object):
             cls.start_time = time.time()
             data['duration'] = duration
         q.put(data)
+
+
+def send_publish_message(notify_way_id, message):
+    if notify_way_id:
+        notice_value = NotifyWay.query.filter_by(id=notify_way_id).first()
+        send_ding_msg(token=notice_value.value, contacts=[], msg=message)
