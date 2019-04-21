@@ -1,8 +1,7 @@
 ## Spug
 
 [![Python3](https://img.shields.io/badge/python-3.x-green.svg?style=plastic)](https://www.python.org/)
-[![Flask](https://img.shields.io/badge/Flask-0.12-brightgreen.svg?style=plastic)](http://flask.pocoo.org/)
-[![Paramiko](https://img.shields.io/badge/paramiko-2.2.1-green.svg?style=plastic)](http://www.paramiko.org/)
+[![Flask](https://img.shields.io/badge/Flask-1.0.x-green.svg?style=plastic)](http://flask.pocoo.org/)
 [![Node](https://img.shields.io/badge/node-6.x-green.svg?style=plastic)](https://nodejs.org/)
 [![Element](https://img.shields.io/badge/Element-2.x-green.svg?style=plastic)](http://element-cn.eleme.io/#/zh-CN/)
 
@@ -105,7 +104,7 @@ $ -e MYSQL_DATABASE="spug"                    //指定数据库名称
 
 ### Contributor 贡献者
 ----------------------------
-#### 1.0.1
+#### 1.0.0
 - zyupo <张玉坡> 项目发起者
 - Yooke <雷二猛> Spug架构师、熟悉多种开发语言。
 - junun <刘军>   部分功能开发
@@ -114,7 +113,7 @@ $ -e MYSQL_DATABASE="spug"                    //指定数据库名称
 
 ### 开发者群
 ----------------------------
-QQ群号:
+QQ群号: 783951751
 
 ![image](https://github.com/openspug/spug/blob/master/docs/demo/spug.png)
 
