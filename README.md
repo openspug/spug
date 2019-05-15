@@ -88,11 +88,11 @@ $ -e MYSQL_DATABASE="spug"                    //指定数据库名称
 
 ### Preview 预览
 ----------------------------
-![image](https://github.com/openspug/spug/blob/master/docs/demo/login.gif)
-![image](https://github.com/openspug/spug/blob/master/docs/demo/user.gif)
-![image](https://github.com/openspug/spug/blob/master/docs/demo/host.gif)
-![image](https://github.com/openspug/spug/blob/master/docs/demo/publish.gif)
-![image](https://github.com/openspug/spug/blob/master/docs/demo/tasks.gif)
+![image](http://image.qbangmang.com/login.gif)
+![image](http://image.qbangmang.com/user.gif)
+![image](http://image.qbangmang.com/host.gif)
+![image](http://image.qbangmang.com/publish.gif)
+![image](http://image.qbangmang.com/tasks.gif)
 
 ### Docs 开发者文档
 ----------------------------
@@ -115,7 +115,7 @@ $ -e MYSQL_DATABASE="spug"                    //指定数据库名称
 ----------------------------
 QQ群号: 783951751
 
-![image](https://github.com/openspug/spug/blob/master/docs/demo/spug.png)
+![image](http://image.qbangmang.com/spug.png)
 
 ### License & Copyright
 ----------------------------
