@@ -1,7 +1,9 @@
 set -e
 
 if [ ! -d /var/lib/mysql/mysql ]; then
-    mysql_install_db &> /dev/null
+    echo 'start init mysql.........'
+    # mysql_install_db &> /dev/null
+    mysql_install_db --datadir=/var/lib/mysql
     mkdir -p /run/mysqld
     tfile=`mktemp`
     echo "USE mysql;" >> $tfile

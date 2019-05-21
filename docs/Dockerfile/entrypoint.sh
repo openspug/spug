@@ -26,7 +26,7 @@ fi
 cd /spug/spug_api
 nginx
 nohup /usr/bin/mysqld_safe --datadir=/var/lib/mysql --user=root &
-sleep 2
 
-/usr/bin/python3 /scripts/init_spug.py
+sleep 3
+/usr/local/bin/python /scripts/init_spug.py
 gunicorn --threads=32 main:app -b 0.0.0.0:3000
