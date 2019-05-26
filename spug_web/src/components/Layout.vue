@@ -48,7 +48,7 @@
                 <router-view @routerChange="routerChange"></router-view>
             </div>
             <div class="layout-footer">
-                Ant Design all rights reserved © 2015 Created by Ant UED
+                Create By Openspug@<a style="color: #99a9bf" href="https://github.com/openspug">Github</a>
             </div>
         </div>
     </div>
@@ -102,3 +102,4 @@
         }
     }
 </script>
+

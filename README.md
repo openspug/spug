@@ -45,12 +45,15 @@ $ 默认账号密码：admin/spug
 # 可选参数：
 $ docker run -d -e REGISTRY_SERVER="hub.qbangmang.com" -p 80:80 hub.qbangmang.com/spug
 
-$ -e MYSQL_DATABASE="spug"                    //指定数据库名称
-  -e MYSQL_USER="spuguser"                    //指定数据库用户名
-  -e MYSQL_PASSWORD="spugpwd"                 //指定数据库密码
-  -e REGISTRY_SERVER="hub.qbangmang.com"      //指定私有镜像仓库
-  -e REGISTRY_USER="hubuser"                  //指定私有镜像仓库用户名
-  -e REGISTRY_PASSWORD="hubpwd"               //指定私有镜像仓库密码
+$ -e MYSQL_HOST = "192.168.1.10"              // 指定数据库地址
+  -e MYSQL_DATABASE="spug"                    // 指定数据库名称，
+  -e MYSQL_USER="spuguser"                    // 指定数据库用户名
+  -e MYSQL_PASSWORD="spugpwd"                 // 指定数据库密码
+  -e MYSQL_PORT="3306"                        // 指定数据库端口
+
+  -e REGISTRY_SERVER="hub.qbangmang.com"      // 指定私有镜像仓库
+  -e REGISTRY_USER="hubuser"                  // 指定私有镜像仓库用户名
+  -e REGISTRY_PASSWORD="hubpwd"               // 指定私有镜像仓库密码
 ```
 
 更多Dockerfile [Dockerfile](https://github.com/openspug/spug/tree/master/docs/Dockerfile)
@@ -86,6 +89,15 @@ $ -e MYSQL_DATABASE="spug"                    //指定数据库名称
 
 ```
 
+### 前端单独使用
+**Spug项目前后端分离，支持前端单独运行，也支持后端单独运行。
+如果你想单独基于前端项目开发自己需要的后台功能，那么可以访问前端独立出来的项目**：https://github.com/openspug/spug-vue-admin
+
+
+
+
+
+
 ### Preview 预览
 ----------------------------
 ![image](http://image.qbangmang.com/login.gif)
@@ -120,3 +132,4 @@ QQ群号: 783951751
 ### License & Copyright
 ----------------------------
 [MIT](https://opensource.org/licenses/MIT)
+
