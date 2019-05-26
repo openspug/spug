@@ -1,5 +1,5 @@
 <template>
-    <td @click="check"><el-tag :type="tag_type" style="cursor: pointer">{{item.desc}}</el-tag></td>
+    <td ><el-tag @click="check" type="info" :color="colorUpdate" style="cursor: pointer">{{item.desc}}</el-tag></td>
 </template>
 
 <script>
@@ -9,13 +9,13 @@
             return {}
         },
         computed: {
-            tag_type() {
-                return (this.item['is_has']) ? 'primary' : 'info'
-            }
+            colorUpdate() {
+                return (this.item['is_has']) ? '#99ffd6' : '#ffffff'
+            },
         },
         methods: {
             check() {
-                this.item['is_has'] = !this.item['is_has']
+                this.item['is_has'] = !this.item['is_has'];
             }
         }
     }

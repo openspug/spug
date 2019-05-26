@@ -162,7 +162,6 @@
                 let [action, index] = command.split(' ');
                 this.form = this.$deepCopy(this.tableData[index]);
                 if (action === 'edit') {
-
                     if (this.images.length === 0) this.fetchImages();
                     this.dialogAddVisible = true;
                     this.fetchNotifyWay();
@@ -200,6 +199,7 @@
                 // this.$router.push({name: 'app_add'})
                 this.form = this.init_form();
                 this.dialogAddVisible = true;
+                this.fetchNotifyWay();
                 if (this.images.length === 0) this.fetchImages()
             },
             addGroup() {

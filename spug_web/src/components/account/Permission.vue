@@ -244,7 +244,7 @@
             fetch() {
                 this.loading = true;
                 this.$http.get(`/api/account/roles/${this.role.id}/permissions`).then(res => {
-                    this.codes = res.result
+                    this.codes = res.result;
                 }, res => this.$layer_message(res.result)).finally(() => this.loading = false)
             },
             saveCommit() {
