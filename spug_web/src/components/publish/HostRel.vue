@@ -1,7 +1,7 @@
 <template>
     <div>
         <el-select v-model="type" style="margin-bottom: 15px" placeholder="请选择环境">
-            <el-option v-for="env in this.owner" :label="env.name" :value="env.id">
+            <el-option v-for="env in this.owner" :label="env.name" :value="env.id" :key="env.id">
             </el-option>
         </el-select>
                 <el-transfer :titles="['未选主机', '已选主机']" v-if="type === ''" :data="ecs_host"></el-transfer>
