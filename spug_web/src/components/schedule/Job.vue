@@ -78,14 +78,21 @@
                     <el-input v-model="form.command_user" placeholder="默认root身份执行，仅对容器执行生效"></el-input>
                 </el-form-item>
                 <el-form-item label="执行对象" required>
-                    <el-cascader style="margin-bottom: 10px; width: 100%" placeholder="请选择执行对象"
-                                 v-for="(item, index) in targets"
-                                 :key="index"
-                                 :options="options"
-                                 v-model="targets[index]"
-                                 @active-item-change="loadNode"
-                                 @change="handleChange"
-                    ></el-cascader>
+                    <div v-for="(item, index) in targets" :key="index" style="display: flex; align-items: center; margin-bottom: 20px">
+                        <el-cascader
+                            style="flex: 1" placeholder="请选择执行对象"
+                            :key="index"
+                            :options="options"
+                            v-model="targets[index]"
+                            @change="handleChange"
+                        />
+                        <i v-if="targets.length > 1" @click="targets.splice(index, 1) && handleChange()" class="el-icon-remove-outline delIcon"></i>
+                        <div v-else class="delIcon"></div>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-top: 20px">
+                      <div class="addBtn" @click="targets.push([])">添加执行对象</div>
+                      <div style="width: 44px"></div>
+                    </div>
                 </el-form-item>
                 <el-row v-if="form.id" style="text-align: center">
                     <i style="color: #F7BA2A" class="el-icon-information">&nbsp;如果修改任务详情、执行用户或执行对象，则需要重启任务后才会生效！</i>
@@ -93,7 +100,6 @@
             </el-form>
             <div slot="footer">
                 <el-button @click="dialogAddVisible=false">取消</el-button>
-                <el-button @click="targets.push([])">添加执行对象</el-button>
                 <el-button type="primary" @click="saveCommit" :loading="btnSaveLoading">保存</el-button>
             </div>
         </el-dialog>
@@ -166,7 +172,6 @@
                     {label: '本地', value: 'local'},
                     {label: '主机', value: 'host', children: []},
                     {label: '容器', value: 'container', children: []},
-                    {label: '删除', value: 'delete', disabled: true}
                 ]
             }
         },
@@ -226,7 +231,7 @@
                         return x.slice(1, 3).join('_')
                     }
                 });
-                this.form['targets'] = tmp.join(',');
+                this.form['targets'] = tmp.filter(x => x).join(',');
                 let request;
                 if (this.form.id) {
                     request = this.$http.put(`/api/schedule/jobs/${this.form.id}`, this.form)
@@ -240,34 +245,30 @@
                     this.get_job_group();
                 }, res => this.$layer_message(res.result)).finally(() => this.btnSaveLoading = false)
             },
-            loadContainer (val) {
-                if (val.length > 1) {
-                    let item = this.options[2].children.find((x) => x.value === val[1]);
-                    if (item.hasOwnProperty('is_load')) return;
-                    this.$http.get(`/api/deploy/containers/${val[1]}/`).then(res => {
-                        item['is_load'] = true;
-                        let apps = res.result['apps'];
-                        let envs = res.result['envs'];
-                        item.children = res.result['relationships'].map(x => Object({
-                            label: `${apps[x.app_id]['name']} - ${envs[x.env_id]['name']}`,
-                            value: `${x.app_id}_${x.env_id}`
-                        }));
-                        if (item.children.length === 0) item.disabled = true;
-                    }, res => this.$layer_message(res.result))
-                }
+            _loadContainer (item) {
+                return this.$http.get(`/api/deploy/containers/${item.value}/`).then(res => {
+                    item['is_load'] = true;
+                    let apps = res.result['apps'];
+                    let envs = res.result['envs'];
+                    item.children = res.result['relationships'].map(x => Object({
+                        label: `${apps[x.app_id]['name']} - ${envs[x.env_id]['name']}`,
+                        value: `${x.app_id}_${x.env_id}`
+                    }));
+                    if (item.children.length === 0) item.disabled = true;
+                }, res => this.$layer_message(res.result))
             },
-            loadNode (val) {
+            _loadNode () {
                 if (this.hosts === undefined) {
                     this.$http.get('/api/assets/hosts/').then(res => {
                         this.hosts = res.result.data.map(x => Object({label: x.name, value: x.id + ''}));
                         this.options[1].children = this.hosts;
                         this.options[2].children = this.$deepCopy(this.hosts).map(x => Object.assign(x, {children: []}));
-                        this.loadContainer(val)
+                        Promise.all(this.options[2].children.map(item => this._loadContainer(item)))
+                            .then(this.handleChange)
                     }, res => this.$layer_message(res.result))
                 } else {
-                    this.loadContainer(val)
+                  this.handleChange()
                 }
-
             },
             clear_disabled (data) {
                 for (let item of data) {
@@ -277,7 +278,6 @@
                         item['disabled'] = false
                     }
                 }
-                this.options[3]['disabled'] = this.targets.length <= 1;
             },
             handleChange () {
                 this.clear_disabled(this.options);
@@ -289,8 +289,6 @@
                     } else if (val[0] === 'container') {
                         let sub = this.options[2].children.find(x => x.value === val[1])['children'];
                         sub.find(x => x.value === val[2])['disabled'] = true
-                    } else if (val[0] === 'delete') {
-                        this.targets.splice(this.targets.indexOf(val), 1)
                     }
                 }
             },
@@ -308,8 +306,7 @@
                             return ['host', x]
                         }
                     });
-                    this.options[3]['disabled'] = this.targets.length <= 1;
-                    this.targets.map(x => this.loadNode(x));
+                    this._loadNode();
                     this.dialogAddVisible = true
                 } else if (action === 'del') {
                     this.$confirm(`此操作将永久删除 ${this.form.name}，是否继续？`, '删除确认', {type: 'warning'}).then(() => {
@@ -370,3 +367,23 @@
         }
     }
 </script>
+
+<style scoped>
+  .addBtn {
+    flex: 1; 
+    border: 1px dashed #dfdfdf; 
+    text-align: center; 
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .addBtn:hover {
+    border-color: #40a9ff;
+    color: #40a9ff;
+  }
+  .delIcon {
+    width: 44px;
+    font-size: 34px;
+    margin-left: 10px;
+    color: #f5222d
+  }
+</style>
