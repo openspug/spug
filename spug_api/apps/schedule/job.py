@@ -91,6 +91,8 @@ def set_trigger(job_id):
 def switch(job_id):
     job = Job.query.get_or_404(job_id)
     if request.method == 'POST':
+        if job.trigger is None:
+            return json_response(message='请在 更多-设置触发器 中配置调度策略')
         job.update(enabled=True)
         scheduler.add_job(job)
     elif request.method == 'DELETE':
