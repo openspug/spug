@@ -5,7 +5,6 @@ from queue import Queue
 import ipaddress
 import json
 import time
-import six
 
 
 def human_time(date=None):
@@ -74,14 +73,12 @@ class Argument(object):
     def __init__(self, name, default=None, required=True, type=str, filter=None, help=None, nullable=False):
         self.name = name
         self.default = default
-        self.type = (type,)
+        self.type = type
         self.required = required
         self.nullable = nullable
         self.filter = filter
         self.help = help
-        if type == str:
-            self.type = six.string_types
-        if not isinstance(self.name, six.string_types):
+        if not isinstance(self.name, str):
             raise TypeError('Argument name must be string')
         if filter and not callable(self.filter):
             raise TypeError('Argument filter is not callable')
@@ -100,15 +97,17 @@ class Argument(object):
             else:
                 return None
         try:
-            if self.type[0] in six.integer_types:
-                value = self.type[0](value)
-            elif self.type[0] == dict:
-                value = json.loads(value)
-            elif self.type[0] == bool:
-                assert value.lower() in ['true', 'false']
-                value = value.lower() == 'true'
-        except (ValueError, AssertionError):
-            raise ParseError(self.help or 'Type Error: %s type must be %s' % (self.name, self.type[0]))
+            if self.type:
+                if self.type in (list, dict) and isinstance(value, str):
+                    value = json.loads(value)
+                    assert isinstance(value, self.type)
+                elif self.type == bool and isinstance(value, str):
+                    assert value.lower() in ['true', 'false']
+                    value = value.lower() == 'true'
+                elif not isinstance(value, self.type):
+                    value = self.type(value)
+        except (TypeError, ValueError, AssertionError):
+            raise ParseError(self.help or 'Type Error: %s type must be %s' % (self.name, self.type))
 
         if self.filter:
             if not self.filter(value):
@@ -120,7 +119,7 @@ class BaseParser(object):
     def __init__(self, *args):
         self.args = []
         for e in args:
-            if isinstance(e, six.string_types):
+            if isinstance(e, str):
                 e = Argument(e)
             elif not isinstance(e, Argument):
                 raise TypeError('%r is not instance of Argument' % e)
@@ -162,8 +161,9 @@ class JsonParser(BaseParser):
                 self.__data.update(post_json or {})
         else:
             try:
-                if isinstance(data, six.string_types):
-                    self.__data = json.loads(data)
+                if isinstance(data, (str, bytes)):
+                    data = data.decode('utf-8')
+                    self.__data = json.loads(data) if data else {}
                 else:
                     assert hasattr(data, '__contains__')
                     assert hasattr(data, 'get')
