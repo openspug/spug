@@ -5,7 +5,7 @@
             </el-option>
         </el-select>
                 <el-transfer :titles="['未选主机', '已选主机']" v-if="type === ''" :data="ecs_host"></el-transfer>
-                <el-transfer v-for="item in this.owner" :titles="['未选主机', '已选主机']" v-if="type === item.id" v-model="app_result" :data="ecs_host"></el-transfer>
+                <el-transfer v-for="item in this.owner" :key="item.id" :titles="['未选主机', '已选主机']" v-if="type === item.id" v-model="app_result" :data="ecs_host"></el-transfer>
         <!--<el-transfer :titles="['未选主机', '已选主机']" v-if="type === 'app'" v-model="app_result" :data="apps"></el-transfer>-->
         <!--<el-transfer :titles="['未选主机', '已选主机']" v-if="type === 'service'" v-model="service_result" :data="services"></el-transfer>-->
         <div slot="footer" v-if="has_permission('config_app_rel_edit')">
