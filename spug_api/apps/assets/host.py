@@ -19,7 +19,7 @@ blueprint = Blueprint(__name__, __name__)
 def get():
     form, error = JsonParser(Argument('page', type=int, default=1, required=False),
                              Argument('pagesize', type=int, default=10, required=False),
-                             Argument('host_query', type=dict, required=False), ).parse(request.args)
+                             Argument('host_query', type=dict, default={}), ).parse(request.args)
     if error is None:
         host_data = Host.query
         if form.page == -1:
