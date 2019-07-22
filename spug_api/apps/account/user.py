@@ -27,12 +27,12 @@ def get():
         users = []
         now_time = datetime.now()
         for item in user.limit(form.pagesize).offset((form.page - 1) * form.pagesize).all():
-            item = item.to_json()
-            if item['token_expired']:
-                item['last_login'] = human_diff_time(now_time, datetime.fromtimestamp(item['token_expired'] - 8 * 60 * 60)) + '前'
+            data = item.to_json(excludes=('password_hash', 'access_token', 'token_expired'))
+            if item.token_expired:
+                data['last_login'] = human_diff_time(now_time, datetime.fromtimestamp(item.token_expired - 8 * 60 * 60)) + '前'
             else:
-                item['last_login'] = '从未登录'
-            users.append(item)
+                data['last_login'] = '从未登录'
+            users.append(data)
         return json_response({'data': users, 'total': total})
     return json_response(message=error)
 
@@ -125,7 +125,8 @@ def login():
             if user.is_active:
                 if user.verify_password(form.password):
                     login_limit.pop(form.username, None)
-                    token = uuid.uuid4().hex
+                    # token = uuid.uuid4().hex
+                    token = user.access_token
                     user.access_token = token
                     user.token_expired = time.time() + 8 * 60 * 60
                     user.save()
