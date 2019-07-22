@@ -47,7 +47,12 @@ class ModelMixin(object):
             record = cls(**kwargs).save()
         return record
 
-    def to_json(self):
-        if hasattr(self, '__table__'):
+    def to_json(self, excludes=None, selects=None):
+        if not hasattr(self, '__table__'):
+            raise AssertionError('<%r> does not have attribute for __table__' % self)
+        elif selects:
+            return {i: getattr(self, i) for i in selects}
+        elif excludes:
+            return {i.name: getattr(self, i.name) for i in self.__table__.columns if i.name not in excludes}
+        else:
             return {i.name: getattr(self, i.name) for i in self.__table__.columns}
-        raise AssertionError('<%r> does not have attribute for __table__' % self)

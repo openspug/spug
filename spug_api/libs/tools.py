@@ -70,7 +70,7 @@ class Argument(object):
     :param bool required: is required
     """
 
-    def __init__(self, name, default=None, required=True, type=str, filter=None, help=None, nullable=False):
+    def __init__(self, name, default=None, required=True, type=None, filter=None, help=None, nullable=False):
         self.name = name
         self.default = default
         self.type = type
