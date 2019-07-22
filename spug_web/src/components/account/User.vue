@@ -58,19 +58,19 @@
 
 
         <!--编辑新增界面-->
-        <el-dialog :title="editFormTitle" :visible.sync="dialogShow" :close-on-click-modal="false">
+        <el-dialog :title="editFormTitle" visible v-if="dialogShow" @close="dialogShow = false" :close-on-click-modal="false">
             <el-form ref="editForm" :model="editForm" :rules="rules" label-width="80px">
                 <el-form-item prop="username" label="登录名">
-                    <el-input v-model="editForm.username" auto-complete="off" :disabled="is_disabled"></el-input>
+                    <el-input placeholder="请输入" v-model="editForm.username" auto-complete="off" :disabled="is_disabled"></el-input>
                 </el-form-item>
                 <el-form-item prop="nickname" label="姓名">
-                    <el-input v-model="editForm.nickname" auto-complete="off"></el-input>
+                    <el-input placeholder="请输入" v-model="editForm.nickname" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-form-item prop="password" label="密码" :style="display" >
-                    <el-input type="password" v-model="editForm.password" auto-complete="off"></el-input>
+                    <el-input placeholder="请输入" type="password" v-model="editForm.password" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-form-item prop="checkPass" label="确认密码" :style="display" width="180" >
-                    <el-input type="password" v-model="editForm.checkPass" auto-complete="off"></el-input>
+                    <el-input placeholder="请输入" type="password" v-model="editForm.checkPass" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="角色" required>
                     <el-select v-model="editForm.role_id" placeholder="请选择用户角色">
@@ -78,10 +78,10 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item prop="email" label="邮箱">
-                    <el-input v-model="editForm.email" auto-complete="off"></el-input>
+                    <el-input placeholder="请输入" v-model="editForm.email" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-form-item prop="mobile" label="电话" required>
-                    <el-input v-model="editForm.mobile" auto-complete="off"></el-input>
+                    <el-input placeholder="请输入" v-model="editForm.mobile" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-alert v-if="error" :title="error" type="error" style="margin-top: -10px; margin-bottom: 10px"
                           show-icon></el-alert>
