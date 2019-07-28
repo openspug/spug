@@ -28,6 +28,8 @@
             <el-table-column v-if="has_permission('system_notify_view|system_notify_add|system_notify_edit')" label="操作">
                 <template slot-scope="scope">
                     <el-button v-if="has_permission('system_notify_edit')" size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                    <el-button v-if="has_permission('system_notify_add')" type="primary" size="small"
+                               @click="handleDingTest(scope.row)">测试</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -49,7 +51,9 @@
                     <el-input v-model="editForm.name" ></el-input>
                 </el-form-item>
                 <el-form-item prop="value" label="通知URL" >
-                    <el-input placeholder="输入钉钉webhook" type="textarea" :rows="3" v-model="editForm.value" auto-complete="off"></el-input>
+                    <el-input
+                            placeholder="钉钉机器人完整URL，例如：https://oapi.dingtalk.com/robot/send?access_token=858124219d02d5bf412aab28a0b26"
+                            type="textarea" :rows="3" v-model="editForm.value" auto-complete="off"></el-input>
                 </el-form-item>
 
                 <el-form-item prop="desc" label="备注信息">
@@ -154,6 +158,12 @@
                     this.$layer_message(msg + pwd, 'success');
                     this.getUsers(this.currentPage);
                 }, response => this.$layer_message(response.result)).finally(() => this.btnDelLoading = {});
+            },
+            handleDingTest: function (row){
+                this.$http.post(`/api/system/notify/test/${row.id}`, row).then( res=> {
+                    this.$layer_message('测试成功', 'success');
+                    this.getNotify(this.currentPage);
+                })
             },
 
             editSubmit: function () {

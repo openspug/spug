@@ -16,7 +16,7 @@ import uuid
 import time
 import os
 from apps.system.models import NotifyWay
-from libs.utils import send_ding_msg
+from libs.utils import send_ding_ding
 
 
 blueprint = Blueprint(__name__, __name__)
@@ -121,7 +121,7 @@ def do_update(q, form, host_id):
                                                               with_exit_code=True)
         if exec_code != 0:
             send_message('执行应用更新失败，退出状态码：{0}'.format(exec_code), level='error')
-            send_publish_message(pro.notify_way_id, pro.name + ' 发布失败！')
+            send_publish_message(pro.notify_way_id, pro.name + ' 发布失败！', status='failed')
             send_message(exec_output, level='console')
             return
         else:
@@ -132,7 +132,7 @@ def do_update(q, form, host_id):
             ctr.restart(timeout=3)
             send_message('重启容器成功！', update=True)
         # 整个流程正常结束
-        send_publish_message(pro.notify_way_id, pro.name + ' 发布成功')
+        send_publish_message(pro.notify_way_id, pro.name + ' 发布成功', status='success')
         send_message('完成发布！', level='success')
         deploy_success = True
     except Exception as e:
@@ -162,7 +162,19 @@ class PublishMessage(object):
         q.put(data)
 
 
-def send_publish_message(notify_way_id, message):
+def send_publish_message(notify_way_id, message, status='info'):
     if notify_way_id:
         notice_value = NotifyWay.query.filter_by(id=notify_way_id).first()
-        send_ding_msg(token=notice_value.value, contacts=[], msg=message)
+        if status == 'success':
+            publish_status = '<font color=\"#85CE60\">发布成功</font>'
+        elif status == 'failed':
+            publish_status = '<font color=\"#f90202\">发布失败</font>'
+        else:
+            publish_status = '<font color=\"#A6A9AD\">开始发布</font>'
+
+        msg = f'# <font face=\"微软雅黑\">运维平台通知</font> #  \n <br>  \n  ' \
+            f'**发布信息:**  {message} \n  \n  ' \
+            f'**平台地址:**  http://spug.qbangmang.com \n  \n ' \
+            f'**发布状态:**  {publish_status}<br /> \n \n ' \
+
+        send_ding_ding(token_url=notice_value.value, contacts=[], msg=msg)

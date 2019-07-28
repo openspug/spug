@@ -2,6 +2,7 @@ from flask import Blueprint, request
 from libs.tools import json_response, JsonParser, Argument
 from .models import NotifyWay
 from libs.decorators import require_permission
+from libs.utils import send_ding_ding
 
 
 blueprint = Blueprint(__name__, __name__)
@@ -58,3 +59,15 @@ def put(n_id):
             notify_info.save()
         return json_response(notify_info)
     return json_response(message=error)
+
+
+@blueprint.route('/test/<int:d_id>', methods=['POST'])
+def send_ding_test(d_id):
+    if d_id:
+        notice_value = NotifyWay.query.filter_by(id=d_id).first()
+        message = f'# <font face=\"微软雅黑\">运维平台通知</font> #  \n ' \
+                  '**平台地址:**  http://spug.qbangmang.com \n  \n ' \
+                  '**测试状态:**  <font color=\"#85CE60\">测试成功</font><br /> \n \n '
+
+        send_ding_ding(token_url=notice_value.value, contacts=[], msg=message)
+        return json_response()

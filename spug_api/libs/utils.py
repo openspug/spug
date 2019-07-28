@@ -225,18 +225,11 @@ class Git(object):
         return '<Git %r>' % self.work_tree
 
 
-def send_ding_msg(token_url='', contacts=[], msg=''):
-    payload = {
-        "msgtype": "text",
-        "text": {
-            "content": msg,
-            "isAtAll": False
-        },
-        "at": {
-            "atMobiles": contacts
-        }
-    }
-    req = requests.post(token_url, json=payload)
+def send_ding_ding(token_url='', contacts='', msg=''):
+    payload = {"msgtype": "markdown", "markdown": {"title": "运维平台", "text": msg}}
+    binary_data = json.dumps(payload).encode(encoding='UTF8')
+    headers = {"Content-Type": "application/json"}
+    req = requests.post(token_url, data=binary_data, headers=headers)
     if req.status_code == 200:
         return True
     else:
