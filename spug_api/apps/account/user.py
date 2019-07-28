@@ -125,8 +125,8 @@ def login():
             if user.is_active:
                 if user.verify_password(form.password):
                     login_limit.pop(form.username, None)
-                    # token = uuid.uuid4().hex
-                    token = user.access_token
+                    token = uuid.uuid4().hex
+                    # token = user.access_token
                     user.access_token = token
                     user.token_expired = time.time() + 8 * 60 * 60
                     user.save()
