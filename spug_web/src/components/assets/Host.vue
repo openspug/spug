@@ -132,7 +132,6 @@
 </style>
 
 <script>
-    import envs from '../../config/env'
     export default {
         data () {
             return {
@@ -157,7 +156,7 @@
                 fileList: [],
                 tp_file:'',
                 import_loading: false,
-                download_url: envs.apiServer + "/apis/files/download/host.xls",
+                download_url: "/api/apis/files/download/host.xls",
             }
         },
         methods: {
