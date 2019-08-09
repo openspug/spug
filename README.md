@@ -36,14 +36,14 @@ Spug是一款使用Python+Flask+Vue+Element组件开发的开源运维管理系�
 ### 快速启动
 ----------------------------
 ```
-$ docker pull hub.qbangmang.com/spug
+$ docker pull reg.qiniu.com/openspug/spug
 $ docker run -d -p 80:80 hub.qbangmang.com/spug
 
 $ 访问：http://主机ip
 $ 默认账号密码：admin/spug
 
 # 可选参数：
-$ docker run -d -e REGISTRY_SERVER="hub.qbangmang.com" -p 80:80 hub.qbangmang.com/spug
+$ docker run -d -e REGISTRY_SERVER="hub.qbangmang.com" -p 80:80 reg.qiniu.com/openspug/spug
 
 $ -e MYSQL_HOST = "192.168.1.10"              // 指定数据库地址
   -e MYSQL_DATABASE="spug"                    // 指定数据库名称，
