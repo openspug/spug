@@ -37,7 +37,7 @@ Spug是一款使用Python+Flask+Vue+Element组件开发的开源运维管理系�
 ----------------------------
 ```
 $ docker pull reg.qiniu.com/openspug/spug
-$ docker run -d -p 80:80 hub.qbangmang.com/spug
+$ docker run -d -p 80:80 reg.qiniu.com/openspug/spug
 
 $ 访问：http://主机ip
 $ 默认账号密码：admin/spug
@@ -112,6 +112,10 @@ $ -e MYSQL_HOST = "192.168.1.10"              // 指定数据库地址
 
 ### Contributor 贡献者
 ----------------------------
+#### 1.0.5
+- zyupo 
+- Yooke 
+
 #### 1.0.0
 - zyupo 项目发起者
 - Yooke Spug架构师、熟悉多种开发语言。
