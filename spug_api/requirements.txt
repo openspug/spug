@@ -40,4 +40,4 @@ texttable==1.6.1
 tzlocal==1.5.1
 urllib3==1.24.3
 websocket-client==0.56.0
-Werkzeug==0.15.2
+Werkzeug==0.15.3
