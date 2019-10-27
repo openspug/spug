@@ -4,10 +4,20 @@ import os
 DEBUG = True
 TIME_ZONE = timezone('Asia/Shanghai')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-#SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:redhat@127.0.0.1/doms'
-SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'test.db')
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://spug:spugpwd@123.12.13.18:3306/spug'
+# SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'test.db')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_ECHO = False
 
-DOCKER_REGISTRY_SERVER = 'localhost:5000'
-DOCKER_REGISTRY_AUTH = {'username': 'user', 'password': 'password'}
+DOCKER_REGISTRY_SERVER = 'hub.qbangmang.com'
+DOCKER_REGISTRY_AUTH = {'username': 'hubuser', 'password': 'hubpassword'}
+
+LDAP_CONFIG = {
+    'host': '',
+    'port': 389,
+    'is_openldap':  True,
+    'base_dn': 'dc=spug,dc=com',
+    'admin_dn': 'cn=admin,dc=spug,dc=com',
+    'admin_password': 'spugpwd',
+    'user_filter': 'cn',
+}

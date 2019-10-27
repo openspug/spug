@@ -20,6 +20,9 @@ class Image(db.Model, ModelMixin):
     def __repr__(self):
         return '<Image %r>' % self.name
 
+    class Meta:
+        ordering = ('-id',)
+
 
 class ImageConfig(db.Model, ModelMixin):
     __tablename__ = 'deploy_image_configs'
@@ -63,6 +66,9 @@ class History(db.Model, ModelMixin):
     deploy_success = db.Column(db.Boolean)
     created = db.Column(db.String(20))
 
+    class Meta:
+        ordering = ('-id',)
+
 
 class App(db.Model, ModelMixin):
     __tablename__ = 'deploy_apps'
@@ -83,6 +89,9 @@ class App(db.Model, ModelMixin):
 
     def __repr__(self):
         return '<App %r>' % self.name
+
+    class Meta:
+        ordering = ('-id',)
 
 
 class AppHostRel(db.Model, ModelMixin):
@@ -122,6 +131,9 @@ class DeployMenu(db.Model, ModelMixin):
 
     def __repr__(self):
         return '<DeployMenu %r>' % self.name
+
+    class Meta:
+        ordering = ('-id',)
 
 
 class AppMenuRel(db.Model, ModelMixin):

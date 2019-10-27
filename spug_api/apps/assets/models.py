@@ -18,6 +18,8 @@ class Host(db.Model, ModelMixin):
     def __repr__(self):
         return '<Host %r>' % self.name
 
+    class Meta:
+        ordering = ('-id',)
 
 class HostExtend(db.Model, ModelMixin):
     __tablename__ = 'assets_hosts_extend'
@@ -33,6 +35,9 @@ class HostExtend(db.Model, ModelMixin):
 
     hosts = db.relationship(Host, backref=db.backref('host'))
 
+    class Meta:
+        ordering = ('-id',)
+
 
 class HostExecTemplate(db.Model, ModelMixin):
     __tablename__ = 'assets_hosts_exec_template'
@@ -45,3 +50,6 @@ class HostExecTemplate(db.Model, ModelMixin):
 
     def __repr__(self):
         return '<HostExecTemplate %r>' % self.tpl_name
+
+    class Meta:
+        ordering = ('-id',)

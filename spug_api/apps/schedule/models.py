@@ -21,6 +21,9 @@ class Job(db.Model, ModelMixin):
     def __repr__(self):
         return '<schedule.Job name=%r trigger=%r>' % (self.name, self.trigger)
 
+    class Meta:
+        ordering = ('-id',)
+
 
 class JobHistory(db.Model, ModelMixin):
     __tablename__ = 'schedule_jobs_history'
@@ -48,3 +51,6 @@ class JobHistory(db.Model, ModelMixin):
 
     def __repr__(self):
         return '<schedule.JonHistory id=%r job_id=%r>' % (self.id, self.job_id)
+
+    class Meta:
+        ordering = ('-id',)

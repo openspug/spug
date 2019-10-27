@@ -41,3 +41,4 @@ tzlocal==1.5.1
 urllib3==1.24.3
 websocket-client==0.56.0
 Werkzeug==0.16.0
+python-ldap==3.2.0

@@ -24,3 +24,6 @@ class NoticeWay(db.Model, ModelMixin):
 
     def __repr__(self):
         return '<NoticeWay %r>' % self.name
+
+    class Meta:
+        ordering = ('-id',)

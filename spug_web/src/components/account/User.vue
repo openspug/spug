@@ -19,12 +19,12 @@
             </el-col>
         </el-row>
 
-        <el-table :data="tableData.data" stripe border v-loading="listLoading" style="width: 100%"
-                  :default-sort="{prop: 'username', order: 'descending'}">
+        <el-table :data="tableData.data" stripe border v-loading="listLoading" style="width: 100%">
             <el-table-column type="index" width="60"></el-table-column>
             <el-table-column prop="username" label="登录名" sortable></el-table-column>
             <el-table-column prop="nickname" label="姓名" sortable></el-table-column>
             <el-table-column prop="role_name" label="角色"></el-table-column>
+            <el-table-column prop="type" label="类型"></el-table-column>
             <el-table-column prop="last_login" label="最近登录"></el-table-column>
             <el-table-column label="状态" sortable width="90">
                 <template slot-scope="scope">

@@ -16,6 +16,7 @@ class User(db.Model, ModelMixin):
     email = db.Column(db.String(120))
     mobile = db.Column(db.String(30))
     is_supper = db.Column(db.Boolean, default=False)
+    type = db.Column(db.String(20), default='系统用户')
     is_active = db.Column(db.Boolean, default=True)
     access_token = db.Column(db.String(32))
     token_expired = db.Column(db.Integer)
@@ -49,6 +50,9 @@ class User(db.Model, ModelMixin):
     def __repr__(self):
         return '<User %r>' % self.username
 
+    class Meta:
+        ordering = ('-id',)
+
 
 class Role(db.Model, ModelMixin):
     __tablename__ = 'account_roles'
@@ -68,6 +72,9 @@ class Role(db.Model, ModelMixin):
     def __repr__(self):
         return '<Role %r>' % self.name
 
+    class Meta:
+        ordering = ('-id',)
+
 
 class Permission(db.Model, ModelMixin):
     __tablename__ = 'account_permissions'
@@ -78,6 +85,9 @@ class Permission(db.Model, ModelMixin):
 
     def __repr__(self):
         return '<Permission %r>' % self.name
+
+    class Meta:
+        ordering = ('-id',)
 
 
 class RolePermissionRel(db.Model, ModelMixin):

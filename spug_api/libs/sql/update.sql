@@ -18,3 +18,11 @@ INSERT INTO account_permissions (id, name, `desc`) VALUES (1303, 'system_notify_
 INSERT INTO account_permissions (id, name, `desc`) VALUES (1304, 'system_notify_del', '删除通知设置');
 
 -- end update 1.0.0 --
+
+-- start update 1.1.0 --
+
+INSERT INTO account_roles (id, name, `desc`) VALUES (1, '系统默认角色', '系统默认角色');
+
+ALTER TABLE `spug`.`account_users` ADD COLUMN `type` varchar(20) NULL DEFAULT '系统用户' AFTER `is_supper`;
+
+-- end update 1.0.1 --

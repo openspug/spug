@@ -1,3 +1,6 @@
+-- system role
+INSERT INTO account_roles (id, name, `desc`) VALUES (1, '系统默认角色', '系统默认角色');
+
 -- Dashboard
 INSERT INTO account_permissions (id, name, `desc`) VALUES (100, 'home_view', 'Dashboard');
 

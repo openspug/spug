@@ -6,6 +6,8 @@ from collections import defaultdict
 from datetime import datetime
 import uuid
 import time
+from public import ldap
+
 
 blueprint = Blueprint('account_page', __name__)
 login_limit = defaultdict(int)
@@ -118,38 +120,67 @@ def get_self():
 
 @blueprint.route('/login/', methods=['POST'])
 def login():
-    form, error = JsonParser('username', 'password').parse()
+    form, error = JsonParser('username', 'password', 'type').parse()
     if error is None:
-        user = User.query.filter_by(username=form.username).first()
-        if user:
-            if user.is_active:
-                if user.verify_password(form.password):
-                    login_limit.pop(form.username, None)
-                    token = uuid.uuid4().hex
-                    # token = user.access_token
-                    user.access_token = token
-                    user.token_expired = time.time() + 8 * 60 * 60
-                    user.save()
-                    return json_response({
-                        'token': token,
-                        'is_supper': user.is_supper,
-                        'nickname': user.nickname,
-                        'permissions': list(user.permissions)
-                    })
+        if form.type == 'ldap':
+            ldap_login = ldap.bind_user(form.username, form.password)
+            if ldap_login:
+                token = uuid.uuid4().hex
+                # user = User.query.filter_by(username=form.username).filter_by(type='LDAP').first()
+                user = User.query.filter_by(username=form.username).first()
+                if not user:
+                    form.nickname = form.username
+                    form.type = 'LDAP'
+                    form.role_id = 1
+                    form.is_supper = False
+                    is_supper = False
+                    nickname = form.username
+                    permissions = []
+                    User(**form).save()
                 else:
-                    login_limit[form.username] += 1
-                    if login_limit[form.username] >= 3:
-                        user.update(is_active=False)
-                    return json_response(message='用户名或密码错误，连续3次错误将会被禁用')
+                    user.access_token = token
+                    user.token_expired = time.time() + 80 * 60 * 6000
+                    is_supper = user.is_supper,
+                    nickname = user.nickname,
+                    permissions = list(user.permissions)
+                    user.save()
+
+                return json_response({
+                    'token': token,
+                    'is_supper': is_supper,
+                    'nickname': nickname,
+                    'permissions': permissions
+                })
             else:
-                return json_response(message='用户已被禁用，请联系管理员')
-        elif login_limit[form.username] >= 3:
-            return json_response(message='用户已被禁用，请联系管理员')
+                return json_response(message='用户名或密码错误，确认输入的是LDAP的账号密码？')
         else:
-            login_limit[form.username] += 1
-            return json_response(message='用户名或密码错误，连续3次错误将会被禁用')
-    else:
-        return json_response(message='请输入用户名和密码')
+            user = User.query.filter_by(username=form.username).filter_by(type='系统用户').first()
+            if user:
+                if user.is_active:
+                    if user.verify_password(form.password):
+                        login_limit.pop(form.username, None)
+                        token = uuid.uuid4().hex
+                        user.access_token = token
+                        user.token_expired = time.time() + 80 * 60 * 6000
+                        user.save()
+                        return json_response({
+                            'token': token,
+                            'is_supper': user.is_supper,
+                            'nickname': user.nickname,
+                            'permissions': list(user.permissions)
+                        })
+                    else:
+                        login_limit[form.username] += 1
+                        if login_limit[form.username] >= 3:
+                            user.update(is_active=False)
+                        return json_response(message='用户名或密码错误，连续3次错误将会被禁用')
+                else:
+                    return json_response(message='用户已被禁用，请联系管理员')
+            elif login_limit[form.username] >= 3:
+                return json_response(message='用户已被禁用，请联系管理员')
+            else:
+                login_limit[form.username] += 1
+                return json_response(message='用户名不存在，请确认用户名')
 
 
 @blueprint.route('/logout/')

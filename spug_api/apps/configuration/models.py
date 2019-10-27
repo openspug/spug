@@ -14,6 +14,9 @@ class Environment(db.Model, ModelMixin):
     def __repr__(self):
         return '<Environment %r>' % self.name
 
+    class Meta:
+        ordering = ('-id',)
+
 
 class Service(db.Model, ModelMixin):
     __tablename__ = 'configuration_services'
@@ -23,6 +26,9 @@ class Service(db.Model, ModelMixin):
     identify = db.Column(db.String(50), unique=True)
     desc = db.Column(db.String(255))
     group = db.Column(db.String(50))
+
+    class Meta:
+        ordering = ('-id',)
 
 
 class ConfigValue(db.Model, ModelMixin):
