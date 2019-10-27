@@ -12,6 +12,7 @@ docker-pycreds==0.4.0
 Flask==1.0.2
 Flask-Excel==0.0.7
 Flask-SQLAlchemy==2.4.0
+Flask-SimpleLDAP==1.4.0
 idna==2.8
 itsdangerous==1.1.0
 Jinja2==2.10.1
@@ -42,4 +43,3 @@ urllib3==1.24.3
 websocket-client==0.56.0
 Werkzeug==0.16.0
 python-ldap==3.2.0
-flask_simpleldap==1.4.0
