@@ -37,7 +37,8 @@ def get():
 @blueprint.route('/', methods=['POST'])
 @require_permission('assets_host_add')
 def post():
-    form, error = JsonParser('name', 'type', 'zone', 'docker_uri', 'ssh_ip', 'ssh_port',
+    form, error = JsonParser('name', 'type', 'zone', 'ssh_ip', 'ssh_port',
+                             Argument('docker_uri', nullable=True, required=False),
                              Argument('desc', nullable=True, required=False)).parse()
     if error is None:
         host = Host(**form)
@@ -59,7 +60,8 @@ def delete(host_id):
 @blueprint.route('/<int:host_id>', methods=['PUT'])
 @require_permission('assets_host_edit')
 def put(host_id):
-    form, error = JsonParser('name', 'type', 'zone', 'docker_uri', 'ssh_ip', 'ssh_port',
+    form, error = JsonParser('name', 'type', 'zone', 'ssh_ip', 'ssh_port',
+                             Argument('docker_uri', nullable=True, required=False),
                              Argument('desc', nullable=True, required=False)).parse()
     if error is None:
         host = Host.query.get_or_404(host_id)
@@ -75,10 +77,11 @@ def get_valid(host_id):
     if not Setting.has('ssh_private_key'):
         utils.generate_and_save_ssh_key()
     if ssh.ssh_ping(cli.ssh_ip, cli.ssh_port):
-        try:
-            sync_host_info(host_id, cli.docker_uri)
-        except DockerException:
-            return json_response(message='docker fail')
+        if cli.docker_uri:
+            try:
+                sync_host_info(host_id, cli.docker_uri)
+            except DockerException:
+                return json_response(message='docker fail')
     else:
         return json_response(message='ssh fail')
     return json_response()
@@ -92,10 +95,11 @@ def post_valid(host_id):
         cli = Host.query.get_or_404(host_id)
         ssh.add_public_key(cli.ssh_ip, cli.ssh_port, form.secret)
         if ssh.ssh_ping(cli.ssh_ip, cli.ssh_port):
-            try:
-                sync_host_info(host_id, cli.docker_uri)
-            except DockerException:
-                return json_response(message='获取扩展信息失败，请检查docker是否可以正常连接！')
+            if cli.docker_uri:
+                try:
+                    sync_host_info(host_id, cli.docker_uri)
+                except DockerException:
+                    return json_response(message='获取扩展信息失败，请检查docker是否可以正常连接！')
         else:
             return json_response(message='验证失败！')
     return json_response(message=error)
@@ -139,7 +143,7 @@ def host_import():
 def sync_host_info(host_id, uri):
     host_info = DockerClient(base_url=uri).docker_info()
     operate_system = host_info.get('OperatingSystem')
-    memory = math.ceil(int(host_info.get('MemTotal'))/1024/1024/1024)
+    memory = math.ceil(int(host_info.get('MemTotal')) / 1024 / 1024 / 1024)
     cpu = host_info.get('NCPU')
     # outer_ip = 1
     # inner_ip = 2

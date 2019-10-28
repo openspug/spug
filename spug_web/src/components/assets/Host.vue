@@ -33,7 +33,7 @@
                         <el-form-item label="备注信息"><span>{{ props.row.desc }}</span></el-form-item>
                     </el-form>
                     <el-row v-else style="text-align: center">
-                        <span style="color: #99a9bf">暂没有配置信息，点击验证自动获取...</span>
+                        <span style="color: #99a9bf">暂没有配置信息，点击验证自动获取，需要配置docker连接地址</span>
                     </el-row>
                 </template>
             </el-table-column>
@@ -41,8 +41,12 @@
             <el-table-column prop="name" label="主机名称"></el-table-column>
             <el-table-column prop="zone" label="所属区域"></el-table-column>
             <el-table-column prop="type" label="类型"></el-table-column>
-            <el-table-column prop="docker_uri" label="Docker连接" width="180"></el-table-column>
-            <el-table-column prop="ssh_ip" label="SSH连接"></el-table-column>
+            <el-table-column label="SSH连接">
+                <template slot-scope="scope">
+                    {{scope.row['ssh_ip']}}:{{scope.row['ssh_port']}}
+                </template>
+            </el-table-column>
+            <el-table-column prop="desc" label="备注"></el-table-column>
             <el-table-column label="操作" width="240px" v-if="has_permission('assets_host_edit|assets_host_del|assets_host_valid')">
                 <template slot-scope="scope">
                     <el-button v-if="has_permission('assets_host_edit')" size="small" @click="handleEdit(scope.row)">编辑</el-button>
@@ -65,7 +69,7 @@
             </el-pagination>
         </div>
 
-        <el-dialog :title="title" :visible.sync="dialogVisible" width="80%" :close-on-click-modal="false">
+        <el-dialog visible :title="title" v-if="dialogVisible" width="80%" :close-on-click-modal="false">
             <el-tabs v-model="activeName" >
                 <el-tab-pane label="单条记录" name="first">
                     <el-form :model="form" label-width="80px">
@@ -76,22 +80,22 @@
                             <el-button style="margin-left: 15px" type="text" @click="addZone">添加区域</el-button>
                         </el-form-item>
                         <el-form-item label="主机类型" prop="type" required>
-                            <el-input v-model="form.type"></el-input>
+                            <el-input v-model="form.type" placeholder="主机的类型，例如：web-server"></el-input>
                         </el-form-item>
                         <el-form-item label="主机名称" prop="name" required>
-                            <el-input v-model="form.name"></el-input>
+                            <el-input v-model="form.name" placeholder="主机唯一标识，例如：web-01"></el-input>
                         </el-form-item>
-                        <el-form-item label="Docker连接地址" prop="docker_uri"  required>
-                            <el-input v-model="form.docker_uri" placeholder="连接主机Docker的地址,例如:192.168.1.1:2375"></el-input>
+                        <el-form-item label="Docker连接地址" prop="docker_uri">
+                            <el-input v-model="form.docker_uri" placeholder="用于应用发布等与容器相关功能，例如：192.168.1.1:2375"></el-input>
                         </el-form-item>
                         <el-form-item label="SSH地址" prop="ssh_ip" required>
-                            <el-input v-model="form.ssh_ip" placeholder="连接主机的SSH地址,例如:192.168.1.1"></el-input>
+                            <el-input v-model="form.ssh_ip" placeholder="连接主机的SSH地址，例如：192.168.1.1"></el-input>
                         </el-form-item>
                         <el-form-item label="SSH端口" prop="ssh_ip" required>
-                            <el-input v-model="form.ssh_port"></el-input>
+                            <el-input v-model="form.ssh_port" placeholder="主机的SSH端口，例如：22"></el-input>
                         </el-form-item>
                         <el-form-item label="备注信息" prop="outer_ip">
-                            <el-input v-model="form.desc" type="textarea" autosize></el-input>
+                            <el-input v-model="form.desc" type="textarea" autosize placeholder="额外备注信息"></el-input>
                         </el-form-item>
                     </el-form>
                 </el-tab-pane>
