@@ -38,6 +38,7 @@ def get_ssh_client(hostname, port):
         hostname,
         port=port,
         username='root',
+        timeout=5,
         pkey=RSAKey.from_private_key(StringIO(Setting.ssh_private_key)))
     return ssh_client
 

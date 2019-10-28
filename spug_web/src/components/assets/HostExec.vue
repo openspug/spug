@@ -168,11 +168,11 @@
             <el-collapse>
                 <el-collapse-item v-for="i in multipleSelection" :key="i.ip" :name="i.ip">
                     <template slot="title">
-                        <el-tag type="info" style="margin-right: 15px">{{ i.name + '(' + i.ssh_ip + ')'}}</el-tag>
+                        <el-tag type="info" style="margin-right: 15px">{{`${i.name}(${i.ssh_ip}:${i.ssh_port})`}}</el-tag>
                     </template>
                     <pre>** 开始执行 **
 
-                        <template v-for="line in exec_output"><span v-if="line[i.ssh_ip]">{{line[i.ssh_ip]}}</span></template>
+                        <template v-for="line in exec_output"><span v-if="line[`${i.ssh_ip}:${i.ssh_port}`]">{{line[`${i.ssh_ip}:${i.ssh_port}`]}}</span></template>
                     </pre>
                 </el-collapse-item>
             </el-collapse>
@@ -313,7 +313,7 @@
             save_select_host() {
                 let hosts = [], hosts_id = [];
                 for (let v of this.multipleSelection) {
-                    hosts.push( v.name + '(' + v.ssh_ip + ')');
+                    hosts.push(`${v.name}(${v.ssh_ip}:${v.ssh_port})`);
                     hosts_id.push(v.id);
                 }
                 this.selected_host_id = hosts_id;

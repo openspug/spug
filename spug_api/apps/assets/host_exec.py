@@ -95,11 +95,16 @@ def exec_host_command():
 
 
 def hosts_exec(q, ip, port, command):
-    ssh_client = get_ssh_client(ip, port)
-    q.destroyed.append(ssh_client.close)
-    output = ssh_exec_command_with_stream(ssh_client, command)
-    for line in output:
-        q.put({ip: line})
-    q.put({ip: '\n** 执行完成 **'})
-    q.done()
-
+    key = '%s:%s' % (ip, port)
+    try:
+        ssh_client = get_ssh_client(ip, port)
+        q.destroyed.append(ssh_client.close)
+        output = ssh_exec_command_with_stream(ssh_client, command)
+        for line in output:
+            q.put({key: line})
+        q.put({key: '\n** 执行完成 **'})
+        q.done()
+    except Exception as e:
+        q.put({key: '%s\n' % e})
+        q.put({key: '\n** 执行异常结束 **'})
+        q.done()
