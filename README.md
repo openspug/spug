@@ -74,10 +74,10 @@ $ -e MYSQL_HOST = "192.168.1.10"              // 指定数据库地址
    2. Start server 启动服务端：
    $ cd spug/spug_api
    $ pip install -r requirements.txt  //安装依赖包
-   $ mv config.py.example config.py   //编辑配置文件
-   $ python manage.py init_db         //初始化数据库
-   $ python manage.py create_admin    //创建管理员
-   $ python main.py                   //启动服务
+   $ cp config.py.example config.py   //编辑配置文件
+   $ python3 manage.py init_db        //初始化数据库
+   $ python3 manage.py create_admin   //创建管理员
+   $ python3 main.py                  //启动服务
 
    3. Start web  启动前端：
    $ cd spug/spug_web
