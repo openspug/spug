@@ -55,7 +55,11 @@ $ -e MYSQL_HOST = "192.168.1.10"              // 指定数据库地址
   -e REGISTRY_USER="hubuser"                  // 指定私有镜像仓库用户名
   -e REGISTRY_PASSWORD="hubpwd"               // 指定私有镜像仓库密码
 ```
-
+⚠️注意：如果使用了 `-e MYSQL_HOST` 意味着你将使用外部数据库，容器内自带的数据库将不会启动，且你需要通过以下方式手动执行数据库的初始化操作
+```
+# 在容器内执行
+/usr/bin/python3 /scripts/init_spug.py
+```
 更多Dockerfile [Dockerfile](https://github.com/openspug/spug/tree/master/docs/Dockerfile)
 
 

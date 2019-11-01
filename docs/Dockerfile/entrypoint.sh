@@ -4,10 +4,13 @@ set -e
 
 
 # init db
-if [ ! -d /var/lib/mysql/mysql ]; then
-    echo 'Initializing db, please wait ...'
-    REQUIRE_INIT_OPS=true
-    /bin/sh /scripts/init_db.sh
+if [ -z $MYSQL_HOST ]; then
+    if [ ! -d /var/lib/mysql/mysql ]; then
+        echo 'Initializing db, please wait ...'
+        REQUIRE_INIT_OPS=true
+        /bin/sh /scripts/init_db.sh
+    fi
+    nohup /usr/bin/mysqld_safe --datadir=/var/lib/mysql --user=root &
 fi
 
 # init nginx
@@ -25,8 +28,8 @@ fi
 
 cd /spug/spug_api
 nginx
-nohup /usr/bin/mysqld_safe --datadir=/var/lib/mysql --user=root &
-
 sleep 3
-/usr/local/bin/python /scripts/init_spug.py
+if [ $REQUIRE_INIT_OPS == true ]; then
+    /usr/bin/python3 /scripts/init_spug.py
+fi
 gunicorn --threads=32 main:app -b 0.0.0.0:3000
