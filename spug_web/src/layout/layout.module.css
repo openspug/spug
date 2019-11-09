@@ -1,0 +1,75 @@
+.header {
+    height: 64px;
+    padding: 0 12px 0 0;
+    background: #fff;
+    box-shadow: 2px 2px 2px rgba(0, 21, 41, 0.08);
+    position: relative;
+    z-index: 2;
+}
+
+.header .icon {
+    margin-right: 10px;
+}
+
+.content {
+    padding: 24px 24px 0;
+    overflow-y: scroll;
+}
+
+.trigger {
+    font-size: 20px;
+    line-height: 64px;
+    cursor: pointer;
+    transition: all 0.3s, padding 0s;
+    padding: 0 24px;
+    float: left;
+}
+
+.trigger:hover {
+    background: rgb(233, 247, 254);
+}
+
+.logo {
+    height: 64px;
+    line-height: 64px;
+    padding-left: 24px;
+    background-color: #002140;
+    overflow: hidden;
+}
+
+.logo h1 {
+    display: inline-block;
+    vertical-align: middle;
+    color: #ffffff;
+    font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    margin: 0 0 0 12px;
+    font-weight: 600;
+}
+
+.logo img {
+    height: 32px;
+}
+
+.right {
+    float: right;
+    height: 100%;
+}
+
+.action {
+    cursor: pointer;
+    padding: 0 12px;
+    display: inline-block;
+    transition: all 0.3s;
+    height: 100%;
+}
+
+.action:hover {
+    background: rgb(233, 247, 254);
+}
+
+.footer {
+    margin: 48px 0 24px;
+    text-align: center;
+    color: rgba(0, 0, 0, .45);
+}

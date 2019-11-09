@@ -1,0 +1,36 @@
+.container {
+    display: flex;
+    height: 80%;
+    align-items: center;
+}
+
+.imgBlock {
+    flex: 0 0 62.5%;
+    width: 62.5%;
+    zoom: 1;
+    padding-right: 88px;
+}
+
+.img {
+    float: right;
+    height: 360px;
+    width: 100%;
+    max-width: 430px;
+    background-size: contain;
+    background: url('./404.svg') no-repeat 50% 50%;
+}
+
+.title {
+    color: #434e59;
+    font-size: 72px;
+    font-weight: 600;
+    line-height: 72px;
+    margin-bottom: 24px;
+}
+
+.desc {
+    color: rgba(0, 0, 0, .45);
+    font-size: 20px;
+    line-height: 28px;
+    margin-bottom: 16px;
+}

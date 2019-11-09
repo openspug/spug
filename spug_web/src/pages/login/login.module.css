@@ -1,0 +1,58 @@
+.container {
+    background-image: url("./bg.svg");
+    background-repeat: no-repeat;
+    background-position: center 110px;
+    background-size: 100%;
+    background-color: #f0f2f5;
+    height: 100vh;
+}
+
+.titleContainer {
+    padding-top: 70px;
+    text-align: center;
+    font-size: 33px;
+    font-weight: 600;
+}
+
+.titleContainer .logo {
+    height: 35px;
+    margin-right: 15px;
+}
+
+.titleContainer .desc {
+    margin-top: 12px;
+    margin-bottom: 40px;
+    color: rgba(0, 0, 0, .45);
+    font-size: 14px;
+    font-weight: 300;
+}
+
+.formContainer {
+    width: 368px;
+    margin: 0 auto;
+}
+
+.formContainer .tabs {
+    margin-bottom: 10px;
+}
+
+.formContainer .formItem {
+    margin-bottom: 24px;
+}
+
+.formContainer .icon {
+    color: rgba(0, 0, 0, .25);
+    font-size: 14px;
+}
+
+.formContainer .button {
+    margin-top: 10px;
+}
+
+.footer {
+    width: 100%;
+    position: fixed;
+    bottom: 24px;
+    text-align: center;
+    color: rgba(0, 0, 0, .45);
+}

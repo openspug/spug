@@ -1,0 +1,44 @@
+{
+  "name": "spug_web",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "antd": "^3.25.0",
+    "axios": "^0.19.0",
+    "history": "^4.10.1",
+    "http-proxy-middleware": "^0.20.0",
+    "mobx": "^5.15.0",
+    "mobx-react": "^6.1.4",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0",
+    "react-router-dom": "^5.1.2",
+    "react-scripts": "3.2.0"
+  },
+  "scripts": {
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-decorators": "^7.7.0",
+    "babel-plugin-import": "^1.12.2",
+    "customize-cra": "^0.8.0",
+    "react-app-rewired": "^2.1.5"
+  }
+}
