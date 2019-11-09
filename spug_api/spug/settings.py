@@ -36,6 +36,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'libs.middleware.AuthenticationMiddleware',
+    'libs.middleware.HandleExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'spug.urls'
@@ -66,4 +68,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-AUTHENTICATION_EXCLUDES = ()
+AUTHENTICATION_EXCLUDES = (
+    '/account/login/',
+)
