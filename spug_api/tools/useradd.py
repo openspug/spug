@@ -17,6 +17,9 @@ parser.add_argument('-p', required=True, metavar='password', help='账户密码'
 parser.add_argument('-n', default='', metavar='nickname', help='账户昵称')
 parser.add_argument('-s', default=False, action='store_true', help='是否是超级用户（默认否）')
 
+if len(sys.argv) == 1:
+    parser.print_help()
+    sys.exit(1)
 args = parser.parse_args()
 
 User.objects.create(
