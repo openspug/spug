@@ -16,6 +16,5 @@ code {
 
 /* Common CSS style */
 .span-button {
-    cursor: pointer;
-    color: #1890ff;
+    padding: 0;
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, Badge, message, Button } from 'antd';
+import { Table, Divider, Modal, Badge, message } from 'antd';
 import ComForm from './Form';
 import http from 'libs/http';
 import store from './store';
