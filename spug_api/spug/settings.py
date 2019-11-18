@@ -31,6 +31,8 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'channels',
     'apps.account',
+    'apps.host',
+    'apps.setting',
 ]
 
 MIDDLEWARE = [
