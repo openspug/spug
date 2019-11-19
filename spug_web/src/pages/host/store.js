@@ -3,17 +3,21 @@ import http from 'libs/http';
 
 class Store {
   @observable records = [];
+  @observable zones = [];
   @observable record = {};
   @observable isFetching = false;
   @observable formVisible = false;
 
   @observable f_name;
-  @observable f_status;
+  @observable f_zone;
 
   fetchRecords = () => {
     this.isFetching = true;
     http.get('/api/host/')
-      .then(res => this.records = res)
+      .then(({hosts, zones}) => {
+        this.records = hosts;
+        this.zones = zones;
+      })
       .finally(() => this.isFetching = false)
   };
 

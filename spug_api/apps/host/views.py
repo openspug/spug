@@ -9,7 +9,8 @@ from libs import human_time
 class HostView(View):
     def get(self, request):
         hosts = Host.objects.filter(deleted_by_id__isnull=True)
-        return json_response(hosts)
+        zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
+        return json_response({'zones': zones, 'hosts': [x.to_dict() for x in hosts]})
 
     def post(self, request):
         form, error = JsonParser(

@@ -1,14 +1,17 @@
 import React from 'react';
-import { Modal, Form, Input, message } from 'antd';
+import { observer } from 'mobx-react';
+import { Modal, Form, Input, Select, Col, Button, message } from 'antd';
 import http from 'libs/http';
 import store from './store';
 
+@observer
 class ComForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       loading: false,
       password: null,
+      zone: null,
     }
   }
 
@@ -56,6 +59,28 @@ class ComForm extends React.Component {
     )
   };
 
+  handleAddZone = () => {
+    Modal.confirm({
+      icon: 'exclamation-circle',
+      title: '添加主机类别',
+      content: this.addZoneForm,
+      onOk: () => {
+        if (this.state.zone) {
+          store.zones.push(this.state.zone);
+          this.props.form.setFieldsValue({'zone': this.state.zone})
+        }
+      },
+    })
+  };
+
+  addZoneForm = (
+    <Form>
+      <Form.Item required label="主机类别">
+        <Input onChange={val => this.setState({zone: val.target.value})}/>
+      </Form.Item>
+    </Form>
+  );
+
   render() {
     const info = store.record;
     const {getFieldDecorator} = this.props.form;
@@ -79,9 +104,18 @@ class ComForm extends React.Component {
         onOk={this.handleSubmit}>
         <Form>
           <Form.Item {...itemLayout} required label="主机类别">
-            {getFieldDecorator('zone', {initialValue: info['zone']})(
-              <Input placeholder="请输入主机类别/区域/分组"/>
-            )}
+            <Col span={16}>
+              {getFieldDecorator('zone', {initialValue: info['zone']})(
+                <Select placeholder="请选择主机类别/区域/分组">
+                  {store.zones.map(item => (
+                    <Select.Option value={item} key={item}>{item}</Select.Option>
+                  ))}
+                </Select>
+              )}
+            </Col>
+            <Col span={6} offset={2}>
+              <Button type="link" onClick={this.handleAddZone}>添加类别</Button>
+            </Col>
           </Form.Item>
           <Form.Item {...itemLayout} required label="主机别名">
             {getFieldDecorator('name', {initialValue: info['name']})(
