@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "ace-builds": "^1.4.7",
     "antd": "^3.25.0",
     "axios": "^0.19.0",
     "history": "^4.10.1",
@@ -10,6 +11,7 @@
     "mobx": "^5.15.0",
     "mobx-react": "^6.1.4",
     "react": "^16.11.0",
+    "react-ace": "^8.0.0",
     "react-dom": "^16.11.0",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.2.0"
