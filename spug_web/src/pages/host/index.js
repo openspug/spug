@@ -10,14 +10,14 @@ export default observer(function () {
     <Card>
       <SearchForm>
         <SearchForm.Item span={8} title="主机类别">
-          <Select allowClear placeholder="请选择" onChange={v => store.f_zone = v}>
+          <Select allowClear placeholder="请选择" value={store.f_zone} onChange={v => store.f_zone = v}>
             {store.zones.map(item => (
               <Select.Option value={item} key={item}>{item}</Select.Option>
             ))}
           </Select>
         </SearchForm.Item>
         <SearchForm.Item span={8} title="主机别名">
-          <Input allowClear onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
+          <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
         </SearchForm.Item>
         <SearchForm.Item span={8}>
           <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
