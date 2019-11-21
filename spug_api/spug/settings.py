@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'apps.account',
     'apps.host',
     'apps.setting',
+    'apps.exec',
 ]
 
 MIDDLEWARE = [
