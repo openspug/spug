@@ -15,7 +15,8 @@ class ComTable extends React.Component {
   columns = [{
     title: '序号',
     key: 'series',
-    render: (_, __, index) => index + 1
+    render: (_, __, index) => index + 1,
+    width: 80
   }, {
     title: '类别',
     dataIndex: 'zone',
@@ -30,7 +31,8 @@ class ComTable extends React.Component {
     dataIndex: 'port'
   }, {
     title: '备注',
-    dataIndex: 'desc'
+    dataIndex: 'desc',
+    ellipsis: true
   }, {
     title: '操作',
     render: info => (
