@@ -3,7 +3,8 @@ export default [
   {icon: 'cloud-server', title: '主机管理', path: '/host'},
   {
     icon: 'deployment-unit', title: '批量执行', child: [
-      {title: '执行模板', path: '/exec/template'},
+      {title: '执行任务', path: '/exec/task'},
+      {title: '模板管理', path: '/exec/template'},
     ]
   },
   {

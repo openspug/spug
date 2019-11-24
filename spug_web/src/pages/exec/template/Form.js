@@ -1,11 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, Col, Button, message } from 'antd';
-import Editor from 'react-ace';
-import 'ace-builds/src-noconflict/ext-language_tools';
-import 'ace-builds/src-noconflict/mode-sh';
-import 'ace-builds/src-noconflict/theme-tomorrow';
-import 'ace-builds/src-noconflict/snippets/sh';
+import { SHEditor } from 'components';
 import http from 'libs/http';
 import store from './store';
 
@@ -92,15 +88,10 @@ class ComForm extends React.Component {
             )}
           </Form.Item>
           <Form.Item {...itemLayout} required label="模板内容">
-              <Editor
-                mode="sh"
-                theme="tomorrow"
-                value={this.state.body}
-                onChange={val => this.setState({body: val})}
-                enableLiveAutocompletion={true}
-                enableBasicAutocompletion={true}
-                enableSnippets={true}
-                height="300px"/>
+            <SHEditor
+              value={this.state.body}
+              onChange={val => this.setState({body: val})}
+              height="300px"/>
           </Form.Item>
           <Form.Item {...itemLayout} label="备注信息">
             {getFieldDecorator('desc', {initialValue: info['desc']})(

@@ -1,0 +1,20 @@
+.collapse :global(.ant-collapse-content-box) {
+    padding: 0;
+}
+
+.console {
+    max-height: 300px;
+    padding: 10px 15px;
+}
+
+.header {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 400px;
+    padding-right: 20px;
+    margin: 0
+}
+
+pre {
+    margin: 0;
+}

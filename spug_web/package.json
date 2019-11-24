@@ -8,6 +8,7 @@
     "axios": "^0.19.0",
     "history": "^4.10.1",
     "http-proxy-middleware": "^0.20.0",
+    "lodash": "^4.17.15",
     "mobx": "^5.15.0",
     "mobx-react": "^6.1.4",
     "react": "^16.11.0",
