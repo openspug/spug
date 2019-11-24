@@ -30,27 +30,39 @@ class SSH:
         command = f'mkdir -p -m 700 ~/.ssh && \
         echo {public_key!r} >> ~/.ssh/authorized_keys && \
         chmod 600 ~/.ssh/authorized_keys'
-        code, stdout, stderr = self.exec_command(command)
+        code, out = self.exec_command(command)
         if code != 0:
-            raise Exception(stdout + stderr)
+            raise Exception(out)
 
     def ping(self):
         with self:
             return True
 
-    def exec_command(self, command):
+    def exec_command(self, command, timeout=1800, environment=None):
         with self as cli:
-            _, stdout, stderr = cli.exec_command(command)
-            return stdout.channel.recv_exit_status(), ''.join(stdout), ''.join(stderr)
+            chan = cli.get_transport().open_session()
+            chan.settimeout(timeout)
+            chan.set_combine_stderr(True)
+            if environment:
+                chan.update_environment(environment)
+            chan.exec_command(command)
+            out = chan.makefile("r", -1)
+            return chan.recv_exit_status(), out.read()
 
-    def exec_command_with_stream(self, command):
+    def exec_command_with_stream(self, command, timeout=1800, environment=None):
         with self as cli:
-            _, stdout, _ = cli.exec_command(command, get_pty=True)
-            while True:
-                message = stdout.readline()
-                if not message:
-                    break
-                yield message
+            chan = cli.get_transport().open_session()
+            chan.settimeout(timeout)
+            chan.set_combine_stderr(True)
+            if environment:
+                chan.update_environment(environment)
+            chan.exec_command(command)
+            stdout = chan.makefile("r", -1)
+            out = stdout.readline()
+            while out:
+                yield chan.exit_status, out
+                out = stdout.readline()
+            return chan.exit_status, out
 
     def __enter__(self):
         if self.client is not None:
