@@ -22,10 +22,12 @@ class Job:
         self.token = token
         self.rds_cli = None
 
-    def _send(self, message):
+    def _send(self, message, with_expire=False):
         if self.rds_cli is None:
             self.rds_cli = get_redis_connection()
         self.rds_cli.rpush(self.token, json.dumps(message))
+        if with_expire:
+            self.rds_cli.expire(self.token, 300)
 
     def send(self, data):
         message = {'key': self.key, 'type': 'info', 'data': data}
@@ -41,7 +43,7 @@ class Job:
 
     def send_status(self, code):
         message = {'key': self.key, 'status': code}
-        self._send(message)
+        self._send(message, True)
 
     def run(self):
         if not self.token:
@@ -49,7 +51,7 @@ class Job:
         self.send_system('### Executing')
         code = -1
         try:
-            for code, out in self.ssh_cli.exec_command_with_stream(self.command, timeout=5):
+            for code, out in self.ssh_cli.exec_command_with_stream(self.command):
                 self.send(out)
         except socket.timeout:
             code = 130
