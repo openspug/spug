@@ -77,7 +77,7 @@ class ExecConsole extends React.Component {
           {Object.entries(store.outputs).map(([key, item], index) => (
             <Collapse.Panel
               key={index}
-              header={<b>{item['title']}{key}</b>}
+              header={<b>{item['title']}</b>}
               extra={this.genExtra(key)}>
               <pre className={styles.console}>
                 <pre style={{color: '#91d5ff'}}>{item['system']}</pre>
