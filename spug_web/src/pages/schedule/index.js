@@ -11,8 +11,9 @@ export default observer(function () {
       <SearchForm>
         <SearchForm.Item span={6} title="状态">
           <Select allowClear onChange={v => store.f_status = v} placeholder="请选择">
-            <Select.Option value={-2}>未激活</Select.Option>
-            <Select.Option value={-1}>已激活</Select.Option>
+            <Select.Option value={-3}>未激活</Select.Option>
+            <Select.Option value={-2}>已激活</Select.Option>
+            <Select.Option value={-1}>待调度</Select.Option>
             <Select.Option value={0}>成功</Select.Option>
             <Select.Option value={1}>异常</Select.Option>
             <Select.Option value={2}>失败</Select.Option>

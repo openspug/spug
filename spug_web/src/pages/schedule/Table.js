@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, Tag, message } from 'antd';
+import { Table, Divider, Modal, Tag, Dropdown, Icon, Menu, message } from 'antd';
 import ComForm from './Form';
 import http from 'libs/http';
 import store from './store';
@@ -13,6 +13,18 @@ class ComTable extends React.Component {
   }
 
   colors = ['green', 'orange', 'red'];
+
+  moreMenus = (info) => (
+    <Menu>
+      <Menu.Item>
+        <LinkButton onClick={() => this.handleActive(info)}>{info.is_active ? '禁用' : '激活'}</LinkButton>
+      </Menu.Item>
+      <Menu.Divider />
+      <Menu.Item>
+        <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
+      </Menu.Item>
+    </Menu>
+  );
 
   columns = [{
     title: '序号',
@@ -29,7 +41,11 @@ class ComTable extends React.Component {
     title: '最新状态',
     render: info => {
       if (info.is_active) {
-        return <Tag color={this.colors[info['latest_status']]}>{info['latest_status_alias']}</Tag>
+        if (info['latest_status_alias']) {
+          return <Tag color={this.colors[info['latest_status']]}>{info['latest_status_alias']}</Tag>
+        } else {
+          return <Tag color="blue">待调度</Tag>
+        }
       } else {
         return <Tag>未激活</Tag>
       }
@@ -43,13 +59,18 @@ class ComTable extends React.Component {
     ellipsis: true
   }, {
     title: '操作',
+    width: 180,
     render: info => (
       <span>
-        <LinkButton onClick={() => this.handleActive(info)}>{info.is_active ? '禁用' : '激活'}</LinkButton>
+        <LinkButton onClick={() => store.showForm(info)}>详情</LinkButton>
         <Divider type="vertical"/>
         <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
+        <Dropdown overlay={() => this.moreMenus(info)} trigger={['click']}>
+          <LinkButton>
+            更多 <Icon type="down"/>
+          </LinkButton>
+        </Dropdown>
       </span>
     )
   }];
@@ -85,10 +106,12 @@ class ComTable extends React.Component {
   render() {
     let data = store.records;
     if (store.f_status !== undefined) {
-      if (store.f_status === -2) {
+      if (store.f_status === -3) {
         data = data.filter(item => !item['is_active'])
-      } else if (store.f_status === -1) {
+      } else if (store.f_status === -2) {
         data = data.filter(item => item['is_active'])
+      } else if (store.f_status === -1) {
+        data = data.filter(item => item['is_active'] && !item['latest_status_alias'])
       } else {
         data = data.filter(item => item['latest_status'] === store.f_status)
       }
