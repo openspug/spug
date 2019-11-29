@@ -13,6 +13,7 @@ import moment from 'moment';
 class ComForm extends React.Component {
   constructor(props) {
     super(props);
+    this.isFirstRender = true;
     this.state = {
       loading: false,
       type: null,
@@ -85,9 +86,13 @@ class ComForm extends React.Component {
 
   verifyButtonStatus = () => {
     const data = this.props.form.getFieldsValue();
-    const b1 = data['type'] && data['name'] && this.state.command;
+    let b1 = data['type'] && data['name'] && this.state.command;
     const b2 = store.targets.filter(x => x).length > 0;
     const b3 = this.state.args[data['trigger']];
+    if (!b1 && this.isFirstRender && store.record.id) {
+      this.isFirstRender = false;
+      b1 = true
+    }
     return [b1, b2, b3];
   };
 
@@ -229,7 +234,7 @@ class ComForm extends React.Component {
         </Form>
         {showTmp && <TemplateSelector
           onOk={command => this.setState({command})}
-          onCancel={() => this.setState({showTmp: false})} />}
+          onCancel={() => this.setState({showTmp: false})}/>}
       </Modal>
     )
   }
