@@ -9,6 +9,7 @@ class Store {
   @observable isFetching = false;
   @observable formVisible = false;
 
+  @observable f_status;
   @observable f_name;
   @observable f_type;
 

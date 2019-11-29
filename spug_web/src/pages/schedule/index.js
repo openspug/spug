@@ -9,17 +9,26 @@ export default observer(function () {
   return (
     <Card>
       <SearchForm>
-        <SearchForm.Item span={8} title="任务类型">
+        <SearchForm.Item span={6} title="状态">
+          <Select allowClear onChange={v => store.f_status = v} placeholder="请选择">
+            <Select.Option value={-2}>未激活</Select.Option>
+            <Select.Option value={-1}>已激活</Select.Option>
+            <Select.Option value={0}>成功</Select.Option>
+            <Select.Option value={1}>异常</Select.Option>
+            <Select.Option value={2}>失败</Select.Option>
+          </Select>
+        </SearchForm.Item>
+        <SearchForm.Item span={6} title="类型">
           <Select allowClear onChange={v => store.f_type = v} placeholder="请选择">
             {store.types.map(item => (
               <Select.Option value={item} key={item}>{item}</Select.Option>
             ))}
           </Select>
         </SearchForm.Item>
-        <SearchForm.Item span={8} title="任务名称">
+        <SearchForm.Item span={6} title="名称">
           <Input allowClear onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
         </SearchForm.Item>
-        <SearchForm.Item span={8}>
+        <SearchForm.Item span={6}>
           <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
         </SearchForm.Item>
       </SearchForm>

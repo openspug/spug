@@ -84,6 +84,16 @@ class ComTable extends React.Component {
 
   render() {
     let data = store.records;
+    if (store.f_status !== undefined) {
+      if (store.f_status === -2) {
+        data = data.filter(item => !item['is_active'])
+      } else if (store.f_status === -1) {
+        data = data.filter(item => item['is_active'])
+      } else {
+        data = data.filter(item => item['latest_status'] === store.f_status)
+      }
+    }
+    if (store.f_status === 0) data = data.filter(item => item['is_active']);
     if (store.f_name) {
       data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
     }
