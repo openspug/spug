@@ -1,3 +1,4 @@
+apscheduler==3.6.3
 Django==2.2.7
 channels==2.3.1
 paramiko==2.6.0

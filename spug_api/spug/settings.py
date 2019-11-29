@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'apps.host',
     'apps.setting',
     'apps.exec',
+    'apps.schedule',
 ]
 
 MIDDLEWARE = [
@@ -53,6 +54,7 @@ ASGI_APPLICATION = 'spug.routing.application'
 
 DATABASES = {
     'default': {
+        'ATOMIC_REQUESTS': True,
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
@@ -76,6 +78,8 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+SCHEDULE_KEY = 'spug:schedule'
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/

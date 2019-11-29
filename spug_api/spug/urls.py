@@ -19,4 +19,5 @@ urlpatterns = [
     path('account/', include('apps.account.urls')),
     path('host/', include('apps.host.urls')),
     path('exec/', include('apps.exec.urls')),
+    path('schedule/', include('apps.schedule.urls')),
 ]
