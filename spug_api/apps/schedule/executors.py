@@ -4,25 +4,26 @@ from libs.ssh import SSH
 from apps.host.models import Host
 from apps.setting.utils import AppSetting
 import subprocess
+import time
 
 
 def local_executor(q, command):
-    exit_code, out = -1, None
+    exit_code, out, now = -1, None, time.time()
     try:
         task = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         exit_code = task.wait()
         out = task.stdout.read() + task.stderr.read()
     finally:
-        q.put(('local', exit_code, out.decode()))
+        q.put(('local', exit_code, time.time() - now, out.decode()))
 
 
 def host_executor(q, host, pkey, command):
-    exit_code, out = -1, None
+    exit_code, out, now = -1, None, time.time()
     try:
         cli = SSH(host.hostname, host.port, host.username, pkey=pkey)
         exit_code, out = cli.exec_command(command)
     finally:
-        q.put((host.id, exit_code, out.decode()))
+        q.put((host.id, exit_code, time.time() - now, out.decode()))
 
 
 def dispatch(command, targets):
