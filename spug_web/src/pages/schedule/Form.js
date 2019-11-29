@@ -1,7 +1,8 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, Col, Button, Steps, Tabs, InputNumber, DatePicker, Icon, message } from 'antd';
-import { SHEditor } from 'components';
+import { LinkButton, SHEditor } from 'components';
+import TemplateSelector from '../exec/task/TemplateSelector';
 import http from 'libs/http';
 import store from './store';
 import hostStore from '../host/store';
@@ -93,7 +94,7 @@ class ComForm extends React.Component {
   render() {
     const info = store.record;
     const {getFieldDecorator} = this.props.form;
-    const {page, args, loading} = this.state;
+    const {page, args, loading, showTmp} = this.state;
     const [b1, b2, b3] = this.verifyButtonStatus();
     const itemLayout = {
       labelCol: {span: 6},
@@ -138,7 +139,11 @@ class ComForm extends React.Component {
                 <Input placeholder="请输入任务名称"/>
               )}
             </Form.Item>
-            <Form.Item {...itemLayout} required label="任务内容">
+            <Form.Item
+              {...itemLayout}
+              required
+              label="任务内容"
+              extra={<LinkButton onClick={() => this.setState({showTmp: true})}>从模板添加</LinkButton>}>
               <SHEditor
                 value={this.state.command}
                 onChange={val => this.setState({command: val})}
@@ -222,6 +227,9 @@ class ComForm extends React.Component {
             <Button style={{marginLeft: 20}} onClick={() => this.setState({page: page - 1})}>上一步</Button>}
           </Form.Item>
         </Form>
+        {showTmp && <TemplateSelector
+          onOk={command => this.setState({command})}
+          onCancel={() => this.setState({showTmp: false})} />}
       </Modal>
     )
   }

@@ -46,7 +46,9 @@ class ComForm extends React.Component {
           {outputs && (
             <Tabs tabPosition="left" defaultActiveKey="0" style={{width: 700, height: 350, margin: 'auto'}}>
               {outputs.map((item, index) => (
-                <Tabs.TabPane key={`${index}`} tab={item.name}>
+                <Tabs.TabPane
+                  key={`${index}`}
+                  tab={item.code === 0 ? item.name : <span style={{color: 'red'}}>{item.name}</span>}>
                   <div>执行时间： {run_time}（{moment(run_time).fromNow()}）</div>
                   <div style={{marginTop: 5}}>运行耗时： {item.duration} s</div>
                   <div style={{marginTop: 5}}>返回状态： {item.code}</div>
