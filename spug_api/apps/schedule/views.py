@@ -1,6 +1,7 @@
 from django.views.generic import View
 from django_redis import get_redis_connection
 from apps.schedule.models import Task
+from apps.host.models import Host
 from django.conf import settings
 from libs import json_response, JsonParser, Argument, human_time
 import json
@@ -32,6 +33,7 @@ class Schedule(View):
                     **form
                 )
                 form.action = 'modify'
+                form.targets = json.loads(form.targets)
                 rds_cli = get_redis_connection()
                 rds_cli.rpush(settings.SCHEDULE_KEY, json.dumps(form))
             else:
@@ -67,3 +69,23 @@ class Schedule(View):
                     return json_response(error='该任务在运行中，请先停止任务再尝试删除')
                 task.delete()
         return json_response(error=error)
+
+
+class ScheduleInfo(View):
+    def get(self, request, t_id):
+        task = Task.objects.filter(pk=t_id).first()
+        outputs = json.loads(task.latest_output)
+        host_ids = (x[0] for x in outputs if isinstance(x[0], int))
+        hosts_info = {x.id: x.name for x in Host.objects.filter(id__in=host_ids)}
+        data = {'run_time': task.latest_run_time, 'success': 0, 'failure': 0, 'duration': 0, 'outputs': []}
+        for h_id, code, duration, out in outputs:
+            key = 'success' if code == 0 else 'failure'
+            data[key] += 1
+            data['duration'] += duration
+            data['outputs'].append({
+                'name': hosts_info.get(h_id, '本机'),
+                'code': code,
+                'duration': duration,
+                'output': out})
+        data['duration'] = f"{data['duration'] / len(outputs):.3f}"
+        return json_response(data)

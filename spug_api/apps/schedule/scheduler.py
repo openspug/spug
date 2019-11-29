@@ -30,6 +30,7 @@ class Scheduler:
             raise TypeError(f'unknown schedule policy: {trigger!r}')
 
     def _handle_event(self, event):
+        # TODO: notify to user
         if event.code == events.EVENT_SCHEDULER_SHUTDOWN:
             logger.info(f'EVENT_SCHEDULER_SHUTDOWN: {event}')
         if event.code == events.EVENT_JOB_MAX_INSTANCES:
@@ -67,7 +68,6 @@ class Scheduler:
         while True:
             _, data = rds_cli.blpop(settings.SCHEDULE_KEY)
             task = AttrDict(json.loads(data))
-            print(f'queue: {task!r}')
             if task.action in ('add', 'modify'):
                 trigger = self.parse_trigger(task.trigger, task.trigger_args)
                 self.scheduler.add_job(

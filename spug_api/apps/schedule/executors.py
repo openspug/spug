@@ -14,7 +14,7 @@ def local_executor(q, command):
         exit_code = task.wait()
         out = task.stdout.read() + task.stderr.read()
     finally:
-        q.put(('local', exit_code, time.time() - now, out.decode()))
+        q.put(('local', exit_code, round(time.time() - now, 3), out.decode()))
 
 
 def host_executor(q, host, pkey, command):
@@ -23,7 +23,7 @@ def host_executor(q, host, pkey, command):
         cli = SSH(host.hostname, host.port, host.username, pkey=pkey)
         exit_code, out = cli.exec_command(command)
     finally:
-        q.put((host.id, exit_code, time.time() - now, out.decode()))
+        q.put((host.id, exit_code, round(time.time() - now, 3), out.decode()))
 
 
 def dispatch(command, targets):
