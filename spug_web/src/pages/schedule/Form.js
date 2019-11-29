@@ -152,7 +152,7 @@ class ComForm extends React.Component {
               <SHEditor
                 value={this.state.command}
                 onChange={val => this.setState({command: val})}
-                height="300px"/>
+                height="200px"/>
             </Form.Item>
             <Form.Item {...itemLayout} label="备注信息">
               {getFieldDecorator('desc', {initialValue: info['desc']})(
