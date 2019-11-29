@@ -6,6 +6,7 @@ import http from 'libs/http';
 import store from './store';
 import { LinkButton } from "components";
 import Info from './Info';
+import moment from "moment";
 
 @observer
 class ComTable extends React.Component {
@@ -54,6 +55,7 @@ class ComTable extends React.Component {
   }, {
     title: '最近时间',
     dataIndex: 'latest_run_time',
+    render: value => value ? moment(value).fromNow() : 'N/A'
   }, {
     title: '描述信息',
     dataIndex: 'desc',
@@ -63,7 +65,7 @@ class ComTable extends React.Component {
     width: 180,
     render: info => (
       <span>
-        <LinkButton onClick={() => store.showInfo(info)}>详情</LinkButton>
+        <LinkButton disabled={!info['latest_run_time']} onClick={() => store.showInfo(info)}>详情</LinkButton>
         <Divider type="vertical"/>
         <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
