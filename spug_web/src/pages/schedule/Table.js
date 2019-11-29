@@ -5,6 +5,7 @@ import ComForm from './Form';
 import http from 'libs/http';
 import store from './store';
 import { LinkButton } from "components";
+import Info from './Info';
 
 @observer
 class ComTable extends React.Component {
@@ -62,7 +63,7 @@ class ComTable extends React.Component {
     width: 180,
     render: info => (
       <span>
-        <LinkButton onClick={() => store.showForm(info)}>详情</LinkButton>
+        <LinkButton onClick={() => store.showInfo(info)}>详情</LinkButton>
         <Divider type="vertical"/>
         <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
@@ -127,6 +128,7 @@ class ComTable extends React.Component {
       <React.Fragment>
         <Table rowKey="id" loading={store.isFetching} dataSource={data} columns={this.columns}/>
         {store.formVisible && <ComForm/>}
+        {store.infoVisible && <Info/>}
       </React.Fragment>
     )
   }

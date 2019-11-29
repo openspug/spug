@@ -8,6 +8,7 @@ class Store {
   @observable targets = [undefined];
   @observable isFetching = false;
   @observable formVisible = false;
+  @observable infoVisible = false;
 
   @observable f_status;
   @observable f_name;
@@ -25,6 +26,11 @@ class Store {
 
   showForm = (info = {}) => {
     this.formVisible = true;
+    this.record = info
+  };
+
+  showInfo = (info = {}) => {
+    this.infoVisible = true;
     this.record = info
   };
 
