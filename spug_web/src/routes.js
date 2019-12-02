@@ -5,6 +5,7 @@ import hostRoutes from './pages/host/routes';
 import systemRoutes from './pages/system/routes';
 import execRoutes from './pages/exec/routes';
 import scheduleRoutes from './pages/schedule/routes';
+import monitorRoutes from './pages/monitor/routes';
 
 
 export default [
@@ -13,4 +14,5 @@ export default [
   makeModuleRoute('/system', systemRoutes),
   makeModuleRoute('/exec', execRoutes),
   makeModuleRoute('/schedule', scheduleRoutes),
+  makeModuleRoute('/monitor', monitorRoutes),
 ]
