@@ -32,10 +32,12 @@ class Schedule(View):
                     updated_by=request.user,
                     **form
                 )
-                form.action = 'modify'
-                form.targets = json.loads(form.targets)
-                rds_cli = get_redis_connection()
-                rds_cli.rpush(settings.SCHEDULE_KEY, json.dumps(form))
+                task = Task.objects.filter(pk=form.id).first()
+                if task and task.is_active:
+                    form.action = 'modify'
+                    form.targets = json.loads(form.targets)
+                    rds_cli = get_redis_connection()
+                    rds_cli.rpush(settings.SCHEDULE_KEY, json.dumps(form))
             else:
                 Task.objects.create(created_by=request.user, **form)
         return json_response(error=error)
