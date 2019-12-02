@@ -15,7 +15,8 @@ class ComTable extends React.Component {
   columns = [{
     title: '序号',
     key: 'series',
-    render: (_, __, index) => index + 1
+    render: (_, __, index) => index + 1,
+    width: 80
   }, {
     title: '登录名',
     dataIndex: 'username',

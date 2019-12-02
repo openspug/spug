@@ -9,7 +9,7 @@ export default function () {
     <Card>
       <SearchForm>
         <SearchForm.Item span={8} title="账户名称">
-          <Input onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
+          <Input allowClear onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
         </SearchForm.Item>
         <SearchForm.Item span={8} title="账户状态">
           <Select allowClear onChange={v => store.f_status = v} placeholder="请选择">
