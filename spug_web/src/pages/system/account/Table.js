@@ -1,6 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Table, Divider, Modal, Badge, message } from 'antd';
+import { LinkButton } from 'components';
 import ComForm from './Form';
 import http from 'libs/http';
 import store from './store';
@@ -31,11 +32,11 @@ class ComTable extends React.Component {
     title: '操作',
     render: info => (
       <span>
-        <span className="span-button" onClick={() => this.handleActive(info)}>{info['is_active'] ? '禁用' : '启用'}</span>
+        <LinkButton className="span-button" onClick={() => this.handleActive(info)}>{info['is_active'] ? '禁用' : '启用'}</LinkButton>
         <Divider type="vertical"/>
-        <span className="span-button" onClick={() => store.showForm(info)}>编辑</span>
+        <LinkButton className="span-button" onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
-        <span className="span-button" onClick={() => this.handleDelete(info)}>删除</span>
+        <LinkButton className="span-button" onClick={() => this.handleDelete(info)}>删除</LinkButton>
       </span>
     )
   }];
