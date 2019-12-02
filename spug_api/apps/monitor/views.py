@@ -1,6 +1,9 @@
 from django.views.generic import View
 from libs import json_response, JsonParser, Argument, human_time
 from apps.monitor.models import Detection
+from django_redis import get_redis_connection
+from django.conf import settings
+import json
 
 
 class DetectionView(View):
@@ -22,12 +25,38 @@ class DetectionView(View):
         ).parse(request.body)
         if error is None:
             if form.id:
-                form.updated_at = human_time()
-                form.updated_by = request.user
-                Detection.objects.filter(pk=form.pop('id')).update(**form)
+                Detection.objects.filter(pk=form.id).update(
+                    updated_at=human_time(),
+                    updated_by=request.user,
+                    **form)
+                task = Detection.objects.filter(pk=form.id).first()
+                if task and task.is_active:
+                    form.action = 'modify'
+                    rds_cli = get_redis_connection()
+                    rds_cli.rpush(settings.MONITOR_KEY, json.dumps(form))
             else:
-                form.created_by = request.user
-                Detection.objects.create(**form)
+                Detection.objects.create(created_by=request.user, **form)
+                form.action = 'add'
+                rds_cli = get_redis_connection()
+                rds_cli.rpush(settings.MONITOR_KEY, json.dumps(form))
+        return json_response(error=error)
+
+    def patch(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='请指定操作对象'),
+            Argument('is_active', type=bool, required=False)
+        ).parse(request.body, True)
+        if error is None:
+            Detection.objects.filter(pk=form.id).update(**form)
+            if form.get('is_active') is not None:
+                if form.is_active:
+                    task = Detection.objects.filter(pk=form.id).first()
+                    message = {'id': form.id, 'action': 'add'}
+                    message.update(task.to_dict(selects=('addr', 'extra', 'rate', 'type')))
+                else:
+                    message = {'id': form.id, 'action': 'remove'}
+                rds_cli = get_redis_connection()
+                rds_cli.rpush(settings.MONITOR_KEY, json.dumps(message))
         return json_response(error=error)
 
     def delete(self, request):
@@ -35,5 +64,9 @@ class DetectionView(View):
             Argument('id', type=int, help='请指定操作对象')
         ).parse(request.GET)
         if error is None:
-            Detection.objects.filter(pk=form.id).delete()
+            task = Detection.objects.filter(pk=form.id).first()
+            if task:
+                if task.is_active:
+                    return json_response(error='该监控项正在运行中，请先停止后再尝试删除')
+                task.delete()
         return json_response(error=error)

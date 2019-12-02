@@ -81,6 +81,7 @@ CHANNEL_LAYERS = {
 }
 
 SCHEDULE_KEY = 'spug:schedule'
+MONITOR_KEY = 'spug:monitor'
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/

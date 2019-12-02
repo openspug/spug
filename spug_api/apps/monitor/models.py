@@ -10,6 +10,10 @@ class Detection(models.Model, ModelMixin):
         ('3', '进程检测'),
         ('4', '自定义脚本'),
     )
+    STATUS = (
+        (0, '成功'),
+        (1, '失败'),
+    )
     name = models.CharField(max_length=50)
     type = models.CharField(max_length=2, choices=TYPES)
     addr = models.CharField(max_length=255)
@@ -19,6 +23,11 @@ class Detection(models.Model, ModelMixin):
     rate = models.IntegerField(default=5)
     threshold = models.IntegerField(default=3)
     quiet = models.IntegerField(default=24 * 60)
+    fault_times = models.SmallIntegerField(default=0)
+    latest_status = models.SmallIntegerField(choices=STATUS, null=True)
+    latest_run_time = models.CharField(max_length=20, null=True)
+    latest_fault_time = models.IntegerField(null=True)
+    latest_notify_time = models.IntegerField(default=0)
 
     created_at = models.CharField(max_length=20, default=human_time)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
@@ -28,6 +37,7 @@ class Detection(models.Model, ModelMixin):
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
         tmp['type_alias'] = self.get_type_display()
+        tmp['latest_status_alias'] = self.get_latest_status_display()
         return tmp
 
     def __repr__(self):
