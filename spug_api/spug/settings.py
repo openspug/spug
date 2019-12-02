@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'apps.setting',
     'apps.exec',
     'apps.schedule',
+    'apps.monitor',
 ]
 
 MIDDLEWARE = [
