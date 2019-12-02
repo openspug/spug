@@ -21,15 +21,19 @@ class ComTable extends React.Component {
   componentDidMount() {
     store.fetchRecords();
     if (hostStore.records.length === 0) {
-      hostStore.fetchRecords().then(() => {
-        const tmp = {};
-        for (let item of hostStore.records) {
-          tmp[item.id] = item
-        }
-        this.setState({hosts: tmp})
-      })
+      hostStore.fetchRecords().then(this._handleHosts)
+    } else {
+      this._handleHosts()
     }
   }
+
+  _handleHosts = () => {
+    const tmp = {};
+    for (let item of hostStore.records) {
+      tmp[item.id] = item
+    }
+    this.setState({hosts: tmp})
+  };
 
   columns = [{
     title: '序号',
