@@ -1,12 +1,13 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, message } from 'antd';
+import { Table, Divider, Modal, Tag, message } from 'antd';
 import { LinkButton } from 'components';
 import ComForm from './Form';
 import http from 'libs/http';
 import store from './store';
 import hostStore from '../host/store';
 import lds from 'lodash';
+import moment from "moment";
 
 @observer
 class ComTable extends React.Component {
@@ -57,11 +58,23 @@ class ComTable extends React.Component {
     render: value => `${value}分钟`
   }, {
     title: '状态',
-    dataIndex: 'xx'
+    render: info => {
+      if (info.is_active) {
+        if (info['latest_status'] === 0) {
+          return <Tag color="green">正常</Tag>
+        } else if (info['latest_status'] === 1) {
+          return <Tag color="red">异常</Tag>
+        } else {
+          return <Tag color="orange">待检测</Tag>
+        }
+      } else {
+        return <Tag>未启用</Tag>
+      }
+    }
   }, {
-    title: '备注',
-    dataIndex: 'desc',
-    ellipsis: true
+    title: '更新于',
+    dataIndex: 'latest_run_time',
+    render: value => value ? moment(value).fromNow() : null
   }, {
     title: '操作',
     render: info => (
@@ -109,8 +122,16 @@ class ComTable extends React.Component {
     if (store.f_name) {
       data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
     }
-    if (store.f_status) {
-      data = data.filter(item => String(item['is_active']) === store.f_status)
+    if (store.f_status !== undefined) {
+      if (store.f_status === -3) {
+        data = data.filter(item => !item['is_active'])
+      } else if (store.f_status === -2) {
+        data = data.filter(item => item['is_active'])
+      } else if (store.f_status === -1) {
+        data = data.filter(item => item['is_active'] && !item['latest_status_alias'])
+      } else {
+        data = data.filter(item => item['latest_status'] === store.f_status)
+      }
     }
     return (
       <React.Fragment>

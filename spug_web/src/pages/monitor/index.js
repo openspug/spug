@@ -9,12 +9,15 @@ export default function () {
     <Card>
       <SearchForm>
         <SearchForm.Item span={8} title="任务名称">
-          <Input onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
+          <Input allowClear onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
         </SearchForm.Item>
         <SearchForm.Item span={8} title="任务状态">
           <Select allowClear onChange={v => store.f_status = v} placeholder="请选择">
-            <Select.Option value="true">正常</Select.Option>
-            <Select.Option value="false">禁用</Select.Option>
+            <Select.Option value={-3}>未激活</Select.Option>
+            <Select.Option value={-2}>已激活</Select.Option>
+            <Select.Option value={-1}>待检测</Select.Option>
+            <Select.Option value={0}>正常</Select.Option>
+            <Select.Option value={1}>异常</Select.Option>
           </Select>
         </SearchForm.Item>
         <SearchForm.Item span={8}>
