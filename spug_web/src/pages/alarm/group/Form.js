@@ -11,8 +11,6 @@ class ComForm extends React.Component {
     super(props);
     this.state = {
       loading: false,
-      targetKeys: [],
-      dataSource: contactStore.records.map(x => ({key: x.id, title: x.name}))
     }
   }
 
@@ -60,9 +58,7 @@ class ComForm extends React.Component {
               <Transfer
               titles={['已有联系人', '已选联系人']}
               listStyle={{width: 199}}
-              dataSource={this.state.dataSource}
-              targetKeys={this.state.targetKeys}
-              onChange={v => this.setState({targetKeys: v})}
+              dataSource={contactStore.records.map(x => ({key: x.id, title: x.name}))}
               render={item => item.title}/>
             )}
           </Form.Item>
