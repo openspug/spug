@@ -5,6 +5,7 @@ from apscheduler import events
 from django_redis import get_redis_connection
 from apps.schedule.models import Task
 from apps.schedule.executors import dispatch
+from apps.alarm.utils import auto_clean_records
 from django.conf import settings
 from libs import AttrDict, human_time
 import logging
@@ -40,17 +41,22 @@ class Scheduler:
         if event.code == events.EVENT_JOB_MISSED:
             logger.info(f'EVENT_JOB_MISSED: job_id {event.job_id}')
         if event.code == events.EVENT_JOB_EXECUTED:
-            score = 0
-            for item in event.retval:
-                score += 1 if item[1] else 0
-            Task.objects.filter(pk=event.job_id).update(
-                latest_status=2 if score == len(event.retval) else 1 if score else 0,
-                latest_run_time=human_time(event.scheduled_run_time),
-                latest_output=json.dumps(event.retval)
-            )
+            if event.retval:
+                score = 0
+                for item in event.retval:
+                    score += 1 if item[1] else 0
+                Task.objects.filter(pk=event.job_id).update(
+                    latest_status=2 if score == len(event.retval) else 1 if score else 0,
+                    latest_run_time=human_time(event.scheduled_run_time),
+                    latest_output=json.dumps(event.retval)
+                )
 
+    def _init_builtin_jobs(self):
+        self.scheduler.add_job(auto_clean_records, 'cron', hour=0, minute=0)
+        
     def _init(self):
         self.scheduler.start()
+        self._init_builtin_jobs()
         for task in Task.objects.filter(is_active=True):
             trigger = self.parse_trigger(task.trigger, task.trigger_args)
             self.scheduler.add_job(
