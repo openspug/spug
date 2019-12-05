@@ -26,7 +26,7 @@ class Scheduler:
         duration = seconds_to_human(time.time() - obj.latest_fault_time)
         Alarm.objects.create(
             name=obj.name,
-            type=obj.type,
+            type=obj.get_type_display(),
             status=status,
             duration=duration,
             notify_grp=obj.notify_grp,

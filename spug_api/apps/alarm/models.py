@@ -25,7 +25,7 @@ class Alarm(models.Model, ModelMixin):
 
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
-        tmp['notify_mode'] = json.loads(self.notify_mode)
+        tmp['notify_mode'] = ','.join(dict(self.MODES)[x] for x in json.loads(self.notify_mode))
         tmp['notify_grp'] = json.loads(self.notify_grp)
         tmp['status_alias'] = self.get_status_display()
         return tmp
