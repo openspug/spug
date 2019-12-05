@@ -56,10 +56,11 @@ class ComForm extends React.Component {
           <Form.Item {...itemLayout} required label="选择联系人">
             {getFieldDecorator('contacts', {valuePropName: 'targetKeys', initialValue: info['contacts']})(
               <Transfer
-              titles={['已有联系人', '已选联系人']}
-              listStyle={{width: 199}}
-              dataSource={contactStore.records.map(x => ({key: x.id, title: x.name}))}
-              render={item => item.title}/>
+                rowKey={item => item.id}
+                titles={['已有联系人', '已选联系人']}
+                listStyle={{width: 199}}
+                dataSource={contactStore.records}
+                render={item => item.name}/>
             )}
           </Form.Item>
         </Form>

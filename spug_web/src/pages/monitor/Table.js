@@ -8,6 +8,7 @@ import store from './store';
 import hostStore from '../host/store';
 import lds from 'lodash';
 import moment from "moment";
+import groupStore from "pages/alarm/group/store";
 
 @observer
 class ComTable extends React.Component {
@@ -20,6 +21,7 @@ class ComTable extends React.Component {
 
   componentDidMount() {
     store.fetchRecords();
+    if (groupStore.records.length === 0) groupStore.fetchRecords();
     if (hostStore.records.length === 0) {
       hostStore.fetchRecords().then(this._handleHosts)
     } else {
