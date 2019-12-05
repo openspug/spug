@@ -6,6 +6,7 @@ import systemRoutes from './pages/system/routes';
 import execRoutes from './pages/exec/routes';
 import scheduleRoutes from './pages/schedule/routes';
 import monitorRoutes from './pages/monitor/routes';
+import alarmRoutes from './pages/alarm/routes';
 
 
 export default [
@@ -15,4 +16,5 @@ export default [
   makeModuleRoute('/exec', execRoutes),
   makeModuleRoute('/schedule', scheduleRoutes),
   makeModuleRoute('/monitor', monitorRoutes),
+  makeModuleRoute('/alarm', alarmRoutes),
 ]
