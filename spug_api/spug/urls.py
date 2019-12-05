@@ -21,4 +21,5 @@ urlpatterns = [
     path('exec/', include('apps.exec.urls')),
     path('schedule/', include('apps.schedule.urls')),
     path('monitor/', include('apps.monitor.urls')),
+    path('alarm/', include('apps.alarm.urls')),
 ]

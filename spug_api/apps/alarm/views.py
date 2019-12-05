@@ -20,7 +20,7 @@ class GroupView(View):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
             Argument('name', help='请输入组名'),
-            Argument('contacts', type=list, help='请选择模版类型'),
+            Argument('contacts', type=list, help='请选择联系人'),
             Argument('desc', required=False)
         ).parse(request.body)
         if error is None:
