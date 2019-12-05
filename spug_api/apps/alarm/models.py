@@ -17,7 +17,7 @@ class Alarm(models.Model, ModelMixin):
     )
     name = models.CharField(max_length=50)
     type = models.CharField(max_length=50)
-    notify_mode = models.CharField(max_length=2, choices=MODES)
+    notify_mode = models.CharField(max_length=255)
     notify_grp = models.CharField(max_length=255)
     status = models.CharField(max_length=2, choices=STATUS)
     duration = models.CharField(max_length=50)
@@ -25,7 +25,8 @@ class Alarm(models.Model, ModelMixin):
 
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
-        tmp['notify_mode_alias'] = self.get_notify_mode_display()
+        tmp['notify_mode'] = json.loads(self.notify_mode)
+        tmp['notify_grp'] = json.loads(self.notify_grp)
         tmp['status_alias'] = self.get_status_display()
         return tmp
 

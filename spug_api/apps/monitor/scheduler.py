@@ -3,7 +3,9 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler import events
 from django_redis import get_redis_connection
 from apps.monitor.models import Detection
+from apps.alarm.models import Alarm
 from apps.monitor.executors import dispatch
+from apps.monitor.utils import seconds_to_human
 from django.conf import settings
 from libs import AttrDict, human_time
 import logging
@@ -20,15 +22,27 @@ class Scheduler:
         self.scheduler = BackgroundScheduler(timezone=self.timezone)
         self.scheduler.add_listener(self._handle_event, )
 
+    def _record_alarm(self, obj, status):
+        duration = seconds_to_human(time.time() - obj.latest_fault_time)
+        Alarm.objects.create(
+            name=obj.name,
+            type=obj.type,
+            status=status,
+            duration=duration,
+            notify_grp=obj.notify_grp,
+            notify_mode=obj.notify_mode)
+
     def _handle_notify(self, obj, old_status):
         if obj.latest_status == 0:
             if old_status == 1:
+                self._record_alarm(obj, '2')
                 logger.info(f'{human_time()} recover job_id: {obj.id}')
         else:
             if obj.fault_times >= obj.threshold:
                 if time.time() - obj.latest_notify_time >= obj.quiet * 60:
                     obj.latest_notify_time = int(time.time())
                     obj.save()
+                    self._record_alarm(obj, '1')
                     logger.info(f'{human_time()} notify job_id: {obj.id}')
 
     def _handle_event(self, event):
@@ -46,7 +60,7 @@ class Scheduler:
             old_status = obj.latest_status
             obj.latest_status = 0 if event.retval else 1
             obj.latest_run_time = human_time(event.scheduled_run_time)
-            if old_status == 0 and event.retval is False:
+            if old_status in [0, None] and event.retval is False:
                 obj.latest_fault_time = int(time.time())
             if obj.latest_status == 0:
                 obj.latest_notify_time = 0
