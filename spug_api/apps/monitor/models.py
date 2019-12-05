@@ -1,6 +1,7 @@
 from django.db import models
 from libs import ModelMixin, human_time
 from apps.account.models import User
+import json
 
 
 class Detection(models.Model, ModelMixin):
@@ -24,6 +25,8 @@ class Detection(models.Model, ModelMixin):
     threshold = models.IntegerField(default=3)
     quiet = models.IntegerField(default=24 * 60)
     fault_times = models.SmallIntegerField(default=0)
+    notify_mode = models.CharField(max_length=255)
+    notify_grp = models.CharField(max_length=255)
     latest_status = models.SmallIntegerField(choices=STATUS, null=True)
     latest_run_time = models.CharField(max_length=20, null=True)
     latest_fault_time = models.IntegerField(null=True)
@@ -38,6 +41,8 @@ class Detection(models.Model, ModelMixin):
         tmp = super().to_dict(*args, **kwargs)
         tmp['type_alias'] = self.get_type_display()
         tmp['latest_status_alias'] = self.get_latest_status_display()
+        tmp['notify_mode'] = json.loads(self.notify_mode)
+        tmp['notify_grp'] = json.loads(self.notify_grp)
         return tmp
 
     def __repr__(self):

@@ -21,9 +21,13 @@ class DetectionView(View):
             Argument('desc', required=False),
             Argument('rate', type=int, default=5),
             Argument('threshold', type=int, default=3),
-            Argument('quiet', type=int, default=24 * 60)
+            Argument('quiet', type=int, default=24 * 60),
+            Argument('notify_grp', type=list, help='请选择报警联系组'),
+            Argument('notify_mode', type=list, help='请选择报警方式'),
         ).parse(request.body)
         if error is None:
+            form.notify_grp = json.dumps(form.notify_grp)
+            form.notify_mode = json.dumps(form.notify_mode)
             if form.id:
                 Detection.objects.filter(pk=form.id).update(
                     updated_at=human_time(),
