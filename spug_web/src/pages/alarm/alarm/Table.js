@@ -1,67 +1,63 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, message } from 'antd';
-import http from 'libs/http';
+import { Table, Tag } from 'antd';
 import store from './store';
-import { LinkButton } from "components";
+import groupStore from '../group/store';
 
 @observer
 class ComTable extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      groupMap: {}
+    }
+  }
   componentDidMount() {
-    store.fetchRecords()
+    store.fetchRecords();
+    if (groupStore.records.length === 0) {
+      groupStore.fetchRecords().then(this._handleGroups)
+    } else {
+      this._handleGroups()
+    }
   }
 
+  _handleGroups = () => {
+    const tmp = {};
+    for (let item of groupStore.records) {
+      tmp[item.id] = item.name
+    }
+    this.setState({groupMap: tmp})
+  };
+
   columns = [{
-    title: '序号',
-    key: 'series',
-    render: (_, __, index) => index + 1,
-    width: 80,
-  }, {
     title: '任务名称',
     dataIndex: 'name',
   }, {
     title: '监控类型',
     dataIndex: 'type',
   }, {
+    title: '状态',
+    dataIndex: 'status',
+    render: value => value === '1' ? <Tag color="orange">报警发生</Tag> : <Tag color="green">故障恢复</Tag>
+  }, {
     title: '持续时间',
-    render: text => text.body,
-    ellipsis: true
+    dataIndex: 'duration',
   }, {
-    title: '描述信息',
-    dataIndex: 'desc',
-    ellipsis: true
+    title: '通知方式',
+    dataIndex: 'notify_mode',
   }, {
-    title: '操作',
-    render: info => (
-      <span>
-        <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
-      </span>
-    )
+    title: '通知对象',
+    dataIndex: 'notify_grp',
+    render: value => value.map(id => this.state.groupMap[id]).join(',')
+  }, {
+    title: '发生时间',
+    dataIndex: 'created_at'
   }];
-
-  handleDelete = (text) => {
-    Modal.confirm({
-      title: '删除确认',
-      content: `确定要删除【${text['name']}】?`,
-      onOk: () => {
-        return http.delete('/api/exec/template/', {params: {id: text.id}})
-          .then(() => {
-            message.success('删除成功');
-            store.fetchRecords()
-          })
-      }
-    })
-  };
 
   render() {
     let data = store.records;
     if (store.f_name) {
       data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
-    }
-    if (store.f_type) {
-      data = data.filter(item => item['type'].toLowerCase().includes(store.f_type.toLowerCase()))
     }
     return (
       <Table rowKey="id" loading={store.isFetching} dataSource={data} columns={this.columns}/>
