@@ -23,4 +23,5 @@ urlpatterns = [
     path('monitor/', include('apps.monitor.urls')),
     path('alarm/', include('apps.alarm.urls')),
     path('setting/', include('apps.setting.urls')),
+    path('config/', include('apps.config.urls')),
 ]
