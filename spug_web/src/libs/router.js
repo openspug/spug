@@ -6,7 +6,7 @@ import styles from './libs.module.css';
 
 // 创建单个路由
 export function makeRoute(path, component) {
-  return {path, component}
+  return {subPath: path, component}
 }
 
 // 创建模块路由
@@ -40,7 +40,7 @@ export class Router extends React.Component {
   initialRoutes() {
     for (let moduleRoute of moduleRoutes) {
       for (let route of moduleRoute['routes']) {
-        route['fullPath'] = moduleRoute['prefix'] + route['path'];
+        route['path'] = moduleRoute['prefix'] + route['subPath'];
         this.routes.push(route)
       }
     }
@@ -49,7 +49,7 @@ export class Router extends React.Component {
   render() {
     return (
       <Switch>
-        {this.routes.map(route => <Route exact strict key={route.fullPath} {...route}/>)}
+        {this.routes.map(route => <Route exact strict key={route.path} {...route}/>)}
         <Route component={NotFound}/>
       </Switch>
     )
