@@ -1,7 +1,8 @@
 from django.db import models
+from libs import ModelMixin
 
 
-class Setting(models.Model):
+class Setting(models.Model, ModelMixin):
     key = models.CharField(max_length=50, unique=True)
     value = models.TextField()
     desc = models.CharField(max_length=255, null=True)

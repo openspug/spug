@@ -3,7 +3,7 @@ from apps.setting.models import Setting
 
 
 class AppSetting:
-    keys = ('public_key', 'private_key')
+    keys = ('public_key', 'private_key', 'mail_service')
 
     @classmethod
     @lru_cache(maxsize=64)
