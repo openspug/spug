@@ -4,6 +4,7 @@ import BasicSetting from './BasicSetting';
 import AlarmSetting from './AlarmSetting';
 import MailServer from './MailServer';
 import styles from './index.module.css';
+import store from './store';
 
 
 class Index extends React.Component {
@@ -12,6 +13,10 @@ class Index extends React.Component {
     this.state = {
       selectedKeys: ['basic']
     }
+  }
+
+  componentDidMount() {
+    store.fetchSettings()
   }
 
   render() {
