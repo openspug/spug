@@ -2,12 +2,17 @@ export default [
   {icon: 'desktop', title: '工作台', path: '/home'},
   {icon: 'cloud-server', title: '主机管理', path: '/host'},
   {
-    icon: 'deployment-unit', title: '批量执行', child: [
+    icon: 'code', title: '批量执行', child: [
       {title: '执行任务', path: '/exec/task'},
       {title: '模板管理', path: '/exec/template'},
     ]
   },
   {icon: 'schedule', title: '任务计划', path: '/schedule'},
+  {
+    icon: 'deployment-unit', title: '配置中心', child: [
+      {title: '环境管理', path: '/config/environment'},
+    ]
+  },
   {icon: 'monitor', title: '监控中心', path: '/monitor'},
   {
     icon: 'alert', title: '报警中心', child: [
