@@ -11,6 +11,7 @@ export default [
   {
     icon: 'deployment-unit', title: '配置中心', child: [
       {title: '环境管理', path: '/config/environment'},
+      {title: '服务管理', path: '/config/service'},
     ]
   },
   {icon: 'monitor', title: '监控中心', path: '/monitor'},
