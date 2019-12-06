@@ -23,6 +23,7 @@ class Service(models.Model, ModelMixin):
     key = models.CharField(max_length=50)
     desc = models.CharField(max_length=255, null=True)
     created_at = models.CharField(max_length=20, default=human_time)
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def __repr__(self):
         return f'<Service {self.name!r}>'
