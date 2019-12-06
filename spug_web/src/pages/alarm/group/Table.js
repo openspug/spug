@@ -16,18 +16,23 @@ class ComTable extends React.Component {
       contactMap: {}
     }
   }
+
   componentDidMount() {
     store.fetchRecords();
     if (contactStore.records.length === 0) {
-      contactStore.fetchRecords().then(() => {
-        const tmp = {};
-        for (let item of contactStore.records) {
-          tmp[item.id] = item
-        }
-        this.setState({contactMap: tmp})
-      })
+      contactStore.fetchRecords().then(this._handleContacts)
+    } else {
+      this._handleContacts()
     }
   }
+
+  _handleContacts = () => {
+    const tmp = {};
+    for (let item of contactStore.records) {
+      tmp[item.id] = item
+    }
+    this.setState({contactMap: tmp})
+  };
 
   columns = [{
     title: '序号',
