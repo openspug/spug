@@ -1,6 +1,8 @@
 import { makeRoute } from 'libs/router';
-import AccountIndex from './account/index';
+import Account from './account';
+import Setting from './setting';
 
 export default [
-  makeRoute('/account', AccountIndex)
+  makeRoute('/account', Account),
+  makeRoute('/setting', Setting),
 ]
