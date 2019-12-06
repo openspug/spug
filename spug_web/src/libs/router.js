@@ -40,7 +40,7 @@ export class Router extends React.Component {
   initialRoutes() {
     for (let moduleRoute of moduleRoutes) {
       for (let route of moduleRoute['routes']) {
-        route['path'] = moduleRoute['prefix'] + route['path'];
+        route['fullPath'] = moduleRoute['prefix'] + route['path'];
         this.routes.push(route)
       }
     }
@@ -49,7 +49,7 @@ export class Router extends React.Component {
   render() {
     return (
       <Switch>
-        {this.routes.map(route => <Route exact strict key={route.path} {...route}/>)}
+        {this.routes.map(route => <Route exact strict key={route.fullPath} {...route}/>)}
         <Route component={NotFound}/>
       </Switch>
     )
