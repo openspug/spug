@@ -9,6 +9,7 @@ class Store {
   @observable id;
   @observable isFetching = false;
   @observable formVisible = false;
+  @observable recordVisible = false;
 
   @observable f_name;
 
@@ -23,6 +24,10 @@ class Store {
   showForm = (info) => {
     this.formVisible = true;
     this.record = info || {};
+  };
+
+  showRecord = () => {
+    this.recordVisible = true
   }
 }
 

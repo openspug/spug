@@ -5,6 +5,7 @@ import envStore from '../environment/store';
 import styles from './index.module.css';
 import { SearchForm } from 'components';
 import ComTable from './Table';
+import Record from './Record';
 import store from './store';
 
 @observer
@@ -56,7 +57,7 @@ class Index extends React.Component {
             </SearchForm.Item>
             <SearchForm.Item span={4}>
               <Button type="primary" style={{backgroundColor: 'orange', borderColor: 'orange'}} icon="history"
-                      onClick={store.fetchRecords}>更改历史</Button>
+                      onClick={store.showRecord}>更改历史</Button>
             </SearchForm.Item>
             <SearchForm.Item span={8} style={{textAlign: 'right'}}>
               <Button type="primary" icon="plus" onClick={() => store.showForm()}>新增配置</Button>
@@ -64,6 +65,7 @@ class Index extends React.Component {
           </SearchForm>
           <ComTable/>
         </div>
+        {store.recordVisible && <Record />}
       </div>
     )
   }
