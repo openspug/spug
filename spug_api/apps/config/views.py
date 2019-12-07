@@ -1,4 +1,5 @@
 from django.views.generic import View
+from django.db.models import F
 from libs import json_response, JsonParser, Argument
 from apps.config.models import *
 
@@ -77,8 +78,12 @@ class ConfigView(View):
             Argument('env_id', type=int, help='缺少必要参数'),
         ).parse(request.GET)
         if error is None:
-            configs = Config.objects.filter(type=form.type, o_id=form.id, env_id=form.env_id)
-            return json_response(configs)
+            data, configs = [], Config.objects.filter(type=form.type, o_id=form.id, env_id=form.env_id)
+            for item in configs.annotate(update_user=F('updated_by__nickname')):
+                tmp = item.to_dict()
+                tmp['update_user'] = item.update_user
+                data.append(tmp)
+            return json_response(data)
         return json_response(error=error)
 
     def post(self, request):
