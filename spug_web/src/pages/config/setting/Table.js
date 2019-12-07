@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, message } from 'antd';
+import { Table, Divider, Modal, Tooltip, message } from 'antd';
 import { LinkButton } from 'components';
 import ComForm from './Form';
 import http from 'libs/http';
@@ -10,16 +10,23 @@ import store from './store';
 class ComTable extends React.Component {
   columns = [{
     title: 'Key',
-    dataIndex: 'key',
+    key: 'key',
+    render: info => <Tooltip title={info.desc}>{info.key}</Tooltip>
   }, {
     title: 'Value',
     dataIndex: 'value',
-  }, {
-    title: '描述信息',
-    dataIndex: 'desc',
     ellipsis: true
   }, {
+    title: '修改人',
+    width: 120,
+    dataIndex: 'update_user'
+  }, {
+    title: '修改时间',
+    width: 180,
+    dataIndex: 'updated_at'
+  }, {
     title: '操作',
+    width: 120,
     render: info => (
       <span>
         <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
