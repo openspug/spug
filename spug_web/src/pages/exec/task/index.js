@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Card, Form, Button, Tag } from 'antd';
-import { SHEditor } from 'components';
+import { ACEditor } from 'components';
 import HostSelector from './HostSelector';
 import TemplateSelector from './TemplateSelector';
 import ExecConsole from './ExecConsole';
@@ -38,7 +38,7 @@ class TaskIndex extends React.Component {
           </Form.Item>
           <Button icon="plus" onClick={store.switchHost}>从主机列表中选择</Button>
           <Form.Item label="执行命令">
-            <SHEditor value={body} height="300px" onChange={body => this.setState({body})}/>
+            <ACEditor mode="sh" value={body} height="300px" onChange={body => this.setState({body})}/>
           </Form.Item>
           <Form.Item>
             <Button icon="plus" onClick={store.switchTemplate}>从执行模版中选择</Button>

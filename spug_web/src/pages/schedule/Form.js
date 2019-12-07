@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, Col, Button, Steps, Tabs, InputNumber, DatePicker, Icon, message } from 'antd';
-import { LinkButton, SHEditor } from 'components';
+import { LinkButton, ACEditor } from 'components';
 import TemplateSelector from '../exec/task/TemplateSelector';
 import http from 'libs/http';
 import store from './store';
@@ -149,7 +149,8 @@ class ComForm extends React.Component {
               required
               label="任务内容"
               extra={<LinkButton onClick={() => this.setState({showTmp: true})}>从模板添加</LinkButton>}>
-              <SHEditor
+              <ACEditor
+                mode="sh"
                 value={this.state.command}
                 onChange={val => this.setState({command: val})}
                 height="200px"/>

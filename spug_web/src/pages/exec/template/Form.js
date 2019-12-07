@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, Col, Button, message } from 'antd';
-import { SHEditor } from 'components';
+import { ACEditor } from 'components';
 import http from 'libs/http';
 import store from './store';
 
@@ -88,7 +88,8 @@ class ComForm extends React.Component {
             )}
           </Form.Item>
           <Form.Item {...itemLayout} required label="模板内容">
-            <SHEditor
+            <ACEditor
+              mode="sh"
               value={this.state.body}
               onChange={val => this.setState({body: val})}
               height="300px"/>

@@ -2,7 +2,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, Radio, message, Steps, Button, Transfer, Checkbox } from 'antd';
 import TemplateSelector from '../exec/task/TemplateSelector';
-import { LinkButton, SHEditor } from 'components';
+import { LinkButton, ACEditor } from 'components';
 import http from 'libs/http';
 import store from './store';
 import hostStore from '../host/store';
@@ -163,7 +163,7 @@ class ComForm extends React.Component {
             </Form.Item>
             <Form.Item {...this.itemLayout} required label="脚本内容" style={this.getStyle('4')}
                        extra={<LinkButton onClick={() => this.setState({showTmp: true})}>从模板添加</LinkButton>}>
-              <SHEditor value={extra['4']} height="200px" onChange={e => this.handleExtra('4', e)}/>
+              <ACEditor mode="sh" value={extra['4']} height="200px" onChange={e => this.handleExtra('4', e)}/>
             </Form.Item>
             <Form.Item {...this.itemLayout} label="备注信息">
               {getFieldDecorator('desc', {initialValue: info['desc']})(
