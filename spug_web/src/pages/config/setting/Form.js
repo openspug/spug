@@ -4,7 +4,6 @@ import { Modal, Form, Input, Checkbox, Row, Col, message } from 'antd';
 import http from 'libs/http';
 import store from './store';
 import envStore from '../environment/store'
-import lds from 'lodash';
 
 @observer
 class ComForm extends React.Component {

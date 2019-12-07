@@ -5,7 +5,6 @@ import { LinkButton } from 'components';
 import ComForm from './Form';
 import http from 'libs/http';
 import store from './store';
-import lds from 'lodash';
 
 @observer
 class ComTable extends React.Component {
