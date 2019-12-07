@@ -78,3 +78,4 @@ class ConfigHistory(models.Model, ModelMixin):
 
     class Meta:
         db_table = 'config_histories'
+        ordering = ('-id',)

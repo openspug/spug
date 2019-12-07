@@ -78,8 +78,8 @@ class ConfigView(View):
             Argument('env_id', type=int, help='缺少必要参数'),
         ).parse(request.GET)
         if error is None:
-            data, configs = [], Config.objects.filter(type=form.type, o_id=form.id, env_id=form.env_id)
-            for item in configs.annotate(update_user=F('updated_by__nickname')):
+            form.o_id, data = form.pop('id'), []
+            for item in Config.objects.filter(**form).annotate(update_user=F('updated_by__nickname')):
                 tmp = item.to_dict()
                 tmp['update_user'] = item.update_user
                 data.append(tmp)
@@ -154,4 +154,22 @@ class ConfigView(View):
                     updated_by=request.user
                 )
                 config.delete()
+        return json_response(error=error)
+
+
+class HistoryView(View):
+    def post(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='缺少必要参数'),
+            Argument('env_id', type=int, help='缺少必要参数'),
+            Argument('type', filter=lambda x: x in dict(Config.TYPES), help='缺少必要参数')
+        ).parse(request.body)
+        if error is None:
+            form.o_id, data = form.pop('id'), []
+            for item in ConfigHistory.objects.filter(**form).annotate(update_user=F('updated_by__nickname')):
+                tmp = item.to_dict()
+                tmp['action_alias'] = item.get_action_display()
+                tmp['update_user'] = item.update_user
+                data.append(tmp)
+            return json_response(data)
         return json_response(error=error)
