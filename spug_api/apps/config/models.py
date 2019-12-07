@@ -33,33 +33,26 @@ class Service(models.Model, ModelMixin):
         ordering = ('-id',)
 
 
-class ConfigKey(models.Model, ModelMixin):
+class Config(models.Model, ModelMixin):
     TYPES = (
         ('app', 'App'),
         ('src', 'Service')
     )
-    name = models.CharField(max_length=50)
     type = models.CharField(max_length=5, choices=TYPES)
     o_id = models.IntegerField()
-    is_public = models.BooleanField()
-
-    def __repr__(self):
-        return f'<ConfigKey {self.name!r}>'
-
-    class Meta:
-        db_table = 'config_keys'
-
-
-class ConfigValue(models.Model, ModelMixin):
+    key = models.CharField(max_length=50)
     env = models.ForeignKey(Environment, on_delete=models.PROTECT)
-    key = models.ForeignKey(ConfigKey, on_delete=models.PROTECT)
-    value = models.TextField()
+    value = models.TextField(null=True)
+    desc = models.CharField(max_length=255, null=True)
+    is_public = models.BooleanField(default=True)
+    updated_at = models.CharField(max_length=20)
+    updated_by = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def __repr__(self):
-        return f'<ConfigValue {self.id!r}>'
+        return f'<Config {self.key!r}>'
 
     class Meta:
-        db_table = 'config_values'
+        db_table = 'configs'
 
 
 class ConfigHistory(models.Model, ModelMixin):
@@ -68,12 +61,17 @@ class ConfigHistory(models.Model, ModelMixin):
         ('2', '更新'),
         ('3', '删除')
     )
+    type = models.CharField(max_length=5)
+    o_id = models.IntegerField()
     key = models.CharField(max_length=50)
+    env_id = models.IntegerField()
+    value = models.TextField(null=True)
+    desc = models.CharField(max_length=255, null=True)
+    is_public = models.BooleanField()
     old_value = models.TextField(null=True)
-    new_value = models.TextField(null=True)
     action = models.CharField(max_length=2, choices=ACTIONS)
-    created_at = models.CharField(max_length=20, default=human_time)
-    created_by = models.ForeignKey(User, on_delete=models.PROTECT)
+    updated_at = models.CharField(max_length=20)
+    updated_by = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def __repr__(self):
         return f'<ConfigHistory {self.key!r}>'
