@@ -7,7 +7,7 @@ import http from 'libs/http';
 import store from './store';
 
 @observer
-class ComTable extends React.Component {
+class TableView extends React.Component {
   columns = [{
     title: 'Key',
     key: 'key',
@@ -57,11 +57,11 @@ class ComTable extends React.Component {
     }
     return (
       <React.Fragment>
-        <Table rowKey="id" loading={store.isFetching} dataSource={data} columns={this.columns}/>
+        <Table size="small" rowKey="id" loading={store.isFetching} dataSource={data} columns={this.columns}/>
         {store.formVisible && <ComForm/>}
       </React.Fragment>
     )
   }
 }
 
-export default ComTable
+export default TableView
