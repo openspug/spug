@@ -37,7 +37,8 @@ class JSONView extends React.Component {
       const formData = {type: store.type, o_id: store.id, env_id: store.env.id, data};
       http.post('/api/config/parse/json/', formData)
         .then(res => {
-          message.success('保存成功')
+          message.success('保存成功');
+          this.updateValue()
         })
         .finally(() => this.setState({loading: false}))
     } catch (err) {
@@ -61,12 +62,16 @@ class JSONView extends React.Component {
           onChange={v => this.setState({body: v})}/>
         {readOnly && <Button
           icon="edit"
-          style={{position: 'absolute', top: 20, right: 0}}
+          type="link"
+          size="large"
+          style={{position: 'absolute', top: 0, right: 0}}
           onClick={() => this.setState({readOnly: false})}>编辑</Button>}
         {readOnly || <Button
           icon="save"
+          type="link"
+          size="large"
           loading={loading}
-          style={{position: 'absolute', top: 20, right: 0}}
+          style={{position: 'absolute', top: 0, right: 0}}
           onClick={this.handleSubmit}>保存</Button>}
       </div>
     )

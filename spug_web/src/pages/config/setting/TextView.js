@@ -35,7 +35,8 @@ class TextView extends React.Component {
     const formData = {type: store.type, o_id: store.id, env_id: store.env.id, data: this.state.body};
     http.post('/api/config/parse/text/', formData)
       .then(res => {
-        message.success('保存成功')
+        message.success('保存成功');
+        this.updateValue()
       })
       .finally(() => this.setState({loading: false}))
   };
@@ -55,12 +56,16 @@ class TextView extends React.Component {
           onChange={v => this.setState({body: v})}/>
         {readOnly && <Button
           icon="edit"
-          style={{position: 'absolute', top: 20, right: 10}}
+          type="link"
+          size="large"
+          style={{position: 'absolute', top: 0, right: 0}}
           onClick={() => this.setState({readOnly: false})}>编辑</Button>}
         {readOnly || <Button
           icon="save"
+          type="link"
+          size="large"
           loading={loading}
-          style={{position: 'absolute', top: 20, right: 10}}
+          style={{position: 'absolute', top: 0, right: 0}}
           onClick={this.handleSubmit}>保存</Button>}
       </div>
     )
