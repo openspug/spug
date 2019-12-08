@@ -16,7 +16,7 @@ class Store {
   fetchRecords = () => {
     const params = {type: this.type, id: this.id, env_id: this.env.id};
     this.isFetching = true;
-    http.get('/api/config/', {params})
+    return http.get('/api/config/', {params})
       .then(res => this.records = res)
       .finally(() => this.isFetching = false)
   };

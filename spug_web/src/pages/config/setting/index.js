@@ -14,6 +14,8 @@ import store from './store';
 class Index extends React.Component {
   constructor(props) {
     super(props);
+    this.textView = null;
+    this.JSONView = null;
     this.state = {
       view: '1'
     }
@@ -32,7 +34,14 @@ class Index extends React.Component {
 
   updateEnv = (env) => {
     store.env = env || envStore.records[0];
-    store.fetchRecords()
+    this.handleRefresh()
+  };
+
+  handleRefresh = () => {
+     store.fetchRecords().then(() => {
+      if (this.textView) this.textView.updateValue();
+      if (this.JSONView) this.JSONView.updateValue();
+    })
   };
 
   render() {
@@ -63,7 +72,7 @@ class Index extends React.Component {
               <Input allowClear onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
             </SearchForm.Item>
             <SearchForm.Item span={4}>
-              <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
+              <Button type="primary" icon="sync" onClick={this.handleRefresh}>刷新</Button>
             </SearchForm.Item>
             <SearchForm.Item span={4}>
               <Button type="primary" style={{backgroundColor: 'orange', borderColor: 'orange'}} icon="history"
@@ -75,8 +84,8 @@ class Index extends React.Component {
           </SearchForm>
 
           {view === '1' && <TableView />}
-          {view === '2' && <TextView />}
-          {view === '3' && <JSONView />}
+          {view === '2' && <TextView ref={ref => this.textView = ref} />}
+          {view === '3' && <JSONView ref={ref => this.JSONView = ref} />}
         </div>
         {store.recordVisible && <Record />}
       </div>
