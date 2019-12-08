@@ -156,12 +156,12 @@ class ConfigView(View):
 class HistoryView(View):
     def post(self, request):
         form, error = JsonParser(
-            Argument('id', type=int, help='缺少必要参数'),
+            Argument('o_id', type=int, help='缺少必要参数'),
             Argument('env_id', type=int, help='缺少必要参数'),
             Argument('type', filter=lambda x: x in dict(Config.TYPES), help='缺少必要参数')
         ).parse(request.body)
         if error is None:
-            form.o_id, data = form.pop('id'), []
+            data = []
             for item in ConfigHistory.objects.filter(**form).annotate(update_user=F('updated_by__nickname')):
                 tmp = item.to_dict()
                 tmp['action_alias'] = item.get_action_display()
@@ -169,6 +169,23 @@ class HistoryView(View):
                 data.append(tmp)
             return json_response(data)
         return json_response(error=error)
+
+
+def post_diff(request):
+    form, error = JsonParser(
+        Argument('o_id', type=int, help='缺少必要参数'),
+        Argument('type', filter=lambda x: x in dict(Config.TYPES), help='缺少必要参数'),
+        Argument('envs', type=list, filter=lambda x: len(x), help='缺少必要参数'),
+    ).parse(request.body)
+    if error is None:
+        data, form.env_id__in = {}, form.pop('envs')
+        for item in Config.objects.filter(**form).order_by('key'):
+            if item.key in data:
+                data[item.key][item.env_id] = item.value
+            else:
+                data[item.key] = {'key': item.key, item.env_id: item.value}
+        return json_response(list(data.values()))
+    return json_response(error=error)
 
 
 def parse_json(request):
