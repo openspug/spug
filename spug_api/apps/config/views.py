@@ -2,6 +2,7 @@ from django.views.generic import View
 from django.db.models import F
 from libs import json_response, JsonParser, Argument
 from apps.config.models import *
+import json
 
 
 class EnvironmentView(View):
@@ -142,16 +143,11 @@ class ConfigView(View):
             if config:
                 ConfigHistory.objects.create(
                     action='3',
-                    type=config.type,
-                    o_id=config.o_id,
-                    env_id=config.env_id,
-                    key=config.key,
-                    desc=config.desc,
-                    is_public=config.is_public,
                     old_value=config.value,
                     value='',
                     updated_at=human_time(),
-                    updated_by=request.user
+                    updated_by=request.user,
+                    **config.to_dict(excludes=('id', 'value', 'updated_at', 'updated_by_id'))
                 )
                 config.delete()
         return json_response(error=error)
@@ -173,3 +169,76 @@ class HistoryView(View):
                 data.append(tmp)
             return json_response(data)
         return json_response(error=error)
+
+
+def parse_json(request):
+    form, error = JsonParser(
+        Argument('o_id', type=int, help='缺少必要参数'),
+        Argument('type', filter=lambda x: x in dict(Config.TYPES), help='缺少必要参数'),
+        Argument('env_id', type=int, help='缺少必要参数'),
+        Argument('data', type=dict, help='缺少必要参数')
+    ).parse(request.body)
+    if error is None:
+        data = form.pop('data')
+        _parse(request, form, data)
+    return json_response(error=error)
+
+
+def parse_text(request):
+    form, error = JsonParser(
+        Argument('o_id', type=int, help='缺少必要参数'),
+        Argument('type', filter=lambda x: x in dict(Config.TYPES), help='缺少必要参数'),
+        Argument('env_id', type=int, help='缺少必要参数'),
+        Argument('data', help='缺少必要参数')
+    ).parse(request.body)
+    if error is None:
+        data = {}
+        for line in form.pop('data').strip().split('\n'):
+            fields = line.split('=', 1)
+            if len(fields) != 2 or fields[0].strip() == '':
+                return json_response(error=f'解析配置{line!r}失败，确认其遵循 key = value 格式')
+            data[fields[0].strip()] = fields[1].strip()
+        _parse(request, form, data)
+    return json_response(error=error)
+
+
+def _parse(request, query, data):
+    for item in Config.objects.filter(**query):
+        if item.key in data:
+            value = _filter_value(data.pop(item.key))
+            if item.value != value:
+                old_value = item.value
+                item.value = value
+                item.updated_at = human_time()
+                item.updated_by = request.user
+                item.save()
+                ConfigHistory.objects.create(
+                    action='2',
+                    old_value=old_value,
+                    **item.to_dict(excludes=('id',)))
+        else:
+            ConfigHistory.objects.create(
+                action='3',
+                old_value=item.value,
+                value='',
+                updated_at=human_time(),
+                updated_by=request.user,
+                **item.to_dict(excludes=('id', 'value', 'updated_at', 'updated_by_id'))
+            )
+            item.delete()
+    for key, value in data.items():
+        query.key = key
+        query.is_public = True
+        query.value = _filter_value(value)
+        query.updated_at = human_time()
+        query.updated_by = request.user
+        Config.objects.create(**query)
+        ConfigHistory.objects.create(action='1', **query)
+
+
+def _filter_value(value):
+    if isinstance(value, (str, int)):
+        value = str(value).strip()
+    else:
+        value = json.dumps(value)
+    return value
