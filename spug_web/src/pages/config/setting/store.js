@@ -10,6 +10,7 @@ class Store {
   @observable isFetching = false;
   @observable formVisible = false;
   @observable recordVisible = false;
+  @observable diffVisible = false;
 
   @observable f_name;
 
@@ -28,6 +29,10 @@ class Store {
 
   showRecord = () => {
     this.recordVisible = true
+  };
+
+  showDiff = () => {
+    this.diffVisible = true
   }
 }
 

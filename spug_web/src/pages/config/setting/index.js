@@ -1,9 +1,11 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Menu, Input, Button, Select, Icon } from 'antd';
+import { Menu, Input, Button, Select, PageHeader, Icon } from 'antd';
 import envStore from '../environment/store';
 import styles from './index.module.css';
+import history from 'libs/history';
 import { SearchForm } from 'components';
+import DiffConfig from './DiffConfig';
 import TableView from './TableView';
 import TextView from './TextView';
 import JSONView from './JSONView';
@@ -38,7 +40,7 @@ class Index extends React.Component {
   };
 
   handleRefresh = () => {
-     store.fetchRecords().then(() => {
+    store.fetchRecords().then(() => {
       if (this.textView) this.textView.updateValue();
       if (this.JSONView) this.JSONView.updateValue();
     })
@@ -49,6 +51,11 @@ class Index extends React.Component {
     return (
       <div className={styles.container}>
         <div className={styles.left}>
+          <PageHeader
+            title="环境列表"
+            style={{padding: '0 0 10px 10px'}}
+            onBack={() => history.goBack()}
+            extra={<Button type="link" icon="diff" onClick={store.showDiff}>对比配置</Button>}/>
           <Menu
             mode="inline"
             selectedKeys={[String(store.env.id)]}
@@ -63,9 +70,9 @@ class Index extends React.Component {
           <SearchForm>
             <SearchForm.Item span={5} title="视图">
               <Select value={view} style={{width: '100%'}} onChange={v => this.setState({view: v})}>
-                <Select.Option value="1"><Icon type="table" style={{marginRight: 10}} />表格</Select.Option>
-                <Select.Option value="2"><Icon type="unordered-list" style={{marginRight: 10}} />文本</Select.Option>
-                <Select.Option value="3"><Icon type="number" style={{marginRight: 10}} />JSON</Select.Option>
+                <Select.Option value="1"><Icon type="table" style={{marginRight: 10}}/>表格</Select.Option>
+                <Select.Option value="2"><Icon type="unordered-list" style={{marginRight: 10}}/>文本</Select.Option>
+                <Select.Option value="3"><Icon type="number" style={{marginRight: 10}}/>JSON</Select.Option>
               </Select>
             </SearchForm.Item>
             <SearchForm.Item span={7} title="Key">
@@ -83,11 +90,12 @@ class Index extends React.Component {
             </SearchForm.Item>
           </SearchForm>
 
-          {view === '1' && <TableView />}
-          {view === '2' && <TextView ref={ref => this.textView = ref} />}
-          {view === '3' && <JSONView ref={ref => this.JSONView = ref} />}
+          {view === '1' && <TableView/>}
+          {view === '2' && <TextView ref={ref => this.textView = ref}/>}
+          {view === '3' && <JSONView ref={ref => this.JSONView = ref}/>}
         </div>
-        {store.recordVisible && <Record />}
+        {store.recordVisible && <Record/>}
+        {store.diffVisible && <DiffConfig/>}
       </div>
     )
   }

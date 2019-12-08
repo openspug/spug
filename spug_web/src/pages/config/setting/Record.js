@@ -16,7 +16,7 @@ class Record extends React.Component {
   }
 
   componentDidMount() {
-    const formData = {type: store.type, id: store.id, env_id: store.env.id};
+    const formData = {type: store.type, o_id: store.id, env_id: store.env.id};
     http.post('/api/config/history/', formData)
       .then(res => this.setState({records: res}))
       .finally(() => this.setState({loading: false}))
