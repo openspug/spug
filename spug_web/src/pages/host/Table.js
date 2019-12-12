@@ -35,14 +35,21 @@ class ComTable extends React.Component {
     ellipsis: true
   }, {
     title: '操作',
+    width: 200,
     render: info => (
       <span>
         <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
         <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
+        <Divider type="vertical"/>
+        <LinkButton onClick={() => this.handleConsole(info)}>Console</LinkButton>
       </span>
     )
   }];
+
+  handleConsole = (info) => {
+    window.open(`/api/host/ssh/${info.id}/?x-token=${localStorage.getItem('token')}`)
+  };
 
   handleDelete = (text) => {
     Modal.confirm({
