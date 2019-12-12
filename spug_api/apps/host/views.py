@@ -1,4 +1,6 @@
 from django.views.generic import View
+from django.shortcuts import render
+from django.http.response import HttpResponseBadRequest
 from libs import json_response, JsonParser, Argument
 from apps.setting.utils import AppSetting
 from apps.host.models import Host
@@ -44,6 +46,14 @@ class HostView(View):
                 deleted_by=request.user,
             )
         return json_response(error=error)
+
+
+def web_ssh(request, h_id):
+    host = Host.objects.filter(pk=h_id).first()
+    if not host:
+        return HttpResponseBadRequest('unknown host')
+    context = {'id': h_id, 'title': host.name, 'token': request.user.access_token}
+    return render(request, 'web_ssh.html', context)
 
 
 def valid_ssh(hostname, port, username, password):

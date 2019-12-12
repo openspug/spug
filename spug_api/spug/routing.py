@@ -1,5 +1,5 @@
 from channels.routing import ProtocolTypeRouter, ChannelNameRouter, URLRouter
-from apps.consumer import routing, executors
+from consumer import routing, executors
 
 application = ProtocolTypeRouter({
     'channel': ChannelNameRouter({

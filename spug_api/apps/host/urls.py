@@ -1,7 +1,8 @@
-from django.conf.urls import url
+from django.urls import path
 
 from .views import *
 
 urlpatterns = [
-    url(r'^$', HostView.as_view()),
+    path('', HostView.as_view()),
+    path('ssh/<int:h_id>/', web_ssh),
 ]
