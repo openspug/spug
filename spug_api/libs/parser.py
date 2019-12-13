@@ -17,7 +17,8 @@ class Argument(object):
     :param bool required: is required
     """
 
-    def __init__(self, name, default=None, required=True, type=str, filter=None, help=None, nullable=False):
+    def __init__(self, name, default=None, handler=None, required=True, type=str, filter=None, help=None,
+                 nullable=False):
         self.name = name
         self.default = default
         self.type = type
@@ -25,6 +26,7 @@ class Argument(object):
         self.nullable = nullable
         self.filter = filter
         self.help = help
+        self.handler = handler
         if not isinstance(self.name, str):
             raise TypeError('Argument name must be string')
         if filter and not callable(self.filter):
@@ -63,6 +65,8 @@ class Argument(object):
             if not self.filter(value):
                 raise ParseError(
                     self.help or 'Value Error: %s filter check failed' % self.name)
+        if self.handler:
+            value = self.handler(value)
         return value
 
 

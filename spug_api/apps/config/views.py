@@ -206,11 +206,11 @@ def parse_text(request):
         Argument('o_id', type=int, help='缺少必要参数'),
         Argument('type', filter=lambda x: x in dict(Config.TYPES), help='缺少必要参数'),
         Argument('env_id', type=int, help='缺少必要参数'),
-        Argument('data', help='缺少必要参数')
+        Argument('data', handler=str.strip, help='缺少必要参数')
     ).parse(request.body)
     if error is None:
         data = {}
-        for line in form.pop('data').strip().split('\n'):
+        for line in form.pop('data').split('\n'):
             fields = line.split('=', 1)
             if len(fields) != 2 or fields[0].strip() == '':
                 return json_response(error=f'解析配置{line!r}失败，确认其遵循 key = value 格式')

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'apps.monitor',
     'apps.alarm',
     'apps.config',
+    'apps.app',
 ]
 
 MIDDLEWARE = [
