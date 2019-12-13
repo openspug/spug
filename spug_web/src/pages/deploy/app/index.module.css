@@ -1,0 +1,39 @@
+.steps {
+    width: 520px;
+    margin: 0 auto 30px;
+}
+
+.delIcon {
+    font-size: 24px;
+    position: relative;
+    top: 4px
+}
+
+.deployBlock {
+    height: 100px;
+    margin-top: 63px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.cardBlock {
+    display: flex;
+    justify-content: space-around;
+    background-color: rgba(240, 242, 245, 1);
+    padding: 50px 0;
+}
+
+.cardTitle {
+    margin-bottom: 12px;
+    font-weight: 500;
+    font-size: 16px;
+    color: rgba(0, 0, 0, .85);
+}
+
+.cardDesc {
+    height: 64px;
+    overflow: hidden;
+    color: rgba(0, 0, 0, .65);
+}

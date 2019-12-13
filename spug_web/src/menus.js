@@ -7,6 +7,11 @@ export default [
       {title: '模板管理', path: '/exec/template'},
     ]
   },
+  {
+    icon: 'flag', title: '应用发布', child: [
+      {title: '应用管理', path: '/deploy/app'},
+    ]
+  },
   {icon: 'schedule', title: '任务计划', path: '/schedule'},
   {
     icon: 'deployment-unit', title: '配置中心', child: [
