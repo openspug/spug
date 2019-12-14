@@ -1,46 +1,29 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, message } from 'antd';
-import http from 'libs/http';
+import { Modal, Steps } from 'antd';
+import styles from './index.module.css';
+import Setup1 from './Ext2Setup1';
+import Setup2 from './Ext2Setup2';
+import Setup3 from './Ext2Setup3';
 import store from './store';
 
-@observer
-class ComForm extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      loading: false,
-      type: null,
-      body: store.record['body'],
-    }
-  }
-
-  handleSubmit = () => {
-    this.setState({loading: true});
-    const formData = this.props.form.getFieldsValue();
-    formData['id'] = store.record.id;
-    formData['body'] = this.state.body;
-    http.post('/api/exec/template/', formData)
-      .then(res => {
-        message.success('操作成功');
-        store.formVisible = false;
-        store.fetchRecords()
-      }, () => this.setState({loading: false}))
-  };
-
-  render() {
-    return (
-      <Modal
-        visible
-        width={800}
-        maskClosable={false}
-        title={store.record.id ? '编辑自定义发布' : '新建自定义发布'}
-        onCancel={() => store.ext2Visible = false}
-        footer={null}>
-
-      </Modal>
-    )
-  }
-}
-
-export default ComForm
+export default observer(function Ext2From() {
+  return (
+    <Modal
+      visible
+      width={800}
+      maskClosable={false}
+      title={store.record.id ? '编辑自定义发布' : '新建自定义发布'}
+      onCancel={() => store.ext2Visible = false}
+      footer={null}>
+      <Steps current={store.page} className={styles.steps}>
+        <Steps.Step key={0} title="基本配置"/>
+        <Steps.Step key={1} title="发布主机"/>
+        <Steps.Step key={2} title="执行动作"/>
+      </Steps>
+      {store.page === 0 && <Setup1/>}
+      {store.page === 1 && <Setup2/>}
+      {store.page === 2 && <Setup3/>}
+    </Modal>
+  )
+})

@@ -4,6 +4,7 @@ import http from 'libs/http';
 class Store {
   @observable records = [];
   @observable record = {};
+  @observable actions = [{}];
   @observable page = 0;
   @observable isFetching = false;
   @observable addVisible = false;
@@ -11,14 +12,6 @@ class Store {
   @observable ext2Visible = false;
 
   @observable f_name;
-
-  initRecord = () => ({
-    git_type: 'branch',
-    is_audit: false,
-    versions: 10,
-    host_ids: [undefined],
-    filter_rule: {type: 'contain', data: ''}
-  });
 
   fetchRecords = () => {
     this.isFetching = true;
@@ -38,7 +31,6 @@ class Store {
       this.record = info
     } else {
       this.addVisible = true;
-      this.record = this.initRecord()
     }
   };
 

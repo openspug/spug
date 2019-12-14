@@ -5,27 +5,16 @@ import Editor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-text';
 import 'ace-builds/src-noconflict/mode-sh';
 import 'ace-builds/src-noconflict/theme-tomorrow';
-import envStore from 'pages/config/environment/store';
 import store from './store';
 import http from 'libs/http';
-import hostStore from 'pages/host/store';
 import styles from './index.module.css';
 
 @observer
-class Setup1 extends React.Component {
+class Ext1Setup3 extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       loading: false
-    }
-  }
-
-  componentDidMount() {
-    if (envStore.records.length === 0) {
-      envStore.fetchRecords()
-    }
-    if (hostStore.records.length === 0) {
-      hostStore.fetchRecords()
     }
   }
 
@@ -57,10 +46,6 @@ class Setup1 extends React.Component {
 
   render() {
     const info = store.record;
-    const itemTailLayout = {
-      labelCol: {span: 6},
-      wrapperCol: {span: 14, offset: 6}
-    };
     return (
       <React.Fragment>
         <Row>
@@ -149,7 +134,7 @@ class Setup1 extends React.Component {
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item {...itemTailLayout}>
+        <Form.Item wrapperCol={{span: 14, offset: 6}}>
           <Button type="primary" onClick={this.handleSubmit}>提交</Button>
           <Button style={{marginLeft: 20}} onClick={() => store.page -= 1}>上一步</Button>
         </Form.Item>
@@ -158,4 +143,4 @@ class Setup1 extends React.Component {
   }
 }
 
-export default Setup1
+export default Ext1Setup3

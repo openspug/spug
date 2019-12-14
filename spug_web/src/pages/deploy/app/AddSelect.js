@@ -9,11 +9,22 @@ class AddSelect extends React.Component {
   switchExt1 = () => {
     store.addVisible = false;
     store.ext1Visible = true;
+    store.record = {
+      git_type: 'branch',
+      is_audit: false,
+      versions: 10,
+      host_ids: [undefined],
+      filter_rule: {type: 'contain', data: ''}
+    }
   };
 
   switchExt2 = () => {
     store.addVisible = false;
     store.ext2Visible = true;
+    store.record = {
+      is_audit: false,
+      host_ids: [undefined],
+    }
   };
 
   render() {

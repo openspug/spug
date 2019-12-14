@@ -1,13 +1,13 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Steps } from 'antd';
-import Setup1 from './Setup1';
-import Setup2 from './Setup2';
-import Setup3 from './Setup3';
+import Setup1 from './Ext1Setup1';
+import Setup2 from './Ext1Setup2';
+import Setup3 from './Ext1Setup3';
 import store from './store';
 import styles from './index.module.css';
 
-export default observer(function () {
+export default observer(function Ext1From() {
   return (
     <Modal
       visible
@@ -18,7 +18,7 @@ export default observer(function () {
       footer={null}>
       <Steps current={store.page} className={styles.steps}>
         <Steps.Step key={0} title="基本配置"/>
-        <Steps.Step key={1} title="目标集群"/>
+        <Steps.Step key={1} title="发布主机"/>
         <Steps.Step key={2} title="任务配置"/>
       </Steps>
       {store.page === 0 && <Setup1/>}
