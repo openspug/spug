@@ -84,14 +84,6 @@ class ComForm extends React.Component {
   render() {
     const info = store.record;
     const {getFieldDecorator} = this.props.form;
-    const itemLayout = {
-      labelCol: {span: 6},
-      wrapperCol: {span: 14}
-    };
-    const itemTailLayout = {
-      labelCol: {span: 6},
-      wrapperCol: {span: 14, offset: 6}
-    };
     return (
       <Modal
         visible
