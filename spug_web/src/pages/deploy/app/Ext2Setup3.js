@@ -19,7 +19,8 @@ class Ext2Setup3 extends React.Component {
 
   handleSubmit = () => {
     this.setState({loading: true});
-    http.post('/api/app/', {extend: '2', actions: store.actions})
+    store.record['extend'] = '2';
+    http.post('/api/app/', store.record)
       .then(res => {
         message.success('保存成功');
         store.ext2Visible = false;
@@ -28,9 +29,10 @@ class Ext2Setup3 extends React.Component {
   };
 
   render() {
+    const actions = store.record['actions'];
     return (
       <Form labelCol={{span: 6}} wrapperCol={{span: 14}} className={styles.ext2Form}>
-        {store.actions.map((item, index) => (
+        {actions.map((item, index) => (
           <div key={index} style={{marginBottom: 30, position: 'relative'}}>
             <Form.Item required label={`动作${index + 1}`}>
               <Input value={item['title']} onChange={e => item['title'] = e.target.value} placeholder="请输入"/>
@@ -45,21 +47,21 @@ class Ext2Setup3 extends React.Component {
                 onChange={v => item['data'] = v}
                 placeholder="请输入要执行的动作"/>
             </Form.Item>
-            {store.actions.length > 1 && (
-              <div className={styles.delAction} onClick={() => store.actions.splice(index, 1)}><Icon
+            {actions.length > 1 && (
+              <div className={styles.delAction} onClick={() => actions.splice(index, 1)}><Icon
                 type="minus-circle"/>移除</div>
             )}
           </div>
         ))}
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <Button type="dashed" block onClick={() => store.actions.push({})}>
+          <Button type="dashed" block onClick={() => actions.push({})}>
             <Icon type="plus"/>添加执行动作
           </Button>
         </Form.Item>
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
           <Button
             type="primary"
-            disabled={store.actions.filter(x => x.title && x.data).length === 0}
+            disabled={actions.filter(x => x.title && x.data).length === 0}
             loading={this.state.loading}
             onClick={this.handleSubmit}>提交</Button>
           <Button style={{marginLeft: 20}} onClick={() => store.page -= 1}>上一步</Button>

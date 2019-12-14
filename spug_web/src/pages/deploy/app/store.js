@@ -4,7 +4,6 @@ import http from 'libs/http';
 class Store {
   @observable records = [];
   @observable record = {};
-  @observable actions = [{}];
   @observable page = 0;
   @observable isFetching = false;
   @observable addVisible = false;
