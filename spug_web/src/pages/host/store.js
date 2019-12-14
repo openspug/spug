@@ -5,6 +5,7 @@ class Store {
   @observable records = [];
   @observable zones = [];
   @observable record = {};
+  @observable idMap = {};
   @observable isFetching = false;
   @observable formVisible = false;
 
@@ -17,6 +18,9 @@ class Store {
       .then(({hosts, zones}) => {
         this.records = hosts;
         this.zones = zones;
+        for (let item of hosts) {
+          this.idMap[item.id] = item
+        }
       })
       .finally(() => this.isFetching = false)
   };

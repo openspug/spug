@@ -10,6 +10,7 @@ export default [
   {
     icon: 'flag', title: '应用发布', child: [
       {title: '应用管理', path: '/deploy/app'},
+      {title: '发布申请', path: '/deploy/request'},
     ]
   },
   {icon: 'schedule', title: '任务计划', path: '/schedule'},
