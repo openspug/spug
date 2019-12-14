@@ -50,8 +50,13 @@ class AppView(View):
                 ).parse(request.body)
                 if error:
                     return json_response(error=error)
-                app = App.objects.create(created_by=request.user, **form)
-                AppExtend2.objects.create(app=app, actions=json.dumps(extend_form.actions))
+                extend_form.actions = json.dumps(extend_form.actions)
+                if form.id:
+                    App.objects.filter(pk=form.id).update(**form)
+                    AppExtend2.objects.filter(app_id=form.id).update(**extend_form)
+                else:
+                    app = App.objects.create(created_by=request.user, **form)
+                    AppExtend2.objects.create(app=app, **extend_form.actions)
         return json_response(error=error)
 
 

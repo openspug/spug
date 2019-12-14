@@ -75,6 +75,11 @@ class AppExtend2(models.Model, ModelMixin):
     app = models.OneToOneField(App, primary_key=True, on_delete=models.CASCADE)
     actions = models.TextField()
 
+    def to_dict(self, *args, **kwargs):
+        tmp = super().to_dict(*args, **kwargs)
+        tmp['actions'] = json.loads(self.actions)
+        return tmp
+
     def __repr__(self):
         return '<AppExtend2 app_id=%r>' % self.app_id
 
