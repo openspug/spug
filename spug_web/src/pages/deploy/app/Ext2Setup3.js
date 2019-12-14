@@ -20,6 +20,7 @@ class Ext2Setup3 extends React.Component {
   handleSubmit = () => {
     this.setState({loading: true});
     store.record['extend'] = '2';
+    store.record['actions'] = store.record['actions'].filter(x => x.title && x.data);
     http.post('/api/app/', store.record)
       .then(res => {
         message.success('保存成功');
@@ -65,7 +66,7 @@ class Ext2Setup3 extends React.Component {
           </div>
         ))}
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <Button type="dashed" block onClick={() => actions.push({})}>
+          <Button type="dashed" block onClick={() => actions.push({target: 'server'})}>
             <Icon type="plus"/>添加执行动作
           </Button>
         </Form.Item>
