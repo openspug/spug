@@ -28,10 +28,6 @@ class ComForm extends React.Component {
   render() {
     const info = store.record;
     const {getFieldDecorator} = this.props.form;
-    const itemLayout = {
-      labelCol: {span: 6},
-      wrapperCol: {span: 14}
-    };
     return (
       <Modal
         visible
@@ -41,18 +37,18 @@ class ComForm extends React.Component {
         onCancel={() => store.formVisible = false}
         confirmLoading={this.state.loading}
         onOk={this.handleSubmit}>
-        <Form>
-          <Form.Item {...itemLayout} required label="环境名称">
+        <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
+          <Form.Item required label="环境名称">
             {getFieldDecorator('name', {initialValue: info['name']})(
               <Input placeholder="请输入环境名称，例如：开发环境"/>
             )}
           </Form.Item>
-          <Form.Item {...itemLayout} required label="唯一标识符">
+          <Form.Item required label="唯一标识符">
             {getFieldDecorator('key', {initialValue: info['key']})(
               <Input placeholder="请输入唯一标识符，例如：dev"/>
             )}
           </Form.Item>
-          <Form.Item {...itemLayout} label="备注信息">
+          <Form.Item label="备注信息">
             {getFieldDecorator('desc', {initialValue: info['desc']})(
               <Input.TextArea placeholder="请输入备注信息"/>
             )}

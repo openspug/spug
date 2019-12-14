@@ -29,10 +29,6 @@ class ComForm extends React.Component {
   render() {
     const info = store.record;
     const {getFieldDecorator} = this.props.form;
-    const itemLayout = {
-      labelCol: {span: 6},
-      wrapperCol: {span: 14}
-    };
     return (
       <Modal
         visible
@@ -42,18 +38,18 @@ class ComForm extends React.Component {
         onCancel={() => store.formVisible = false}
         confirmLoading={this.state.loading}
         onOk={this.handleSubmit}>
-        <Form>
-          <Form.Item {...itemLayout} required label="组名称">
+        <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
+          <Form.Item required label="组名称">
             {getFieldDecorator('name', {initialValue: info['name']})(
               <Input placeholder="请输入联系组名称"/>
             )}
           </Form.Item>
-          <Form.Item {...itemLayout} label="备注信息">
+          <Form.Item label="备注信息">
             {getFieldDecorator('desc', {initialValue: info['desc']})(
               <Input.TextArea placeholder="请输入模板备注信息"/>
             )}
           </Form.Item>
-          <Form.Item {...itemLayout} required label="选择联系人">
+          <Form.Item required label="选择联系人">
             {getFieldDecorator('contacts', {valuePropName: 'targetKeys', initialValue: info['contacts']})(
               <Transfer
                 rowKey={item => item.id}

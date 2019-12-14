@@ -26,10 +26,6 @@ class ComForm extends React.Component {
   render() {
     const info = store.record;
     const {getFieldDecorator} = this.props.form;
-    const itemLayout = {
-      labelCol: {span: 6},
-      wrapperCol: {span: 14}
-    };
     return (
       <Modal
         visible
@@ -38,18 +34,18 @@ class ComForm extends React.Component {
         onCancel={() => store.formVisible = false}
         confirmLoading={this.state.loading}
         onOk={this.handleSubmit}>
-        <Form>
-          <Form.Item {...itemLayout} required label="登录名">
+        <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
+          <Form.Item required label="登录名">
             {getFieldDecorator('username', {initialValue: info['username']})(
               <Input placeholder="请输入登录名"/>
             )}
           </Form.Item>
-          <Form.Item {...itemLayout} required label="姓名">
+          <Form.Item required label="姓名">
             {getFieldDecorator('nickname', {initialValue: info['nickname']})(
               <Input placeholder="请输入姓名"/>
             )}
           </Form.Item>
-          <Form.Item {...itemLayout} required label="密码">
+          <Form.Item required label="密码">
             {getFieldDecorator('password', {initialValue: info.id ? '******' : undefined})(
               <Input type="password" placeholder="请输入密码"/>
             )}

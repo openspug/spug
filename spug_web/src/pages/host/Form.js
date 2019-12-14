@@ -102,8 +102,8 @@ class ComForm extends React.Component {
         onCancel={() => store.formVisible = false}
         confirmLoading={this.state.loading}
         onOk={this.handleSubmit}>
-        <Form>
-          <Form.Item {...itemLayout} required label="主机类别">
+        <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
+          <Form.Item required label="主机类别">
             <Col span={16}>
               {getFieldDecorator('zone', {initialValue: info['zone']})(
                 <Select placeholder="请选择主机类别/区域/分组">
@@ -117,12 +117,12 @@ class ComForm extends React.Component {
               <Button type="link" onClick={this.handleAddZone}>添加类别</Button>
             </Col>
           </Form.Item>
-          <Form.Item {...itemLayout} required label="主机别名">
+          <Form.Item required label="主机别名">
             {getFieldDecorator('name', {initialValue: info['name']})(
               <Input placeholder="请输入主机别名"/>
             )}
           </Form.Item>
-          <Form.Item {...itemLayout} required label="连接地址" style={{marginBottom: 0}}>
+          <Form.Item required label="连接地址" style={{marginBottom: 0}}>
             <Form.Item style={{display: 'inline-block', width: 'calc(30%)'}}>
               {getFieldDecorator('username', {initialValue: info['username']})(
                 <Input addonBefore="ssh" placeholder="用户名"/>
@@ -139,12 +139,12 @@ class ComForm extends React.Component {
               )}
             </Form.Item>
           </Form.Item>
-          <Form.Item {...itemLayout} label="备注信息">
+          <Form.Item label="备注信息">
             {getFieldDecorator('desc', {initialValue: info['desc']})(
               <Input.TextArea placeholder="请输入主机备注信息"/>
             )}
           </Form.Item>
-          <Form.Item {...itemTailLayout}>
+          <Form.Item wrapperCol={{span: 14, offset: 6}}>
             <span role="img" aria-label="notice">⚠️ 首次验证时需要输入登录用户名对应的密码，但不会存储该密码。</span>
           </Form.Item>
         </Form>

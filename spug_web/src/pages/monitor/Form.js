@@ -60,16 +60,6 @@ class ComForm extends React.Component {
       }, () => this.setState({loading: false}))
   };
 
-  itemLayout = {
-    labelCol: {span: 6},
-    wrapperCol: {span: 14}
-  };
-
-  itemTailLayout = {
-    labelCol: {span: 6},
-    wrapperCol: {span: 14, offset: 6}
-  };
-
   getStyle = (t) => {
     const type = this.props.form.getFieldValue('type');
     return t.indexOf(type) !== -1 ? {display: 'block'} : {display: 'none'}
@@ -123,9 +113,9 @@ class ComForm extends React.Component {
           <Steps.Step key={0} title="创建任务"/>
           <Steps.Step key={1} title="设置规则"/>
         </Steps>
-        <Form>
+        <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
           <div style={{display: page === 0 ? 'block' : 'none'}}>
-            <Form.Item {...this.itemLayout} label="监控类型">
+            <Form.Item label="监控类型">
               {getFieldDecorator('type', {initialValue: info['type'] || '1'})(
                 <Select placeholder="请选择监控类型">
                   <Select.Option value="1">站点检测</Select.Option>
@@ -135,19 +125,19 @@ class ComForm extends React.Component {
                 </Select>
               )}
             </Form.Item>
-            <Form.Item {...this.itemLayout} required label="任务名称">
+            <Form.Item required label="任务名称">
               {getFieldDecorator('name', {initialValue: info['name']})(
                 <Input placeholder="请输入任务名称"/>
               )}
             </Form.Item>
-            <Form.Item {...this.itemLayout} required label="监控地址" style={this.getStyle('1')}>
+            <Form.Item required label="监控地址" style={this.getStyle('1')}>
               <Input value={addr['1']} addonBefore={this.siteBefore()} placeholder="请输入监控地址"
                      onChange={e => this.handleAddr('1', e)}/>
             </Form.Item>
-            <Form.Item {...this.itemLayout} required label="监控地址" style={this.getStyle('2')}>
+            <Form.Item required label="监控地址" style={this.getStyle('2')}>
               <Input value={addr['2']} placeholder="请输入监控地址（IP/域名）" onChange={e => this.handleAddr('2', e)}/>
             </Form.Item>
-            <Form.Item {...this.itemLayout} required label="监控主机" style={this.getStyle('34')}>
+            <Form.Item required label="监控主机" style={this.getStyle('34')}>
               <Select value={addr['3']} placeholder="请选择主机" onChange={v => this.handleAddr('3', v)}>
                 {hostStore.records.map(item => (
                   <Select.Option value={String(item.id)}
@@ -155,24 +145,24 @@ class ComForm extends React.Component {
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item {...this.itemLayout} required label="检测端口" style={this.getStyle('2')}>
+            <Form.Item required label="检测端口" style={this.getStyle('2')}>
               <Input value={extra['2']} placeholder="请输入端口号" onChange={e => this.handleExtra('2', e)}/>
             </Form.Item>
-            <Form.Item {...this.itemLayout} required label="进程名称" style={this.getStyle('3')}>
+            <Form.Item required label="进程名称" style={this.getStyle('3')}>
               <Input value={extra['3']} placeholder="请输入进程名称" onChange={e => this.handleExtra('3', e)}/>
             </Form.Item>
-            <Form.Item {...this.itemLayout} required label="脚本内容" style={this.getStyle('4')}
+            <Form.Item required label="脚本内容" style={this.getStyle('4')}
                        extra={<LinkButton onClick={() => this.setState({showTmp: true})}>从模板添加</LinkButton>}>
               <ACEditor mode="sh" value={extra['4']} height="200px" onChange={e => this.handleExtra('4', e)}/>
             </Form.Item>
-            <Form.Item {...this.itemLayout} label="备注信息">
+            <Form.Item label="备注信息">
               {getFieldDecorator('desc', {initialValue: info['desc']})(
                 <Input.TextArea placeholder="请输入备注信息"/>
               )}
             </Form.Item>
           </div>
           <div style={{display: page === 1 ? 'block' : 'none'}}>
-            <Form.Item {...this.itemLayout} label="监控频率">
+            <Form.Item label="监控频率">
               {getFieldDecorator('rate', {initialValue: info['rate'] || 5})(
                 <Radio.Group>
                   <Radio value={1}>1分钟</Radio>
@@ -183,7 +173,7 @@ class ComForm extends React.Component {
                 </Radio.Group>
               )}
             </Form.Item>
-            <Form.Item {...this.itemLayout} label="报警阈值">
+            <Form.Item label="报警阈值">
               {getFieldDecorator('threshold', {initialValue: info['threshold'] || 3})(
                 <Radio.Group>
                   <Radio value={1}>1次</Radio>
@@ -194,7 +184,7 @@ class ComForm extends React.Component {
                 </Radio.Group>
               )}
             </Form.Item>
-            <Form.Item {...this.itemLayout} required label="报警联系人组">
+            <Form.Item required label="报警联系人组">
               {getFieldDecorator('notify_grp', {valuePropName: 'targetKeys', initialValue: info['notify_grp']})(
                 <Transfer
                   lazy={false}
@@ -205,12 +195,12 @@ class ComForm extends React.Component {
                   render={item => item.name}/>
               )}
             </Form.Item>
-            <Form.Item {...this.itemLayout} required label="报警方式">
+            <Form.Item required label="报警方式">
               {getFieldDecorator('notify_mode', {initialValue: info['notify_mode']})(
                 <Checkbox.Group options={modeOptions}/>
               )}
             </Form.Item>
-            <Form.Item {...this.itemLayout} label="通道沉默">
+            <Form.Item label="通道沉默">
               {getFieldDecorator('quiet', {initialValue: info['quiet'] || 24 * 60})(
                 <Select placeholder="请选择">
                   <Select.Option value={5}>5分钟</Select.Option>
@@ -226,7 +216,7 @@ class ComForm extends React.Component {
               )}
             </Form.Item>
           </div>
-          <Form.Item {...this.itemTailLayout}>
+          <Form.Item wrapperCol={{span: 14, offset: 6}}>
             {page === 1 &&
             <Button disabled={!b2} type="primary" onClick={this.handleSubmit} loading={loading}>提交</Button>}
             {page === 0 &&

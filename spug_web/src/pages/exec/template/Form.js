@@ -54,10 +54,6 @@ class ComForm extends React.Component {
   render() {
     const info = store.record;
     const {getFieldDecorator} = this.props.form;
-    const itemLayout = {
-      labelCol: {span: 6},
-      wrapperCol: {span: 14}
-    };
     return (
       <Modal
         visible
@@ -67,8 +63,8 @@ class ComForm extends React.Component {
         onCancel={() => store.formVisible = false}
         confirmLoading={this.state.loading}
         onOk={this.handleSubmit}>
-        <Form>
-          <Form.Item {...itemLayout} required label="模板类型">
+        <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
+          <Form.Item required label="模板类型">
             <Col span={16}>
               {getFieldDecorator('type', {initialValue: info['type']})(
                 <Select placeholder="请选择模板类型">
@@ -82,19 +78,19 @@ class ComForm extends React.Component {
               <Button type="link" onClick={this.handleAddZone}>添加类型</Button>
             </Col>
           </Form.Item>
-          <Form.Item {...itemLayout} required label="模板名称">
+          <Form.Item required label="模板名称">
             {getFieldDecorator('name', {initialValue: info['name']})(
               <Input placeholder="请输入模板名称"/>
             )}
           </Form.Item>
-          <Form.Item {...itemLayout} required label="模板内容">
+          <Form.Item required label="模板内容">
             <ACEditor
               mode="sh"
               value={this.state.body}
               onChange={val => this.setState({body: val})}
               height="300px"/>
           </Form.Item>
-          <Form.Item {...itemLayout} label="备注信息">
+          <Form.Item label="备注信息">
             {getFieldDecorator('desc', {initialValue: info['desc']})(
               <Input.TextArea placeholder="请输入模板备注信息"/>
             )}

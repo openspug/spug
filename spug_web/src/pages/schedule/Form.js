@@ -101,14 +101,6 @@ class ComForm extends React.Component {
     const {getFieldDecorator} = this.props.form;
     const {page, args, loading, showTmp} = this.state;
     const [b1, b2, b3] = this.verifyButtonStatus();
-    const itemLayout = {
-      labelCol: {span: 6},
-      wrapperCol: {span: 14}
-    };
-    const itemTailLayout = {
-      labelCol: {span: 6},
-      wrapperCol: {span: 14, offset: 6}
-    };
     return (
       <Modal
         visible
@@ -123,9 +115,9 @@ class ComForm extends React.Component {
           <Steps.Step key={1} title="选择执行对象"/>
           <Steps.Step key={2} title="设置触发器"/>
         </Steps>
-        <Form>
+        <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
           <div style={{display: page === 0 ? 'block' : 'none'}}>
-            <Form.Item {...itemLayout} required label="任务类型">
+            <Form.Item required label="任务类型">
               <Col span={16}>
                 {getFieldDecorator('type', {initialValue: info['type']})(
                   <Select placeholder="请选择任务类型">
@@ -139,13 +131,12 @@ class ComForm extends React.Component {
                 <Button type="link" onClick={this.handleAddZone}>添加类型</Button>
               </Col>
             </Form.Item>
-            <Form.Item {...itemLayout} required label="任务名称">
+            <Form.Item required label="任务名称">
               {getFieldDecorator('name', {initialValue: info['name']})(
                 <Input placeholder="请输入任务名称"/>
               )}
             </Form.Item>
             <Form.Item
-              {...itemLayout}
               required
               label="任务内容"
               extra={<LinkButton onClick={() => this.setState({showTmp: true})}>从模板添加</LinkButton>}>
@@ -153,16 +144,16 @@ class ComForm extends React.Component {
                 mode="sh"
                 value={this.state.command}
                 onChange={val => this.setState({command: val})}
-                height="200px"/>
+                height="150px"/>
             </Form.Item>
-            <Form.Item {...itemLayout} label="备注信息">
+            <Form.Item label="备注信息">
               {getFieldDecorator('desc', {initialValue: info['desc']})(
                 <Input.TextArea placeholder="请输入模板备注信息"/>
               )}
             </Form.Item>
           </div>
           <div style={{minHeight: 224, display: page === 1 ? 'block' : 'none'}}>
-            <Form.Item {...itemLayout} required label="执行对象">
+            <Form.Item required label="执行对象">
               {store.targets.map((id, index) => (
                 <React.Fragment key={index}>
                   <Select
@@ -183,14 +174,14 @@ class ComForm extends React.Component {
                 </React.Fragment>
               ))}
             </Form.Item>
-            <Form.Item {...itemTailLayout}>
+            <Form.Item wrapperCol={{span: 14, offset: 6}}>
               <Button type="dashed" style={{width: '60%'}} onClick={store.addTarget}>
                 <Icon type="plus"/>添加执行对象
               </Button>
             </Form.Item>
           </div>
           <div style={{display: page === 2 ? 'block' : 'none'}}>
-            <Form.Item {...itemTailLayout}>
+            <Form.Item wrapperCol={{span: 14, offset: 6}}>
               {getFieldDecorator('trigger', {valuePropName: 'activeKey', initialValue: info['trigger'] || 'interval'})(
                 <Tabs tabPosition="left" style={{minHeight: 200}}>
                   <Tabs.TabPane tab="普通间隔" key="interval">
@@ -222,7 +213,7 @@ class ComForm extends React.Component {
               )}
             </Form.Item>
           </div>
-          <Form.Item {...itemTailLayout}>
+          <Form.Item wrapperCol={{span: 14, offset: 6}}>
             {page === 2 &&
             <Button disabled={!b3} type="primary" onClick={this.handleSubmit} loading={loading}>提交</Button>}
             {page === 0 &&

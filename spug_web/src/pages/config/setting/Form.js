@@ -53,10 +53,6 @@ class ComForm extends React.Component {
     const info = store.record;
     const {envs} = this.state;
     const {getFieldDecorator} = this.props.form;
-    const itemLayout = {
-      labelCol: {span: 6},
-      wrapperCol: {span: 14}
-    };
     return (
       <Modal
         visible
@@ -66,23 +62,23 @@ class ComForm extends React.Component {
         onCancel={() => store.formVisible = false}
         confirmLoading={this.state.loading}
         onOk={this.handleSubmit}>
-        <Form>
-          <Form.Item {...itemLayout} required label="Key">
+        <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
+          <Form.Item required label="Key">
             {getFieldDecorator('key', {initialValue: info['key']})(
               <Input disabled={this.isModify} placeholder="请输入"/>
             )}
           </Form.Item>
-          <Form.Item {...itemLayout} label="Value">
+          <Form.Item label="Value">
             {getFieldDecorator('value', {initialValue: info['value']})(
               <Input.TextArea placeholder="请输入"/>
             )}
           </Form.Item>
-          <Form.Item {...itemLayout} label="备注">
+          <Form.Item label="备注">
             {getFieldDecorator('desc', {initialValue: info['desc']})(
               <Input.TextArea placeholder="请输入备注信息"/>
             )}
           </Form.Item>
-          <Form.Item {...itemLayout} label="选择环境">
+          <Form.Item label="选择环境">
             {envStore.records.map((item, index) => (
               <Row
                 key={item.id}
