@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Form, Input, message, Button, Icon } from 'antd';
+import { Form, Input, Button, message, Col, Radio, Icon } from 'antd';
 import Editor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-sh';
 import 'ace-builds/src-noconflict/theme-tomorrow';
@@ -35,8 +35,19 @@ class Ext2Setup3 extends React.Component {
         {actions.map((item, index) => (
           <div key={index} style={{marginBottom: 30, position: 'relative'}}>
             <Form.Item required label={`动作${index + 1}`}>
-              <Input value={item['title']} onChange={e => item['title'] = e.target.value} placeholder="请输入"/>
+              <Col span={9}>
+                <Input value={item['title']} onChange={e => item['title'] = e.target.value} placeholder="请输入"/>
+              </Col>
+              <Col span={15}>
+                <Form.Item labelCol={{span: 6}} wrapperCol={{span: 18}} label="目标">
+                  <Radio.Group value={item['target']} onChange={e => item['target'] = e.target.value}>
+                    <Radio value="server">服务本机</Radio>
+                    <Radio value="host">目标主机</Radio>
+                  </Radio.Group>
+                </Form.Item>
+              </Col>
             </Form.Item>
+
             <Form.Item required label="执行内容">
               <Editor
                 mode="sh"
