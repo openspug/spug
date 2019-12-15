@@ -44,6 +44,7 @@ class SelectApp extends React.Component {
     } else {
       store.ext2Visible = true
     }
+    store.addVisible = false
   };
 
   render() {

@@ -4,6 +4,7 @@ import { Card, Input, Select, Button } from 'antd';
 import { SearchForm } from 'components';
 import SelectApp from './SelectApp';
 import Ext1Form from './Ext1Form';
+import Ext2Form from './Ext2Form';
 import ComTable from './Table';
 import store from './store';
 
@@ -31,6 +32,7 @@ export default observer(function () {
       <ComTable/>
       {store.addVisible && <SelectApp />}
       {store.ext1Visible && <Ext1Form />}
+      {store.ext2Visible && <Ext2Form />}
     </Card>
   )
 })
