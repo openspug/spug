@@ -93,6 +93,7 @@ TEMPLATES = [
 
 SCHEDULE_KEY = 'spug:schedule'
 MONITOR_KEY = 'spug:monitor'
+REPOS_DIR = os.path.join(BASE_DIR, 'repos')
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/

@@ -1,6 +1,7 @@
 from django.views.generic import View
 from libs import JsonParser, Argument, json_response
 from apps.app.models import App, AppExtend1, AppExtend2
+from apps.app.utils import parse_envs, fetch_versions
 import json
 
 
@@ -60,12 +61,11 @@ class AppView(View):
         return json_response(error=error)
 
 
-def parse_envs(data):
-    tmp = {}
-    if data:
-        for line in data.split('\n'):
-            fields = line.split('=', 1)
-            if len(fields) != 2 or fields[0].strip() == '':
-                raise Exception(f'解析自定义全局变量{line!r}失败，确认其遵循 key = value 格式')
-            tmp[fields[0].strip()] = fields[1].strip()
-    return tmp
+def get_versions(request, a_id):
+    app = App.objects.filter(pk=a_id).first()
+    if not app:
+        return json_response(error='未找到指定应用')
+    if app.extend == '2':
+        return json_response(error='该应用不支持此操作')
+    branches, tags = fetch_versions(app)
+    return json_response({'branches': branches, 'tags': tags})

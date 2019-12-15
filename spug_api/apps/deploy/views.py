@@ -21,6 +21,3 @@ class RequestView(View):
             form.host_ids = json.dumps(form.host_ids)
             DeployRequest.objects.create(**form)
         return json_response(error=error)
-
-
-
