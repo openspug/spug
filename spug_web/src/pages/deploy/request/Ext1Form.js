@@ -12,10 +12,46 @@ class Ext1Form extends React.Component {
     super(props);
     this.state = {
       loading: false,
-      type: null,
+      fetching: true,
+      git_type: 'branch',
+      extra1: undefined,
+      extra2: undefined,
+      versions: {},
       host_ids: store.record['host_ids'].concat()
     }
   }
+
+  componentDidMount() {
+    this.fetchVersions()
+  }
+
+  fetchVersions = () => {
+    this.setState({fetching: true});
+    http.get(`/api/app/${store.record.id}/versions/`)
+      .then(res => {
+        this.setState({versions: res}, this._initExtra1);
+      })
+      .finally(() => this.setState({fetching: false}))
+  };
+
+  _initExtra1 = () => {
+    const {git_type, versions: {branches, tags}} = this.state;
+    let extra1 = undefined;
+    if (git_type === 'branch') {
+      if (branches) {
+        extra1 = lds.get(Object.keys(branches), 0)
+      }
+    } else {
+      if (tags) {
+        extra1 = lds.get(Object.keys(tags), 0)
+      }
+    }
+    this.setState({extra1})
+  };
+
+  switchType = (v) => {
+    this.setState({git_type: v}, this._initExtra1)
+  };
 
   handleSubmit = () => {
     if (this.state.host_ids.length === 0) {
@@ -46,7 +82,7 @@ class Ext1Form extends React.Component {
 
   render() {
     const info = store.record;
-    const {host_ids} = this.state;
+    const {host_ids, git_type, extra1, fetching, versions: {branches, tags}} = this.state;
     const {getFieldDecorator} = this.props.form;
     return (
       <Modal
@@ -57,26 +93,51 @@ class Ext1Form extends React.Component {
         onCancel={() => store.ext1Visible = false}
         confirmLoading={this.state.loading}
         onOk={this.handleSubmit}>
-        <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
+        <Form labelCol={{span: 5}} wrapperCol={{span: 17}}>
           <Form.Item required label="申请标题">
             {getFieldDecorator('name', {initialValue: info['name']})(
               <Input placeholder="请输入申请标题"/>
             )}
           </Form.Item>
-          <Form.Item required label={`选择${info['git_type'] === 'branch' ? '分支' : '标签/版本'}`}>
+          <Form.Item required label="选择分支/标签/版本" help="根据网络情况，刷新可能会很慢，请耐心等待。">
             <Col span={19}>
-              {getFieldDecorator('name', {initialValue: info['name']})(
-                <Select placeholder="请选择">
-                  {store.types.map(item => (
-                    <Select.Option value={item} key={item}>{item}</Select.Option>
-                  ))}
+              <Input.Group compact>
+                <Select value={git_type} onChange={this.switchType} style={{width: 100}}>
+                  <Select.Option value="branch">Branch</Select.Option>
+                  <Select.Option value="tag">Tag</Select.Option>
                 </Select>
-              )}
+                <Select
+                  value={extra1}
+                  style={{width: 320}}
+                  loading={fetching}
+                  placeholder="请稍等"
+                  onChange={v => this.setState({extra1: v})}>
+                  {git_type === 'branch' ? (
+                    Object.keys(branches || {}).map(b => <Select.Option key={b} value={b}>{b}</Select.Option>)
+                  ) : (
+                    Object.entries(tags || {}).map(([tag, info]) => (
+                      <Select.Option key={tag} value={tag}>{tag} {info.author}</Select.Option>
+                    ))
+                  )}
+                </Select>
+              </Input.Group>
             </Col>
             <Col span={4} offset={1}>
-              <Button type="link" icon="sync" onClick={this.handleAddZone}>刷新</Button>
+              <Button type="link" icon="sync" disabled={fetching} onClick={this.fetchVersions}>刷新</Button>
             </Col>
           </Form.Item>
+          {git_type === 'branch' && (
+            <Form.Item required label="选择Commit ID">
+              {getFieldDecorator('extra2')(
+                <Select placeholder="请选择">
+                  {extra1 ? branches[extra1].map(item => (
+                    <Select.Option
+                      key={item.id}>{item.id.substr(0, 6)} {item['date']} {item['author']} {item['message']}</Select.Option>
+                  )): null}
+                </Select>
+              )}
+            </Form.Item>
+          )}
           <Form.Item label="备注信息">
             {getFieldDecorator('desc', {initialValue: info['desc']})(
               <Input placeholder="请输入备注信息"/>
