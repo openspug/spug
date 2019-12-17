@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, Select, Col, Button, Tag, message } from 'antd';
+import { Modal, Form, Input, Select, Col, Button, Tag, Icon, message } from 'antd';
 import hostStore from 'pages/host/store';
 import http from 'libs/http';
 import store from './store';
@@ -36,21 +36,30 @@ class Ext1Form extends React.Component {
 
   _initExtra1 = () => {
     const {git_type, versions: {branches, tags}} = this.state;
-    let extra1 = undefined;
+    let [extra1, extra2] = [undefined, undefined];
     if (git_type === 'branch') {
       if (branches) {
-        extra1 = lds.get(Object.keys(branches), 0)
+        extra1 = lds.get(Object.keys(branches), 0);
+        extra2 = lds.get(branches[extra1], '0.id')
       }
     } else {
       if (tags) {
         extra1 = lds.get(Object.keys(tags), 0)
       }
     }
-    this.setState({extra1})
+    this.setState({extra1, extra2})
   };
 
   switchType = (v) => {
-    this.setState({git_type: v}, this._initExtra1)
+    this.setState({git_type: v, extra1: null}, this._initExtra1)
+  };
+
+  switchExtra1 = (v) => {
+    let {git_type, extra2, versions: {branches}} = this.state;
+    if (git_type === 'branch') {
+      extra2 = lds.get(branches[v], '0.id')
+    }
+    this.setState({extra1: v, extra2})
   };
 
   handleSubmit = () => {
@@ -69,7 +78,7 @@ class Ext1Form extends React.Component {
       }, () => this.setState({loading: false}))
   };
 
-  handleChange = (id, v) => {
+  handleChange = (id) => {
     const host_ids = this.state.host_ids;
     const index = host_ids.indexOf(id);
     if (index === -1) {
@@ -82,7 +91,7 @@ class Ext1Form extends React.Component {
 
   render() {
     const info = store.record;
-    const {host_ids, git_type, extra1, fetching, versions: {branches, tags}} = this.state;
+    const {host_ids, git_type, extra1, extra2, fetching, versions: {branches, tags}} = this.state;
     const {getFieldDecorator} = this.props.form;
     return (
       <Modal
@@ -106,12 +115,7 @@ class Ext1Form extends React.Component {
                   <Select.Option value="branch">Branch</Select.Option>
                   <Select.Option value="tag">Tag</Select.Option>
                 </Select>
-                <Select
-                  value={extra1}
-                  style={{width: 320}}
-                  loading={fetching}
-                  placeholder="请稍等"
-                  onChange={v => this.setState({extra1: v})}>
+                <Select style={{width: 320}} placeholder="请稍等" value={extra1} onChange={this.switchExtra1}>
                   {git_type === 'branch' ? (
                     Object.keys(branches || {}).map(b => <Select.Option key={b} value={b}>{b}</Select.Option>)
                   ) : (
@@ -122,20 +126,20 @@ class Ext1Form extends React.Component {
                 </Select>
               </Input.Group>
             </Col>
-            <Col span={4} offset={1}>
-              <Button type="link" icon="sync" disabled={fetching} onClick={this.fetchVersions}>刷新</Button>
+            <Col span={4} offset={1} style={{textAlign: 'center'}}>
+              {fetching ? <Icon type="loading" style={{fontSize: 18, color: '#1890ff'}}/> :
+                <Button type="link" icon="sync" disabled={fetching} onClick={this.fetchVersions}>刷新</Button>
+              }
             </Col>
           </Form.Item>
           {git_type === 'branch' && (
             <Form.Item required label="选择Commit ID">
-              {getFieldDecorator('extra2')(
-                <Select placeholder="请选择">
-                  {extra1 ? branches[extra1].map(item => (
-                    <Select.Option
-                      key={item.id}>{item.id.substr(0, 6)} {item['date']} {item['author']} {item['message']}</Select.Option>
-                  )): null}
-                </Select>
-              )}
+              <Select value={extra2} placeholder="请选择" onChange={v => this.setState({extra2: v})}>
+                {extra1 ? branches[extra1].map(item => (
+                  <Select.Option
+                    key={item.id}>{item.id.substr(0, 6)} {item['date']} {item['author']} {item['message']}</Select.Option>
+                )) : null}
+              </Select>
             </Form.Item>
           )}
           <Form.Item label="备注信息">
@@ -145,7 +149,7 @@ class Ext1Form extends React.Component {
           </Form.Item>
           <Form.Item required label="发布目标主机">
             {info['host_ids'].map(id => (
-              <Tag.CheckableTag key={id} checked={host_ids.includes(id)} onChange={v => this.handleChange(id, v)}>
+              <Tag.CheckableTag key={id} checked={host_ids.includes(id)} onChange={() => this.handleChange(id)}>
                 {lds.get(hostStore.idMap, `${id}.name`)}({lds.get(hostStore.idMap, `${id}.hostname`)}:{lds.get(hostStore.idMap, `${id}.port`)})
               </Tag.CheckableTag>
             ))}
