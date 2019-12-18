@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'apps.alarm',
     'apps.config',
     'apps.app',
+    'apps.deploy',
 ]
 
 MIDDLEWARE = [
