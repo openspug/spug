@@ -4,7 +4,6 @@ import { Modal, Button, Menu, Icon } from 'antd';
 import store from './store';
 import styles from './index.module.css';
 import envStore from 'pages/config/environment/store';
-import hostStore from 'pages/host/store';
 import appStore from '../app/store';
 import lds from 'lodash';
 
@@ -26,9 +25,6 @@ class SelectApp extends React.Component {
     if (appStore.records.length === 0) {
       appStore.fetchRecords()
     }
-    if (hostStore.records.length === 0) {
-      hostStore.fetchRecords()
-    }
   }
 
   _initEnv = () => {
@@ -38,7 +34,7 @@ class SelectApp extends React.Component {
   };
 
   handleClick = (app) => {
-    store.record = app;
+    store.record = {app_id: app.id, app_host_ids: app.host_ids};
     if (app.extend === '1') {
       store.ext1Visible = true
     } else {

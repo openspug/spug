@@ -10,24 +10,28 @@ import lds from 'lodash';
 class Ext1Form extends React.Component {
   constructor(props) {
     super(props);
+    this.isReady = false;
     this.state = {
       loading: false,
       fetching: true,
-      git_type: 'branch',
-      extra1: undefined,
-      extra2: undefined,
+      git_type: lds.get(store.record, 'extra.0', 'branch'),
+      extra1: lds.get(store.record, 'extra.1'),
+      extra2: lds.get(store.record, 'extra.2'),
       versions: {},
       host_ids: store.record['host_ids'].concat()
     }
   }
 
   componentDidMount() {
-    this.fetchVersions()
+    this.fetchVersions();
+    if (hostStore.records.length === 0) {
+      hostStore.fetchRecords()
+    }
   }
 
   fetchVersions = () => {
     this.setState({fetching: true});
-    http.get(`/api/app/${store.record.id}/versions/`)
+    http.get(`/api/app/${store.record.app_id}/versions/`)
       .then(res => {
         this.setState({versions: res}, this._initExtra1);
       })
@@ -35,19 +39,23 @@ class Ext1Form extends React.Component {
   };
 
   _initExtra1 = () => {
-    const {git_type, versions: {branches, tags}} = this.state;
-    let [extra1, extra2] = [undefined, undefined];
-    if (git_type === 'branch') {
-      if (branches) {
-        extra1 = lds.get(Object.keys(branches), 0);
-        extra2 = lds.get(branches[extra1], '0.id')
+    if (this.isReady === true || this.state.extra1 === undefined) {
+      const {git_type, versions: {branches, tags}} = this.state;
+      let [extra1, extra2] = [undefined, undefined];
+      if (git_type === 'branch') {
+        if (branches) {
+          extra1 = lds.get(Object.keys(branches), 0);
+          extra2 = lds.get(branches[extra1], '0.id')
+        }
+      } else {
+        if (tags) {
+          extra1 = lds.get(Object.keys(tags), 0)
+        }
       }
+      this.setState({extra1, extra2})
     } else {
-      if (tags) {
-        extra1 = lds.get(Object.keys(tags), 0)
-      }
+      this.isReady = true
     }
-    this.setState({extra1, extra2})
   };
 
   switchType = (v) => {
@@ -67,13 +75,16 @@ class Ext1Form extends React.Component {
       return message.error('请至少选择一个要发布的目标主机')
     }
     this.setState({loading: true});
+    const {git_type, extra1, extra2} = this.state;
     const formData = this.props.form.getFieldsValue();
     formData['id'] = store.record.id;
-    formData['body'] = this.state.body;
-    http.post('/api/exec/template/', formData)
+    formData['app_id'] = store.record.app_id;
+    formData['host_ids'] = this.state.host_ids;
+    formData['extra'] = [git_type, extra1, extra2];
+    http.post('/api/deploy/request/', formData)
       .then(res => {
         message.success('操作成功');
-        store.formVisible = false;
+        store.ext1Visible = false;
         store.fetchRecords()
       }, () => this.setState({loading: false}))
   };
@@ -135,7 +146,7 @@ class Ext1Form extends React.Component {
           {git_type === 'branch' && (
             <Form.Item required label="选择Commit ID">
               <Select value={extra2} placeholder="请选择" onChange={v => this.setState({extra2: v})}>
-                {extra1 ? branches[extra1].map(item => (
+                {extra1 && branches ? branches[extra1].map(item => (
                   <Select.Option
                     key={item.id}>{item.id.substr(0, 6)} {item['date']} {item['author']} {item['message']}</Select.Option>
                 )) : null}
@@ -148,7 +159,7 @@ class Ext1Form extends React.Component {
             )}
           </Form.Item>
           <Form.Item required label="发布目标主机">
-            {info['host_ids'].map(id => (
+            {info['app_host_ids'].map(id => (
               <Tag.CheckableTag key={id} checked={host_ids.includes(id)} onChange={() => this.handleChange(id)}>
                 {lds.get(hostStore.idMap, `${id}.name`)}({lds.get(hostStore.idMap, `${id}.hostname`)}:{lds.get(hostStore.idMap, `${id}.port`)})
               </Tag.CheckableTag>

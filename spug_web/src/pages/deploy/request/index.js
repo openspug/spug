@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Card, Input, Select, Button } from 'antd';
+import { Card, Input, Button } from 'antd';
 import { SearchForm } from 'components';
 import SelectApp from './SelectApp';
 import Ext1Form from './Ext1Form';
@@ -13,13 +13,9 @@ export default observer(function () {
     <Card>
       <SearchForm>
         <SearchForm.Item span={8} title="应用名称">
-          <Select allowClear onChange={v => store.f_type = v} placeholder="请选择">
-            {store.types.map(item => (
-              <Select.Option value={item} key={item}>{item}</Select.Option>
-            ))}
-          </Select>
+          <Input allowClear onChange={e => store.f_app_name = e.target.value} placeholder="请输入"/>
         </SearchForm.Item>
-        <SearchForm.Item span={8} title="模版名称">
+        <SearchForm.Item span={8} title="申请标题">
           <Input allowClear onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
         </SearchForm.Item>
         <SearchForm.Item span={8}>
