@@ -52,7 +52,8 @@ class SSH:
             chan.settimeout(timeout)
             chan.set_combine_stderr(True)
             if environment:
-                chan.update_environment(environment)
+                str_env = ' '.join(f'{k}={v}' for k, v in environment.items())
+                command = f'export {str_env} && {command}'
             chan.exec_command(command)
             out = chan.makefile("r", -1)
             return chan.recv_exit_status(), out.read()
@@ -63,7 +64,8 @@ class SSH:
             chan.settimeout(timeout)
             chan.set_combine_stderr(True)
             if environment:
-                chan.update_environment(environment)
+                str_env = ' '.join(f'{k}={v}' for k, v in environment.items())
+                command = f'export {str_env} && {command}'
             chan.exec_command(command)
             stdout = chan.makefile("r", -1)
             out = stdout.readline()
