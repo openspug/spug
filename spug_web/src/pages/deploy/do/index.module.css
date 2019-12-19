@@ -1,3 +1,17 @@
 .header {
     display: flex;
 }
+
+.collapse :global(.ant-collapse-content-box) {
+    padding: 0;
+}
+
+.console {
+    min-height: 40px;
+    max-height: 300px;
+    padding: 10px 15px;
+}
+
+pre {
+    margin: 0;
+}
