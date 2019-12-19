@@ -43,18 +43,20 @@ def _ext1_deploy(request, req, helper, env):
     else:
         tree_ish = extras[1]
         env.update(TAG=extras[1])
+    helper.send_step('local', 1, '完成\r\n')
 
-    helper.send_step('local', 2, f'完成\r\n{human_time()} 检出前任务...\r\n')
     if extend.hook_pre_server:
+        helper.send_step('local', 2, f'{human_time()} 检出前任务...\r\n')
         helper.local(f'cd /tmp && {extend.hook_pre_server}', env)
 
     helper.send_step('local', 3, f'{human_time()} 执行检出...        ')
     git_dir = os.path.join(REPOS_DIR, str(app.id))
     command = f'cd {git_dir} && git archive --prefix={env.VERSION}/ {tree_ish} | (cd .. && tar xf -)'
     helper.local(command)
+    helper.send_step('local', 3, '完成\r\n')
 
-    helper.send_step('local', 4, f'完成\r\n{human_time()} 检出后任务...\r\n')
     if extend.hook_post_server:
+        helper.send_step('local', 4, f'{human_time()} 检出后任务...\r\n')
         helper.local(f'cd {os.path.join(REPOS_DIR, env.VERSION)} && {extend.hook_post_server}', env)
 
     helper.send_step('local', 5, f'\r\n{human_time()} ** 执行完毕 **')
@@ -85,11 +87,12 @@ def _deploy_host(helper, h_id, extend, env):
 
     command = f'cd {extend.dst_repo} && tar xf {tar_gz_file} && rm -f {env.APP_ID}_*.tar.gz'
     helper.remote(host.id, ssh, command)
+    helper.send_step(h_id, 1, '完成\r\n')
 
     # pre host
-    helper.send_step(h_id, 2, f'完成\r\n{human_time()} 发布前任务...       \r\n')
     repo_dir = os.path.join(extend.dst_repo, env.VERSION)
     if extend.hook_pre_host:
+        helper.send_step(h_id, 2, f'{human_time()} 发布前任务...       \r\n')
         command = f'cd {repo_dir} && {extend.hook_pre_host}'
         helper.remote(host.id, ssh, command, env)
 
@@ -97,10 +100,11 @@ def _deploy_host(helper, h_id, extend, env):
     helper.send_step(h_id, 3, f'{human_time()} 执行发布...        ')
     tmp_path = os.path.join(extend.dst_repo, f'tmp_{env.VERSION}')
     helper.remote(host.id, ssh, f'ln -sfn {repo_dir} {tmp_path} && mv -fT {tmp_path} {extend.dst_dir}')
+    helper.send_step(h_id, 3, '完成\r\n')
 
     # post host
-    helper.send_step(h_id, 4, f'完成\r\n{human_time()} 发布后任务...       \r\n')
     if extend.hook_post_host:
+        helper.send_step(h_id, 4, f'{human_time()} 发布后任务...       \r\n')
         command = f'cd {extend.dst_dir} && {extend.hook_post_host}'
         helper.remote(host.id, ssh, command, env)
 
