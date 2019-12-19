@@ -46,6 +46,12 @@ class SSH:
         self.client.connect(**self.arguments)
         return self.client
 
+    def put_file(self, local_path, remote_path):
+        with self as cli:
+            sftp = cli.open_sftp()
+            sftp.put(local_path, remote_path)
+            sftp.close()
+
     def exec_command(self, command, timeout=1800, environment=None):
         with self as cli:
             chan = cli.get_transport().open_session()
@@ -72,7 +78,7 @@ class SSH:
             while out:
                 yield chan.exit_status, out
                 out = stdout.readline()
-            return chan.exit_status, out
+            yield chan.recv_exit_status(), out
 
     def __enter__(self):
         if self.client is not None:

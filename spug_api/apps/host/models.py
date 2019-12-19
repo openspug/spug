@@ -1,6 +1,7 @@
 from django.db import models
 from libs import ModelMixin, human_time
 from apps.account.models import User
+from apps.setting.utils import AppSetting
 from libs.ssh import SSH
 
 
@@ -17,7 +18,8 @@ class Host(models.Model, ModelMixin):
     deleted_at = models.CharField(max_length=20, null=True)
     deleted_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)
 
-    def get_ssh(self, pkey):
+    def get_ssh(self, pkey=None):
+        pkey = pkey or AppSetting.get('private_key')
         return SSH(self.hostname, self.port, self.username, pkey)
 
     def __repr__(self):

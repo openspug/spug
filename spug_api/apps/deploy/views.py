@@ -2,8 +2,11 @@ from django.views.generic import View
 from django.db.models import F
 from libs import json_response, JsonParser, Argument
 from apps.deploy.models import DeployRequest
+from apps.deploy.utils import deploy_dispatch
 from apps.app.models import App
+from threading import Thread
 import json
+import uuid
 
 
 class RequestView(View):
@@ -52,3 +55,14 @@ class RequestView(View):
             else:
                 DeployRequest.objects.create(created_by=request.user, **form)
         return json_response(error=error)
+
+
+def do_deploy(request, r_id):
+    req = DeployRequest.objects.filter(pk=r_id).first()
+    if not req:
+        return json_response(error='未找到指定发布申请')
+    if req.status != '2':
+        return json_response(error='该申请单当前状态还不能执行发布')
+    token = uuid.uuid4().hex
+    Thread(target=deploy_dispatch, args=(request, req, token)).start()
+    return json_response(token)

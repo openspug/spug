@@ -22,6 +22,8 @@ class DeployRequest(models.Model, ModelMixin):
 
     created_at = models.CharField(max_length=20, default=human_time)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
+    approve_at = models.CharField(max_length=20, null=True)
+    approve_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)
 
     def __repr__(self):
         return f'<DeployRequest app_id={self.app_id} name={self.name}>'
