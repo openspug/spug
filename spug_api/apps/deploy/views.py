@@ -1,6 +1,6 @@
 from django.views.generic import View
 from django.db.models import F
-from libs import json_response, JsonParser, Argument
+from libs import json_response, JsonParser, Argument, human_time
 from apps.deploy.models import DeployRequest
 from apps.deploy.utils import deploy_dispatch
 from apps.app.models import App
@@ -67,6 +67,7 @@ def do_deploy(request, r_id):
     hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
     token = uuid.uuid4().hex
     Thread(target=deploy_dispatch, args=(request, req, token)).start()
-    outputs = {str(x): {'data': ''} for x in json.loads(req.host_ids) + ['local']}
+    outputs = {str(x.id): {'data': ''} for x in hosts}
+    outputs.update(local={'data': f'{human_time()} 建立接连...        '})
     targets = [{'id': x.id, 'title': f'{x.name}({x.hostname}:{x.port})'} for x in hosts]
     return json_response({'token': token, 'outputs': outputs, 'targets': targets})

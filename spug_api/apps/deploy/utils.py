@@ -1,13 +1,12 @@
 from django_redis import get_redis_connection
 from django.conf import settings
-from libs.utils import AttrDict
+from libs.utils import AttrDict, human_time
 from apps.host.models import Host
 from datetime import datetime
 from threading import Thread
 import socket
 import subprocess
 import json
-import time
 import os
 
 REPOS_DIR = settings.REPOS_DIR
@@ -17,7 +16,7 @@ def deploy_dispatch(request, req, token):
     now = datetime.now()
     rds = get_redis_connection()
     helper = Helper(rds, token)
-    helper.send_step('local', 1, '发布准备... ')
+    helper.send_step('local', 1, f'完成\r\n{human_time()} 发布准备...        ')
     rds.expire(token, 60 * 60)
     env = AttrDict(
         APP_NAME=req.app.name,
@@ -33,8 +32,6 @@ def deploy_dispatch(request, req, token):
     else:
         _ext2_deploy(request, req, helper, env)
 
-    print('!!!!!!!!!!!!!!!!!')
-
 
 def _ext1_deploy(request, req, helper, env):
     app = req.app
@@ -47,23 +44,20 @@ def _ext1_deploy(request, req, helper, env):
         tree_ish = extras[1]
         env.update(TAG=extras[1])
 
-    helper.send_step('local', 2, '完成\r\n检出前任务... ')
+    helper.send_step('local', 2, f'完成\r\n{human_time()} 检出前任务...\r\n')
     if extend.hook_pre_server:
         helper.local(f'cd /tmp && {extend.hook_pre_server}', env)
 
-    helper.send_step('local', 3, '执行检出... ')
+    helper.send_step('local', 3, f'{human_time()} 执行检出...        ')
     git_dir = os.path.join(REPOS_DIR, str(app.id))
     command = f'cd {git_dir} && git archive --prefix={env.VERSION}/ {tree_ish} | (cd .. && tar xf -)'
     helper.local(command)
 
-
-    time.sleep(3)
-
-    helper.send_step('local', 4, '完成\r\n检出后任务... ')
+    helper.send_step('local', 4, f'完成\r\n{human_time()} 检出后任务...\r\n')
     if extend.hook_post_server:
         helper.local(f'cd {os.path.join(REPOS_DIR, env.VERSION)} && {extend.hook_post_server}', env)
 
-    helper.send_step('local', 5)
+    helper.send_step('local', 5, f'\r\n{human_time()} ** 执行完毕 **')
     helper.local(f'cd {REPOS_DIR} && tar zcf {env.VERSION}.tar.gz {env.VERSION}')
     for h_id in json.loads(req.host_ids):
         Thread(target=_deploy_host, args=(helper, h_id, extend, env)).start()
@@ -74,7 +68,7 @@ def _ext2_deploy(request, rds, req, token, env):
 
 
 def _deploy_host(helper, h_id, extend, env):
-    helper.send_step(h_id, 1)
+    helper.send_step(h_id, 1, f'{human_time()} 数据准备...        ')
     host = Host.objects.filter(pk=h_id).first()
     if not host:
         helper.send_error(h_id, 'no such host')
@@ -93,24 +87,24 @@ def _deploy_host(helper, h_id, extend, env):
     helper.remote(host.id, ssh, command)
 
     # pre host
-    helper.send_step(h_id, 2)
+    helper.send_step(h_id, 2, f'完成\r\n{human_time()} 发布前任务...       \r\n')
     repo_dir = os.path.join(extend.dst_repo, env.VERSION)
     if extend.hook_pre_host:
         command = f'cd {repo_dir} && {extend.hook_pre_host}'
         helper.remote(host.id, ssh, command, env)
 
     # do deploy
-    helper.send_step(h_id, 3)
+    helper.send_step(h_id, 3, f'{human_time()} 执行发布...        ')
     tmp_path = os.path.join(extend.dst_repo, f'tmp_{env.VERSION}')
     helper.remote(host.id, ssh, f'ln -sfn {repo_dir} {tmp_path} && mv -fT {tmp_path} {extend.dst_dir}')
 
     # post host
-    helper.send_step(h_id, 4)
+    helper.send_step(h_id, 4, f'完成\r\n{human_time()} 发布后任务...       \r\n')
     if extend.hook_post_host:
         command = f'cd {extend.dst_dir} && {extend.hook_post_host}'
         helper.remote(host.id, ssh, command, env)
 
-    helper.send_step(h_id, 5)
+    helper.send_step(h_id, 5, f'\r\n{human_time()} ** 发布成功 **')
 
 
 class Helper:
@@ -122,11 +116,11 @@ class Helper:
         self.rds.rpush(self.token, json.dumps({'key': key, 'status': 'info', 'data': message}))
 
     def send_error(self, key, message):
+        message = '\r\n' + message
         self.rds.rpush(self.token, json.dumps({'key': key, 'status': 'error', 'data': message}))
         raise Exception(message)
 
     def send_step(self, key, step, data):
-        data = datetime.now().strftime('%H:%M:%S ') + data
         self.rds.rpush(self.token, json.dumps({'key': key, 'step': step, 'data': data}))
 
     def local(self, command, env=None):

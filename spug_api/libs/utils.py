@@ -25,6 +25,14 @@ def human_date(date=None):
     return date.strftime('%Y-%m-%d')
 
 
+def human_time(date=None):
+    if date:
+        assert isinstance(date, datetime)
+    else:
+        date = datetime.now()
+    return date.strftime('%H:%M:%S')
+
+
 # 解析时间类型的数据
 def parse_time(value):
     if isinstance(value, datetime):
