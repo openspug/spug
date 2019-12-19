@@ -4,6 +4,7 @@ from libs import json_response, JsonParser, Argument
 from apps.deploy.models import DeployRequest
 from apps.deploy.utils import deploy_dispatch
 from apps.app.models import App
+from apps.host.models import Host
 from threading import Thread
 import json
 import uuid
@@ -63,6 +64,9 @@ def do_deploy(request, r_id):
         return json_response(error='未找到指定发布申请')
     if req.status != '2':
         return json_response(error='该申请单当前状态还不能执行发布')
+    hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
     token = uuid.uuid4().hex
     Thread(target=deploy_dispatch, args=(request, req, token)).start()
-    return json_response(token)
+    outputs = {str(x): {'data': ''} for x in json.loads(req.host_ids) + ['local']}
+    targets = [{'id': x.id, 'title': f'{x.name}({x.hostname}:{x.port})'} for x in hosts]
+    return json_response({'token': token, 'outputs': outputs, 'targets': targets})
