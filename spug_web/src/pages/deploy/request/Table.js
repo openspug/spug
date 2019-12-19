@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react';
 import { Table, Divider, Modal, Icon, message } from 'antd';
 import http from 'libs/http';
@@ -53,6 +54,8 @@ class ComTable extends React.Component {
     title: '操作',
     render: info => (
       <span>
+        <Link to={`/deploy/do/${info.id}`}>发布</Link>
+        <Divider type="vertical"/>
         <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
         <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
