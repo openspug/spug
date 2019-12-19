@@ -1,6 +1,6 @@
 from django.core.cache import cache
 from django.views.generic import View
-from libs import JsonParser, Argument, human_time, json_response
+from libs import JsonParser, Argument, human_datetime, json_response
 from .models import User
 import time
 import uuid
@@ -43,7 +43,7 @@ class UserView(View):
         ).parse(request.GET)
         if error is None:
             User.objects.filter(pk=form.id).update(
-                deleted_at=human_time(),
+                deleted_at=human_datetime(),
                 deleted_by=request.user
             )
         return json_response(error=error)
@@ -64,7 +64,7 @@ def login(request):
                 token_isvalid = user.access_token and len(user.access_token) == 32 and user.token_expired >= time.time()
                 user.access_token = user.access_token if token_isvalid else uuid.uuid4().hex
                 user.token_expired = time.time() + 8 * 60 * 60
-                user.last_login = human_time()
+                user.last_login = human_datetime()
                 user.save()
                 return json_response({'access_token': user.access_token, 'nickname': user.nickname})
 

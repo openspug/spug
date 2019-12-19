@@ -1,5 +1,5 @@
 from django.db import models
-from libs import ModelMixin, human_time
+from libs import ModelMixin, human_datetime
 from apps.account.models import User
 from apps.app.models import App
 
@@ -20,7 +20,7 @@ class DeployRequest(models.Model, ModelMixin):
     status = models.CharField(max_length=2, choices=STATUS)
     reason = models.CharField(max_length=255, null=True)
 
-    created_at = models.CharField(max_length=20, default=human_time)
+    created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
     approve_at = models.CharField(max_length=20, null=True)
     approve_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)

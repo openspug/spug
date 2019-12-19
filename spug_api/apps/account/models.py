@@ -1,5 +1,5 @@
 from django.db import models
-from libs import ModelMixin, human_time
+from libs import ModelMixin, human_datetime
 from django.contrib.auth.hashers import make_password, check_password
 
 
@@ -13,7 +13,7 @@ class User(models.Model, ModelMixin):
     token_expired = models.IntegerField(null=True)
     last_login = models.CharField(max_length=20)
 
-    created_at = models.CharField(max_length=20, default=human_time)
+    created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey('User', models.PROTECT, related_name='+', null=True)
     deleted_at = models.CharField(max_length=20, null=True)
     deleted_by = models.ForeignKey('User', models.PROTECT, related_name='+', null=True)

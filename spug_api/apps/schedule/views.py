@@ -3,7 +3,7 @@ from django_redis import get_redis_connection
 from apps.schedule.models import Task
 from apps.host.models import Host
 from django.conf import settings
-from libs import json_response, JsonParser, Argument, human_time
+from libs import json_response, JsonParser, Argument, human_datetime
 import json
 
 
@@ -28,7 +28,7 @@ class Schedule(View):
             form.targets = json.dumps(form.targets)
             if form.id:
                 Task.objects.filter(pk=form.id).update(
-                    updated_at=human_time(),
+                    updated_at=human_datetime(),
                     updated_by=request.user,
                     **form
                 )

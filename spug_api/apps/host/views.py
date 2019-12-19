@@ -5,7 +5,7 @@ from libs import json_response, JsonParser, Argument
 from apps.setting.utils import AppSetting
 from apps.host.models import Host
 from libs.ssh import SSH, AuthenticationException
-from libs import human_time
+from libs import human_datetime
 
 
 class HostView(View):
@@ -42,7 +42,7 @@ class HostView(View):
         ).parse(request.GET)
         if error is None:
             Host.objects.filter(pk=form.id).update(
-                deleted_at=human_time(),
+                deleted_at=human_datetime(),
                 deleted_by=request.user,
             )
         return json_response(error=error)

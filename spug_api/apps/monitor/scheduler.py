@@ -7,7 +7,7 @@ from apps.alarm.models import Alarm
 from apps.monitor.executors import dispatch
 from apps.monitor.utils import seconds_to_human
 from django.conf import settings
-from libs import AttrDict, human_time
+from libs import AttrDict, human_datetime
 import logging
 import json
 import time
@@ -36,14 +36,14 @@ class Scheduler:
         if obj.latest_status == 0:
             if old_status == 1:
                 self._record_alarm(obj, '2')
-                logger.info(f'{human_time()} recover job_id: {obj.id}')
+                logger.info(f'{human_datetime()} recover job_id: {obj.id}')
         else:
             if obj.fault_times >= obj.threshold:
                 if time.time() - obj.latest_notify_time >= obj.quiet * 60:
                     obj.latest_notify_time = int(time.time())
                     obj.save()
                     self._record_alarm(obj, '1')
-                    logger.info(f'{human_time()} notify job_id: {obj.id}')
+                    logger.info(f'{human_datetime()} notify job_id: {obj.id}')
 
     def _handle_event(self, event):
         # TODO: notify to user
@@ -59,7 +59,7 @@ class Scheduler:
             obj = Detection.objects.filter(pk=event.job_id).first()
             old_status = obj.latest_status
             obj.latest_status = 0 if event.retval else 1
-            obj.latest_run_time = human_time(event.scheduled_run_time)
+            obj.latest_run_time = human_datetime(event.scheduled_run_time)
             if old_status in [0, None] and event.retval is False:
                 obj.latest_fault_time = int(time.time())
             if obj.latest_status == 0:

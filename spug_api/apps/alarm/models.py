@@ -1,5 +1,5 @@
 from django.db import models
-from libs import ModelMixin, human_time
+from libs import ModelMixin, human_datetime
 from apps.account.models import User
 import json
 
@@ -21,7 +21,7 @@ class Alarm(models.Model, ModelMixin):
     notify_grp = models.CharField(max_length=255)
     status = models.CharField(max_length=2, choices=STATUS)
     duration = models.CharField(max_length=50)
-    created_at = models.CharField(max_length=20, default=human_time)
+    created_at = models.CharField(max_length=20, default=human_datetime)
 
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
@@ -42,7 +42,7 @@ class Group(models.Model, ModelMixin):
     name = models.CharField(max_length=50)
     desc = models.CharField(max_length=255, null=True)
     contacts = models.TextField(null=True)
-    created_at = models.CharField(max_length=20, default=human_time)
+    created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
 
     def to_dict(self, *args, **kwargs):
@@ -65,7 +65,7 @@ class Contact(models.Model, ModelMixin):
     ding = models.CharField(max_length=255, null=True)
     wx_token = models.CharField(max_length=255, null=True)
 
-    created_at = models.CharField(max_length=20, default=human_time)
+    created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
 
     def __repr__(self):

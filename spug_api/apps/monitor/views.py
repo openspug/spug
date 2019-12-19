@@ -1,5 +1,5 @@
 from django.views.generic import View
-from libs import json_response, JsonParser, Argument, human_time
+from libs import json_response, JsonParser, Argument, human_datetime
 from apps.monitor.models import Detection
 from django_redis import get_redis_connection
 from django.conf import settings
@@ -30,7 +30,7 @@ class DetectionView(View):
             form.notify_mode = json.dumps(form.notify_mode)
             if form.id:
                 Detection.objects.filter(pk=form.id).update(
-                    updated_at=human_time(),
+                    updated_at=human_datetime(),
                     updated_by=request.user,
                     **form)
                 task = Detection.objects.filter(pk=form.id).first()

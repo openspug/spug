@@ -1,5 +1,5 @@
 from django.views.generic import View
-from libs import json_response, JsonParser, Argument, human_time
+from libs import json_response, JsonParser, Argument, human_datetime
 from libs.channel import Channel
 from apps.exec.models import ExecTemplate
 from apps.host.models import Host
@@ -21,7 +21,7 @@ class TemplateView(View):
         ).parse(request.body)
         if error is None:
             if form.id:
-                form.updated_at = human_time()
+                form.updated_at = human_datetime()
                 form.updated_by = request.user
                 ExecTemplate.objects.filter(pk=form.pop('id')).update(**form)
             else:

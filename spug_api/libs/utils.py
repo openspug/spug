@@ -8,7 +8,7 @@ import json
 
 
 # 转换时间格式到字符串
-def human_time(date=None):
+def human_datetime(date=None):
     if date:
         assert isinstance(date, datetime)
     else:

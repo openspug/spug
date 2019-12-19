@@ -99,7 +99,7 @@ class ConfigView(View):
         ).parse(request.body)
         if error is None:
             form.value = form.value.strip()
-            form.updated_at = human_time()
+            form.updated_at = human_datetime()
             form.updated_by = request.user
             envs = form.pop('envs')
             for env_id in envs:
@@ -122,7 +122,7 @@ class ConfigView(View):
                 old_value = config.value
                 config.value = form.value
                 config.desc = form.desc
-                config.updated_at = human_time()
+                config.updated_at = human_datetime()
                 config.updated_by = request.user
                 config.save()
                 ConfigHistory.objects.create(
@@ -145,7 +145,7 @@ class ConfigView(View):
                     action='3',
                     old_value=config.value,
                     value='',
-                    updated_at=human_time(),
+                    updated_at=human_datetime(),
                     updated_by=request.user,
                     **config.to_dict(excludes=('id', 'value', 'updated_at', 'updated_by_id'))
                 )
@@ -226,7 +226,7 @@ def _parse(request, query, data):
             if item.value != value:
                 old_value = item.value
                 item.value = value
-                item.updated_at = human_time()
+                item.updated_at = human_datetime()
                 item.updated_by = request.user
                 item.save()
                 ConfigHistory.objects.create(
@@ -238,7 +238,7 @@ def _parse(request, query, data):
                 action='3',
                 old_value=item.value,
                 value='',
-                updated_at=human_time(),
+                updated_at=human_datetime(),
                 updated_by=request.user,
                 **item.to_dict(excludes=('id', 'value', 'updated_at', 'updated_by_id'))
             )
@@ -247,7 +247,7 @@ def _parse(request, query, data):
         query.key = key
         query.is_public = True
         query.value = _filter_value(value)
-        query.updated_at = human_time()
+        query.updated_at = human_datetime()
         query.updated_by = request.user
         Config.objects.create(**query)
         ConfigHistory.objects.create(action='1', **query)
