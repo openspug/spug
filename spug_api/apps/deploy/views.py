@@ -58,16 +58,28 @@ class RequestView(View):
         return json_response(error=error)
 
 
-def do_deploy(request, r_id):
-    req = DeployRequest.objects.filter(pk=r_id).first()
-    if not req:
-        return json_response(error='未找到指定发布申请')
-    if req.status != '2':
-        return json_response(error='该申请单当前状态还不能执行发布')
-    hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
-    token = uuid.uuid4().hex
-    Thread(target=deploy_dispatch, args=(request, req, token)).start()
-    outputs = {str(x.id): {'data': ''} for x in hosts}
-    outputs.update(local={'data': f'{human_time()} 建立接连...        '})
-    targets = [{'id': x.id, 'title': f'{x.name}({x.hostname}:{x.port})'} for x in hosts]
-    return json_response({'token': token, 'outputs': outputs, 'targets': targets})
+class RequestDetailView(View):
+    def get(self, request, r_id):
+        req = DeployRequest.objects.filter(pk=r_id).first()
+        if not req:
+            return json_response(error='为找到指定发布申请')
+        return json_response({
+            'app_name': req.app.name,
+            'env_name': req.app.env.name,
+            'status': req.status,
+            'status_alias': req.get_status_display()
+        })
+
+    def post(self, request, r_id):
+        req = DeployRequest.objects.filter(pk=r_id).first()
+        if not req:
+            return json_response(error='未找到指定发布申请')
+        if req.status != '2':
+            return json_response(error='该申请单当前状态还不能执行发布')
+        hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
+        token = uuid.uuid4().hex
+        Thread(target=deploy_dispatch, args=(request, req, token)).start()
+        outputs = {str(x.id): {'data': ''} for x in hosts}
+        outputs.update(local={'data': f'{human_time()} 建立接连...        '})
+        targets = [{'id': x.id, 'title': f'{x.name}({x.hostname}:{x.port})'} for x in hosts]
+        return json_response({'token': token, 'outputs': outputs, 'targets': targets})
