@@ -2,6 +2,10 @@
     display: flex;
 }
 
+.collapse {
+    margin-top: 16px;
+}
+
 .collapse :global(.ant-collapse-content-box) {
     padding: 0;
 }

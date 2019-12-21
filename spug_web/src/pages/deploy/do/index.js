@@ -1,17 +1,42 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Steps, Collapse, Icon } from 'antd';
+import { Steps, Collapse, PageHeader, Spin, Tag, Button, Icon } from 'antd';
 import http from 'libs/http';
+import history from 'libs/history';
 import styles from './index.module.css';
 import store from './store';
 import lds from 'lodash';
 
 @observer
 class Index extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      fetching: true,
+      loading: false,
+      request: {},
+    }
+  }
+
   componentDidMount() {
-    const {id} = this.props.match.params;
-    http.post(`/api/deploy/request/${id}/`)
+    this.id = this.props.match.params.id;
+    http.get(`/api/deploy/request/${this.id}/`)
+      .then(res => store.request = res)
+      .finally(() => this.setState({fetching: false}))
+  }
+
+  componentWillUnmount() {
+    if (this.socket) this.socket.close();
+    store.request = {};
+    store.outputs = {};
+    store.targets = []
+  }
+
+  handleDeploy = () => {
+    this.setState({loading: true});
+    http.post(`/api/deploy/request/${this.id}/`)
       .then(({token, outputs, targets}) => {
+        store.request.status = '3';
         store.outputs = outputs;
         store.targets = targets;
         this.socket = new WebSocket(`ws://localhost:8000/ws/exec/${token}/`);
@@ -26,20 +51,14 @@ class Index extends React.Component {
             if (data !== undefined) store.outputs[key]['data'] += data;
             if (step !== undefined) store.outputs[key]['step'] = step;
             if (status !== undefined) store.outputs[key]['status'] = status;
-            // if (this.elements[key]) {
-            //   this.elements[key].scrollIntoView({behavior: 'smooth'})
-            // }
           }
         }
       })
-  }
-
-  componentWillUnmount() {
-    if (this.socket) this.socket.close()
-  }
+      .finally(() => this.setState({loading: false}))
+  };
 
   getStatus = (key, n) => {
-    const step = lds.get(store.outputs, `${key}.step`, 0);
+    const step = lds.get(store.outputs, `${key}.step`, -1);
     const isError = lds.get(store.outputs, `${key}.status`) === 'error';
     const icon = <Icon type="loading"/>;
     if (n > step) {
@@ -51,10 +70,33 @@ class Index extends React.Component {
     }
   };
 
+  getStatusAlias = () => {
+    if (store.targets.length !== 0) {
+      for (let item of store.targets) {
+        if (lds.get(store.outputs, `${item.id}.status`) === 'error') {
+          return <Tag color="orange">发布异常</Tag>
+        } else if (lds.get(store.outputs, `${item.id}.step`, -1) < 5) {
+          return <Tag color="blue">发布中</Tag>
+        }
+      }
+      return <Tag color="green">发布成功</Tag>
+    } else {
+      return <Tag>{store.request['status_alias'] || '...'}</Tag>
+    }
+  };
+
   render() {
+    const {app_name, env_name, status} = store.request;
     return (
-      <div>
-        <div style={{fontSize: 16, marginBottom: 10}}>服务端执行 :</div>
+      <Spin spinning={this.state.fetching}>
+        <PageHeader
+          title="应用发布"
+          subTitle={`${app_name} - ${env_name}`}
+          style={{padding: 0}}
+          tags={this.getStatusAlias()}
+          extra={<Button loading={this.state.loading} type="primary" disabled={status !== '2'}
+                         onClick={this.handleDeploy}>发布</Button>}
+          onBack={() => history.goBack()}/>
         <Collapse defaultActiveKey={1} className={styles.collapse}>
           <Collapse.Panel showArrow={false} key={1} header={
             <Steps>
@@ -67,7 +109,7 @@ class Index extends React.Component {
             <pre className={styles.console}>{lds.get(store.outputs, 'local.data')}</pre>
           </Collapse.Panel>
         </Collapse>
-        <div style={{fontSize: 16, margin: '30px 0 10px 0'}}>目标主机执行 :</div>
+
         <Collapse
           defaultActiveKey={'0'}
           className={styles.collapse}
@@ -87,7 +129,7 @@ class Index extends React.Component {
             </Collapse.Panel>
           ))}
         </Collapse>
-      </div>
+      </Spin>
     )
   }
 }
