@@ -5,6 +5,7 @@ import { SearchForm } from 'components';
 import SelectApp from './SelectApp';
 import Ext1Form from './Ext1Form';
 import Ext2Form from './Ext2Form';
+import Approve from './Approve';
 import ComTable from './Table';
 import store from './store';
 
@@ -26,9 +27,10 @@ export default observer(function () {
         <Button type="primary" icon="plus" onClick={() => store.addVisible = true}>新建发布申请</Button>
       </div>
       <ComTable/>
-      {store.addVisible && <SelectApp />}
-      {store.ext1Visible && <Ext1Form />}
-      {store.ext2Visible && <Ext2Form />}
+      {store.addVisible && <SelectApp/>}
+      {store.ext1Visible && <Ext1Form/>}
+      {store.ext2Visible && <Ext2Form/>}
+      {store.approveVisible && <Approve/>}
     </Card>
   )
 })

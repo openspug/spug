@@ -9,6 +9,7 @@ class Store {
   @observable addVisible = false;
   @observable ext1Visible = false;
   @observable ext2Visible = false;
+  @observable approveVisible = false;
 
   @observable f_name;
   @observable f_app_name;
@@ -27,6 +28,11 @@ class Store {
     } else {
       this.ext2Visible = true
     }
+  };
+
+  showApprove = (info) => {
+    this.record = info;
+    this.approveVisible = true;
   }
 }
 

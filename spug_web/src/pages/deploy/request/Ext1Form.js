@@ -18,7 +18,7 @@ class Ext1Form extends React.Component {
       extra1: lds.get(store.record, 'extra.1'),
       extra2: lds.get(store.record, 'extra.2'),
       versions: {},
-      host_ids: store.record['host_ids'].concat()
+      host_ids: store.record['app_host_ids'].concat()
     }
   }
 

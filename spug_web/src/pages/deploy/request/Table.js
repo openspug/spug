@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, Icon, message } from 'antd';
+import { Table, Divider, Modal, Icon, Popover, message } from 'antd';
 import http from 'libs/http';
 import store from './store';
 import { LinkButton } from "components";
@@ -43,7 +43,19 @@ class ComTable extends React.Component {
     }
   }, {
     title: '状态',
-    dataIndex: 'status_alias'
+    render: info => {
+      if (info.status === '-1' && info.reason) {
+        return <Popover title="驳回原因:" content={info.reason}>
+          <span style={{color: '#1890ff'}}>{info['status_alias']}</span>
+        </Popover>
+      } else if (info.status === '2' && info.reason) {
+        return <Popover title="审核意见:" content={info.reason}>
+          <span style={{color: '#1890ff'}}>{info['status_alias']}</span>
+        </Popover>
+      } else {
+        return info['status_alias']
+      }
+    }
   }, {
     title: '申请人',
     dataIndex: 'created_by_user',
@@ -52,15 +64,35 @@ class ComTable extends React.Component {
     dataIndex: 'created_at'
   }, {
     title: '操作',
-    render: info => (
-      <span>
-        <Link to={`/deploy/do/${info.id}`}>发布</Link>
-        <Divider type="vertical"/>
-        <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
-      </span>
-    )
+    render: info => {
+      switch (info.status) {
+        case '-3':
+        case '3':
+          return <LinkButton onClick={() => store.showForm(info)}>回滚</LinkButton>;
+        case '-1':
+          return <React.Fragment>
+            <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
+            <Divider type="vertical"/>
+            <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
+          </React.Fragment>;
+        case '1':
+          return <React.Fragment>
+            <LinkButton onClick={() => store.showApprove(info)}>审核</LinkButton>
+            <Divider type="vertical"/>
+            <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
+            <Divider type="vertical"/>
+            <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
+          </React.Fragment>
+        case '2':
+          return <React.Fragment>
+            <Link to={`/deploy/do/${info.id}`}>发布</Link>
+            <Divider type="vertical"/>
+            <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
+          </React.Fragment>;
+        default:
+          return null
+      }
+    }
   }];
 
   handleDelete = (text) => {

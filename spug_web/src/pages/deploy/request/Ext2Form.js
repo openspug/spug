@@ -13,7 +13,7 @@ class Ext2Form extends React.Component {
     this.state = {
       loading: false,
       type: null,
-      host_ids: store.record['host_ids'].concat()
+      host_ids: store.record['app_host_ids'].concat()
     }
   }
 
