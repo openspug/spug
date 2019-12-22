@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, Icon, Popover, message } from 'antd';
+import { Table, Divider, Modal, Icon, Popover, Tag, message } from 'antd';
 import http from 'libs/http';
 import store from './store';
 import { LinkButton } from "components";
@@ -48,10 +48,16 @@ class ComTable extends React.Component {
         return <Popover title="驳回原因:" content={info.reason}>
           <span style={{color: '#1890ff'}}>{info['status_alias']}</span>
         </Popover>
-      } else if (info.status === '2' && info.reason) {
+      } else if (info.status === '1' && info.reason) {
         return <Popover title="审核意见:" content={info.reason}>
           <span style={{color: '#1890ff'}}>{info['status_alias']}</span>
         </Popover>
+      } else if (info.status === '2') {
+        return <Tag color="blue">{info['status_alias']}</Tag>
+      } else if (info.status === '3') {
+        return <Tag color="green">{info['status_alias']}</Tag>
+      } else if (info.status === '-3') {
+        return <Tag color="red">{info['status_alias']}</Tag>
       } else {
         return info['status_alias']
       }
@@ -67,6 +73,11 @@ class ComTable extends React.Component {
     render: info => {
       switch (info.status) {
         case '-3':
+          return <React.Fragment>
+            <Link to={`/deploy/do/${info.id}`}>发布</Link>
+            <Divider type="vertical"/>
+            <LinkButton onClick={() => store.showForm(info)}>回滚</LinkButton>
+          </React.Fragment>;
         case '3':
           return <LinkButton onClick={() => store.showForm(info)}>回滚</LinkButton>;
         case '-1':
@@ -75,7 +86,7 @@ class ComTable extends React.Component {
             <Divider type="vertical"/>
             <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
           </React.Fragment>;
-        case '1':
+        case '0':
           return <React.Fragment>
             <LinkButton onClick={() => store.showApprove(info)}>审核</LinkButton>
             <Divider type="vertical"/>
@@ -83,7 +94,7 @@ class ComTable extends React.Component {
             <Divider type="vertical"/>
             <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
           </React.Fragment>
-        case '2':
+        case '1':
           return <React.Fragment>
             <Link to={`/deploy/do/${info.id}`}>发布</Link>
             <Divider type="vertical"/>

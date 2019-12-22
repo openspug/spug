@@ -36,7 +36,7 @@ class Index extends React.Component {
     this.setState({loading: true});
     http.post(`/api/deploy/request/${this.id}/`)
       .then(({token, outputs, targets}) => {
-        store.request.status = '3';
+        store.request.status = '2';
         store.outputs = outputs;
         store.targets = targets;
         this.socket = new WebSocket(`ws://localhost:8000/ws/exec/${token}/`);
@@ -74,7 +74,7 @@ class Index extends React.Component {
     if (store.targets.length !== 0) {
       for (let item of [{id: 'local'}, ...store.targets]) {
         if (lds.get(store.outputs, `${item.id}.status`) === 'error') {
-          return <Tag color="orange">发布异常</Tag>
+          return <Tag color="red">发布异常</Tag>
         } else if (lds.get(store.outputs, `${item.id}.step`, -1) < 5) {
           return <Tag color="blue">发布中</Tag>
         }
@@ -94,7 +94,7 @@ class Index extends React.Component {
           subTitle={`${app_name} - ${env_name}`}
           style={{padding: 0}}
           tags={this.getStatusAlias()}
-          extra={<Button loading={this.state.loading} type="primary" disabled={status !== '2'}
+          extra={<Button loading={this.state.loading} type="primary" disabled={!['1', '-3'].includes(status)}
                          onClick={this.handleDeploy}>发布</Button>}
           onBack={() => history.goBack()}/>
         <Collapse defaultActiveKey={1} className={styles.collapse}>
