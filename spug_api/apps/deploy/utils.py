@@ -2,8 +2,7 @@ from django_redis import get_redis_connection
 from django.conf import settings
 from libs.utils import AttrDict, human_time
 from apps.host.models import Host
-from datetime import datetime
-from threading import Thread
+from concurrent import futures
 import socket
 import subprocess
 import json
@@ -13,25 +12,30 @@ REPOS_DIR = settings.REPOS_DIR
 
 
 def deploy_dispatch(request, req, token):
-    now = datetime.now()
     rds = get_redis_connection()
-    helper = Helper(rds, token)
-    helper.send_step('local', 1, f'完成\r\n{human_time()} 发布准备...        ')
-    rds.expire(token, 60 * 60)
-    env = AttrDict(
-        APP_NAME=req.app.name,
-        APP_ID=str(req.app_id),
-        TASK_NAME=req.name,
-        TASK_ID=str(req.id),
-        VERSION=f'{req.app_id}_{req.id}_{now.strftime("%Y%m%d%H%M%S")}',
-        TIME=str(now.strftime(r'%Y-%m-%d\ %H:%M:%S'))
-    )
-    if req.app.extend == '1':
-        env.update(json.loads(req.app.extend_obj.custom_envs))
-        helper.local(f'cd {REPOS_DIR} && rm -rf {req.app_id}_*')
-        _ext1_deploy(request, req, helper, env)
-    else:
-        _ext2_deploy(request, req, helper, env)
+    try:
+        helper = Helper(rds, token)
+        helper.send_step('local', 1, f'完成\r\n{human_time()} 发布准备...        ')
+        rds.expire(token, 60 * 60)
+        env = AttrDict(
+            APP_NAME=req.app.name,
+            APP_ID=str(req.app_id),
+            TASK_NAME=req.name,
+            TASK_ID=str(req.id),
+            VERSION=req.version
+        )
+        if req.app.extend == '1':
+            env.update(json.loads(req.app.extend_obj.custom_envs))
+            _ext1_deploy(request, req, helper, env)
+        else:
+            _ext2_deploy(request, req, helper, env)
+        req.status = '3'
+    except Exception as e:
+        req.status = '-3'
+        raise e
+    finally:
+        rds.close()
+        req.save()
 
 
 def _ext1_deploy(request, req, helper, env):
@@ -44,6 +48,7 @@ def _ext1_deploy(request, req, helper, env):
     else:
         tree_ish = extras[1]
         env.update(TAG=extras[1])
+    helper.local(f'cd {REPOS_DIR} && rm -rf {req.app_id}_*')
     helper.send_step('local', 1, '完成\r\n')
 
     if extend.hook_pre_server:
@@ -70,8 +75,13 @@ def _ext1_deploy(request, req, helper, env):
             contain = ' '.join(f'{env.VERSION}/{x}' for x in files)
     helper.local(f'cd {REPOS_DIR} && tar zcf {env.VERSION}.tar.gz {exclude} {contain}')
     helper.send_step('local', 6, f'完成')
-    for h_id in json.loads(req.host_ids):
-        Thread(target=_deploy_host, args=(helper, h_id, extend, env)).start()
+    with futures.ThreadPoolExecutor(max_workers=min(16, os.cpu_count() + 4)) as executor:
+        threads = []
+        for h_id in json.loads(req.host_ids):
+            threads.append(executor.submit(_deploy_host, helper, h_id, extend, env))
+        for t in futures.as_completed(threads):
+            if t.exception():
+                raise t.exception()
 
 
 def _ext2_deploy(request, req, helper, env):
@@ -89,7 +99,7 @@ def _deploy_host(helper, h_id, extend, env):
         helper.send_error(host.id, f'please make sure the {extend.dst_dir!r} is not exists.')
     # clean
     clean_command = f'ls -rd {env.APP_ID}_* | tail -n +{extend.versions + 1} | xargs rm -rf'
-    helper.remote(host.id, ssh, f'cd {extend.dst_repo} && {clean_command}')
+    helper.remote(host.id, ssh, f'cd {extend.dst_repo} && rm -rf {env.VERSION} && {clean_command}')
     # transfer files
     tar_gz_file = f'{env.VERSION}.tar.gz'
     try:
@@ -149,7 +159,7 @@ class Helper:
         self.rds.rpush(self.token, json.dumps({'key': key, 'step': step, 'data': data}))
 
     def local(self, command, env=None):
-        print(f'helper.local: {command!r}')
+        # print(f'helper.local: {command!r}')
         task = subprocess.Popen(command, env=env, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         while True:
             message = task.stdout.readline()
@@ -160,7 +170,7 @@ class Helper:
             self.send_error('local', f'exit code: {task.returncode}')
 
     def remote(self, key, ssh, command, env=None):
-        print(f'helper.remote: {command!r} env: {env!r}')
+        # print(f'helper.remote: {command!r} env: {env!r}')
         code = -1
         try:
             for code, out in ssh.exec_command_with_stream(command, environment=env):

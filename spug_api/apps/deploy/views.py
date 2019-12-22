@@ -6,6 +6,7 @@ from apps.deploy.utils import deploy_dispatch
 from apps.app.models import App
 from apps.host.models import Host
 from threading import Thread
+from datetime import datetime
 import json
 import uuid
 
@@ -44,7 +45,7 @@ class RequestView(View):
             app = App.objects.filter(pk=form.app_id).first()
             if not app:
                 return json_response(error='未找到该应用')
-            form.status = '1' if app.is_audit else '2'
+            form.status = '0' if app.is_audit else '1'
             form.extra = json.dumps(form.extra)
             form.host_ids = json.dumps(form.host_ids)
             if form.id:
@@ -74,14 +75,18 @@ class RequestDetailView(View):
         req = DeployRequest.objects.filter(pk=r_id).first()
         if not req:
             return json_response(error='未找到指定发布申请')
-        if req.status != '2':
+        if req.status not in ('1', '-3'):
             return json_response(error='该申请单当前状态还不能执行发布')
         hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
         token = uuid.uuid4().hex
-        Thread(target=deploy_dispatch, args=(request, req, token)).start()
         outputs = {str(x.id): {'data': ''} for x in hosts}
         outputs.update(local={'data': f'{human_time()} 建立接连...        '})
         targets = [{'id': x.id, 'title': f'{x.name}({x.hostname}:{x.port})'} for x in hosts]
+        req.status = '2'
+        if not req.version:
+            req.version = f'{req.app_id}_{req.id}_{datetime.now().strftime("%Y%m%d%H%M%S")}'
+        req.save()
+        Thread(target=deploy_dispatch, args=(request, req, token)).start()
         return json_response({'token': token, 'outputs': outputs, 'targets': targets})
 
     def patch(self, request, r_id):
@@ -95,11 +100,11 @@ class RequestDetailView(View):
                 return json_response(error='未找到指定申请')
             if not form.is_pass and not form.reason:
                 return json_response(error='请输入驳回原因')
-            if req.status != '1':
+            if req.status != '0':
                 return json_response(error='该申请当前状态不允许审核')
             req.approve_at = human_datetime()
             req.approve_by = request.user
-            req.status = '2' if form.is_pass else '-1'
+            req.status = '1' if form.is_pass else '-1'
             req.reason = form.reason
             req.save()
         return json_response(error=error)

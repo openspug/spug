@@ -8,8 +8,9 @@ class DeployRequest(models.Model, ModelMixin):
     STATUS = (
         ('-3', '发布异常'),
         ('-1', '已驳回'),
-        ('1', '待审核'),
-        ('2', '待发布'),
+        ('0', '待审核'),
+        ('1', '待发布'),
+        ('2', '发布中'),
         ('3', '发布成功'),
     )
     app = models.ForeignKey(App, on_delete=models.CASCADE)
@@ -19,6 +20,7 @@ class DeployRequest(models.Model, ModelMixin):
     desc = models.CharField(max_length=255, null=True)
     status = models.CharField(max_length=2, choices=STATUS)
     reason = models.CharField(max_length=255, null=True)
+    version = models.CharField(max_length=50, null=True)
 
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
