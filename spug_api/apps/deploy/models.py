@@ -6,11 +6,11 @@ from apps.app.models import App
 
 class DeployRequest(models.Model, ModelMixin):
     STATUS = (
-        ('-2', '发布失败'),
+        ('-3', '发布异常'),
         ('-1', '已驳回'),
         ('1', '待审核'),
         ('2', '待发布'),
-        ('3', '已完成'),
+        ('3', '发布成功'),
     )
     app = models.ForeignKey(App, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)

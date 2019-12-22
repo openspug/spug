@@ -1,6 +1,6 @@
 from django.views.generic import View
 from django.db.models import F
-from libs import json_response, JsonParser, Argument, human_time
+from libs import json_response, JsonParser, Argument, human_datetime, human_time
 from apps.deploy.models import DeployRequest
 from apps.deploy.utils import deploy_dispatch
 from apps.app.models import App
@@ -83,3 +83,23 @@ class RequestDetailView(View):
         outputs.update(local={'data': f'{human_time()} 建立接连...        '})
         targets = [{'id': x.id, 'title': f'{x.name}({x.hostname}:{x.port})'} for x in hosts]
         return json_response({'token': token, 'outputs': outputs, 'targets': targets})
+
+    def patch(self, request, r_id):
+        form, error = JsonParser(
+            Argument('reason', required=False),
+            Argument('is_pass', type=bool, help='参数错误')
+        ).parse(request.body)
+        if error is None:
+            req = DeployRequest.objects.filter(pk=r_id).first()
+            if not req:
+                return json_response(error='未找到指定申请')
+            if not form.is_pass and not form.reason:
+                return json_response(error='请输入驳回原因')
+            if req.status != '1':
+                return json_response(error='该申请当前状态不允许审核')
+            req.approve_at = human_datetime()
+            req.approve_by = request.user
+            req.status = '2' if form.is_pass else '-1'
+            req.reason = form.reason
+            req.save()
+        return json_response(error=error)
