@@ -59,8 +59,16 @@ def _ext1_deploy(request, req, helper, env):
         helper.send_step('local', 4, f'{human_time()} 检出后任务...\r\n')
         helper.local(f'cd {os.path.join(REPOS_DIR, env.VERSION)} && {extend.hook_post_server}', env)
 
-    helper.send_step('local', 5, f'\r\n{human_time()} ** 执行完毕 **')
-    helper.local(f'cd {REPOS_DIR} && tar zcf {env.VERSION}.tar.gz {env.VERSION}')
+    helper.send_step('local', 5, f'\r\n{human_time()} 执行打包...        ')
+    filter_rule, exclude, contain = json.loads(extend.filter_rule), '', env.VERSION
+    files = helper.parse_filter_rule(filter_rule['data'])
+    if files:
+        if filter_rule['type'] == 'exclude':
+            exclude = ' '.join(f'--exclude={x}' for x in files)
+        else:
+            contain = ' '.join(f'{env.VERSION}/{x}' for x in files)
+    helper.local(f'cd {REPOS_DIR} && tar zcf {env.VERSION}.tar.gz {exclude} {contain}')
+    helper.send_step('local', 6, f'完成')
     for h_id in json.loads(req.host_ids):
         Thread(target=_deploy_host, args=(helper, h_id, extend, env)).start()
 
@@ -115,6 +123,15 @@ class Helper:
     def __init__(self, rds, token):
         self.rds = rds
         self.token = token
+
+    def parse_filter_rule(self, data: str):
+        data, files = data.strip(), []
+        if data:
+            for line in data.split('\n'):
+                line = line.strip()
+                if line and not line.startswith('#'):
+                    files.append(line)
+        return files
 
     def send_info(self, key, message):
         self.rds.rpush(self.token, json.dumps({'key': key, 'status': 'info', 'data': message}))

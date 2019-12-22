@@ -72,7 +72,7 @@ class Index extends React.Component {
 
   getStatusAlias = () => {
     if (store.targets.length !== 0) {
-      for (let item of store.targets) {
+      for (let item of [{id: 'local'}, ...store.targets]) {
         if (lds.get(store.outputs, `${item.id}.status`) === 'error') {
           return <Tag color="orange">发布异常</Tag>
         } else if (lds.get(store.outputs, `${item.id}.step`, -1) < 5) {
@@ -105,6 +105,7 @@ class Index extends React.Component {
               <Steps.Step {...this.getStatus('local', 2)} title="检出前任务"/>
               <Steps.Step {...this.getStatus('local', 3)} title="执行检出"/>
               <Steps.Step {...this.getStatus('local', 4)} title="检出后任务"/>
+              <Steps.Step {...this.getStatus('local', 5)} title="执行打包"/>
             </Steps>}>
             <pre className={styles.console}>{lds.get(store.outputs, 'local.data')}</pre>
           </Collapse.Panel>
