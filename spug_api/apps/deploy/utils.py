@@ -28,6 +28,7 @@ def deploy_dispatch(request, req, token):
     )
     if req.app.extend == '1':
         env.update(json.loads(req.app.extend_obj.custom_envs))
+        helper.local(f'cd {REPOS_DIR} && rm -rf {req.app_id}_*')
         _ext1_deploy(request, req, helper, env)
     else:
         _ext2_deploy(request, req, helper, env)
@@ -73,7 +74,7 @@ def _ext1_deploy(request, req, helper, env):
         Thread(target=_deploy_host, args=(helper, h_id, extend, env)).start()
 
 
-def _ext2_deploy(request, rds, req, token, env):
+def _ext2_deploy(request, req, helper, env):
     pass
 
 
@@ -86,6 +87,9 @@ def _deploy_host(helper, h_id, extend, env):
     code, _ = ssh.exec_command(f'mkdir -p {extend.dst_repo} && [ -e {extend.dst_dir} ] && [ ! -L {extend.dst_dir} ]')
     if code == 0:
         helper.send_error(host.id, f'please make sure the {extend.dst_dir!r} is not exists.')
+    # clean
+    clean_command = f'ls -rd {env.APP_ID}_* | tail -n +{extend.versions + 1} | xargs rm -rf'
+    helper.remote(host.id, ssh, f'cd {extend.dst_repo} && {clean_command}')
     # transfer files
     tar_gz_file = f'{env.VERSION}.tar.gz'
     try:
