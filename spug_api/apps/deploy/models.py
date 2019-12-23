@@ -13,8 +13,13 @@ class DeployRequest(models.Model, ModelMixin):
         ('2', '发布中'),
         ('3', '发布成功'),
     )
+    TYPES = (
+        ('1', '正常发布'),
+        ('2', '回滚')
+    )
     app = models.ForeignKey(App, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
+    type = models.CharField(max_length=2, choices=TYPES, default='1')
     extra = models.TextField()
     host_ids = models.TextField()
     desc = models.CharField(max_length=255, null=True)

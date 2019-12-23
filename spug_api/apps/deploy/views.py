@@ -58,17 +58,56 @@ class RequestView(View):
                 DeployRequest.objects.create(created_by=request.user, **form)
         return json_response(error=error)
 
+    def put(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='缺少必要参数'),
+            Argument('action', filter=lambda x: x in ('check', 'do'), help='参数错误')
+        ).parse(request.body)
+        if error is None:
+            req = DeployRequest.objects.filter(pk=form.id).first()
+            if not req:
+                return json_response(error='未找到指定发布申请')
+            pre_req = DeployRequest.objects.filter(app_id=req.app_id, id__lt=req.id, status='3').first()
+            if not pre_req:
+                return json_response(error='未找到该应用可以用于回滚的版本')
+            if form.action == 'check':
+                return json_response({'date': pre_req.created_at, 'name': pre_req.name})
+            DeployRequest.objects.create(
+                app_id=req.app_id,
+                name=f'{req.name} - 回滚',
+                type='2',
+                extra=pre_req.extra,
+                host_ids=req.host_ids,
+                status='0',
+                desc='自动回滚至该应用的上个版本',
+                version=pre_req.version,
+                created_by=request.user
+            )
+        return json_response(error=error)
+
+    def delete(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='缺少必要参数')
+        ).parse(request.body)
+        if error is None:
+            DeployRequest.objects.filter(pk=form.id, status__in=('0', '1', '-1')).delete()
+        return json_response(error=error)
+
 
 class RequestDetailView(View):
     def get(self, request, r_id):
         req = DeployRequest.objects.filter(pk=r_id).first()
         if not req:
             return json_response(error='为找到指定发布申请')
+        hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
+        targets = [{'id': x.id, 'title': f'{x.name}({x.hostname}:{x.port})'} for x in hosts]
         return json_response({
             'app_name': req.app.name,
             'env_name': req.app.env.name,
             'status': req.status,
-            'status_alias': req.get_status_display()
+            'type': req.type,
+            'status_alias': req.get_status_display(),
+            'targets': targets
         })
 
     def post(self, request, r_id):
@@ -81,13 +120,12 @@ class RequestDetailView(View):
         token = uuid.uuid4().hex
         outputs = {str(x.id): {'data': ''} for x in hosts}
         outputs.update(local={'data': f'{human_time()} 建立接连...        '})
-        targets = [{'id': x.id, 'title': f'{x.name}({x.hostname}:{x.port})'} for x in hosts]
         req.status = '2'
         if not req.version:
             req.version = f'{req.app_id}_{req.id}_{datetime.now().strftime("%Y%m%d%H%M%S")}'
         req.save()
         Thread(target=deploy_dispatch, args=(request, req, token)).start()
-        return json_response({'token': token, 'outputs': outputs, 'targets': targets})
+        return json_response({'token': token, 'type': req.type, 'outputs': outputs})
 
     def patch(self, request, r_id):
         form, error = JsonParser(
