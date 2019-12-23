@@ -67,7 +67,11 @@ class RequestView(View):
             req = DeployRequest.objects.filter(pk=form.id).first()
             if not req:
                 return json_response(error='未找到指定发布申请')
-            pre_req = DeployRequest.objects.filter(app_id=req.app_id, id__lt=req.id, status='3').first()
+            pre_req = DeployRequest.objects.filter(
+                app_id=req.app_id,
+                type='1',
+                id__lt=req.id,
+                version__isnull=False).first()
             if not pre_req:
                 return json_response(error='未找到该应用可以用于回滚的版本')
             if form.action == 'check':

@@ -27,7 +27,7 @@ class Index extends React.Component {
 
   componentWillUnmount() {
     if (this.socket) this.socket.close();
-    store.request = { targets: []};
+    store.request = {targets: []};
     store.outputs = {};
   }
 
@@ -97,18 +97,14 @@ class Index extends React.Component {
           onBack={() => history.goBack()}/>
         <Collapse defaultActiveKey={1} className={styles.collapse}>
           <Collapse.Panel showArrow={false} key={1} header={
-            store.request.type === '1' ?
-              <Steps>
-                <Steps.Step {...this.getStatus('local', 0)} title="建立连接"/>
-                <Steps.Step {...this.getStatus('local', 1)} title="发布准备"/>
-                <Steps.Step {...this.getStatus('local', 2)} title="检出前任务"/>
-                <Steps.Step {...this.getStatus('local', 3)} title="执行检出"/>
-                <Steps.Step {...this.getStatus('local', 4)} title="检出后任务"/>
-                <Steps.Step {...this.getStatus('local', 5)} title="执行打包"/>
-              </Steps> : <Steps style={{width: 400}}>
-                <Steps.Step {...this.getStatus('local', 0)} title="建立连接"/>
-                <Steps.Step {...this.getStatus('local', 1)} title="发布准备"/>
-              </Steps>}>
+            <Steps>
+              <Steps.Step {...this.getStatus('local', 0)} title="建立连接"/>
+              <Steps.Step {...this.getStatus('local', 1)} title="发布准备"/>
+              <Steps.Step {...this.getStatus('local', 2)} title="检出前任务"/>
+              <Steps.Step {...this.getStatus('local', 3)} title="执行检出"/>
+              <Steps.Step {...this.getStatus('local', 4)} title="检出后任务"/>
+              <Steps.Step {...this.getStatus('local', 5)} title="执行打包"/>
+            </Steps>}>
             <pre className={styles.console}>{lds.get(store.outputs, 'local.data')}</pre>
           </Collapse.Panel>
         </Collapse>

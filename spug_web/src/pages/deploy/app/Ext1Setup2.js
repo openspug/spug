@@ -28,7 +28,7 @@ class Ext1Setup2 extends React.Component {
         <Form.Item required label="目标主机仓库路径" help="此目录用于存储应用的历史版本，例如：/data/spug/repos">
           <Input value={info['dst_repo']} onChange={e => info['dst_repo'] = e.target.value} placeholder="请输入目标主机仓库路径"/>
         </Form.Item>
-        <Form.Item required label="保留历史版本数量" help="早于指定数量的历史版本将无法回滚">
+        <Form.Item required label="保留历史版本数量" help="早于指定数量的历史版本会被删除，以释放空间">
           <Input value={info['versions']} onChange={e => info['versions'] = e.target.value} placeholder="请输入保留历史版本数量"/>
         </Form.Item>
         <Form.Item required label="发布目标主机">
