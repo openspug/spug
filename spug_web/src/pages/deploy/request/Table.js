@@ -8,6 +8,13 @@ import { LinkButton } from "components";
 
 @observer
 class ComTable extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: false
+    }
+  }
+
   componentDidMount() {
     store.fetchRecords()
   }
@@ -76,10 +83,16 @@ class ComTable extends React.Component {
           return <React.Fragment>
             <Link to={`/deploy/do/${info.id}`}>发布</Link>
             <Divider type="vertical"/>
-            <LinkButton onClick={() => store.showForm(info)}>回滚</LinkButton>
+            <LinkButton
+              disabled={info.type === '2'}
+              loading={this.state.loading}
+              onClick={() => this.handleRollback(info)}>回滚</LinkButton>
           </React.Fragment>;
         case '3':
-          return <LinkButton onClick={() => store.showForm(info)}>回滚</LinkButton>;
+          return <LinkButton
+            disabled={info.type === '2'}
+            loading={this.state.loading}
+            onClick={() => this.handleRollback(info)}>回滚</LinkButton>;
         case '-1':
           return <React.Fragment>
             <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
@@ -106,12 +119,31 @@ class ComTable extends React.Component {
     }
   }];
 
-  handleDelete = (text) => {
+  handleRollback = (info) => {
+    this.setState({loading: true});
+    http.put('/api/deploy/request/', {id: info.id, action: 'check'})
+      .then(res => {
+        Modal.confirm({
+          title: '回滚确认',
+          content: `确定要回滚至 ${res['date']} 创建的名称为【${res['name']}】的发布申请版本?`,
+          onOk: () => {
+            return http.put('/api/deploy/request/', {id: info.id, action: 'do'})
+              .then(() => {
+                message.success('回滚申请创建成功');
+                store.fetchRecords()
+              })
+          }
+        })
+      })
+      .finally(() => this.setState({loading: false}))
+  };
+
+  handleDelete = (info) => {
     Modal.confirm({
       title: '删除确认',
-      content: `确定要删除【${text['name']}】?`,
+      content: `确定要删除【${info['name']}】?`,
       onOk: () => {
-        return http.delete('/api/exec/template/', {params: {id: text.id}})
+        return http.delete('/api/exec/template/', {params: {id: info.id}})
           .then(() => {
             message.success('删除成功');
             store.fetchRecords()

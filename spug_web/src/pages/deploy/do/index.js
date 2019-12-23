@@ -27,18 +27,16 @@ class Index extends React.Component {
 
   componentWillUnmount() {
     if (this.socket) this.socket.close();
-    store.request = {};
+    store.request = { targets: []};
     store.outputs = {};
-    store.targets = []
   }
 
   handleDeploy = () => {
     this.setState({loading: true});
     http.post(`/api/deploy/request/${this.id}/`)
-      .then(({token, outputs, targets}) => {
+      .then(({token, outputs}) => {
         store.request.status = '2';
         store.outputs = outputs;
-        store.targets = targets;
         this.socket = new WebSocket(`ws://localhost:8000/ws/exec/${token}/`);
         this.socket.onopen = () => {
           this.socket.send('ok');
@@ -71,8 +69,8 @@ class Index extends React.Component {
   };
 
   getStatusAlias = () => {
-    if (store.targets.length !== 0) {
-      for (let item of [{id: 'local'}, ...store.targets]) {
+    if (Object.keys(store.outputs).length !== 0) {
+      for (let item of [{id: 'local'}, ...store.request.targets]) {
         if (lds.get(store.outputs, `${item.id}.status`) === 'error') {
           return <Tag color="red">发布异常</Tag>
         } else if (lds.get(store.outputs, `${item.id}.step`, -1) < 5) {
@@ -99,14 +97,18 @@ class Index extends React.Component {
           onBack={() => history.goBack()}/>
         <Collapse defaultActiveKey={1} className={styles.collapse}>
           <Collapse.Panel showArrow={false} key={1} header={
-            <Steps>
-              <Steps.Step {...this.getStatus('local', 0)} title="建立连接"/>
-              <Steps.Step {...this.getStatus('local', 1)} title="发布准备"/>
-              <Steps.Step {...this.getStatus('local', 2)} title="检出前任务"/>
-              <Steps.Step {...this.getStatus('local', 3)} title="执行检出"/>
-              <Steps.Step {...this.getStatus('local', 4)} title="检出后任务"/>
-              <Steps.Step {...this.getStatus('local', 5)} title="执行打包"/>
-            </Steps>}>
+            store.request.type === '1' ?
+              <Steps>
+                <Steps.Step {...this.getStatus('local', 0)} title="建立连接"/>
+                <Steps.Step {...this.getStatus('local', 1)} title="发布准备"/>
+                <Steps.Step {...this.getStatus('local', 2)} title="检出前任务"/>
+                <Steps.Step {...this.getStatus('local', 3)} title="执行检出"/>
+                <Steps.Step {...this.getStatus('local', 4)} title="检出后任务"/>
+                <Steps.Step {...this.getStatus('local', 5)} title="执行打包"/>
+              </Steps> : <Steps style={{width: 400}}>
+                <Steps.Step {...this.getStatus('local', 0)} title="建立连接"/>
+                <Steps.Step {...this.getStatus('local', 1)} title="发布准备"/>
+              </Steps>}>
             <pre className={styles.console}>{lds.get(store.outputs, 'local.data')}</pre>
           </Collapse.Panel>
         </Collapse>
@@ -115,7 +117,7 @@ class Index extends React.Component {
           defaultActiveKey={'0'}
           className={styles.collapse}
           expandIcon={({isActive}) => <Icon type="caret-right" style={{fontSize: 16}} rotate={isActive ? 90 : 0}/>}>
-          {store.targets.map((item, index) => (
+          {store.request.targets.map((item, index) => (
             <Collapse.Panel key={index} header={
               <div style={{display: 'flex', justifyContent: 'space-between'}}>
                 <b>{item.title}</b>

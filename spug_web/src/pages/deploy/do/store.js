@@ -2,8 +2,9 @@ import { observable } from "mobx";
 
 class Store {
   @observable outputs = {};
-  @observable targets = [];
-  @observable request = {};
+  @observable request = {
+    targets: [],
+  };
 }
 
 export default new Store()
