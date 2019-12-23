@@ -6,7 +6,7 @@ import os
 
 def parse_envs(text):
     data = {}
-    if data:
+    if text:
         for line in text.split('\n'):
             fields = line.split('=', 1)
             if len(fields) != 2 or fields[0].strip() == '':

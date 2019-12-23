@@ -22,6 +22,8 @@ def deploy_dispatch(request, req, token):
             APP_ID=str(req.app_id),
             TASK_NAME=req.name,
             TASK_ID=str(req.id),
+            ENV_ID=str(req.app.env_id),
+            ENV_KEY=req.app.env.key,
             VERSION=req.version
         )
         if req.app.extend == '1':
