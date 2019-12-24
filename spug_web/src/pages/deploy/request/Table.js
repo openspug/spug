@@ -44,7 +44,7 @@ class ComTable extends React.Component {
         }
       } else {
         return <React.Fragment>
-          <Icon type="build"/> xxx
+          <Icon type="build"/> {info.extra[0]}
         </React.Fragment>
       }
     }
@@ -81,7 +81,7 @@ class ComTable extends React.Component {
       switch (info.status) {
         case '-3':
           return <React.Fragment>
-            <Link to={`/deploy/do/${info.id}`}>发布</Link>
+            <Link to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>发布</Link>
             <Divider type="vertical"/>
             <LinkButton
               disabled={info.type === '2'}
@@ -106,10 +106,10 @@ class ComTable extends React.Component {
             <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
             <Divider type="vertical"/>
             <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
-          </React.Fragment>
+          </React.Fragment>;
         case '1':
           return <React.Fragment>
-            <Link to={`/deploy/do/${info.id}`}>发布</Link>
+            <Link to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>发布</Link>
             <Divider type="vertical"/>
             <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
           </React.Fragment>;

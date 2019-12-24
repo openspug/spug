@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react';
 import { Modal, Button, Menu, Icon } from 'antd';
 import store from './store';
@@ -45,6 +46,7 @@ class SelectApp extends React.Component {
 
   render() {
     const {env_id} = this.state;
+    const records = appStore.records.filter(x => String(x.env_id) === env_id);
     return (
       <Modal
         visible
@@ -66,13 +68,15 @@ class SelectApp extends React.Component {
           </div>
           <div className={styles.right}>
             <div className={styles.title}>{lds.get(envStore.idMap, `${env_id}.name`)}</div>
-            {appStore.records.map(item => (
+            {records.map(item => (
               <Button key={item.id} type="primary" className={styles.appBlock} onClick={() => this.handleClick(item)}>
                 <div style={{width: 135, overflow: 'hidden', textOverflow: 'ellipsis'}}>
                   <Icon type={item.extend === '1' ? 'ordered-list' : 'build'} style={{marginRight: 10}}/>{item.name}
                 </div>
               </Button>
             ))}
+            {records.length === 0 &&
+            <div className={styles.tips}>该环境下还没有可发布的应用哦，快去<Link to="/deploy/app">应用管理</Link>创建应用吧。</div>}
           </div>
         </div>
       </Modal>

@@ -24,7 +24,8 @@ class AddSelect extends React.Component {
     store.record = {
       is_audit: false,
       host_ids: [undefined],
-      actions: [{target: 'server'}]
+      host_actions: [],
+      server_actions: []
     }
   };
 

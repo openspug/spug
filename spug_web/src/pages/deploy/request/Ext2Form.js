@@ -17,6 +17,12 @@ class Ext2Form extends React.Component {
     }
   }
 
+  componentDidMount() {
+    if (hostStore.records.length === 0) {
+      hostStore.fetchRecords()
+    }
+  }
+
   handleSubmit = () => {
     if (this.state.host_ids.length === 0) {
       return message.error('请至少选择一个要发布的目标主机')
@@ -24,11 +30,13 @@ class Ext2Form extends React.Component {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
     formData['id'] = store.record.id;
-    formData['body'] = this.state.body;
-    http.post('/api/exec/template/', formData)
+    formData['app_id'] = store.record.app_id;
+    formData['extra'] = [formData['extra']];
+    formData['host_ids'] = this.state.host_ids;
+    http.post('/api/deploy/request/', formData)
       .then(res => {
         message.success('操作成功');
-        store.formVisible = false;
+        store.ext2Visible = false;
         store.fetchRecords()
       }, () => this.setState({loading: false}))
   };
@@ -63,13 +71,18 @@ class Ext2Form extends React.Component {
               <Input placeholder="请输入申请标题"/>
             )}
           </Form.Item>
+          <Form.Item label="环境变量（_SPUG_RELEASE）" help="可以在自定义脚本中引用该变量，用于设置本次发布相关的动态变量，在脚本中通过 $_SPUG_RELEASE 来使用该值">
+            {getFieldDecorator('extra', {initialValue: info['extra']})(
+              <Input placeholder="请输入环境变量 _SPUG_RELEASE 的值"/>
+            )}
+          </Form.Item>
           <Form.Item label="备注信息">
             {getFieldDecorator('desc', {initialValue: info['desc']})(
               <Input placeholder="请输入备注信息"/>
             )}
           </Form.Item>
           <Form.Item required label="发布目标主机">
-            {info['host_ids'].map(id => (
+            {info['app_host_ids'].map(id => (
               <Tag.CheckableTag key={id} checked={host_ids.includes(id)} onChange={v => this.handleChange(id, v)}>
                 {lds.get(hostStore.idMap, `${id}.name`)}({lds.get(hostStore.idMap, `${id}.hostname`)}:{lds.get(hostStore.idMap, `${id}.port`)})
               </Tag.CheckableTag>
