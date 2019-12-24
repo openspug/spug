@@ -47,11 +47,15 @@ class AppView(View):
                     AppExtend1.objects.create(app=app, **extend_form)
             elif form.extend == '2':
                 extend_form, error = JsonParser(
-                    Argument('actions', type=list, filter=lambda x: len(x), help='请输入执行动作')
+                    Argument('server_actions', type=list, help='请输入执行动作'),
+                    Argument('host_actions', type=list, help='请输入执行动作')
                 ).parse(request.body)
                 if error:
                     return json_response(error=error)
-                extend_form.actions = json.dumps(extend_form.actions)
+                if len(extend_form.server_actions) + len(extend_form.host_actions) == 0:
+                    return json_response(error='请至少设置一个执行的动作')
+                extend_form.server_actions = json.dumps(extend_form.server_actions)
+                extend_form.host_actions = json.dumps(extend_form.host_actions)
                 if form.id:
                     App.objects.filter(pk=form.id).update(**form)
                     AppExtend2.objects.filter(app_id=form.id).update(**extend_form)

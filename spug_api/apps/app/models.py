@@ -73,11 +73,13 @@ class AppExtend1(models.Model, ModelMixin):
 
 class AppExtend2(models.Model, ModelMixin):
     app = models.OneToOneField(App, primary_key=True, on_delete=models.CASCADE)
-    actions = models.TextField()
+    server_actions = models.TextField()
+    host_actions = models.TextField()
 
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
-        tmp['actions'] = json.loads(self.actions)
+        tmp['server_actions'] = json.loads(self.server_actions)
+        tmp['host_actions'] = json.loads(self.host_actions)
         return tmp
 
     def __repr__(self):
