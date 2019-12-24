@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Form, Input, Button, message, Divider, Icon } from 'antd';
+import { Form, Input, Button, message, Divider, Alert, Icon } from 'antd';
 import Editor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-sh';
 import 'ace-builds/src-noconflict/theme-tomorrow';
@@ -36,6 +36,18 @@ class Ext2Setup3 extends React.Component {
     const host_actions = store.record['host_actions'];
     return (
       <Form labelCol={{span: 6}} wrapperCol={{span: 14}} className={styles.ext2Form}>
+        {store.record.id === undefined && (
+          <Alert
+            closable
+            showIcon
+            type="info"
+            message="小提示"
+            style={{margin: '0 80px 20px'}}
+            description={[
+              <p key={1}>Spug 将遵循先本地后目标主机的原则，按照顺序依次执行添加的动作，例如：本地动作1 -> 本地动作2 -> 目标主机动作1 -> 目标主机动作2 ...</p>,
+              <p key={2}>执行的命令内可以使用发布申请中设置的环境变量 _SPUG_RELEASE，一般可用于标记一次发布的版本号或提交ID等，在执行的脚本内通过使用 $_SPUG_RELEASE 获取其值来执行相应操作。</p>
+            ]}/>
+        )}
         {server_actions.map((item, index) => (
           <div key={index} style={{marginBottom: 30, position: 'relative'}}>
             <Form.Item required label={`本地动作${index + 1}`}>
@@ -89,7 +101,7 @@ class Ext2Setup3 extends React.Component {
             <Icon type="plus"/>添加目标主机执行动作（在部署目标主机执行）
           </Button>
         </Form.Item>
-        <Form.Item wrapperCol={{span: 14, offset: 6}} help="Spug 将遵循先本地后目标主机的原则，按照顺序依次执行添加的动作，例如：本地动作1 -> 本地动作2 -> 目标主机动作1 -> 目标主机动作2 ...">
+        <Form.Item wrapperCol={{span: 14, offset: 6}}>
           <Button
             type="primary"
             disabled={[...host_actions, ...server_actions].filter(x => x.title && x.data).length === 0}
