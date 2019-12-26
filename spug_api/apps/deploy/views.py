@@ -105,13 +105,10 @@ class RequestDetailView(View):
             return json_response(error='为找到指定发布申请')
         hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
         targets = [{'id': x.id, 'title': f'{x.name}({x.hostname}:{x.port})'} for x in hosts]
-        server_steps, host_steps = [], []
+        server_actions, host_actions = [], []
         if req.app.extend == '2':
-            for item in json.loads(req.app.extend_obj.actions):
-                if item['target'] == 'server':
-                    server_steps.append(item['name'])
-                else:
-                    host_steps.append(item['name'])
+            server_actions = json.loads(req.app.extend_obj.server_actions)
+            host_actions = json.loads(req.app.extend_obj.host_actions)
         return json_response({
             'app_name': req.app.name,
             'env_name': req.app.env.name,
@@ -119,8 +116,8 @@ class RequestDetailView(View):
             'type': req.type,
             'status_alias': req.get_status_display(),
             'targets': targets,
-            'server_steps': server_steps,
-            'host_steps': host_steps
+            'server_actions': server_actions,
+            'host_actions': host_actions
         })
 
     def post(self, request, r_id):

@@ -39,6 +39,11 @@
     height: 100px;
 }
 
+.ext2Tips {
+    color: #888;
+    margin-top: 30px;
+}
+
 pre {
     margin: 0;
 }
