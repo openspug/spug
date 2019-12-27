@@ -18,14 +18,14 @@ def deploy_dispatch(request, req, token):
         helper.send_step('local', 1, f'完成\r\n{human_time()} 发布准备...        ')
         rds.expire(token, 60 * 60)
         env = AttrDict(
-            APP_NAME=req.app.name,
-            APP_ID=str(req.app_id),
-            TASK_NAME=req.name,
-            TASK_ID=str(req.id),
-            ENV_ID=str(req.app.env_id),
-            ENV_KEY=req.app.env.key,
-            VERSION=req.version,
-            DEPLOY_TYPE=req.type
+            SPUG_APP_NAME=req.app.name,
+            SPUG_APP_ID=str(req.app_id),
+            SPUG_TASK_NAME=req.name,
+            SPUG_TASK_ID=str(req.id),
+            SPUG_ENV_ID=str(req.app.env_id),
+            SPUG_ENV_KEY=req.app.env.key,
+            SPUG_VERSION=req.version,
+            SPUG_DEPLOY_TYPE=req.type
         )
         if req.app.extend == '1':
             env.update(json.loads(req.app.extend_obj.custom_envs))
@@ -47,10 +47,10 @@ def _ext1_deploy(request, req, helper, env):
     extras = json.loads(req.extra)
     if extras[0] == 'branch':
         tree_ish = extras[2]
-        env.update(BRANCH=extras[1], COMMIT_ID=extras[2])
+        env.update(SPUG_BRANCH=extras[1], SPUG_COMMIT_ID=extras[2])
     else:
         tree_ish = extras[1]
-        env.update(TAG=extras[1])
+        env.update(SPUG_TAG=extras[1])
     helper.local(f'cd {REPOS_DIR} && rm -rf {req.app_id}_*')
     helper.send_step('local', 1, '完成\r\n')
 
@@ -60,23 +60,23 @@ def _ext1_deploy(request, req, helper, env):
 
     helper.send_step('local', 3, f'{human_time()} 执行检出...        ')
     git_dir = os.path.join(REPOS_DIR, str(app.id))
-    command = f'cd {git_dir} && git archive --prefix={env.VERSION}/ {tree_ish} | (cd .. && tar xf -)'
+    command = f'cd {git_dir} && git archive --prefix={env.SPUG_VERSION}/ {tree_ish} | (cd .. && tar xf -)'
     helper.local(command)
     helper.send_step('local', 3, '完成\r\n')
 
     if extend.hook_post_server:
         helper.send_step('local', 4, f'{human_time()} 检出后任务...\r\n')
-        helper.local(f'cd {os.path.join(REPOS_DIR, env.VERSION)} && {extend.hook_post_server}', env)
+        helper.local(f'cd {os.path.join(REPOS_DIR, env.SPUG_VERSION)} && {extend.hook_post_server}', env)
 
     helper.send_step('local', 5, f'\r\n{human_time()} 执行打包...        ')
-    filter_rule, exclude, contain = json.loads(extend.filter_rule), '', env.VERSION
+    filter_rule, exclude, contain = json.loads(extend.filter_rule), '', env.SPUG_VERSION
     files = helper.parse_filter_rule(filter_rule['data'])
     if files:
         if filter_rule['type'] == 'exclude':
             exclude = ' '.join(f'--exclude={x}' for x in files)
         else:
-            contain = ' '.join(f'{env.VERSION}/{x}' for x in files)
-    helper.local(f'cd {REPOS_DIR} && tar zcf {env.VERSION}.tar.gz {exclude} {contain}')
+            contain = ' '.join(f'{env.SPUG_VERSION}/{x}' for x in files)
+    helper.local(f'cd {REPOS_DIR} && tar zcf {env.SPUG_VERSION}.tar.gz {exclude} {contain}')
     helper.send_step('local', 6, f'完成')
     with futures.ThreadPoolExecutor(max_workers=min(16, os.cpu_count() + 4)) as executor:
         threads = []
@@ -88,7 +88,11 @@ def _ext1_deploy(request, req, helper, env):
 
 
 def _ext2_deploy(request, req, helper, env):
-    pass
+    app = req.app
+    extend = req.app.extend_obj
+    extras = json.loads(req.extra)
+    if extras and extras[0]:
+        env.update({'SPUG_RELEASE': extras[0]})
 
 
 def _deploy_host(helper, h_id, extend, env):
@@ -101,21 +105,21 @@ def _deploy_host(helper, h_id, extend, env):
     if code == 0:
         helper.send_error(host.id, f'please make sure the {extend.dst_dir!r} is not exists.')
     # clean
-    clean_command = f'ls -rd {env.APP_ID}_* | tail -n +{extend.versions + 1} | xargs rm -rf'
-    helper.remote(host.id, ssh, f'cd {extend.dst_repo} && rm -rf {env.VERSION} && {clean_command}')
+    clean_command = f'ls -rd {env.SPUG_APP_ID}_* | tail -n +{extend.versions + 1} | xargs rm -rf'
+    helper.remote(host.id, ssh, f'cd {extend.dst_repo} && rm -rf {env.SPUG_VERSION} && {clean_command}')
     # transfer files
-    tar_gz_file = f'{env.VERSION}.tar.gz'
+    tar_gz_file = f'{env.SPUG_VERSION}.tar.gz'
     try:
         ssh.put_file(os.path.join(REPOS_DIR, tar_gz_file), os.path.join(extend.dst_repo, tar_gz_file))
     except Exception as e:
         helper.send_error(host.id, f'exception: {e}')
 
-    command = f'cd {extend.dst_repo} && tar xf {tar_gz_file} && rm -f {env.APP_ID}_*.tar.gz'
+    command = f'cd {extend.dst_repo} && tar xf {tar_gz_file} && rm -f {env.SPUG_APP_ID}_*.tar.gz'
     helper.remote(host.id, ssh, command)
     helper.send_step(h_id, 1, '完成\r\n')
 
     # pre host
-    repo_dir = os.path.join(extend.dst_repo, env.VERSION)
+    repo_dir = os.path.join(extend.dst_repo, env.SPUG_VERSION)
     if extend.hook_pre_host:
         helper.send_step(h_id, 2, f'{human_time()} 发布前任务...       \r\n')
         command = f'cd {repo_dir} && {extend.hook_pre_host}'
@@ -123,7 +127,7 @@ def _deploy_host(helper, h_id, extend, env):
 
     # do deploy
     helper.send_step(h_id, 3, f'{human_time()} 执行发布...        ')
-    tmp_path = os.path.join(extend.dst_repo, f'tmp_{env.VERSION}')
+    tmp_path = os.path.join(extend.dst_repo, f'tmp_{env.SPUG_VERSION}')
     helper.remote(host.id, ssh, f'ln -sfn {repo_dir} {tmp_path} && mv -fT {tmp_path} {extend.dst_dir}')
     helper.send_step(h_id, 3, '完成\r\n')
 
