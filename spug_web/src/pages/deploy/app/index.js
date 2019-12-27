@@ -12,7 +12,7 @@ export default observer(function () {
   return (
     <Card>
       <SearchForm>
-        <SearchForm.Item span={8} title="任务名称">
+        <SearchForm.Item span={8} title="应用名称">
           <Input allowClear onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
         </SearchForm.Item>
         <SearchForm.Item span={8}>
