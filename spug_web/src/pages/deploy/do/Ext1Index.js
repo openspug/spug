@@ -27,7 +27,7 @@ class Ext1Index extends React.Component {
 
   componentWillUnmount() {
     if (this.socket) this.socket.close();
-    store.request = {targets: []};
+    store.request = {targets: [], host_actions: [], server_actions: []};
     store.outputs = {};
   }
 

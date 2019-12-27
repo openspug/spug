@@ -70,7 +70,7 @@ class Ext2Setup3 extends React.Component {
           </div>
         ))}
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <Button type="dashed" block onClick={() => server_actions.push({target: 'server'})}>
+          <Button type="dashed" block onClick={() => server_actions.push({})}>
             <Icon type="plus"/>添加本地执行动作（在服务端本地执行）
           </Button>
         </Form.Item>
@@ -97,7 +97,7 @@ class Ext2Setup3 extends React.Component {
           </div>
         ))}
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <Button type="dashed" block onClick={() => host_actions.push({target: 'server'})}>
+          <Button type="dashed" block onClick={() => host_actions.push({})}>
             <Icon type="plus"/>添加目标主机执行动作（在部署目标主机执行）
           </Button>
         </Form.Item>

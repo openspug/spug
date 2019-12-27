@@ -78,24 +78,39 @@ def _ext1_deploy(request, req, helper, env):
             contain = ' '.join(f'{env.SPUG_VERSION}/{x}' for x in files)
     helper.local(f'cd {REPOS_DIR} && tar zcf {env.SPUG_VERSION}.tar.gz {exclude} {contain}')
     helper.send_step('local', 6, f'完成')
-    with futures.ThreadPoolExecutor(max_workers=min(16, os.cpu_count() + 4)) as executor:
+    with futures.ThreadPoolExecutor(max_workers=min(10, os.cpu_count() + 5)) as executor:
         threads = []
         for h_id in json.loads(req.host_ids):
-            threads.append(executor.submit(_deploy_host, helper, h_id, extend, env))
+            threads.append(executor.submit(_deploy_ext1_host, helper, h_id, extend, env))
         for t in futures.as_completed(threads):
             if t.exception():
                 raise t.exception()
 
 
 def _ext2_deploy(request, req, helper, env):
-    app = req.app
     extend = req.app.extend_obj
     extras = json.loads(req.extra)
+    host_actions = json.loads(extend.host_actions)
+    server_actions = json.loads(extend.server_actions)
     if extras and extras[0]:
         env.update({'SPUG_RELEASE': extras[0]})
+    step = 2
+    for action in server_actions:
+        helper.send_step('local', step, f'\r\n{human_time()} {action["title"]}...\r\n')
+        helper.local(f'cd /tmp && {action["data"]}', env)
+        step += 1
+    helper.send_step('local', 100, '完成\r\n' if step == 2 else '\r\n')
+    if host_actions:
+        with futures.ThreadPoolExecutor(max_workers=min(10, os.cpu_count() + 5)) as executor:
+            threads = []
+            for h_id in json.loads(req.host_ids):
+                threads.append(executor.submit(_deploy_ext2_host, helper, h_id, host_actions, env))
+            for t in futures.as_completed(threads):
+                if t.exception():
+                    raise t.exception()
 
 
-def _deploy_host(helper, h_id, extend, env):
+def _deploy_ext1_host(helper, h_id, extend, env):
     helper.send_step(h_id, 1, f'{human_time()} 数据准备...        ')
     host = Host.objects.filter(pk=h_id).first()
     if not host:
@@ -138,6 +153,20 @@ def _deploy_host(helper, h_id, extend, env):
         helper.remote(host.id, ssh, command, env)
 
     helper.send_step(h_id, 5, f'\r\n{human_time()} ** 发布成功 **')
+
+
+def _deploy_ext2_host(helper, h_id, actions, env):
+    helper.send_step(h_id, 1, f'{human_time()} 数据准备...        ')
+    host = Host.objects.filter(pk=h_id).first()
+    if not host:
+        helper.send_error(h_id, 'no such host')
+    ssh = host.get_ssh()
+    helper.send_step(h_id, 2, '完成\r\n')
+    for index, action in enumerate(actions):
+        helper.send_step(h_id, 2 + index, f'{human_time()} {action["title"]}...\r\n')
+        helper.remote(host.id, ssh, f'cd /tmp && {action["data"]}', env)
+
+    helper.send_step(h_id, 100, f'\r\n{human_time()}** 发布成功 **')
 
 
 class Helper:

@@ -73,7 +73,7 @@ class Ext1Index extends React.Component {
       for (let item of [{id: 'local'}, ...store.request.targets]) {
         if (lds.get(store.outputs, `${item.id}.status`) === 'error') {
           return <Tag color="red">发布异常</Tag>
-        } else if (lds.get(store.outputs, `${item.id}.step`, -1) < 5) {
+        } else if (lds.get(store.outputs, `${item.id}.step`, -1) < 100) {
           return <Tag color="blue">发布中</Tag>
         }
       }
@@ -101,7 +101,7 @@ class Ext1Index extends React.Component {
               <Steps.Step {...this.getStatus('local', 0)} title="建立连接"/>
               <Steps.Step {...this.getStatus('local', 1)} title="发布准备"/>
               {server_actions.map((item, index) => (
-                <Steps.Step {...this.getStatus('local', 2)} key={index} title={item.title}/>
+                <Steps.Step {...this.getStatus('local', 2 + index)} key={index} title={item.title}/>
               ))}
             </Steps>}>
             <pre className={styles.ext1Console}>{lds.get(store.outputs, 'local.data')}</pre>
@@ -119,8 +119,8 @@ class Ext1Index extends React.Component {
                   <b>{item.title}</b>
                   <Steps size="small" style={{maxWidth: 150 + host_actions.length * 150}}>
                     <Steps.Step {...this.getStatus(item.id, 1)} title="数据准备"/>
-                    {host_actions.map((item, index) => (
-                      <Steps.Step {...this.getStatus(item.id, 2)} key={index} title={item.title}/>
+                    {host_actions.map((action, index) => (
+                      <Steps.Step {...this.getStatus(item.id, 2 + index)} key={index} title={action.title}/>
                     ))}
                   </Steps>
                 </div>}>
