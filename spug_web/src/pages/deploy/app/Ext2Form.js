@@ -13,7 +13,7 @@ export default observer(function Ext2From() {
       visible
       width={800}
       maskClosable={false}
-      title={store.record.id ? '编辑自定义发布' : '新建自定义发布'}
+      title={store.deploy.id ? '编辑自定义发布' : '新建自定义发布'}
       onCancel={() => store.ext2Visible = false}
       footer={null}>
       <Steps current={store.page} className={styles.steps}>

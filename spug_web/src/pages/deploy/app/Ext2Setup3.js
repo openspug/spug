@@ -19,24 +19,25 @@ class Ext2Setup3 extends React.Component {
 
   handleSubmit = () => {
     this.setState({loading: true});
-    const info = store.record;
+    const info = store.deploy;
+    info['app_id'] = store.app_id;
     info['extend'] = '2';
     info['host_actions'] = info['host_actions'].filter(x => x.title && x.data);
     info['server_actions'] = info['server_actions'].filter(x => x.title && x.data);
-    http.post('/api/app/', info)
+    http.post('/api/app/deploy/', info)
       .then(res => {
         message.success('保存成功');
         store.ext2Visible = false;
-        store.fetchRecords()
+        store.loadDeploys(store.app_id)
       }, () => this.setState({loading: false}))
   };
 
   render() {
-    const server_actions = store.record['server_actions'];
-    const host_actions = store.record['host_actions'];
+    const server_actions = store.deploy['server_actions'];
+    const host_actions = store.deploy['host_actions'];
     return (
       <Form labelCol={{span: 6}} wrapperCol={{span: 14}} className={styles.ext2Form}>
-        {store.record.id === undefined && (
+        {store.deploy.id === undefined && (
           <Alert
             closable
             showIcon

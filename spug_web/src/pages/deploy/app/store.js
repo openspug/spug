@@ -2,10 +2,13 @@ import { observable } from "mobx";
 import http from 'libs/http';
 
 class Store {
-  @observable records = [];
+  @observable records = {};
   @observable record = {};
+  @observable deploy = {};
   @observable page = 0;
+  @observable loading = {};
   @observable isFetching = false;
+  @observable formVisible = false;
   @observable addVisible = false;
   @observable ext1Visible = false;
   @observable ext2Visible = false;
@@ -15,34 +18,51 @@ class Store {
   fetchRecords = () => {
     this.isFetching = true;
     http.get('/api/app/')
-      .then(res => this.records = res)
+      .then(res => {
+        const tmp = {};
+        for (let item of res) {
+          tmp[item.id] = item
+        }
+        this.records = tmp
+      })
       .finally(() => this.isFetching = false)
   };
 
+  loadDeploys = (id) => {
+    http.get('/api/app/deploy/', {params: {id}})
+      .then(res => this.records[id]['deploys'] = res)
+  };
+
   showForm = (info) => {
+    this.record = info || {};
+    this.formVisible = true;
+  };
+
+  showExtForm = (app_id, info) => {
     this.page = 0;
+    this.app_id = app_id;
     if (info) {
       if (info.extend === '1') {
         this.ext1Visible = true
       } else {
         this.ext2Visible = true
       }
-      this.record = info
+      this.deploy = info
     } else {
       this.addVisible = true;
     }
   };
 
   addHost = () => {
-    this.record['host_ids'].push(undefined)
+    this.deploy['host_ids'].push(undefined)
   };
 
   editHost = (index, v) => {
-    this.record['host_ids'][index] = v
+    this.deploy['host_ids'][index] = v
   };
 
   delHost = (index) => {
-    this.record['host_ids'].splice(index, 1)
+    this.deploy['host_ids'].splice(index, 1)
   }
 }
 

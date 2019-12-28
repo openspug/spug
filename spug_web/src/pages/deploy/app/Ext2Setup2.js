@@ -14,7 +14,7 @@ class Ext2Setup2 extends React.Component {
   }
 
   render() {
-    const info = store.record;
+    const info = store.deploy;
     return (
       <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
         <Form.Item required label="发布目标主机">

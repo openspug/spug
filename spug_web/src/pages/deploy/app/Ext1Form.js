@@ -13,7 +13,7 @@ export default observer(function Ext1From() {
       visible
       width={800}
       maskClosable={false}
-      title={store.record.id ? '编辑常规发布' : '新建常规发布'}
+      title={store.deploy.id ? '编辑常规发布' : '新建常规发布'}
       onCancel={() => store.ext1Visible = false}
       footer={null}>
       <Steps current={store.page} className={styles.steps}>

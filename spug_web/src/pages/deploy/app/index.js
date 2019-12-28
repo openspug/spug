@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import { Card, Input, Button } from 'antd';
 import { SearchForm } from 'components';
 import ComTable from './Table';
+import ComForm from './Form';
 import Ext1Form from './Ext1Form';
 import Ext2Form from './Ext2Form';
 import AddSelect from './AddSelect';
@@ -23,6 +24,7 @@ export default observer(function () {
         <Button type="primary" icon="plus" onClick={() => store.showForm()}>新建</Button>
       </div>
       <ComTable/>
+      {store.formVisible && <ComForm />}
       {store.addVisible && <AddSelect />}
       {store.ext1Visible &&  <Ext1Form />}
       {store.ext2Visible &&  <Ext2Form />}

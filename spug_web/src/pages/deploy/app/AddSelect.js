@@ -9,7 +9,7 @@ class AddSelect extends React.Component {
   switchExt1 = () => {
     store.addVisible = false;
     store.ext1Visible = true;
-    store.record = {
+    store.deploy = {
       git_type: 'branch',
       is_audit: false,
       versions: 10,
@@ -21,7 +21,7 @@ class AddSelect extends React.Component {
   switchExt2 = () => {
     store.addVisible = false;
     store.ext2Visible = true;
-    store.record = {
+    store.deploy = {
       is_audit: false,
       host_ids: [undefined],
       host_actions: [],

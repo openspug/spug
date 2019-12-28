@@ -14,12 +14,12 @@ class Ext1Setup2 extends React.Component {
   }
 
   checkStatus = () => {
-    const info = store.record;
+    const info = store.deploy;
     return info['dst_dir'] && info['dst_repo'] && info['versions'] && info['host_ids'].filter(x => x).length > 0
   };
 
   render() {
-    const info = store.record;
+    const info = store.deploy;
     return (
       <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
         <Form.Item required label="目标主机部署路径" help="目标主机的应用根目录，例如：/var/www/html">

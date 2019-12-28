@@ -20,13 +20,14 @@ class Ext1Setup3 extends React.Component {
 
   handleSubmit = () => {
     this.setState({loading: true});
-    const info = store.record;
+    const info = store.deploy;
+    info['app_id'] = store.app_id;
     info['extend'] = '1';
     info['host_ids'] = info['host_ids'].filter(x => x);
-    http.post('/api/app/', info)
+    http.post('/api/app/deploy/', info)
       .then(() => {
         message.success('保存成功');
-        store.fetchRecords();
+        store.loadDeploys(store.app_id);
         store.ext1Visible = false
       }, () => this.setState({loading: false}))
   };
@@ -45,7 +46,7 @@ class Ext1Setup3 extends React.Component {
   );
 
   render() {
-    const info = store.record;
+    const info = store.deploy;
     return (
       <React.Fragment>
         <Row>

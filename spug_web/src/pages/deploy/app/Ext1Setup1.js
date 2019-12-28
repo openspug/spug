@@ -6,12 +6,9 @@ import envStore from 'pages/config/environment/store';
 import store from './store';
 
 export default observer(function Ext2Setup1() {
-  const info = store.record;
+  const info = store.deploy;
   return (
     <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
-      <Form.Item required label="应用名称" help="相同应用不同环境，请保持应用名称相同，以便维护">
-        <Input value={info.name} onChange={e => info.name = e.target.value} placeholder="请输入应用名称"/>
-      </Form.Item>
       <Form.Item required label="发布环境">
         <Col span={16}>
           <Select value={info.env_id} onChange={v => info.env_id = v} placeholder="请选择发布环境">
@@ -27,12 +24,6 @@ export default observer(function Ext2Setup1() {
       <Form.Item required label="Git仓库地址">
         <Input value={info['git_repo']} onChange={e => info['git_repo'] = e.target.value} placeholder="请输入Git仓库地址"/>
       </Form.Item>
-      <Form.Item label="Tag/Branch">
-        <Select value={info['git_type']} onChange={v => info['git_type'] = v}>
-          <Select.Option value="branch">Branch（分支）</Select.Option>
-          <Select.Option value="tag">Tag（标签 / 版本）</Select.Option>
-        </Select>
-      </Form.Item>
       <Form.Item label="发布审核">
         <Switch
           checkedChildren="开启"
@@ -43,7 +34,7 @@ export default observer(function Ext2Setup1() {
       <Form.Item wrapperCol={{span: 14, offset: 6}}>
         <Button
           type="primary"
-          disabled={!(info.name && info.env_id && info['git_repo'])}
+          disabled={!(info.env_id && info['git_repo'])}
           onClick={() => store.page += 1}>下一步</Button>
       </Form.Item>
     </Form>
