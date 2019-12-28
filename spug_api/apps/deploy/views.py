@@ -2,8 +2,8 @@ from django.views.generic import View
 from django.db.models import F
 from libs import json_response, JsonParser, Argument, human_datetime, human_time
 from apps.deploy.models import DeployRequest
+from apps.app.models import Deploy
 from apps.deploy.utils import deploy_dispatch
-from apps.app.models import App
 from apps.host.models import Host
 from threading import Thread
 from datetime import datetime
@@ -15,10 +15,10 @@ class RequestView(View):
     def get(self, request):
         data = []
         for item in DeployRequest.objects.annotate(
-                env_name=F('app__env__name'),
-                app_name=F('app__name'),
-                app_host_ids=F('app__host_ids'),
-                app_extend=F('app__extend'),
+                env_name=F('deploy__env__name'),
+                app_name=F('deploy__app__name'),
+                app_host_ids=F('deploy__host_ids'),
+                app_extend=F('deploy__extend'),
                 created_by_user=F('created_by__nickname')):
             tmp = item.to_dict()
             tmp['env_name'] = item.env_name
@@ -35,17 +35,17 @@ class RequestView(View):
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
-            Argument('app_id', type=int, help='缺少必要参数'),
+            Argument('deploy_id', type=int, help='缺少必要参数'),
             Argument('name', help='请输申请标题'),
             Argument('extra', type=list, help='缺少必要参数'),
             Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
             Argument('desc', required=False),
         ).parse(request.body)
         if error is None:
-            app = App.objects.filter(pk=form.app_id).first()
-            if not app:
-                return json_response(error='未找到该应用')
-            form.status = '0' if app.is_audit else '1'
+            deploy = Deploy.objects.filter(pk=form.deploy_id).first()
+            if not deploy:
+                return json_response(error='未找到该发布配置')
+            form.status = '0' if deploy.is_audit else '1'
             form.extra = json.dumps(form.extra)
             form.host_ids = json.dumps(form.host_ids)
             if form.id:
@@ -68,7 +68,7 @@ class RequestView(View):
             if not req:
                 return json_response(error='未找到指定发布申请')
             pre_req = DeployRequest.objects.filter(
-                app_id=req.app_id,
+                deploy_id=req.deploy_id,
                 type='1',
                 id__lt=req.id,
                 version__isnull=False).first()
@@ -77,7 +77,7 @@ class RequestView(View):
             if form.action == 'check':
                 return json_response({'date': pre_req.created_at, 'name': pre_req.name})
             DeployRequest.objects.create(
-                app_id=req.app_id,
+                deploy_id=req.deploy_id,
                 name=f'{req.name} - 回滚',
                 type='2',
                 extra=pre_req.extra,
@@ -92,7 +92,7 @@ class RequestView(View):
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='缺少必要参数')
-        ).parse(request.body)
+        ).parse(request.GET)
         if error is None:
             DeployRequest.objects.filter(pk=form.id, status__in=('0', '1', '-1')).delete()
         return json_response(error=error)
@@ -106,12 +106,12 @@ class RequestDetailView(View):
         hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
         targets = [{'id': x.id, 'title': f'{x.name}({x.hostname}:{x.port})'} for x in hosts]
         server_actions, host_actions = [], []
-        if req.app.extend == '2':
-            server_actions = json.loads(req.app.extend_obj.server_actions)
-            host_actions = json.loads(req.app.extend_obj.host_actions)
+        if req.deploy.extend == '2':
+            server_actions = json.loads(req.deploy.extend_obj.server_actions)
+            host_actions = json.loads(req.deploy.extend_obj.host_actions)
         return json_response({
-            'app_name': req.app.name,
-            'env_name': req.app.env.name,
+            'app_name': req.deploy.app.name,
+            'env_name': req.deploy.env.name,
             'status': req.status,
             'type': req.type,
             'status_alias': req.get_status_display(),
@@ -132,7 +132,7 @@ class RequestDetailView(View):
         outputs.update(local={'data': f'{human_time()} 建立接连...        '})
         req.status = '2'
         if not req.version:
-            req.version = f'{req.app_id}_{req.id}_{datetime.now().strftime("%Y%m%d%H%M%S")}'
+            req.version = f'{req.deploy_id}_{req.id}_{datetime.now().strftime("%Y%m%d%H%M%S")}'
         req.save()
         Thread(target=deploy_dispatch, args=(request, req, token)).start()
         return json_response({'token': token, 'type': req.type, 'outputs': outputs})

@@ -1,4 +1,5 @@
 from django.views.generic import View
+from django.db.models import F
 from libs import JsonParser, Argument, json_response
 from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
 from apps.config.models import Config
@@ -44,12 +45,10 @@ class AppView(View):
 class DeployView(View):
     def get(self, request):
         form, error = JsonParser(
-            Argument('id', type=int, help='参数错误')
-        ).parse(request.GET)
-        if error is None:
-            deploys = Deploy.objects.filter(app_id=form.id).all()
-            return json_response(deploys)
-        return json_response(error=error)
+            Argument('app_id', type=int, required=False)
+        ).parse(request.GET, True)
+        deploys = Deploy.objects.filter(**form).annotate(app_name=F('app__name'))
+        return json_response(deploys)
 
     def post(self, request):
         form, error = JsonParser(
@@ -115,8 +114,8 @@ class DeployView(View):
         return json_response(error=error)
 
 
-def get_versions(request, a_id):
-    deploy = Deploy.objects.filter(pk=a_id).first()
+def get_versions(request, d_id):
+    deploy = Deploy.objects.filter(pk=d_id).first()
     if not deploy:
         return json_response(error='未找到指定应用')
     if deploy.extend == '2':
