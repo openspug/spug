@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, Checkbox, Row, Col, message } from 'antd';
+import { Modal, Form, Input, Checkbox, Switch, Row, Col, message } from 'antd';
 import http from 'libs/http';
 import store from './store';
 import envStore from '../environment/store'
@@ -27,7 +27,7 @@ class ComForm extends React.Component {
       formData['type'] = store.type;
       formData['o_id'] = store.id;
       formData['envs'] = this.state.envs;
-      formData['is_public'] = true;
+      formData['is_public'] = store.type === 'src' ? true : formData['is_public'];
       request = http.post('/api/config/', formData)
     }
     request.then(res => {
@@ -78,6 +78,13 @@ class ComForm extends React.Component {
               <Input.TextArea placeholder="请输入备注信息"/>
             )}
           </Form.Item>
+          {store.type === 'app' && (
+            <Form.Item label="类型">
+              {getFieldDecorator('is_public', {initialValue: info['is_public'] || true, valuePropName: 'checked'})(
+                <Switch checkedChildren="公共" unCheckedChildren="私有"/>
+              )}
+            </Form.Item>
+          )}
           <Form.Item label="选择环境">
             {envStore.records.map((item, index) => (
               <Row

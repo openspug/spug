@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, Tooltip, message } from 'antd';
+import { Table, Divider, Modal, Tooltip, Tag, Icon, message } from 'antd';
 import { LinkButton } from 'components';
 import ComForm from './Form';
 import http from 'libs/http';
@@ -8,10 +8,21 @@ import store from './store';
 
 @observer
 class TableView extends React.Component {
+  lockIcon = <Tooltip title="私有配置应用专用，不会被其他应用获取到">
+    <Icon style={{marginRight: 5}} type="lock"/>
+  </Tooltip>;
+
   columns = [{
     title: 'Key',
     key: 'key',
-    render: info => <Tooltip title={info.desc}>{info.key}</Tooltip>
+    render: info => {
+      let prefix = (store.type === 'app' && info.is_public === false) ? this.lockIcon : null;
+      let content = info.desc ? <span style={{color: '#1890ff'}}>{info.key}</span> : info.key;
+      return <React.Fragment>
+        {prefix}
+        <Tooltip title={info.desc}>{content}</Tooltip>
+      </React.Fragment>
+    }
   }, {
     title: 'Value',
     dataIndex: 'value',

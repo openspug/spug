@@ -86,7 +86,7 @@ class Index extends React.Component {
                       onClick={store.showRecord}>更改历史</Button>
             </SearchForm.Item>
             <SearchForm.Item span={4} style={{textAlign: 'right'}}>
-              <Button type="primary" icon="plus" onClick={() => store.showForm()}>新增配置</Button>
+              <Button disabled={view !== '1'} type="primary" icon="plus" onClick={() => store.showForm()}>新增配置</Button>
             </SearchForm.Item>
           </SearchForm>
 

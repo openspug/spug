@@ -35,7 +35,7 @@ class AppView(View):
         ).parse(request.GET)
         if error is None:
             if Deploy.objects.filter(app_id=form.id).exists():
-                return json_response(error='该应用已存在关联的发布配置，请删除相关配置后再尝试删除')
+                return json_response(error='该应用在应用发布中已存在关联的发布配置，请删除相关发布配置后再尝试删除')
             if Config.objects.filter(type='app', o_id=form.id).exists():
                 return json_response(error='该应用在配置中心已存在关联的配置信息，请删除相关配置后再尝试删除')
             App.objects.filter(pk=form.id).delete()
