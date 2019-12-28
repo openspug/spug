@@ -6,11 +6,26 @@ import json
 
 
 class App(models.Model, ModelMixin):
+    name = models.CharField(max_length=50)
+    key = models.CharField(max_length=50)
+    desc = models.CharField(max_length=255, null=True)
+    created_at = models.CharField(max_length=20, default=human_datetime)
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    def __repr__(self):
+        return f'<App {self.name!r}>'
+
+    class Meta:
+        db_table = 'apps'
+        ordering = ('-id',)
+
+
+class Deploy(models.Model, ModelMixin):
     EXTENDS = (
         ('1', '常规发布'),
         ('2', '自定义发布'),
     )
-    name = models.CharField(max_length=50)
+    app = models.ForeignKey(App, on_delete=models.PROTECT)
     env = models.ForeignKey(Environment, on_delete=models.PROTECT)
     host_ids = models.TextField()
     extend = models.CharField(max_length=2, choices=EXTENDS)
@@ -23,31 +38,26 @@ class App(models.Model, ModelMixin):
 
     @property
     def extend_obj(self):
-        cls = AppExtend1 if self.extend == '1' else AppExtend2
-        return cls.objects.filter(app=self).first()
+        cls = DeployExtend1 if self.extend == '1' else DeployExtend2
+        return cls.objects.filter(deploy=self).first()
 
     def to_dict(self, *args, **kwargs):
-        app = super().to_dict(*args, **kwargs)
-        app['host_ids'] = json.loads(self.host_ids)
-        app.update(self.extend_obj.to_dict())
-        return app
+        deploy = super().to_dict(*args, **kwargs)
+        deploy['host_ids'] = json.loads(self.host_ids)
+        deploy.update(self.extend_obj.to_dict())
+        return deploy
 
     def __repr__(self):
-        return '<App %r>' % self.name
+        return '<Deploy app_id=%r>' % self.app_id
 
     class Meta:
-        db_table = 'apps'
+        db_table = 'deploys'
         ordering = ('-id',)
 
 
-class AppExtend1(models.Model, ModelMixin):
-    GIT_TYPES = (
-        ('tag', 'tag'),
-        ('branch', 'branch')
-    )
-    app = models.OneToOneField(App, primary_key=True, on_delete=models.CASCADE)
+class DeployExtend1(models.Model, ModelMixin):
+    deploy = models.OneToOneField(Deploy, primary_key=True, on_delete=models.CASCADE)
     git_repo = models.CharField(max_length=255)
-    git_type = models.CharField(max_length=10, choices=GIT_TYPES)
     dst_dir = models.CharField(max_length=255)
     dst_repo = models.CharField(max_length=255)
     versions = models.IntegerField()
@@ -65,14 +75,14 @@ class AppExtend1(models.Model, ModelMixin):
         return tmp
 
     def __repr__(self):
-        return '<AppExtend1 app_id=%r>' % self.app_id
+        return '<DeployExtend1 deploy_id=%r>' % self.deploy_id
 
     class Meta:
-        db_table = 'app_extend1'
+        db_table = 'deploy_extend1'
 
 
-class AppExtend2(models.Model, ModelMixin):
-    app = models.OneToOneField(App, primary_key=True, on_delete=models.CASCADE)
+class DeployExtend2(models.Model, ModelMixin):
+    deploy = models.OneToOneField(Deploy, primary_key=True, on_delete=models.CASCADE)
     server_actions = models.TextField()
     host_actions = models.TextField()
 
@@ -83,7 +93,7 @@ class AppExtend2(models.Model, ModelMixin):
         return tmp
 
     def __repr__(self):
-        return '<AppExtend2 app_id=%r>' % self.app_id
+        return '<DeployExtend2 deploy_id=%r>' % self.deploy_id
 
     class Meta:
-        db_table = 'app_extend2'
+        db_table = 'deploy_extend2'

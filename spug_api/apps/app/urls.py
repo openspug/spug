@@ -4,5 +4,6 @@ from .views import *
 
 urlpatterns = [
     path('', AppView.as_view()),
-    path('<int:a_id>/versions/', get_versions),
+    path('deploy/', DeployView.as_view()),
+    path('deploy/<int:d_id>/versions/', get_versions),
 ]

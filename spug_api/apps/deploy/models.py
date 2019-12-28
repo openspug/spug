@@ -1,7 +1,7 @@
 from django.db import models
 from libs import ModelMixin, human_datetime
 from apps.account.models import User
-from apps.app.models import App
+from apps.app.models import Deploy
 
 
 class DeployRequest(models.Model, ModelMixin):
@@ -17,7 +17,7 @@ class DeployRequest(models.Model, ModelMixin):
         ('1', '正常发布'),
         ('2', '回滚')
     )
-    app = models.ForeignKey(App, on_delete=models.CASCADE)
+    deploy = models.ForeignKey(Deploy, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     type = models.CharField(max_length=2, choices=TYPES, default='1')
     extra = models.TextField()

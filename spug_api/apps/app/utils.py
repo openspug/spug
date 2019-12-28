@@ -1,5 +1,5 @@
 from django.conf import settings
-from apps.app.models import App
+from apps.app.models import Deploy
 from libs.gitlib import Git
 import os
 
@@ -15,7 +15,7 @@ def parse_envs(text):
     return data
 
 
-def fetch_versions(app: App):
-    git_repo = app.extend_obj.git_repo
-    repo_dir = os.path.join(settings.REPOS_DIR, str(app.id))
+def fetch_versions(deploy: Deploy):
+    git_repo = deploy.extend_obj.git_repo
+    repo_dir = os.path.join(settings.REPOS_DIR, str(deploy.id))
     return Git(git_repo, repo_dir).fetch_branches_tags()
