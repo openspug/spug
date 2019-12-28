@@ -28,9 +28,9 @@ class Store {
       .finally(() => this.isFetching = false)
   };
 
-  loadDeploys = (id) => {
-    http.get('/api/app/deploy/', {params: {id}})
-      .then(res => this.records[id]['deploys'] = res)
+  loadDeploys = (app_id) => {
+    http.get('/api/app/deploy/', {params: {app_id}})
+      .then(res => this.records[app_id]['deploys'] = res)
   };
 
   showForm = (info) => {

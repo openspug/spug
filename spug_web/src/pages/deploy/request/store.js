@@ -3,8 +3,10 @@ import http from 'libs/http';
 
 class Store {
   @observable records = [];
+  @observable deploys = [];
   @observable types = [];
   @observable record = {};
+  @observable isLoading = false;
   @observable isFetching = false;
   @observable addVisible = false;
   @observable ext1Visible = false;
@@ -19,6 +21,13 @@ class Store {
     http.get('/api/deploy/request/')
       .then(res => this.records = res)
       .finally(() => this.isFetching = false)
+  };
+
+  loadDeploys = () => {
+    this.isLoading = true;
+    http.get('/api/app/deploy/')
+      .then(res => this.deploys = res)
+      .finally(() => this.isLoading = false)
   };
 
   showForm = (info) => {

@@ -31,7 +31,7 @@ class Ext1Form extends React.Component {
 
   fetchVersions = () => {
     this.setState({fetching: true});
-    http.get(`/api/app/${store.record.app_id}/versions/`)
+    http.get(`/api/app/deploy/${store.record.deploy_id}/versions/`)
       .then(res => {
         this.setState({versions: res}, this._initExtra1);
       })
@@ -78,7 +78,7 @@ class Ext1Form extends React.Component {
     const {git_type, extra1, extra2} = this.state;
     const formData = this.props.form.getFieldsValue();
     formData['id'] = store.record.id;
-    formData['app_id'] = store.record.app_id;
+    formData['deploy_id'] = store.record.deploy_id;
     formData['host_ids'] = this.state.host_ids;
     formData['extra'] = [git_type, extra1, extra2];
     http.post('/api/deploy/request/', formData)

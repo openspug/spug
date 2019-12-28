@@ -30,7 +30,7 @@ class Ext2Form extends React.Component {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
     formData['id'] = store.record.id;
-    formData['app_id'] = store.record.app_id;
+    formData['deploy_id'] = store.record.deploy_id;
     formData['extra'] = [formData['extra']];
     formData['host_ids'] = this.state.host_ids;
     http.post('/api/deploy/request/', formData)
