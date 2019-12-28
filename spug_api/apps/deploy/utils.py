@@ -18,17 +18,17 @@ def deploy_dispatch(request, req, token):
         helper.send_step('local', 1, f'完成\r\n{human_time()} 发布准备...        ')
         rds.expire(token, 60 * 60)
         env = AttrDict(
-            SPUG_APP_NAME=req.app.name,
-            SPUG_APP_ID=str(req.app_id),
+            SPUG_APP_NAME=req.deploy.app.name,
+            SPUG_APP_ID=str(req.deploy.app_id),
             SPUG_TASK_NAME=req.name,
             SPUG_TASK_ID=str(req.id),
-            SPUG_ENV_ID=str(req.app.env_id),
-            SPUG_ENV_KEY=req.app.env.key,
+            SPUG_ENV_ID=str(req.deploy.env_id),
+            SPUG_ENV_KEY=req.deploy.env.key,
             SPUG_VERSION=req.version,
             SPUG_DEPLOY_TYPE=req.type
         )
-        if req.app.extend == '1':
-            env.update(json.loads(req.app.extend_obj.custom_envs))
+        if req.deploy.extend == '1':
+            env.update(json.loads(req.deploy.extend_obj.custom_envs))
             _ext1_deploy(request, req, helper, env)
         else:
             _ext2_deploy(request, req, helper, env)
@@ -42,8 +42,7 @@ def deploy_dispatch(request, req, token):
 
 
 def _ext1_deploy(request, req, helper, env):
-    app = req.app
-    extend = req.app.extend_obj
+    extend = req.deploy.extend_obj
     extras = json.loads(req.extra)
     if extras[0] == 'branch':
         tree_ish = extras[2]
@@ -51,7 +50,7 @@ def _ext1_deploy(request, req, helper, env):
     else:
         tree_ish = extras[1]
         env.update(SPUG_TAG=extras[1])
-    helper.local(f'cd {REPOS_DIR} && rm -rf {req.app_id}_*')
+    helper.local(f'cd {REPOS_DIR} && rm -rf {req.deploy_id}_*')
     helper.send_step('local', 1, '完成\r\n')
 
     if extend.hook_pre_server:
@@ -59,7 +58,7 @@ def _ext1_deploy(request, req, helper, env):
         helper.local(f'cd /tmp && {extend.hook_pre_server}', env)
 
     helper.send_step('local', 3, f'{human_time()} 执行检出...        ')
-    git_dir = os.path.join(REPOS_DIR, str(app.id))
+    git_dir = os.path.join(REPOS_DIR, str(req.deploy.id))
     command = f'cd {git_dir} && git archive --prefix={env.SPUG_VERSION}/ {tree_ish} | (cd .. && tar xf -)'
     helper.local(command)
     helper.send_step('local', 3, '完成\r\n')
@@ -88,7 +87,7 @@ def _ext1_deploy(request, req, helper, env):
 
 
 def _ext2_deploy(request, req, helper, env):
-    extend = req.app.extend_obj
+    extend = req.deploy.extend_obj
     extras = json.loads(req.extra)
     host_actions = json.loads(extend.host_actions)
     server_actions = json.loads(extend.server_actions)
