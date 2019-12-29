@@ -6,4 +6,5 @@ urlpatterns = [
     url(r'^login/', login),
     url(r'^logout/', logout),
     url(r'^user/$', UserView.as_view()),
+    url(r'^role/$', RoleView.as_view()),
 ]

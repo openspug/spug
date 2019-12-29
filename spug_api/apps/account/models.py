@@ -12,6 +12,7 @@ class User(models.Model, ModelMixin):
     access_token = models.CharField(max_length=32)
     token_expired = models.IntegerField(null=True)
     last_login = models.CharField(max_length=20)
+    role = models.ForeignKey('Role', on_delete=models.PROTECT, null=True)
 
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey('User', models.PROTECT, related_name='+', null=True)
@@ -34,4 +35,20 @@ class User(models.Model, ModelMixin):
 
     class Meta:
         db_table = 'users'
+        ordering = ('-id',)
+
+
+class Role(models.Model, ModelMixin):
+    name = models.CharField(max_length=50)
+    desc = models.CharField(max_length=255, null=True)
+    permissions = models.TextField(null=True)
+
+    created_at = models.CharField(max_length=20, default=human_datetime)
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='+')
+
+    def __repr__(self):
+        return '<Role name=%r>' % self.name
+
+    class Meta:
+        db_table = 'roles'
         ordering = ('-id',)

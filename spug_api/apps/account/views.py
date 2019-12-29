@@ -1,7 +1,7 @@
 from django.core.cache import cache
 from django.views.generic import View
 from libs import JsonParser, Argument, human_datetime, json_response
-from .models import User
+from .models import User, Role
 import time
 import uuid
 
@@ -46,6 +46,35 @@ class UserView(View):
                 deleted_at=human_datetime(),
                 deleted_by=request.user
             )
+        return json_response(error=error)
+
+
+class RoleView(View):
+    def get(self, request):
+        roles = Role.objects.all()
+        return json_response(roles)
+
+    def post(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, required=False),
+            Argument('name', help='请输入角色名称'),
+            Argument('desc', required=False)
+        ).parse(request.body)
+        if error is None:
+            if form.id:
+                Role.objects.filter(pk=form.id).update(**form)
+            else:
+                Role.objects.create(created_by=request.user, **form)
+        return json_response(error=error)
+
+    def delete(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='参数错误')
+        ).parse(request.GET)
+        if error is None:
+            if User.objects.filter(role_id=form.id).exists():
+                return json_response(error='已有用户使用了该角色，请解除关联后再尝试删除')
+            Role.objects.filter(pk=form.id).delete()
         return json_response(error=error)
 
 
