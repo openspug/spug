@@ -32,6 +32,7 @@ export default [
   {
     icon: 'setting', title: '系统管理', child: [
       {title: '账户管理', path: '/system/account'},
+      {title: '角色管理', path: '/system/role'},
       {title: '系统设置', path: '/system/setting'},
     ]
   },
