@@ -10,8 +10,6 @@ class ComForm extends React.Component {
     super(props);
     this.state = {
       loading: false,
-      type: null,
-      body: store.record['body'],
     }
   }
 

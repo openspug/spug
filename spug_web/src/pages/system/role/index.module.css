@@ -1,0 +1,11 @@
+.container {
+    width: 100%;
+}
+
+.container :global(.ant-checkbox-group) {
+    width: 100%;
+}
+
+.container td {
+    padding: 5px 15px;
+}

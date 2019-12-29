@@ -1,7 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Table, Divider, Modal, message } from 'antd';
-import ComForm from './Form';
 import http from 'libs/http';
 import store from './store';
 import { LinkButton } from "components";
@@ -33,6 +32,8 @@ class ComTable extends React.Component {
       <span>
         <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
+        <LinkButton onClick={() => store.showPerm(info)}>权限</LinkButton>
+        <Divider type="vertical"/>
         <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
       </span>
     )
@@ -58,10 +59,7 @@ class ComTable extends React.Component {
       data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
     }
     return (
-      <React.Fragment>
-        <Table rowKey="id" loading={store.isFetching} dataSource={data} columns={this.columns}/>
-        {store.formVisible && <ComForm/>}
-      </React.Fragment>
+      <Table rowKey="id" loading={store.isFetching} dataSource={data} columns={this.columns}/>
     )
   }
 }
