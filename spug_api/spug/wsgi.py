@@ -11,12 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-try:
-    from public import setting_overrides
-    settings_path = 'public.setting_overrides'
-except ImportError:
-    settings_path = 'public.settings'
-
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'spug.settings')
 

@@ -112,3 +112,9 @@ USE_TZ = True
 AUTHENTICATION_EXCLUDES = (
     '/account/login/',
 )
+
+# override default config
+try:
+    from spug.overrides import *
+except ImportError:
+    pass
