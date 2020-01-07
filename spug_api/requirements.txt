@@ -1,6 +1,8 @@
 apscheduler==3.6.3
 Django==2.2.7
 channels==2.3.1
+channels_redis==2.4.1
 paramiko==2.6.0
 django-redis==4.10.0
 requests==2.22.0
+GitPython==3.0.5
