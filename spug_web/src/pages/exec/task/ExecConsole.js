@@ -17,7 +17,8 @@ class ExecConsole extends React.Component {
   }
 
   componentDidMount() {
-    this.socket = new WebSocket(`ws://localhost:8000/ws/exec/${store.token}/`);
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${store.token}/`);
     this.socket.onopen = () => {
       this.socket.send('ok');
       for (let item of Object.values(store.outputs)) {

@@ -37,7 +37,8 @@ class Ext1Index extends React.Component {
       .then(({token, outputs}) => {
         store.request.status = '2';
         store.outputs = outputs;
-        this.socket = new WebSocket(`ws://localhost:8000/ws/exec/${token}/`);
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${token}/`);
         this.socket.onopen = () => {
           this.socket.send('ok');
         };
