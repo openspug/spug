@@ -4,8 +4,10 @@ import http from 'libs/http';
 class Store {
   @observable records = [];
   @observable record = {};
+  @observable confRel = {};
   @observable isFetching = false;
   @observable formVisible = false;
+  @observable relVisible = false;
 
   @observable f_name;
 
@@ -19,6 +21,15 @@ class Store {
   showForm = (info = {}) => {
     this.formVisible = true;
     this.record = info
+  };
+
+  showRel = (info) => {
+    this.relVisible = true;
+    this.record = info;
+    this.confRel = {
+      app: info['rel_apps'],
+      service: info['rel_services']
+    }
   }
 }
 

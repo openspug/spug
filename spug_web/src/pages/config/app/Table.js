@@ -1,11 +1,10 @@
 import React from 'react';
-import { observer } from 'mobx-react';
-import { Link } from 'react-router-dom';
-import { Table, Divider, Modal, message } from 'antd';
-import ComForm from './Form';
+import {observer} from 'mobx-react';
+import {Link} from 'react-router-dom';
+import {Table, Divider, Modal, message} from 'antd';
 import http from 'libs/http';
 import store from './store';
-import { LinkButton } from "components";
+import {LinkButton} from "components";
 
 @observer
 class ComTable extends React.Component {
@@ -36,6 +35,8 @@ class ComTable extends React.Component {
         <Divider type="vertical"/>
         <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
         <Divider type="vertical"/>
+        <LinkButton onClick={() => store.showRel(info)}>依赖</LinkButton>
+        <Divider type="vertical"/>
         <Link to={`/config/setting/app/${info.id}`}>配置</Link>
       </span>
     )
@@ -61,10 +62,7 @@ class ComTable extends React.Component {
       data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
     }
     return (
-      <React.Fragment>
-        <Table rowKey="id" loading={store.isFetching} dataSource={data} columns={this.columns}/>
-        {store.formVisible && <ComForm/>}
-      </React.Fragment>
+      <Table rowKey="id" loading={store.isFetching} dataSource={data} columns={this.columns}/>
     )
   }
 }

@@ -11,7 +11,7 @@ class Store {
 
   fetchRecords = () => {
     this.isFetching = true;
-    http.get('/api/config/service/')
+    return http.get('/api/config/service/')
       .then(res => this.records = res)
       .finally(() => this.isFetching = false)
   };
