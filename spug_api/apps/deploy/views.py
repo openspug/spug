@@ -82,7 +82,7 @@ class RequestView(View):
                 type='2',
                 extra=pre_req.extra,
                 host_ids=req.host_ids,
-                status='0',
+                status='0' if pre_req.deploy.is_audit else '1',
                 desc='自动回滚至该应用的上个版本',
                 version=pre_req.version,
                 created_by=request.user
