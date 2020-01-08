@@ -60,7 +60,8 @@ class DeployView(View):
             Argument('is_audit', type=bool, default=False)
         ).parse(request.body)
         if error is None:
-            if Deploy.objects.filter(app_id=form.app_id, env_id=form.env_id).exists():
+            deploy = Deploy.objects.filter(app_id=form.app_id, env_id=form.env_id).first()
+            if deploy and deploy.id != form.id:
                 return json_response(error='应用在该环境下已经存在发布配置')
             form.host_ids = json.dumps(form.host_ids)
             if form.extend == '1':
