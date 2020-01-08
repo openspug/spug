@@ -111,6 +111,7 @@ class ConfigView(View):
         form, error = JsonParser(
             Argument('id', type=int, help='缺少必要参数'),
             Argument('value', type=str, default=''),
+            Argument('is_public', type=bool, help='缺少必要参数'),
             Argument('desc', required=False)
         ).parse(request.body)
         if error is None:
@@ -118,20 +119,18 @@ class ConfigView(View):
             config = Config.objects.filter(pk=form.id).first()
             if not config:
                 return json_response(error='未找到指定对象')
+            config.desc = form.desc
+            config.is_public = form.is_public
             if config.value != form.value:
                 old_value = config.value
                 config.value = form.value
-                config.desc = form.desc
                 config.updated_at = human_datetime()
                 config.updated_by = request.user
-                config.save()
                 ConfigHistory.objects.create(
                     action='2',
                     old_value=old_value,
                     **config.to_dict(excludes=('id',)))
-            elif config.desc != form.desc:
-                config.desc = form.desc
-                config.save()
+            config.save()
         return json_response(error=error)
 
     def delete(self, request):

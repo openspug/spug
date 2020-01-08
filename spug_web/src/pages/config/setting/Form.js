@@ -1,6 +1,6 @@
 import React from 'react';
-import { observer } from 'mobx-react';
-import { Modal, Form, Input, Checkbox, Switch, Row, Col, message } from 'antd';
+import {observer} from 'mobx-react';
+import {Modal, Form, Input, Checkbox, Switch, Row, Col, message} from 'antd';
 import http from 'libs/http';
 import store from './store';
 import envStore from '../environment/store'
@@ -80,7 +80,10 @@ class ComForm extends React.Component {
           </Form.Item>
           {store.type === 'app' && (
             <Form.Item label="类型">
-              {getFieldDecorator('is_public', {initialValue: info['is_public'] || true, valuePropName: 'checked'})(
+              {getFieldDecorator('is_public', {
+                initialValue: info['is_public'] === undefined || info['is_public'],
+                valuePropName: 'checked'
+              })(
                 <Switch checkedChildren="公共" unCheckedChildren="私有"/>
               )}
             </Form.Item>
