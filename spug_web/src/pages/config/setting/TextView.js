@@ -36,7 +36,7 @@ class TextView extends React.Component {
     http.post('/api/config/parse/text/', formData)
       .then(res => {
         message.success('保存成功');
-        this.updateValue()
+        store.fetchRecords().then(this.updateValue)
       })
       .finally(() => this.setState({loading: false}))
   };
