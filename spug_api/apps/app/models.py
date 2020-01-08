@@ -9,8 +9,16 @@ class App(models.Model, ModelMixin):
     name = models.CharField(max_length=50)
     key = models.CharField(max_length=50)
     desc = models.CharField(max_length=255, null=True)
+    rel_apps = models.TextField(null=True)
+    rel_services = models.TextField(null=True)
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    def to_dict(self, *args, **kwargs):
+        tmp = super().to_dict(*args, **kwargs)
+        tmp['rel_apps'] = json.loads(self.rel_apps) if self.rel_apps else []
+        tmp['rel_services'] = json.loads(self.rel_services) if self.rel_services else []
+        return tmp
 
     def __repr__(self):
         return f'<App {self.name!r}>'

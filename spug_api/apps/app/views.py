@@ -29,6 +29,21 @@ class AppView(View):
                 App.objects.create(created_by=request.user, **form)
         return json_response(error=error)
 
+    def patch(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='参数错误'),
+            Argument('rel_apps', type=list, required=False),
+            Argument('rel_services', type=list, required=False)
+        ).parse(request.body)
+        if error is None:
+            app = App.objects.filter(pk=form.id).first()
+            if not app:
+                return json_response(error='未找到指定应用')
+            app.rel_apps = json.dumps(form.rel_apps)
+            app.rel_services = json.dumps(form.rel_services)
+            app.save()
+        return json_response(error=error)
+
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='请指定操作对象')
