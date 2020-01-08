@@ -48,7 +48,7 @@ class HomeIndex extends React.Component {
   }
 
   componentDidMount() {
-    store.fetchInfo()
+    // store.fetchInfo()
   }
 
   render() {
