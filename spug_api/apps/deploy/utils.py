@@ -209,7 +209,7 @@ class Helper:
             self.send_error('local', f'exit code: {task.returncode}')
 
     def remote(self, key, ssh, command, env=None):
-        command, code = 'set -e\n' + command, -1
+        code = -1
         try:
             for code, out in ssh.exec_command_with_stream(command, environment=env):
                 self.send_info(key, out)
