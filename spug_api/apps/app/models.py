@@ -7,7 +7,7 @@ import json
 
 class App(models.Model, ModelMixin):
     name = models.CharField(max_length=50)
-    key = models.CharField(max_length=50)
+    key = models.CharField(max_length=50, unique=True)
     desc = models.CharField(max_length=255, null=True)
     rel_apps = models.TextField(null=True)
     rel_services = models.TextField(null=True)
