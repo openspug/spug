@@ -27,7 +27,7 @@ class ComForm extends React.Component {
       formData['type'] = store.type;
       formData['o_id'] = store.id;
       formData['envs'] = this.state.envs;
-      formData['is_public'] = store.type === 'src' ? true : formData['is_public'];
+      formData['is_public'] = store.type === 'src' ? false : formData['is_public'];
       request = http.post('/api/config/', formData)
     }
     request.then(res => {

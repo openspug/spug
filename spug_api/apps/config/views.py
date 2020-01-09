@@ -246,7 +246,7 @@ def _parse(request, query, data):
             item.delete()
     for key, value in data.items():
         query.key = key
-        query.is_public = True
+        query.is_public = False
         query.value = _filter_value(value)
         query.updated_at = human_datetime()
         query.updated_by = request.user

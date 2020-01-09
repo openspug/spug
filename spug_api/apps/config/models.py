@@ -44,7 +44,7 @@ class Config(models.Model, ModelMixin):
     env = models.ForeignKey(Environment, on_delete=models.PROTECT)
     value = models.TextField(null=True)
     desc = models.CharField(max_length=255, null=True)
-    is_public = models.BooleanField(default=True)
+    is_public = models.BooleanField(default=False)
     updated_at = models.CharField(max_length=20)
     updated_by = models.ForeignKey(User, on_delete=models.PROTECT)
 
