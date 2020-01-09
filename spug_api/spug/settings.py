@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import re
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -111,6 +112,7 @@ USE_TZ = True
 
 AUTHENTICATION_EXCLUDES = (
     '/account/login/',
+    re.compile('/apis/.*'),
 )
 
 # override default config

@@ -3,7 +3,7 @@ from apps.setting.models import Setting
 
 
 class AppSetting:
-    keys = ('public_key', 'private_key', 'mail_service')
+    keys = ('public_key', 'private_key', 'mail_service', 'api_key')
 
     @classmethod
     @lru_cache(maxsize=64)
@@ -11,6 +11,13 @@ class AppSetting:
         info = Setting.objects.filter(key=key).first()
         if not info:
             raise KeyError(f'no such key for {key!r}')
+        return info.value
+
+    @classmethod
+    def get_default(cls, key, default=None):
+        info = Setting.objects.filter(key=key).first()
+        if not info:
+            return default
         return info.value
 
     @classmethod
