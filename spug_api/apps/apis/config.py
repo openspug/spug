@@ -45,12 +45,13 @@ def get_configs(request):
 
 def _kv_response(data):
     output = ''
-    for k, v in data.items():
+    for k, v in sorted(data.items()):
         output += f'{k} = {v}\r\n'
     return HttpResponse(output, content_type='text/plain; charset=utf-8')
 
 
 def _json_response(data):
+    data = dict(sorted(data.items()))
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 
