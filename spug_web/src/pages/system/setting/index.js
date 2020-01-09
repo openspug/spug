@@ -3,6 +3,7 @@ import { Menu } from 'antd';
 import BasicSetting from './BasicSetting';
 import AlarmSetting from './AlarmSetting';
 import MailServer from './MailServer';
+import OpenService from './OpenService';
 import styles from './index.module.css';
 import store from './store';
 
@@ -32,12 +33,14 @@ class Index extends React.Component {
             <Menu.Item key="basic">基本设置</Menu.Item>
             <Menu.Item key="alarm">报警服务设置</Menu.Item>
             <Menu.Item key="mail">邮件服务设置</Menu.Item>
+            <Menu.Item key="service">开放服务设置</Menu.Item>
           </Menu>
         </div>
         <div className={styles.right}>
           {selectedKeys[0] === 'basic' && <BasicSetting />}
           {selectedKeys[0] === 'mail' && <MailServer />}
           {selectedKeys[0] === 'alarm' && <AlarmSetting />}
+          {selectedKeys[0] === 'service' && <OpenService />}
         </div>
       </div>
     )

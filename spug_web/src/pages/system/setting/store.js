@@ -5,6 +5,7 @@ import http from 'libs/http';
 class Store {
   @observable settings = {};
   @observable isFetching = false;
+  @observable loading = false;
 
   fetchSettings = () => {
     this.isFetching = true;
