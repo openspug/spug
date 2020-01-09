@@ -32,9 +32,9 @@ def deploy_dispatch(request, req, token):
         )
         if req.deploy.extend == '1':
             env.update(json.loads(req.deploy.extend_obj.custom_envs))
-            _ext1_deploy(request, req, helper, env)
+            _ext1_deploy(req, helper, env)
         else:
-            _ext2_deploy(request, req, helper, env)
+            _ext2_deploy(req, helper, env)
         req.status = '3'
     except Exception as e:
         req.status = '-3'
@@ -45,7 +45,7 @@ def deploy_dispatch(request, req, token):
         req.save()
 
 
-def _ext1_deploy(request, req, helper, env):
+def _ext1_deploy(req, helper, env):
     extend = req.deploy.extend_obj
     extras = json.loads(req.extra)
     if extras[0] == 'branch':
@@ -90,7 +90,7 @@ def _ext1_deploy(request, req, helper, env):
                 raise t.exception()
 
 
-def _ext2_deploy(request, req, helper, env):
+def _ext2_deploy(req, helper, env):
     extend = req.deploy.extend_obj
     extras = json.loads(req.extra)
     host_actions = json.loads(extend.host_actions)
@@ -123,7 +123,7 @@ def _deploy_ext1_host(helper, h_id, extend, env):
     if code == 0:
         helper.send_error(host.id, f'please make sure the {extend.dst_dir!r} is not exists.')
     # clean
-    clean_command = f'ls -rd {env.SPUG_APP_ID}_* | tail -n +{extend.versions + 1} | xargs rm -rf'
+    clean_command = f'ls -rd {extend.deploy_id}_* | tail -n +{extend.versions + 1} | xargs rm -rf'
     helper.remote(host.id, ssh, f'cd {extend.dst_repo} && rm -rf {env.SPUG_VERSION} && {clean_command}')
     # transfer files
     tar_gz_file = f'{env.SPUG_VERSION}.tar.gz'
@@ -198,7 +198,7 @@ class Helper:
         self.rds.rpush(self.token, json.dumps({'key': key, 'step': step, 'data': data}))
 
     def local(self, command, env=None):
-        # print(f'helper.local: {command!r}')
+        command = 'set -e\n' + command
         task = subprocess.Popen(command, env=env, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         while True:
             message = task.stdout.readline()
@@ -209,8 +209,7 @@ class Helper:
             self.send_error('local', f'exit code: {task.returncode}')
 
     def remote(self, key, ssh, command, env=None):
-        # print(f'helper.remote: {command!r} env: {env!r}')
-        code = -1
+        command, code = 'set -e\n' + command, -1
         try:
             for code, out in ssh.exec_command_with_stream(command, environment=env):
                 self.send_info(key, out)
