@@ -6,6 +6,7 @@ from concurrent import futures
 import socket
 import subprocess
 import json
+import uuid
 import os
 
 REPOS_DIR = settings.REPOS_DIR
@@ -14,9 +15,10 @@ REPOS_DIR = settings.REPOS_DIR
 def deploy_dispatch(request, req, token):
     rds = get_redis_connection()
     try:
+        api_token = uuid.uuid4().hex
+        rds.setex(api_token, 60 * 60, f'{req.deploy.app_id},{req.deploy.env_id}')
         helper = Helper(rds, token)
         helper.send_step('local', 1, f'完成\r\n{human_time()} 发布准备...        ')
-        rds.expire(token, 60 * 60)
         env = AttrDict(
             SPUG_APP_NAME=req.deploy.app.name,
             SPUG_APP_ID=str(req.deploy.app_id),
@@ -25,7 +27,8 @@ def deploy_dispatch(request, req, token):
             SPUG_ENV_ID=str(req.deploy.env_id),
             SPUG_ENV_KEY=req.deploy.env.key,
             SPUG_VERSION=req.version,
-            SPUG_DEPLOY_TYPE=req.type
+            SPUG_DEPLOY_TYPE=req.type,
+            SPUG_API_TOKEN=api_token,
         )
         if req.deploy.extend == '1':
             env.update(json.loads(req.deploy.extend_obj.custom_envs))
@@ -37,6 +40,7 @@ def deploy_dispatch(request, req, token):
         req.status = '-3'
         raise e
     finally:
+        rds.expire(token, 5 * 60)
         rds.close()
         req.save()
 

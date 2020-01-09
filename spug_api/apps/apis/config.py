@@ -61,7 +61,7 @@ def _parse_params(request):
         rds = get_redis_connection()
         content = rds.get(api_token)
         if content:
-            app_id, env_id = content.split(',')
+            app_id, env_id = content.decode().split(',')
             app = App.objects.filter(pk=app_id).first()
     else:
         api_key = AppSetting.get_default('api_key')
