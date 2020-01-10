@@ -1,8 +1,8 @@
 import React from 'react';
-import { Form, Input, Icon, Button, Tabs } from 'antd';
+import {Form, Input, Icon, Button, Tabs, Modal} from 'antd';
 import styles from './login.module.css';
 import history from 'libs/history';
-import { http } from 'libs';
+import {http} from 'libs';
 import logo from 'layout/logo.svg';
 
 class LoginIndex extends React.Component {
@@ -20,17 +20,32 @@ class LoginIndex extends React.Component {
         this.setState({loading: true});
         http.post('/api/account/login/', formData)
           .then(data => {
-            localStorage.setItem('token', data['access_token']);
-            localStorage.setItem('nickname', data['nickname']);
-            localStorage.setItem('is_supper', data['is_supper']);
-            if (history.location.state && history.location.state['from']) {
-              history.push(history.location.state['from'])
+            if (!data['has_real_ip']) {
+              Modal.warning({
+                title: '安全警告',
+                className: styles.tips,
+                content: <div>
+                  未能获取到客户端的真实IP，无法提供基于请求来源IP的合法性验证，详细信息请参考<a target="_blank" href="https://spug.dev">官方文档</a>。
+                </div>,
+                onOk: () => this.doLogin(data)
+              })
             } else {
-              history.push('/home')
+              this.doLogin(data)
             }
           }, () => this.setState({loading: false}))
       }
     })
+  };
+
+  doLogin = (data) => {
+    localStorage.setItem('token', data['access_token']);
+    localStorage.setItem('nickname', data['nickname']);
+    localStorage.setItem('is_supper', data['is_supper']);
+    if (history.location.state && history.location.state['from']) {
+      history.push(history.location.state['from'])
+    } else {
+      history.push('/home')
+    }
   };
 
   render() {
