@@ -90,12 +90,18 @@ def login(request):
                 return json_response(error="账户已被禁用")
             if user.verify_password(form.password):
                 cache.delete(form.username)
+                x_real_ip = request.headers.get('x-real-ip', '')
                 token_isvalid = user.access_token and len(user.access_token) == 32 and user.token_expired >= time.time()
                 user.access_token = user.access_token if token_isvalid else uuid.uuid4().hex
                 user.token_expired = time.time() + 8 * 60 * 60
                 user.last_login = human_datetime()
+                user.last_ip = x_real_ip
                 user.save()
-                return json_response({'access_token': user.access_token, 'nickname': user.nickname})
+                return json_response({
+                    'access_token': user.access_token,
+                    'nickname': user.nickname,
+                    'has_real_ip': True if x_real_ip else False
+                })
 
         value = cache.get_or_set(form.username, 0, 86400)
         if value >= 3:

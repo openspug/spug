@@ -12,6 +12,7 @@ class User(models.Model, ModelMixin):
     access_token = models.CharField(max_length=32)
     token_expired = models.IntegerField(null=True)
     last_login = models.CharField(max_length=20)
+    last_ip = models.CharField(max_length=50)
     role = models.ForeignKey('Role', on_delete=models.PROTECT, null=True)
 
     created_at = models.CharField(max_length=20, default=human_datetime)
