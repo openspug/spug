@@ -4,7 +4,8 @@ import { Card, Input, Button } from 'antd';
 import { SearchForm } from 'components';
 import ComTable from './Table';
 import ComForm from './Form';
-import Permission from './Permission';
+import PagePerm from './PagePerm';
+import DeployPerm from './DeployPerm';
 import store from './store';
 
 export default observer(function () {
@@ -23,7 +24,8 @@ export default observer(function () {
       </div>
       <ComTable/>
       {store.formVisible && <ComForm/>}
-      {store.permVisible && <Permission/>}
+      {store.pagePermVisible && <PagePerm/>}
+      {store.deployPermVisible && <DeployPerm/>}
     </Card>
   )
 })

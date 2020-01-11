@@ -8,9 +8,11 @@ class Store {
   @observable records = [];
   @observable record = {};
   @observable permissions = lds.cloneDeep(codes);
+  @observable deployRel = {}
   @observable isFetching = false;
   @observable formVisible = false;
-  @observable permVisible = true;
+  @observable pagePermVisible = false;
+  @observable deployPermVisible = true;
 
   @observable f_name;
 
@@ -42,9 +44,14 @@ class Store {
     this.record = info
   };
 
-  showPerm = (info) => {
+  showPagePerm = (info) => {
     this.record = info;
-    this.permVisible = true;
+    this.pagePermVisible = true;
+  };
+
+  showDeployPerm = (info) => {
+    this.record = info;
+    this.deployPermVisible = true;
   }
 }
 

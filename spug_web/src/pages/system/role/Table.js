@@ -12,11 +12,6 @@ class ComTable extends React.Component {
   }
 
   columns = [{
-    title: '序号',
-    key: 'series',
-    render: (_, __, index) => index + 1,
-    width: 80,
-  }, {
     title: '角色名称',
     dataIndex: 'name',
   }, {
@@ -28,11 +23,14 @@ class ComTable extends React.Component {
     ellipsis: true
   }, {
     title: '操作',
+    width: 300,
     render: info => (
       <span>
         <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton onClick={() => store.showPerm(info)}>权限</LinkButton>
+        <LinkButton onClick={() => store.showPagePerm(info)}>功能权限</LinkButton>
+        <Divider type="vertical"/>
+        <LinkButton onClick={() => store.showDeployPerm(info)}>发布权限</LinkButton>
         <Divider type="vertical"/>
         <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
       </span>

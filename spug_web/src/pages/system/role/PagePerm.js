@@ -8,7 +8,7 @@ import styles from './index.module.css';
 import lds from 'lodash';
 
 @observer
-class Permission extends React.Component {
+class PagePerm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -66,7 +66,7 @@ class Permission extends React.Component {
         maskClosable={false}
         title="功能权限设置"
         className={styles.container}
-        onCancel={() => store.permVisible = false}
+        onCancel={() => store.pagePermVisible = false}
         confirmLoading={this.state.loading}
         onOk={this.handleSubmit}>
         <Alert closable style={{width: 600, margin: '0 auto 20px', color: '#31708f !important'}} type="info"
@@ -109,4 +109,4 @@ class Permission extends React.Component {
   }
 }
 
-export default Permission
+export default PagePerm
