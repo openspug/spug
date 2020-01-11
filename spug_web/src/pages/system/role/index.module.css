@@ -1,11 +1,24 @@
-.container {
+.container :global(.ant-modal-footer) {
+    border-top: 0
+}
+
+.table {
+    width: 100%;
+    border: 1px solid #dfdfdf;
+}
+
+.table :global(.ant-checkbox-group) {
     width: 100%;
 }
 
-.container :global(.ant-checkbox-group) {
-    width: 100%;
+.table th {
+    background-color: #fafafa;
+    color: #404040;
+    font-size: 18px;
+    font-weight: 500;
+    padding: 5px 15px;
 }
 
-.container td {
+.table td {
     padding: 5px 15px;
 }

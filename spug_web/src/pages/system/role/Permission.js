@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Checkbox, Row, Col, message } from 'antd';
+import {Modal, Checkbox, Row, Col, message, Alert} from 'antd';
 import http from 'libs/http';
 import store from './store';
 import codes from './codes';
@@ -65,10 +65,13 @@ class Permission extends React.Component {
         width={1000}
         maskClosable={false}
         title="功能权限设置"
+        className={styles.container}
         onCancel={() => store.permVisible = false}
         confirmLoading={this.state.loading}
         onOk={this.handleSubmit}>
-        <table border="1" className={styles.container}>
+        <Alert closable style={{width: 600, margin: '0 auto 20px', color: '#31708f !important'}} type="info"
+                 message="小提示: 功能权限仅影响页面功能，管理发布应用权限请在发布权限中设置。"/>
+        <table border="1" className={styles.table}>
           <thead>
           <tr>
             <th>模块</th>
