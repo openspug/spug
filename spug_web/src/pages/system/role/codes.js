@@ -102,4 +102,45 @@ export default [{
       {key: 'edit_config', label: '修改配置'},
     ]
   }]
+}, {
+  key: 'monitor',
+  label: '监控中心',
+  pages: [{
+    key: '监控中心',
+    label: '监控中心',
+    perms: [
+      {key: 'view', label: '查看监控'},
+      {key: 'add', label: '新建监控'},
+      {key: 'edit', label: '编辑监控'},
+      {key: 'del', label: '删除监控'},
+    ]
+  }]
+}, {
+  key: 'alarm',
+  label: '报警中心',
+  pages: [{
+    key: 'alarm',
+    label: '报警记录',
+    perms: [
+      {key: 'view', label: '查看记录'}
+    ]
+  }, {
+    key: 'contact',
+    label: '报警联系人',
+    perms: [
+      {key: 'view', label: '查看联系人'},
+      {key: 'add', label: '新建联系人'},
+      {key: 'edit', label: '编辑联系人'},
+      {key: 'del', label: '删除联系人'},
+    ]
+  }, {
+    key: 'group',
+    label: '报警联系组',
+    perms: [
+      {key: 'view', label: '查看联系组'},
+      {key: 'add', label: '新建联系组'},
+      {key: 'edit', label: '编辑联系组'},
+      {key: 'del', label: '删除联系组'},
+    ]
+  }]
 }]

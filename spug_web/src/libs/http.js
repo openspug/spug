@@ -32,7 +32,7 @@ function handleResponse(response) {
 // 请求拦截器
 http.interceptors.request.use(request => {
   if (request.url.startsWith('/api/')) {
-    request.headers['X-TOKEN'] = localStorage.getItem('token')
+    request.headers['X-Token'] = localStorage.getItem('token')
   }
   request.timeout = 30000;
   return request;
