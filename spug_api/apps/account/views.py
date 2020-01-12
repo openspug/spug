@@ -90,6 +90,7 @@ class RoleView(View):
                 role.page_perms = json.dumps(form.page_perms)
             if form.deploy_perms is not None:
                 role.deploy_perms = json.dumps(form.deploy_perms)
+            role.user_set.update(token_expired=0)
             role.save()
         return json_response(error=error)
 
@@ -126,7 +127,9 @@ def login(request):
                 return json_response({
                     'access_token': user.access_token,
                     'nickname': user.nickname,
-                    'has_real_ip': True if x_real_ip else False
+                    'is_supper': user.is_supper,
+                    'has_real_ip': True if x_real_ip else False,
+                    'permissions': [] if user.is_supper else user.role.permissions
                 })
 
         value = cache.get_or_set(form.username, 0, 86400)

@@ -49,6 +49,22 @@ class Role(models.Model, ModelMixin):
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='+')
 
+    @property
+    def permissions(self):
+        if self.page_perms:
+            data = []
+            perms = json.loads(self.page_perms)
+            for m, v in perms.items():
+                for p, d in v.items():
+                    data.extend(f'{m}.{p}.{x}' for x in d)
+            return data
+        else:
+            return []
+
+    @property
+    def deploy(self):
+        return json.loads(self.deploy_perms) if self.deploy_perms else {'apps': [], 'envs': []}
+
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
         tmp['page_perms'] = json.loads(self.page_perms) if self.page_perms else None
