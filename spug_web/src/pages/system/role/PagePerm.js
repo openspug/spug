@@ -17,16 +17,13 @@ class PagePerm extends React.Component {
   }
 
   handleSubmit = () => {
-    console.log(JSON.stringify(store.permissions));
-    // this.setState({loading: true});
-    // const formData = this.props.form.getFieldsValue();
-    // formData['id'] = store.record.id;
-    // http.post('/api/account/role/', formData)
-    //   .then(res => {
-    //     message.success('操作成功');
-    //     store.formVisible = false;
-    //     store.fetchRecords()
-    //   }, () => this.setState({loading: false}))
+    this.setState({loading: true});
+    http.patch('/api/account/role/', {id: store.record.id, page_perms: store.permissions})
+      .then(res => {
+        message.success('操作成功');
+        store.pagePermVisible = false;
+        store.fetchRecords()
+      }, () => this.setState({loading: false}))
   };
 
   handleAllCheck = (e, mod, page) => {

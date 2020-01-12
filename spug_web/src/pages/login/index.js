@@ -25,7 +25,8 @@ class LoginIndex extends React.Component {
                 title: '安全警告',
                 className: styles.tips,
                 content: <div>
-                  未能获取到客户端的真实IP，无法提供基于请求来源IP的合法性验证，详细信息请参考<a target="_blank" href="https://spug.dev">官方文档</a>。
+                  未能获取到客户端的真实IP，无法提供基于请求来源IP的合法性验证，详细信息请参考
+                  <a target="_blank" href="https://spug.dev" rel="noopener noreferrer">官方文档</a>。
                 </div>,
                 onOk: () => this.doLogin(data)
               })
