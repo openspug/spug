@@ -4,6 +4,7 @@ from libs import JsonParser, Argument, human_datetime, json_response
 from .models import User, Role
 import time
 import uuid
+import json
 
 
 class UserView(View):
@@ -65,6 +66,23 @@ class RoleView(View):
                 Role.objects.filter(pk=form.id).update(**form)
             else:
                 Role.objects.create(created_by=request.user, **form)
+        return json_response(error=error)
+
+    def patch(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='参数错误'),
+            Argument('page_perms', type=dict, required=False),
+            Argument('deploy_perms', type=dict, required=False)
+        ).parse(request.body)
+        if error is None:
+            role = Role.objects.filter(pk=form.pop('id')).first()
+            if not role:
+                return json_response(error='未找到指定角色')
+            if form.page_perms is not None:
+                role.page_perms = json.dumps(form.page_perms)
+            if form.deploy_perms is not None:
+                role.deploy_perms = json.dumps(form.deploy_perms)
+            role.save()
         return json_response(error=error)
 
     def delete(self, request):

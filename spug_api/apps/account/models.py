@@ -1,6 +1,7 @@
 from django.db import models
 from libs import ModelMixin, human_datetime
 from django.contrib.auth.hashers import make_password, check_password
+import json
 
 
 class User(models.Model, ModelMixin):
@@ -42,10 +43,17 @@ class User(models.Model, ModelMixin):
 class Role(models.Model, ModelMixin):
     name = models.CharField(max_length=50)
     desc = models.CharField(max_length=255, null=True)
-    permissions = models.TextField(null=True)
+    page_perms = models.TextField(null=True)
+    deploy_perms = models.TextField(null=True)
 
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='+')
+
+    def to_dict(self, *args, **kwargs):
+        tmp = super().to_dict(*args, **kwargs)
+        tmp['page_perms'] = json.loads(self.page_perms) if self.page_perms else None
+        tmp['deploy_perms'] = json.loads(self.deploy_perms) if self.deploy_perms else None
+        return tmp
 
     def __repr__(self):
         return '<Role name=%r>' % self.name
