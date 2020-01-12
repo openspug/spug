@@ -1,9 +1,18 @@
+let Permission = {
+  isSuper: false,
+  permissions: []
+};
+
+export function updatePermissions(isSupper, data) {
+  Permission.isSuper = isSupper;
+  Permission.permissions = data;
+}
+
 // 前端页面的权限判断(仅作为前端功能展示的控制，具体权限控制应在后端实现)
 export function hasPermission(strCode) {
-  if (localStorage.getItem('is_supper') === 'true') return true;
-  let permStr = localStorage.getItem('permissions');
-  if (!strCode || !permStr) return false;
-  const permissions = permStr.split(',');
+  const {isSuper, permissions} = Permission;
+  // console.log(isSuper, strCode, permissions);
+  if (!strCode || isSuper) return true;
   for (let or_item of strCode.split('|')) {
     if (isSubArray(permissions, or_item.split('&'))) {
       return true

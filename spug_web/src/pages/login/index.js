@@ -2,7 +2,7 @@ import React from 'react';
 import {Form, Input, Icon, Button, Tabs, Modal} from 'antd';
 import styles from './login.module.css';
 import history from 'libs/history';
-import {http} from 'libs';
+import {http, updatePermissions} from 'libs';
 import logo from 'layout/logo.svg';
 
 class LoginIndex extends React.Component {
@@ -42,6 +42,8 @@ class LoginIndex extends React.Component {
     localStorage.setItem('token', data['access_token']);
     localStorage.setItem('nickname', data['nickname']);
     localStorage.setItem('is_supper', data['is_supper']);
+    localStorage.setItem('permissions', JSON.stringify(data['permissions']));
+    updatePermissions(data['is_supper'], data['permissions']);
     if (history.location.state && history.location.state['from']) {
       history.push(history.location.state['from'])
     } else {

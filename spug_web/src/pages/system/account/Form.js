@@ -4,7 +4,6 @@ import http from 'libs/http';
 import store from './store';
 import roleStore from '../role/store';
 import {Link} from "react-router-dom";
-import {LinkButton} from 'components';
 
 class ComForm extends React.Component {
   constructor(props) {

@@ -38,11 +38,11 @@ class ComTable extends React.Component {
     width: 200,
     render: info => (
       <span>
-        <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
+        <LinkButton auth="host.host.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
+        <LinkButton auth="host.host.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton onClick={() => this.handleConsole(info)}>Console</LinkButton>
+        <LinkButton auth="host.host.console" onClick={() => this.handleConsole(info)}>Console</LinkButton>
       </span>
     )
   }];

@@ -1,6 +1,6 @@
 export default [
   {icon: 'desktop', title: '工作台', path: '/home'},
-  {icon: 'cloud-server', title: '主机管理', path: '/host'},
+  {icon: 'cloud-server', title: '主机管理', auth: 'host.host.view', path: '/host'},
   {
     icon: 'code', title: '批量执行', child: [
       {title: '执行任务', path: '/exec/task'},
