@@ -1,7 +1,8 @@
 from django.core.cache import cache
 from django.views.generic import View
+from django.db.models import F
 from libs import JsonParser, Argument, human_datetime, json_response
-from .models import User, Role
+from apps.account.models import User, Role
 import time
 import uuid
 import json
@@ -9,14 +10,19 @@ import json
 
 class UserView(View):
     def get(self, request):
-        users = User.objects.filter(is_supper=False, deleted_by_id__isnull=True)
-        return json_response([x.to_dict(excludes=('access_token', 'password_hash')) for x in users])
+        users = []
+        for u in User.objects.filter(is_supper=False, deleted_by_id__isnull=True).annotate(role_name=F('role__name')):
+            tmp = u.to_dict(excludes=('access_token', 'password_hash'))
+            tmp['role_name'] = u.role_name
+            users.append(tmp)
+        return json_response(users)
 
     def post(self, request):
         form, error = JsonParser(
             Argument('username', help='请输入登录名'),
             Argument('password', help='请输入密码'),
             Argument('nickname', help='请输入姓名'),
+            Argument('role_id', type=int, help='请选择角色'),
         ).parse(request.body)
         if error is None:
             form.password_hash = User.make_password(form.pop('password'))
@@ -30,10 +36,12 @@ class UserView(View):
             Argument('username', required=False),
             Argument('password', required=False),
             Argument('nickname', required=False),
+            Argument('role_id', required=False),
             Argument('is_active', type=bool, required=False),
         ).parse(request.body, True)
         if error is None:
             if form.get('password'):
+                form.token_expired = 0
                 form.password_hash = User.make_password(form.pop('password'))
             User.objects.filter(pk=form.pop('id')).update(**form)
         return json_response(error=error)

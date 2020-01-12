@@ -1,13 +1,19 @@
 import React from 'react';
-import { observer } from 'mobx-react';
-import { Table, Divider, Modal, Badge, message } from 'antd';
-import { LinkButton } from 'components';
+import {observer} from 'mobx-react';
+import {Table, Divider, Modal, Badge, message, Form, Input} from 'antd';
+import {LinkButton} from 'components';
 import ComForm from './Form';
 import http from 'libs/http';
 import store from './store';
 
 @observer
 class ComTable extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      password: ''
+    }
+  }
   componentDidMount() {
     store.fetchRecords()
   }
@@ -24,6 +30,9 @@ class ComTable extends React.Component {
     title: '姓名',
     dataIndex: 'nickname',
   }, {
+    title: '角色',
+    dataIndex: 'role_name'
+  }, {
     title: '状态',
     render: text => text['is_active'] ? <Badge status="success" text="正常"/> : <Badge status="default" text="禁用"/>
   }, {
@@ -33,9 +42,12 @@ class ComTable extends React.Component {
     title: '操作',
     render: info => (
       <span>
-        <LinkButton className="span-button" onClick={() => this.handleActive(info)}>{info['is_active'] ? '禁用' : '启用'}</LinkButton>
+        <LinkButton className="span-button"
+                    onClick={() => this.handleActive(info)}>{info['is_active'] ? '禁用' : '启用'}</LinkButton>
         <Divider type="vertical"/>
         <LinkButton className="span-button" onClick={() => store.showForm(info)}>编辑</LinkButton>
+        <Divider type="vertical"/>
+        <LinkButton className="span-button" onClick={() => this.handleReset(info)}>重置密码</LinkButton>
         <Divider type="vertical"/>
         <LinkButton className="span-button" onClick={() => this.handleDelete(info)}>删除</LinkButton>
       </span>
@@ -53,6 +65,22 @@ class ComTable extends React.Component {
             store.fetchRecords()
           })
       }
+    })
+  };
+
+  handleReset = (info) => {
+    Modal.confirm({
+      icon: 'exclamation-circle',
+      title: '重置登录密码',
+      content: <Form>
+        <Form.Item required label="重置后的新密码">
+          <Input.Password onChange={val => this.setState({password: val.target.value})}/>
+        </Form.Item>
+      </Form>,
+      onOk: () => {
+        return http.patch('/api/account/user/', {id: info.id, password: this.state.password})
+          .then(() => message.success('重置成功', 0.5))
+      },
     })
   };
 
