@@ -85,11 +85,11 @@ class ComTable extends React.Component {
     title: '操作',
     render: info => (
       <span>
-        <LinkButton onClick={() => this.handleActive(info)}>{info['is_active'] ? '禁用' : '启用'}</LinkButton>
+        <LinkButton auth="monitor.monitor.edit" onClick={() => this.handleActive(info)}>{info['is_active'] ? '禁用' : '启用'}</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
+        <LinkButton auth="monitor.monitor.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
+        <LinkButton auth="monitor.monitor.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
       </span>
     ),
     width: 180

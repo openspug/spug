@@ -35,9 +35,9 @@ class ComTable extends React.Component {
     title: '操作',
     render: info => (
       <span>
-        <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
+        <LinkButton auth="alarm.contact.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
+        <LinkButton auth="alarm.contact.del"  onClick={() => this.handleDelete(info)}>删除</LinkButton>
       </span>
     )
   }];

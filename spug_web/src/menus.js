@@ -21,12 +21,12 @@ export default [
       {title: '应用配置', auth: 'config.app.view', path: '/config/app'},
     ]
   },
-  {icon: 'monitor', title: '监控中心', path: '/monitor'},
+  {icon: 'monitor', title: '监控中心', auth: 'monitor.monitor.view', path: '/monitor'},
   {
-    icon: 'alert', title: '报警中心', child: [
-      {title: '报警历史', path: '/alarm/alarm'},
-      {title: '报警联系人', path: '/alarm/contact'},
-      {title: '报警联系组', path: '/alarm/group'},
+    icon: 'alert', title: '报警中心', auth: 'alarm.alarm.view|alarm.contact.view|alarm.group.view', child: [
+      {title: '报警历史', auth: 'alarm.alarm.view', path: '/alarm/alarm'},
+      {title: '报警联系人', auth: 'alarm.contact.view', path: '/alarm/contact'},
+      {title: '报警联系组', auth: 'alarm.group.view', path: '/alarm/group'},
     ]
   },
   {

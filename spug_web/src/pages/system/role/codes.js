@@ -107,7 +107,7 @@ export default [{
   key: 'monitor',
   label: '监控中心',
   pages: [{
-    key: '监控中心',
+    key: 'monitor',
     label: '监控中心',
     perms: [
       {key: 'view', label: '查看监控'},
