@@ -98,6 +98,8 @@ class ComTable extends React.Component {
         <span>
         <LinkButton auth="deploy.app.edit" onClick={() => store.showExtForm(record.id, info)}>编辑</LinkButton>
         <Divider type="vertical"/>
+        <LinkButton auth="deploy.app.edit" onClick={() => store.showExtForm(record.id, info, true)}>克隆配置</LinkButton>
+        <Divider type="vertical"/>
         <LinkButton auth="deploy.app.edit" onClick={() => this.handleDeployDelete(info)}>删除</LinkButton>
       </span>
       )
