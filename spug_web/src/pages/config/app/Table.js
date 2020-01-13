@@ -1,10 +1,9 @@
 import React from 'react';
-import {observer} from 'mobx-react';
-import {Link} from 'react-router-dom';
-import {Table, Divider, Modal, message} from 'antd';
+import { observer } from 'mobx-react';
+import { Table, Divider, Modal, message } from 'antd';
 import http from 'libs/http';
 import store from './store';
-import {LinkButton} from "components";
+import { LinkButton, AuthLink } from 'components';
 
 @observer
 class ComTable extends React.Component {
@@ -31,13 +30,13 @@ class ComTable extends React.Component {
     title: '操作',
     render: info => (
       <span>
-        <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
+        <LinkButton auth="config.app.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
+        <LinkButton auth="config.app.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton onClick={() => store.showRel(info)}>依赖</LinkButton>
+        <LinkButton auth="config.app.view_config" onClick={() => store.showRel(info)}>依赖</LinkButton>
         <Divider type="vertical"/>
-        <Link to={`/config/setting/app/${info.id}`}>配置</Link>
+        <AuthLink auth="config.app.view_config" to={`/config/setting/app/${info.id}`}>配置</AuthLink>
       </span>
     )
   }];

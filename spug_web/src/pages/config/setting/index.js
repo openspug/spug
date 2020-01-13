@@ -4,7 +4,7 @@ import { Menu, Input, Button, Select, PageHeader, Icon } from 'antd';
 import envStore from '../environment/store';
 import styles from './index.module.css';
 import history from 'libs/history';
-import { SearchForm } from 'components';
+import { SearchForm, AuthDiv, AuthButton } from 'components';
 import DiffConfig from './DiffConfig';
 import TableView from './TableView';
 import TextView from './TextView';
@@ -49,7 +49,7 @@ class Index extends React.Component {
   render() {
     const {view} = this.state;
     return (
-      <div className={styles.container}>
+      <AuthDiv auth={`config.${store.type}.view_config`} className={styles.container}>
         <div className={styles.left}>
           <PageHeader
             title="环境列表"
@@ -86,7 +86,7 @@ class Index extends React.Component {
                       onClick={store.showRecord}>更改历史</Button>
             </SearchForm.Item>
             <SearchForm.Item span={4} style={{textAlign: 'right'}}>
-              <Button disabled={view !== '1'} type="primary" icon="plus" onClick={() => store.showForm()}>新增配置</Button>
+              <AuthButton auth="config.app.edit_config|config.service.edit_config" disabled={view !== '1'} type="primary" icon="plus" onClick={() => store.showForm()}>新增配置</AuthButton>
             </SearchForm.Item>
           </SearchForm>
 
@@ -96,7 +96,7 @@ class Index extends React.Component {
         </div>
         {store.recordVisible && <Record/>}
         {store.diffVisible && <DiffConfig/>}
-      </div>
+      </AuthDiv>
     )
   }
 }

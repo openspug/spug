@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Card, Input, Button } from 'antd';
-import { SearchForm } from 'components';
+import { SearchForm, AuthDiv } from 'components';
 import SelectApp from './SelectApp';
 import Ext1Form from './Ext1Form';
 import Ext2Form from './Ext2Form';
@@ -23,9 +23,9 @@ export default observer(function () {
           <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
         </SearchForm.Item>
       </SearchForm>
-      <div style={{marginBottom: 16}}>
+      <AuthDiv auth="deploy.request.add" style={{marginBottom: 16}}>
         <Button type="primary" icon="plus" onClick={() => store.addVisible = true}>新建发布申请</Button>
-      </div>
+      </AuthDiv>
       <ComTable/>
       {store.addVisible && <SelectApp/>}
       {store.ext1Visible && <Ext1Form/>}

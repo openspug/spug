@@ -5,7 +5,8 @@ import 'ace-builds/src-noconflict/mode-space';
 import 'ace-builds/src-noconflict/theme-tomorrow';
 import store from './store';
 import { http } from "libs";
-import { Button, message } from "antd";
+import { Button, message } from 'antd';
+import { AuthButton } from 'components';
 
 @observer
 class TextView extends React.Component {
@@ -54,12 +55,13 @@ class TextView extends React.Component {
           value={body}
           readOnly={readOnly}
           onChange={v => this.setState({body: v})}/>
-        {readOnly && <Button
+        {readOnly && <AuthButton
           icon="edit"
           type="link"
           size="large"
+          auth={`config.${store.type}.edit_config`}
           style={{position: 'absolute', top: 0, right: 0}}
-          onClick={() => this.setState({readOnly: false})}>编辑</Button>}
+          onClick={() => this.setState({readOnly: false})}>编辑</AuthButton>}
         {readOnly || <Button
           icon="save"
           type="link"

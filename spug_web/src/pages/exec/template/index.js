@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Card, Input, Select, Button } from 'antd';
-import { SearchForm } from 'components';
+import { SearchForm, AuthDiv } from 'components';
 import ComTable from './Table';
 import store from './store';
 
@@ -23,9 +23,9 @@ export default observer(function () {
           <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
         </SearchForm.Item>
       </SearchForm>
-      <div style={{marginBottom: 16}}>
+      <AuthDiv auth="exec.template.add" style={{marginBottom: 16}}>
         <Button type="primary" icon="plus" onClick={() => store.showForm()}>新建</Button>
-      </div>
+      </AuthDiv>
       <ComTable/>
     </Card>
   )

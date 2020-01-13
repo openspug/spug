@@ -19,11 +19,11 @@ class ComTable extends React.Component {
   moreMenus = (info) => (
     <Menu>
       <Menu.Item>
-        <LinkButton onClick={() => this.handleActive(info)}>{info.is_active ? '禁用' : '激活'}</LinkButton>
+        <LinkButton auth="schedule.schedule.edit" onClick={() => this.handleActive(info)}>{info.is_active ? '禁用' : '激活'}</LinkButton>
       </Menu.Item>
       <Menu.Divider />
       <Menu.Item>
-        <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
+        <LinkButton auth="schedule.schedule.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
       </Menu.Item>
     </Menu>
   );
@@ -67,7 +67,7 @@ class ComTable extends React.Component {
       <span>
         <LinkButton disabled={!info['latest_run_time']} onClick={() => store.showInfo(info)}>详情</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
+        <LinkButton auth="schedule.schedule.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
         <Dropdown overlay={() => this.moreMenus(info)} trigger={['click']}>
           <LinkButton>

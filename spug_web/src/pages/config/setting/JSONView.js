@@ -1,9 +1,10 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Button, message} from 'antd';
+import { Button, message } from 'antd';
 import Editor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/theme-tomorrow';
+import { AuthButton } from 'components';
 import { http } from 'libs';
 import store from './store';
 
@@ -60,12 +61,13 @@ class JSONView extends React.Component {
           style={{fontSize: 14}}
           value={body}
           onChange={v => this.setState({body: v})}/>
-        {readOnly && <Button
+        {readOnly && <AuthButton
           icon="edit"
           type="link"
           size="large"
+          auth={`config.${store.type}.edit_config`}
           style={{position: 'absolute', top: 0, right: 0}}
-          onClick={() => this.setState({readOnly: false})}>编辑</Button>}
+          onClick={() => this.setState({readOnly: false})}>编辑</AuthButton>}
         {readOnly || <Button
           icon="save"
           type="link"

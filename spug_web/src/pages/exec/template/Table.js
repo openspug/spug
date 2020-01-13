@@ -13,11 +13,6 @@ class ComTable extends React.Component {
   }
 
   columns = [{
-    title: '序号',
-    key: 'series',
-    render: (_, __, index) => index + 1,
-    width: 80,
-  }, {
     title: '模版名称',
     dataIndex: 'name',
   }, {
@@ -35,9 +30,9 @@ class ComTable extends React.Component {
     title: '操作',
     render: info => (
       <span>
-        <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
+        <LinkButton auth="exec.template.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
+        <LinkButton auth="exec.template.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
       </span>
     )
   }];

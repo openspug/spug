@@ -1,10 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react';
 import { Table, Divider, Modal, Icon, Popover, Tag, message } from 'antd';
 import http from 'libs/http';
 import store from './store';
-import { LinkButton } from "components";
+import { LinkButton, AuthLink } from "components";
 
 @observer
 class ComTable extends React.Component {
@@ -81,37 +80,39 @@ class ComTable extends React.Component {
       switch (info.status) {
         case '-3':
           return <React.Fragment>
-            <Link to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>发布</Link>
+            <AuthLink auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>发布</AuthLink>
             <Divider type="vertical"/>
             <LinkButton
+              auth="deploy.request.do"
               disabled={info.type === '2'}
               loading={this.state.loading}
               onClick={() => this.handleRollback(info)}>回滚</LinkButton>
           </React.Fragment>;
         case '3':
           return <LinkButton
+            auth="deploy.request.do"
             disabled={info.type === '2'}
             loading={this.state.loading}
             onClick={() => this.handleRollback(info)}>回滚</LinkButton>;
         case '-1':
           return <React.Fragment>
-            <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
+            <LinkButton auth="deploy.request.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
             <Divider type="vertical"/>
-            <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
+            <LinkButton auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
           </React.Fragment>;
         case '0':
           return <React.Fragment>
-            <LinkButton onClick={() => store.showApprove(info)}>审核</LinkButton>
+            <LinkButton auth="deploy.request.approve" onClick={() => store.showApprove(info)}>审核</LinkButton>
             <Divider type="vertical"/>
-            <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
+            <LinkButton auth="deploy.request.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
             <Divider type="vertical"/>
-            <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
+            <LinkButton auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
           </React.Fragment>;
         case '1':
           return <React.Fragment>
-            <Link to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>发布</Link>
+            <AuthLink auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>发布</AuthLink>
             <Divider type="vertical"/>
-            <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
+            <LinkButton auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
           </React.Fragment>;
         default:
           return null

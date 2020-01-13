@@ -1,7 +1,7 @@
 import React from 'react';
 import {observer} from 'mobx-react';
 import {Modal, Form, Transfer, message, Tabs, Alert} from 'antd';
-import http from 'libs/http';
+import { http, hasPermission } from 'libs';
 import serviceStore from '../service/store';
 import store from './store';
 
@@ -51,6 +51,7 @@ class Rel extends React.Component {
         title="配置依赖关系"
         onCancel={() => store.relVisible = false}
         confirmLoading={this.state.loading}
+        footer={hasPermission('config.app.edit_config') ? undefined : null}
         onOk={this.handleSubmit}>
         <Alert
           closable

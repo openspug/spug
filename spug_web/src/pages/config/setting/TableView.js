@@ -40,9 +40,9 @@ class TableView extends React.Component {
     width: 120,
     render: info => (
       <span>
-        <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
+        <LinkButton auth={`config.${store.type}.edit_config`} onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
+        <LinkButton auth={`config.${store.type}.edit_config`} onClick={() => this.handleDelete(info)}>删除</LinkButton>
       </span>
     )
   }];

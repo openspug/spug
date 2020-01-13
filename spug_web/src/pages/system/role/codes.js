@@ -51,6 +51,7 @@ export default [{
       {key: 'add', label: '新建申请'},
       {key: 'edit', label: '编辑申请'},
       {key: 'del', label: '删除申请'},
+      {key: 'approve', label: '审核申请'},
       {key: 'do', label: '执行发布'}
     ]
   }]
@@ -80,7 +81,7 @@ export default [{
       {key: 'del', label: '删除环境'}
     ]
   }, {
-    key: 'service',
+    key: 'src',
     label: '服务管理',
     perms: [
       {key: 'view', label: '查看服务'},
