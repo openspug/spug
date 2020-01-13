@@ -7,7 +7,10 @@ import json
 
 class EnvironmentView(View):
     def get(self, request):
-        envs = Environment.objects.all()
+        query = {}
+        if not request.user.is_supper:
+            query['id__in'] = request.user.deploy_perms['envs']
+        envs = Environment.objects.filter(**query)
         return json_response(envs)
 
     def post(self, request):

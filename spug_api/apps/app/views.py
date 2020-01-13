@@ -9,7 +9,10 @@ import json
 
 class AppView(View):
     def get(self, request):
-        apps = App.objects.all()
+        query = {}
+        if not request.user.is_supper:
+            query['id__in'] = request.user.deploy_perms['apps']
+        apps = App.objects.filter(**query)
         return json_response(apps)
 
     def post(self, request):
@@ -62,6 +65,10 @@ class DeployView(View):
         form, error = JsonParser(
             Argument('app_id', type=int, required=False)
         ).parse(request.GET, True)
+        if not request.user.is_supper:
+            perms = request.user.deploy_perms
+            form.app_id__in = perms['apps']
+            form.env_id__in = perms['envs']
         deploys = Deploy.objects.filter(**form).annotate(app_name=F('app__name'))
         return json_response(deploys)
 

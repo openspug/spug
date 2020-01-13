@@ -129,7 +129,7 @@ def login(request):
                     'nickname': user.nickname,
                     'is_supper': user.is_supper,
                     'has_real_ip': True if x_real_ip else False,
-                    'permissions': [] if user.is_supper else user.role.permissions
+                    'permissions': [] if user.is_supper else user.page_perms
                 })
 
         value = cache.get_or_set(form.username, 0, 86400)
