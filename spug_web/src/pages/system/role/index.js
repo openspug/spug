@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Card, Input, Button } from 'antd';
-import { SearchForm } from 'components';
+import { SearchForm, AuthCard } from 'components';
 import ComTable from './Table';
 import ComForm from './Form';
 import PagePerm from './PagePerm';
@@ -10,7 +10,7 @@ import store from './store';
 
 export default observer(function () {
   return (
-    <Card>
+    <AuthCard auth="system.role.view">
       <SearchForm>
         <SearchForm.Item span={8} title="角色名称">
           <Input allowClear onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
@@ -26,6 +26,6 @@ export default observer(function () {
       {store.formVisible && <ComForm/>}
       {store.pagePermVisible && <PagePerm/>}
       {store.deployPermVisible && <DeployPerm/>}
-    </Card>
+    </AuthCard>
   )
 })

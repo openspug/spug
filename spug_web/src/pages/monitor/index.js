@@ -1,12 +1,12 @@
 import React from 'react';
 import { Card, Input, Select, Button } from 'antd';
-import { SearchForm, AuthDiv } from 'components';
+import { SearchForm, AuthDiv, AuthCard } from 'components';
 import ComTable from './Table';
 import store from './store';
 
 export default function () {
   return (
-    <Card>
+    <AuthCard auth="monitor.monitor.view">
       <SearchForm>
         <SearchForm.Item span={8} title="任务名称">
           <Input allowClear onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
@@ -28,6 +28,6 @@ export default function () {
         <Button type="primary" icon="plus" onClick={() => store.showForm()}>新建</Button>
       </AuthDiv>
       <ComTable/>
-    </Card>
+    </AuthCard>
   )
 }

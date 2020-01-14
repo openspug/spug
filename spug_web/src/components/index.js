@@ -3,6 +3,7 @@ import SearchForm from './SearchForm';
 import LinkButton from './LinkButton';
 import AuthButton from './AuthButton';
 import AuthLink from './AuthLink';
+import AuthCard from './AuthCard';
 import AuthDiv from './AuthDiv';
 import ACEditor from './ACEditor';
 
@@ -12,6 +13,7 @@ export {
   LinkButton,
   AuthButton,
   AuthLink,
+  AuthCard,
   AuthDiv,
   ACEditor,
 }

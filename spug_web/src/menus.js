@@ -30,10 +30,10 @@ export default [
     ]
   },
   {
-    icon: 'setting', title: '系统管理', child: [
-      {title: '账户管理', path: '/system/account'},
-      {title: '角色管理', path: '/system/role'},
-      {title: '系统设置', path: '/system/setting'},
+    icon: 'setting', title: '系统管理', auth: "system.account.view|system.role.view|system.setting.view", child: [
+      {title: '账户管理', auth: 'system.account.view', path: '/system/account'},
+      {title: '角色管理', auth: 'system.role.view', path: '/system/role'},
+      {title: '系统设置', auth: 'system.setting.view', path: '/system/setting'},
     ]
   },
 ]

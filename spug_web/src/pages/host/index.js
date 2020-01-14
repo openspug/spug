@@ -1,13 +1,13 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Card, Input, Button, Select } from 'antd';
-import { SearchForm, AuthDiv } from 'components';
+import { SearchForm, AuthDiv, AuthCard } from 'components';
 import ComTable from './Table';
 import store from './store';
 
 export default observer(function () {
   return (
-    <Card>
+    <AuthCard auth="host.host.view">
       <SearchForm>
         <SearchForm.Item span={8} title="主机类别">
           <Select allowClear placeholder="请选择" value={store.f_zone} onChange={v => store.f_zone = v}>
@@ -27,6 +27,6 @@ export default observer(function () {
         <Button type="primary" icon="plus" onClick={() => store.showForm()}>新建</Button>
       </AuthDiv>
       <ComTable/>
-    </Card>
+    </AuthCard>
   )
 })

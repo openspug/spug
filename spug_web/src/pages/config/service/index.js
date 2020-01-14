@@ -1,13 +1,13 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Card, Input, Button } from 'antd';
-import { SearchForm, AuthDiv } from 'components';
+import { SearchForm, AuthDiv, AuthCard } from 'components';
 import ComTable from './Table';
 import store from './store';
 
 export default observer(function () {
   return (
-    <Card>
+    <Card auth="config.src.view">
       <SearchForm>
         <SearchForm.Item span={8} title="服务名称">
           <Input allowClear onChange={e => store.f_name = e.target.value} placeholder="请输入"/>

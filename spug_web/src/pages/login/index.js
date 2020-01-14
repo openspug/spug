@@ -47,7 +47,7 @@ class LoginIndex extends React.Component {
     if (history.location.state && history.location.state['from']) {
       history.push(history.location.state['from'])
     } else {
-      history.push('/home')
+      history.push('/welcome')
     }
   };
 

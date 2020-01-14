@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Card, Input, Button } from 'antd';
-import { SearchForm, AuthDiv } from 'components';
+import { SearchForm, AuthDiv, AuthCard } from 'components';
 import ComTable from './Table';
 import ComForm from './Form';
 import Rel from './Rel';
@@ -9,7 +9,7 @@ import store from './store';
 
 export default observer(function () {
   return (
-    <Card>
+    <AuthCard auth="config.app.view">
       <SearchForm>
         <SearchForm.Item span={8} title="应用名称">
           <Input allowClear onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
@@ -24,6 +24,6 @@ export default observer(function () {
       <ComTable/>
       {store.formVisible && <ComForm/>}
       {store.relVisible && <Rel />}
-    </Card>
+    </AuthCard>
   )
 })

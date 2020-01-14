@@ -1,5 +1,6 @@
 import React from 'react';
 import { Menu } from 'antd';
+import {AuthDiv} from 'components';
 import BasicSetting from './BasicSetting';
 import AlarmSetting from './AlarmSetting';
 import MailServer from './MailServer';
@@ -23,7 +24,7 @@ class Index extends React.Component {
   render() {
     const {selectedKeys} = this.state;
     return (
-      <div className={styles.container}>
+      <AuthDiv auth="system.setting.view" className={styles.container}>
         <div className={styles.left}>
           <Menu
             mode="inline"
@@ -42,7 +43,7 @@ class Index extends React.Component {
           {selectedKeys[0] === 'alarm' && <AlarmSetting />}
           {selectedKeys[0] === 'service' && <OpenService />}
         </div>
-      </div>
+      </AuthDiv>
     )
   }
 }

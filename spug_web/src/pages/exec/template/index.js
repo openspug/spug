@@ -1,13 +1,13 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Card, Input, Select, Button } from 'antd';
-import { SearchForm, AuthDiv } from 'components';
+import { SearchForm, AuthDiv, AuthCard } from 'components';
 import ComTable from './Table';
 import store from './store';
 
 export default observer(function () {
   return (
-    <Card>
+    <AuthCard auth="exec.template.view">
       <SearchForm>
         <SearchForm.Item span={8} title="模板类型">
           <Select allowClear onChange={v => store.f_type = v} placeholder="请选择">
@@ -27,6 +27,6 @@ export default observer(function () {
         <Button type="primary" icon="plus" onClick={() => store.showForm()}>新建</Button>
       </AuthDiv>
       <ComTable/>
-    </Card>
+    </AuthCard>
   )
 })

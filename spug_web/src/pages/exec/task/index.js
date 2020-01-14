@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Card, Form, Button, Tag } from 'antd';
-import { ACEditor } from 'components';
+import { ACEditor, AuthCard } from 'components';
 import HostSelector from './HostSelector';
 import TemplateSelector from './TemplateSelector';
 import ExecConsole from './ExecConsole';
@@ -29,7 +29,7 @@ class TaskIndex extends React.Component {
   render() {
     const {body, token} = this.state;
     return (
-      <Card>
+      <AuthCard auth="exec.task.do">
         <Form>
           <Form.Item label="执行主机">
             {store.hosts.map(item => (
@@ -48,7 +48,7 @@ class TaskIndex extends React.Component {
         {store.showHost && <HostSelector onCancel={store.switchHost} onOk={hosts => store.hosts = hosts}/>}
         {store.showTemplate && <TemplateSelector onCancel={store.switchTemplate} onOk={body => this.setState({body})}/>}
         {store.showConsole && <ExecConsole token={token} onCancel={store.switchConsole}/>}
-      </Card>
+      </AuthCard>
     )
   }
 }

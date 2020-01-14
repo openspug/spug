@@ -1,5 +1,6 @@
 import React from 'react';
 import { Row, Col } from 'antd';
+import { AuthDiv } from 'components';
 import StatisticsCard from './StatisticCard';
 import AlarmTrend from './AlarmTrend';
 import RequestTop from './RequestTop';
@@ -8,7 +9,7 @@ import DeployPie from './DeployPie';
 class HomeIndex extends React.Component {
   render() {
     return (
-      <React.Fragment>
+      <AuthDiv auth="home.home.view">
         <StatisticsCard/>
         <AlarmTrend/>
         <Row style={{marginTop: 20}}>
@@ -19,7 +20,7 @@ class HomeIndex extends React.Component {
             <DeployPie/>
           </Col>
         </Row>
-      </React.Fragment>
+      </AuthDiv>
     )
   }
 }
