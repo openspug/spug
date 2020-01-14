@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Input, Select, Button } from 'antd';
+import { Input, Select, Button } from 'antd';
 import { SearchForm, AuthDiv, AuthCard } from 'components';
 import ComTable from './Table';
 import store from './store';

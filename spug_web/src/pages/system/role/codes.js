@@ -1,4 +1,14 @@
 export default [{
+  key: 'home',
+  label: '工作台',
+  pages: [{
+    key: 'home',
+    label: '工作台',
+    perms: [
+      {key: 'view', label: '查看工作台'}
+    ]
+  }]
+}, {
   key: 'host',
   label: '主机管理',
   pages: [{
