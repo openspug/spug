@@ -67,6 +67,27 @@
 .action:hover {
     background: rgb(233, 247, 254);
 }
+.notify {
+    width: 350px;
+    padding: 0;
+}
+.notify :global(.ant-dropdown-menu-item:hover) {
+    background-color: #fff;
+}
+.notifyItem {
+    align-items: center;
+    cursor: pointer;
+    padding: 12px 24px;
+}
+.notifyItem:hover {
+    background-color: rgb(233, 247, 254);
+}
+.notifyFooter {
+    line-height: 46px;
+    text-align: center;
+    cursor: pointer;
+    border-top: 1px solid #e8e8e8;
+}
 
 .footer {
     margin: 48px 0 24px;

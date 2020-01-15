@@ -13,8 +13,8 @@ class NotifyView(View):
 
     def patch(self, request):
         form, error = JsonParser(
-            Argument('id', type=int, help='参数错误')
+            Argument('ids', type=list, help='参数错误')
         ).parse(request.body)
         if error is None:
-            Notify.objects.filter(pk=form.id).update(unread=False)
+            Notify.objects.filter(id__in=form.ids).update(unread=False)
         return json_response(error=error)
