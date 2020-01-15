@@ -1,3 +1,6 @@
+# Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
+# Copyright: (c) <spug.dev@gmail.com>
+# Released under the MIT License.
 from django.db.models import F
 from apps.app.models import App
 from apps.host.models import Host

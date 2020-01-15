@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
+# Copyright: (c) <spug.dev@gmail.com>
+# Released under the MIT License.
 """Django's command-line utility for administrative tasks."""
 import os
 import sys

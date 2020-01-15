@@ -1,3 +1,6 @@
+# Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
+# Copyright: (c) <spug.dev@gmail.com>
+# Released under the MIT License.
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.date import DateTrigger
@@ -85,7 +88,7 @@ class Scheduler:
 
     def _init_builtin_jobs(self):
         self.scheduler.add_job(auto_clean_records, 'cron', hour=0, minute=0)
-        
+
     def _init(self):
         self.scheduler.start()
         self._init_builtin_jobs()

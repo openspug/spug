@@ -1,4 +1,7 @@
 """
+# Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
+# Copyright: (c) <spug.dev@gmail.com>
+# Released under the MIT License.
 WSGI config for spug project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.

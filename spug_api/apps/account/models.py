@@ -1,3 +1,6 @@
+# Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
+# Copyright: (c) <spug.dev@gmail.com>
+# Released under the MIT License.
 from django.db import models
 from libs import ModelMixin, human_datetime
 from django.contrib.auth.hashers import make_password, check_password

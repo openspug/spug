@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) OpenSpug Organization. https://github.com/openspug/spug
+ * Copyright (c) <spug.dev@gmail.com>
+ * Released under the MIT License.
+ */
 import React from 'react';
 import { Button } from 'antd';
 import { hasPermission } from 'libs';

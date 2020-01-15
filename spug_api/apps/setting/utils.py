@@ -1,3 +1,6 @@
+# Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
+# Copyright: (c) <spug.dev@gmail.com>
+# Released under the MIT License.
 from functools import lru_cache
 from apps.setting.models import Setting
 

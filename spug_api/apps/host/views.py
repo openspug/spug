@@ -1,3 +1,6 @@
+# Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
+# Copyright: (c) <spug.dev@gmail.com>
+# Released under the MIT License.
 from django.views.generic import View
 from django.shortcuts import render
 from django.http.response import HttpResponseBadRequest

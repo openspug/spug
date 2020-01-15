@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) OpenSpug Organization. https://github.com/openspug/spug
+ * Copyright (c) <spug.dev@gmail.com>
+ * Released under the MIT License.
+ */
 import React from 'react';
 import {Form, Input, Icon, Button, Tabs, Modal} from 'antd';
 import styles from './login.module.css';
@@ -56,8 +61,8 @@ class LoginIndex extends React.Component {
     return (
       <div className={styles.container}>
         <div className={styles.titleContainer}>
-          <div><img className={styles.logo} src={logo} alt="logo"/>Spug devops</div>
-          <div className={styles.desc}>Open source O & M management system by openspug</div>
+          <div><img className={styles.logo} src={logo} alt="logo"/>Spug</div>
+          <div className={styles.desc}>灵活、强大、功能全面的开源运维平台</div>
         </div>
         <div className={styles.formContainer}>
           <Tabs classNam={styles.tabs} onTabClick={e => this.setState({loginType: e})}>

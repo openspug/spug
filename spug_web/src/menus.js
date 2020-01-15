@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) OpenSpug Organization. https://github.com/openspug/spug
+ * Copyright (c) <spug.dev@gmail.com>
+ * Released under the MIT License.
+ */
 export default [
   {icon: 'desktop', title: '工作台', auth: 'home.home.view', path: '/home'},
   {icon: 'cloud-server', title: '主机管理', auth: 'host.host.view', path: '/host'},
