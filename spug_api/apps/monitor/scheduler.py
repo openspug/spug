@@ -12,7 +12,7 @@ from apps.monitor.executors import dispatch
 from apps.monitor.utils import seconds_to_human
 from apps.notify.models import Notify
 from django.conf import settings
-from libs import AttrDict, human_datetime
+from libs import spug, AttrDict, human_datetime
 import logging
 import json
 import time
@@ -42,6 +42,7 @@ class Scheduler:
             if old_status == 1:
                 self._record_alarm(obj, '2')
                 logger.info(f'{human_datetime()} recover job_id: {obj.id}')
+                spug.notify_by_wx('2', obj.name, json.loads(obj.notify_grp))
         else:
             if obj.fault_times >= obj.threshold:
                 if time.time() - obj.latest_notify_time >= obj.quiet * 60:
@@ -49,6 +50,7 @@ class Scheduler:
                     obj.save()
                     self._record_alarm(obj, '1')
                     logger.info(f'{human_datetime()} notify job_id: {obj.id}')
+                    spug.notify_by_wx('1', obj.name, json.loads(obj.notify_grp))
 
     def _handle_event(self, event):
         obj = SimpleLazyObject(lambda: Detection.objects.filter(pk=event.job_id).first())

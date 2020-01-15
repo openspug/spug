@@ -24,7 +24,6 @@ export default observer(function () {
       .finally(() => store.loading = false)
   }
 
-
   return (
     <React.Fragment>
       <div className={styles.title}>开放服务设置</div>
