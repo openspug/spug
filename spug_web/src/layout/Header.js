@@ -87,13 +87,9 @@ export default class extends React.Component {
                 ]}/>
             </List.Item>
           )}/>
-        {this.state.notifies.length === 0 && (
-          <div>
-            <img src="https://gw.alipayobjects.com/zos/rmsportal/sAuJeJzSKbUmHfBQRzmZ.svg" alt="not found"/>
-            <div>暂无未读通知</div>
-          </div>
+        {this.state.notifies.length !== 0 && (
+          <div className={styles.notifyFooter} onClick={() => this.handleReadAll()}>全部 已读</div>
         )}
-        <div className={styles.notifyFooter} onClick={() => this.handleReadAll()}>全部 已读</div>
       </Menu.Item>
     </Menu>
   );
