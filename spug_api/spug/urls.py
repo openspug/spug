@@ -27,5 +27,6 @@ urlpatterns = [
     path('app/', include('apps.app.urls')),
     path('deploy/', include('apps.deploy.urls')),
     path('home/', include('apps.home.urls')),
+    path('notify/', include('apps.notify.urls')),
     path('apis/', include('apps.apis.urls')),
 ]

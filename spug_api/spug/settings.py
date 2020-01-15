@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'apps.config',
     'apps.app',
     'apps.deploy',
+    'apps.notify',
 ]
 
 MIDDLEWARE = [
