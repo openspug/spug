@@ -18,7 +18,6 @@ import json
 import time
 
 logger = logging.getLogger("django.apps.monitor")
-counter = dict()
 
 
 class Scheduler:
@@ -55,32 +54,13 @@ class Scheduler:
         obj = SimpleLazyObject(lambda: Detection.objects.filter(pk=event.job_id).first())
         if event.code == events.EVENT_SCHEDULER_SHUTDOWN:
             logger.info(f'EVENT_SCHEDULER_SHUTDOWN: {event}')
-            Notify.objects.create(
-                title='调度器已关闭',
-                source='monitor',
-                content='调度器意外关闭，你可以在github上提交issue',
-                type='1',
-            )
+            Notify.make_notify('monitor', '1', '调度器已关闭', '调度器意外关闭，你可以在github上提交issue', False)
         elif event.code == events.EVENT_JOB_MAX_INSTANCES:
             logger.info(f'EVENT_JOB_MAX_INSTANCES: {event}')
-            if time.time() - counter.get(event.job_id, time.time()) > 3600:
-                counter[event.job_id] = time.time()
-                Notify.objects.create(
-                    title=f'{obj.name} - 达到调度实例上限',
-                    source='monitor',
-                    content='一般为上个周期的执行任务还未结束，请增加调度间隔或减少任务执行耗时',
-                    type='1',
-                )
+            Notify.make_notify('monitor', '1', f'{obj.name} - 达到调度实例上限', '一般为上个周期的执行任务还未结束，请增加调度间隔或减少任务执行耗时')
         elif event.code == events.EVENT_JOB_ERROR:
             logger.info(f'EVENT_JOB_ERROR: job_id {event.job_id} exception: {event.exception}')
-            if time.time() - counter.get(event.job_id, time.time()) > 3600:
-                counter[event.job_id] = time.time()
-                Notify.objects.create(
-                    title=f'{obj.name} - 执行异常',
-                    source='monitor',
-                    content=f'{event.exception}',
-                    type='1',
-                )
+            Notify.make_notify('monitor', '1', f'{obj.name} - 执行异常', f'{event.exception}')
         elif event.code == events.EVENT_JOB_EXECUTED:
             obj = Detection.objects.filter(pk=event.job_id).first()
             old_status = obj.latest_status
