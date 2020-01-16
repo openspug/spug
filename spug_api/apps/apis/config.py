@@ -15,7 +15,7 @@ def get_configs(request):
     if not app or not env_id:
         return HttpResponse('Invalid params', status=400)
     # app own configs
-    for item in Config.objects.filter(type='app', o_id=app.id).only('key', 'value'):
+    for item in Config.objects.filter(type='app', o_id=app.id, env_id=env_id).only('key', 'value'):
         data[f'{app.key}_{item.key}'] = item.value
 
     # relation app public configs
@@ -23,7 +23,8 @@ def get_configs(request):
         app_ids = json.loads(app.rel_apps)
         if app_ids:
             id_key_map = {x.id: x.key for x in App.objects.filter(id__in=app_ids)}
-            for item in Config.objects.filter(type='app', o_id__in=app_ids, is_public=True).only('key', 'value'):
+            for item in Config.objects.filter(type='app', o_id__in=app_ids, env_id=env_id, is_public=True) \
+                    .only('key', 'value'):
                 key = f'{id_key_map[item.o_id]}_{item.key}'
                 data[key] = item.value
 
@@ -32,7 +33,7 @@ def get_configs(request):
         src_ids = json.loads(app.rel_services)
         if src_ids:
             id_key_map = {x.id: x.key for x in Service.objects.filter(id__in=src_ids)}
-            for item in Config.objects.filter(type='src', o_id__in=src_ids).only('key', 'value'):
+            for item in Config.objects.filter(type='src', o_id__in=src_ids, env_id=env_id).only('key', 'value'):
                 key = f'{id_key_map[item.o_id]}_{item.key}'
                 data[key] = item.value
 
