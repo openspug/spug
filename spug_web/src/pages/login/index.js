@@ -52,7 +52,7 @@ class LoginIndex extends React.Component {
     if (history.location.state && history.location.state['from']) {
       history.push(history.location.state['from'])
     } else {
-      history.push('/welcome')
+      history.push('/welcome/index')
     }
   };
 
@@ -67,7 +67,7 @@ class LoginIndex extends React.Component {
         <div className={styles.formContainer}>
           <Tabs classNam={styles.tabs} onTabClick={e => this.setState({loginType: e})}>
             <Tabs.TabPane tab="普通登录" key="default"/>
-            <Tabs.TabPane tab="LDAP登录" key="ldap"/>
+            <Tabs.TabPane disabled tab="LDAP登录" key="ldap"/>
           </Tabs>
           <Form>
             <Form.Item className={styles.formItem}>

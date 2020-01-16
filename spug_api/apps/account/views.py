@@ -108,6 +108,29 @@ class RoleView(View):
         return json_response(error=error)
 
 
+class SelfView(View):
+    def patch(self, request):
+        form, error = JsonParser(
+            Argument('old_password', required=False),
+            Argument('new_password', required=False),
+            Argument('nickname', required=False),
+        ).parse(request.body, True)
+        if error is None:
+            if form.get('old_password') and form.get('new_password'):
+                if len(form.new_password) < 6:
+                    return json_response(error='请设置至少6位的新密码')
+                if request.user.verify_password(form.old_password):
+                    request.user.password_hash = User.make_password(form.new_password)
+                    request.user.token_expired = 0
+                    request.user.save()
+                else:
+                    return json_response(error='原密码错误，请重新输入')
+            if form.get('nickname'):
+                request.user.nickname = form.nickname
+                request.user.save()
+        return json_response(error=error)
+
+
 def login(request):
     form, error = JsonParser(
         Argument('username', help='请输入用户名'),

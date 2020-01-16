@@ -4,6 +4,7 @@
  * Released under the MIT License.
  */
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Layout, Dropdown, Menu, List, Icon, Badge, Avatar } from 'antd';
 import styles from './layout.module.css';
 import http from '../libs/http';
@@ -57,8 +58,10 @@ export default class extends React.Component {
   };
   menu = (
     <Menu>
-      <Menu.Item disabled>
-        <Icon type="user" style={{marginRight: 10}}/>个人中心
+      <Menu.Item>
+        <Link to="/welcome/info">
+          <Icon type="user" style={{marginRight: 10}}/>个人中心
+        </Link>
       </Menu.Item>
       <Menu.Divider/>
       <Menu.Item onClick={this.handleLogout}>

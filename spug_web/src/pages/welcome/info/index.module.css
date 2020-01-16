@@ -1,0 +1,25 @@
+.container {
+    display: flex;
+    background-color: #fff;
+    padding: 16px 0;
+}
+.left {
+    flex: 2;
+    border-right: 1px solid #e8e8e8;
+}
+.right {
+    flex: 7;
+    padding: 8px 40px;
+}
+
+.title {
+    margin-bottom: 12px;
+    color: rgba(0, 0, 0, .85);
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 28px;
+}
+
+.form {
+    max-width: 320px;
+}
