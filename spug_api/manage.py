@@ -1,6 +1,7 @@
 # coding=utf-8
 from functools import wraps
 from getpass import getpass
+from config import DEBUG
 import sys
 import os
 
@@ -110,10 +111,16 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         print_usage()
         sys.exit(1)
-    cmd = sys.argv.pop(0)
-    arg1 = sys.argv.pop(0)
-    r_func = commands.get(arg1)
+    r_func = commands.get(sys.argv[1])
     if callable(r_func):
-        r_func(*sys.argv)
+        try:
+            r_func(*sys.argv[2:])
+        except BaseException:
+            if DEBUG:
+                print(sys.exc_info())
+            else:
+                print_usage()
+                print('遇到了不可能会出现的错误(请检查输入命令是否正确)！')
     else:
-        print('遇到了不可能会出现的错误！')
+        print_usage()
+        print('遇到了不可能会出现的错误(请检查输入命令是否正确)！')
