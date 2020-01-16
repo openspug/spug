@@ -37,12 +37,20 @@ class Scheduler:
             notify_grp=obj.notify_grp,
             notify_mode=obj.notify_mode)
 
+    def _do_notify(self, event, obj):
+        grp = json.loads(obj.notify_grp)
+        for mode in json.loads(obj.notify_mode):
+            if mode == '1':
+                spug.notify_by_wx(event, obj.name, grp)
+            elif mode == '4':
+                spug.notify_by_email(event, obj.name, grp)
+
     def _handle_notify(self, obj, old_status):
         if obj.latest_status == 0:
             if old_status == 1:
                 self._record_alarm(obj, '2')
                 logger.info(f'{human_datetime()} recover job_id: {obj.id}')
-                spug.notify_by_wx('2', obj.name, json.loads(obj.notify_grp))
+                self._do_notify('2', obj)
         else:
             if obj.fault_times >= obj.threshold:
                 if time.time() - obj.latest_notify_time >= obj.quiet * 60:
@@ -50,7 +58,7 @@ class Scheduler:
                     obj.save()
                     self._record_alarm(obj, '1')
                     logger.info(f'{human_datetime()} notify job_id: {obj.id}')
-                    spug.notify_by_wx('1', obj.name, json.loads(obj.notify_grp))
+                    self._do_notify('1', obj)
 
     def _handle_event(self, event):
         obj = SimpleLazyObject(lambda: Detection.objects.filter(pk=event.job_id).first())

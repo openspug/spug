@@ -29,7 +29,7 @@ class ComForm extends React.Component {
         {label: '微信', 'value': '1'},
         {label: '短信', 'value': '2', disabled: true},
         {label: '钉钉', 'value': '3', disabled: true},
-        {label: '邮件', 'value': '4', disabled: true}]
+        {label: '邮件', 'value': '4'}]
     }
   }
 
