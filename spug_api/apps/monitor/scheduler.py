@@ -42,6 +42,8 @@ class Scheduler:
         for mode in json.loads(obj.notify_mode):
             if mode == '1':
                 spug.notify_by_wx(event, obj.name, grp)
+            elif mode == '3':
+                spug.notify_by_dd(event, obj.name, grp)
             elif mode == '4':
                 spug.notify_by_email(event, obj.name, grp)
 
