@@ -44,7 +44,7 @@ class Ext2Setup2 extends React.Component {
         </Form.Item>
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
           <Button type="dashed" style={{width: '80%'}} onClick={store.addHost}>
-            <Icon type="plus"/>添加执行对象
+            <Icon type="plus"/>添加目标主机
           </Button>
         </Form.Item>
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
