@@ -89,8 +89,20 @@
     border-top: 1px solid #e8e8e8;
 }
 
-.footer {
-    margin: 48px 0 24px;
+.footerZone {
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    padding: 20px;
+    font-size: 14px;
     text-align: center;
-    color: rgba(0, 0, 0, .45);
+    display: flex;
+    flex-direction: column;
+}
+
+.footerZone .linksZone {
+    margin-bottom: 7px;
+}
+.footerZone .links{
+    margin-right: 40px;
 }

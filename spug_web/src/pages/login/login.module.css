@@ -5,6 +5,8 @@
     background-size: 100%;
     background-color: #f0f2f5;
     height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .titleContainer {
@@ -24,12 +26,14 @@
     margin-bottom: 40px;
     color: rgba(0, 0, 0, .45);
     font-size: 14px;
-    font-weight: 300;
+    font-weight: 400;
+
 }
 
 .formContainer {
     width: 368px;
     margin: 0 auto;
+    flex: 1;
 }
 
 .formContainer .tabs {
@@ -49,12 +53,22 @@
     margin-top: 10px;
 }
 
-.footer {
+.footerZone {
     width: 100%;
-    position: fixed;
-    bottom: 24px;
+    bottom: 0;
+    padding: 20px;
+    font-size: 14px;
     text-align: center;
-    color: rgba(0, 0, 0, .45);
+    display: flex;
+    flex-direction: column;
+}
+
+.footerZone .linksZone {
+    margin-bottom: 7px;
+}
+
+.footerZone .links {
+    margin-right: 40px;
 }
 
 .tips {
