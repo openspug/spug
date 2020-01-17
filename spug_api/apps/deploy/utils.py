@@ -25,8 +25,8 @@ def deploy_dispatch(request, req, token):
         env = AttrDict(
             SPUG_APP_NAME=req.deploy.app.name,
             SPUG_APP_ID=str(req.deploy.app_id),
-            SPUG_TASK_NAME=req.name,
-            SPUG_TASK_ID=str(req.id),
+            SPUG_REQUEST_NAME=req.name,
+            SPUG_REQUEST_ID=str(req.id),
             SPUG_ENV_ID=str(req.deploy.env_id),
             SPUG_ENV_KEY=req.deploy.env.key,
             SPUG_VERSION=req.version,
