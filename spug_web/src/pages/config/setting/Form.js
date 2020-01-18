@@ -24,6 +24,7 @@ class ComForm extends React.Component {
   handleSubmit = () => {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
+    formData['is_public'] = store.type === 'src' ? false : formData['is_public'];
     let request;
     if (this.isModify) {
       formData['id'] = store.record.id;
@@ -32,7 +33,6 @@ class ComForm extends React.Component {
       formData['type'] = store.type;
       formData['o_id'] = store.id;
       formData['envs'] = this.state.envs;
-      formData['is_public'] = store.type === 'src' ? false : formData['is_public'];
       request = http.post('/api/config/', formData)
     }
     request.then(res => {
