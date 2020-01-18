@@ -56,7 +56,7 @@ class Config(models.Model, ModelMixin):
 
     class Meta:
         db_table = 'configs'
-        ordering = ('-id',)
+        ordering = ('-key',)
 
 
 class ConfigHistory(models.Model, ModelMixin):
@@ -82,4 +82,4 @@ class ConfigHistory(models.Model, ModelMixin):
 
     class Meta:
         db_table = 'config_histories'
-        ordering = ('-id',)
+        ordering = ('key',)
