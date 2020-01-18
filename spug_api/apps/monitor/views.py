@@ -42,8 +42,9 @@ class DetectionView(View):
                     rds_cli = get_redis_connection()
                     rds_cli.rpush(settings.MONITOR_KEY, json.dumps(form))
             else:
-                Detection.objects.create(created_by=request.user, **form)
+                dtt = Detection.objects.create(created_by=request.user, **form)
                 form.action = 'add'
+                form.id = dtt.id
                 rds_cli = get_redis_connection()
                 rds_cli.rpush(settings.MONITOR_KEY, json.dumps(form))
         return json_response(error=error)
