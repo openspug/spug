@@ -26,7 +26,7 @@ class Notify(models.Model, ModelMixin):
     created_at = models.CharField(max_length=20, default=human_datetime)
 
     @classmethod
-    def make_notify(cls, source, title, type, content=None, with_quiet=True):
+    def make_notify(cls, source, type, title, content=None, with_quiet=True):
         if not with_quiet or time.time() - cache.get('spug:notify_quiet', 0) > 3600:
             cache.set('spug:notify_quiet', time.time())
             cls.objects.create(source=source, title=title, type=type, content=content)
