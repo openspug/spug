@@ -44,10 +44,10 @@ class Scheduler:
             Notify.make_notify('schedule', '1', '调度器已关闭', '调度器意外关闭，你可以在github上提交issue')
         elif event.code == events.EVENT_JOB_MAX_INSTANCES:
             logger.info(f'EVENT_JOB_MAX_INSTANCES: {event}')
-            Notify.make_notify('monitor', '1', f'{obj.name} - 达到调度实例上限', '一般为上个周期的执行任务还未结束，请增加调度间隔或减少任务执行耗时')
+            Notify.make_notify('schedule', '1', f'{obj.name} - 达到调度实例上限', '一般为上个周期的执行任务还未结束，请增加调度间隔或减少任务执行耗时')
         elif event.code == events.EVENT_JOB_ERROR:
             logger.info(f'EVENT_JOB_ERROR: job_id {event.job_id} exception: {event.exception}')
-            Notify.make_notify('monitor', '1', f'{obj.name} - 执行异常', f'{event.exception}')
+            Notify.make_notify('schedule', '1', f'{obj.name} - 执行异常', f'{event.exception}')
         elif event.code == events.EVENT_JOB_EXECUTED:
             if event.retval:
                 score = 0
