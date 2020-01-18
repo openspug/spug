@@ -3,7 +3,7 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the MIT License.
  */
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import moduleRoutes from '../routes';
 import styles from './libs.module.css';
@@ -53,10 +53,12 @@ export class Router extends React.Component {
 
   render() {
     return (
-      <Switch>
-        {this.routes.map(route => <Route exact strict key={route.path} {...route}/>)}
-        <Route component={NotFound}/>
-      </Switch>
+      <Suspense fallback={<div>Loading...</div>}>
+        <Switch>
+          {this.routes.map(route => <Route exact strict key={route.path} {...route}/>)}
+          <Route component={NotFound}/>
+        </Switch>
+      </Suspense>
     )
   }
 }
