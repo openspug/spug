@@ -210,9 +210,9 @@ class ComForm extends React.Component {
                         onChange={v => this.handleArgs('date', v)}/>
                     </Form.Item>
                   </Tabs.TabPane>
-                  <Tabs.TabPane tab="UNIX Cron" key="cron">
+                  <Tabs.TabPane disabled tab="UNIX Cron" key="cron">
                   </Tabs.TabPane>
-                  <Tabs.TabPane tab="日历间隔" key="calendarinterval">
+                  <Tabs.TabPane disabled tab="日历间隔" key="calendarinterval">
                   </Tabs.TabPane>
                 </Tabs>
               )}
