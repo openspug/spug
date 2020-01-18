@@ -27,7 +27,7 @@ class Git:
                     'author': ref.tag.tagger.name,
                     'date': ref.tag.tagged_date,
                     'message': ref.tag.message.strip()
-                }
+                } if ref.tag else {}
         return branches, tags
 
     def _get_repo(self, git_repo, repo_dir):
