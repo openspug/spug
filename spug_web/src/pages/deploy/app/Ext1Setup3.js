@@ -43,7 +43,7 @@ class Ext1Setup3 extends React.Component {
       <Radio.Group
         style={{marginLeft: 20}}
         value={props.type}
-        onChange={e => store.record['filter_rule']['type'] = e.target.value}>
+        onChange={e => store.deploy['filter_rule']['type'] = e.target.value}>
         <Radio value="contain">包含</Radio>
         <Radio value="exclude">排除</Radio>
       </Radio.Group>
