@@ -12,6 +12,9 @@
 }
 
 .content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     padding: 24px 24px 0;
     overflow-y: scroll;
 }
@@ -91,8 +94,6 @@
 
 .footerZone {
     width: 100%;
-    position: fixed;
-    bottom: 0;
     padding: 20px;
     font-size: 14px;
     text-align: center;

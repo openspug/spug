@@ -73,7 +73,7 @@ class Index extends React.Component {
         </div>
         <div className={styles.right}>
           <SearchForm>
-            <SearchForm.Item span={5} title="视图">
+            <SearchForm.Item span={6} title="视图">
               <Select value={view} style={{width: '100%'}} onChange={v => this.setState({view: v})}>
                 <Select.Option value="1"><Icon type="table" style={{marginRight: 10}}/>表格</Select.Option>
                 <Select.Option value="2"><Icon type="unordered-list" style={{marginRight: 10}}/>文本</Select.Option>
@@ -83,7 +83,7 @@ class Index extends React.Component {
             <SearchForm.Item span={7} title="Key">
               <Input allowClear onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
             </SearchForm.Item>
-            <SearchForm.Item span={4}>
+            <SearchForm.Item span={3}>
               <Button type="primary" icon="sync" onClick={this.handleRefresh}>刷新</Button>
             </SearchForm.Item>
             <SearchForm.Item span={4}>
