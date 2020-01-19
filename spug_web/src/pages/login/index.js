@@ -9,6 +9,8 @@ import styles from './login.module.css';
 import history from 'libs/history';
 import {http, updatePermissions} from 'libs';
 import logo from 'layout/logo.svg';
+import envStore from 'pages/config/environment/store';
+import requestStore from 'pages/deploy/request/store';
 
 class LoginIndex extends React.Component {
   constructor(props) {
@@ -17,6 +19,12 @@ class LoginIndex extends React.Component {
       loading: false,
       loginType: 'default'
     }
+  }
+
+  componentDidMount() {
+    envStore.records = [];
+    requestStore.records = [];
+    requestStore.deploys = []
   }
 
   handleSubmit = () => {
