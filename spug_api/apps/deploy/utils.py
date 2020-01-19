@@ -126,7 +126,7 @@ def _deploy_ext1_host(helper, h_id, extend, env):
     if code == 0:
         helper.send_error(host.id, f'please make sure the {extend.dst_dir!r} is not exists.')
     # clean
-    clean_command = f'ls -rd {extend.deploy_id}_* | tail -n +{extend.versions + 1} | xargs rm -rf'
+    clean_command = f'ls -rd {extend.deploy_id}_* 2> /dev/null | tail -n +{extend.versions + 1} | xargs rm -rf'
     helper.remote(host.id, ssh, f'cd {extend.dst_repo} && rm -rf {env.SPUG_VERSION} && {clean_command}')
     # transfer files
     tar_gz_file = f'{env.SPUG_VERSION}.tar.gz'
