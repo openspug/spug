@@ -22,13 +22,11 @@ class SelectApp extends React.Component {
   }
 
   componentDidMount() {
+    store.loadDeploys();
     if (envStore.records.length === 0) {
       envStore.fetchRecords().then(this._initEnv)
     } else {
       this._initEnv()
-    }
-    if (store.deploys.length === 0) {
-      store.loadDeploys()
     }
   }
 
