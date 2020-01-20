@@ -73,6 +73,11 @@ Spug是面向中小型企业设计的无 Agent的自动化运维平台，整合�
 #### 角色权限
 ![image](http://image.qbangmang.com/role-2.0.png)
 
+## 更多功能
+如果你还想 Spug 支持新的特性，请点击打开 [FeatHub](https://feathub.com/openspug/spug) 进行投票，我们将综合考虑投票结果等因素来确定开发的优先级。
+
+[![Feature Requests](https://feathub.com/openspug/spug?format=svg)](https://feathub.com/openspug/spug)
+
 
 ## 参与贡献
 
