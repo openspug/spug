@@ -26,7 +26,7 @@ def host_executor(q, host, pkey, command):
         cli = SSH(host.hostname, host.port, host.username, pkey=pkey)
         exit_code, out = cli.exec_command(command)
     finally:
-        q.put((host.id, exit_code, round(time.time() - now, 3), out.decode()))
+        q.put((host.id, exit_code, round(time.time() - now, 3), out.decode() if out else None))
 
 
 def dispatch(command, targets):
