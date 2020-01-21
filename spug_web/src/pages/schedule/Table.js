@@ -58,9 +58,8 @@ class ComTable extends React.Component {
       }
     },
   }, {
-    title: '最近时间',
+    title: '更新于',
     dataIndex: 'latest_run_time',
-    render: value => value ? moment(value).fromNow() : 'N/A'
   }, {
     title: '描述信息',
     dataIndex: 'desc',
