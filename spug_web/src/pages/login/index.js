@@ -83,7 +83,7 @@ class LoginIndex extends React.Component {
                 <Input
                   size="large"
                   autoComplete="off"
-                  placeholder="请输入账户: admin"
+                  placeholder="请输入账户"
                   prefix={<Icon type="user" className={styles.icon}/>}/>
               )}
             </Form.Item>
@@ -93,7 +93,7 @@ class LoginIndex extends React.Component {
                   size="large"
                   type="password"
                   autoComplete="off"
-                  placeholder="请输入密码: spug"
+                  placeholder="请输入密码"
                   onPressEnter={this.handleSubmit}
                   prefix={<Icon type="lock" className={styles.icon}/>}/>
               )}
