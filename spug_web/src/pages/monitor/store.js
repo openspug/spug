@@ -5,6 +5,7 @@
  */
 import { observable } from "mobx";
 import http from 'libs/http';
+import moment from "moment";
 
 class Store {
   @observable records = [];
@@ -18,7 +19,13 @@ class Store {
   fetchRecords = () => {
     this.isFetching = true;
     http.get('/api/monitor/')
-      .then(res => this.records = res)
+      .then(res => {
+        res.map(item => {
+          const value = item['latest_run_time'];
+          item['latest_run_time'] = value ? moment(value).fromNow() : null
+        });
+        this.records = res
+      })
       .finally(() => this.isFetching = false)
   };
 
