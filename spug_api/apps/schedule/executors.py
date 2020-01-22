@@ -6,6 +6,7 @@ from threading import Thread
 from libs.ssh import SSH
 from apps.host.models import Host
 from apps.setting.utils import AppSetting
+from django.db import close_old_connections
 import subprocess
 import time
 
@@ -30,6 +31,7 @@ def host_executor(q, host, pkey, command):
 
 
 def dispatch(command, targets):
+    close_old_connections()
     threads, pkey, q = [], AppSetting.get('private_key'), Queue()
     for t in targets:
         if t == 'local':
