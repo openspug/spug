@@ -22,7 +22,8 @@ class Store {
       .then(res => {
         res.map(item => {
           const value = item['latest_run_time'];
-          item['latest_run_time'] = value ? moment(value).fromNow() : null
+          item['latest_run_time'] = value ? moment(value).fromNow() : null;
+          return null
         });
         this.records = res
       })

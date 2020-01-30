@@ -11,7 +11,6 @@ import http from 'libs/http';
 import store from './store';
 import { LinkButton } from "components";
 import Info from './Info';
-import moment from "moment";
 
 @observer
 class ComTable extends React.Component {
