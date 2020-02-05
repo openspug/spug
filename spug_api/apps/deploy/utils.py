@@ -10,7 +10,6 @@ import socket
 import subprocess
 import json
 import uuid
-import sys
 import os
 
 REPOS_DIR = settings.REPOS_DIR
@@ -149,12 +148,7 @@ def _deploy_ext1_host(helper, h_id, extend, env):
 
     # do deploy
     helper.send_step(h_id, 3, f'{human_time()} 执行发布...        ')
-    tmp_path = os.path.join(extend.dst_repo, f'tmp_{env.SPUG_VERSION}')
-    if sys.platform == 'darwin':
-        command = f'rm -f {extend.dst_dir} && ln -sfn {repo_dir} {extend.dst_dir}'
-    else:
-        command = f'ln -sfn {repo_dir} {tmp_path} && mv -fT {tmp_path} {extend.dst_dir}'
-    helper.remote(host.id, ssh, command)
+    helper.remote(host.id, ssh, f'rm -f {extend.dst_dir} && ln -sfn {repo_dir} {extend.dst_dir}')
     helper.send_step(h_id, 3, '完成\r\n')
 
     # post host
