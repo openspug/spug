@@ -36,7 +36,7 @@ class DeployRequest(models.Model, ModelMixin):
     approve_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)
 
     def __repr__(self):
-        return f'<DeployRequest app_id={self.app_id} name={self.name}>'
+        return f'<DeployRequest name={self.name}>'
 
     class Meta:
         db_table = 'deploy_requests'
