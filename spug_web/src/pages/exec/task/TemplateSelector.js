@@ -37,11 +37,6 @@ class TemplateSelector extends React.Component {
   };
 
   columns = [{
-    title: '序号',
-    key: 'series',
-    render: (_, __, index) => index + 1,
-    width: 80
-  }, {
     title: '类型',
     dataIndex: 'type',
   }, {
