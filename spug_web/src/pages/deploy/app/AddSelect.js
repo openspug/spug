@@ -17,6 +17,7 @@ class AddSelect extends React.Component {
     store.deploy = {
       git_type: 'branch',
       is_audit: false,
+      rst_notify: {mode: '0'},
       versions: 10,
       host_ids: [undefined],
       filter_rule: {type: 'contain', data: ''}
@@ -28,6 +29,7 @@ class AddSelect extends React.Component {
     store.ext2Visible = true;
     store.deploy = {
       is_audit: false,
+      rst_notify: {mode: '0'},
       host_ids: [undefined],
       host_actions: [],
       server_actions: []

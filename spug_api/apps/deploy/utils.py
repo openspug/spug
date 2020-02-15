@@ -3,9 +3,10 @@
 # Released under the MIT License.
 from django_redis import get_redis_connection
 from django.conf import settings
-from libs.utils import AttrDict, human_time
+from libs.utils import AttrDict, human_time, human_datetime
 from apps.host.models import Host
 from concurrent import futures
+import requests
 import socket
 import subprocess
 import json
@@ -46,6 +47,7 @@ def deploy_dispatch(request, req, token):
         rds.expire(token, 5 * 60)
         rds.close()
         req.save()
+        Helper.send_deploy_notify(req)
 
 
 def _ext1_deploy(req, helper, env):
@@ -178,6 +180,51 @@ class Helper:
     def __init__(self, rds, token):
         self.rds = rds
         self.token = token
+
+    @staticmethod
+    def send_deploy_notify(req):
+        rst_notify = json.loads(req.deploy.rst_notify)
+        if rst_notify['mode'] != '0' and rst_notify.get('value'):
+            extra = json.loads(req.extra)
+            if req.deploy.extend == '1':
+                mode, extra1, extra2 = extra
+                if mode == 'branch':
+                    version = f'{extra1}#{extra2[:6]}'
+                else:
+                    version = extra1
+            else:
+                version = extra[0]
+            if rst_notify['mode'] == '1':
+                color, text = ('#8ece60', '成功') if req.status == '3' else ('#f90202', '失败')
+                texts = [
+                    '## %s ## ' % '发布结果通知',
+                    f'**应用名称：** {req.deploy.app.name} ',
+                    f'**发布环境：** {req.deploy.env.name} ',
+                    f'**应用版本：** {version} ',
+                    f'**发布结果：** <font color="{color}">{text}</font>',
+                    f'**发布时间：** {human_datetime()} ',
+                    '> 来自 Spug运维平台'
+                ]
+                data = {
+                    'msgtype': 'markdown',
+                    'markdown': {
+                        'title': '发布结果通知',
+                        'text': '\n\n'.join(texts)
+                    }
+                }
+                res = requests.post(rst_notify['value'], json=data)
+            elif rst_notify['mode'] == '2':
+                data = {
+                    'req_id': req.id,
+                    'app_id': req.deploy.app_id,
+                    'app_name': req.deploy.app.name,
+                    'env_id': req.deploy.env_id,
+                    'env_name': req.deploy.env.name,
+                    'version': version,
+                    'is_success': req.status == '3',
+                    'deploy_at': human_datetime()
+                }
+                requests.post(rst_notify['value'], json=data)
 
     def parse_filter_rule(self, data: str):
         data, files = data.strip(), []

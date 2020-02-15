@@ -41,6 +41,7 @@ class Deploy(models.Model, ModelMixin):
     host_ids = models.TextField()
     extend = models.CharField(max_length=2, choices=EXTENDS)
     is_audit = models.BooleanField()
+    rst_notify = models.CharField(max_length=255)
 
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
@@ -56,6 +57,7 @@ class Deploy(models.Model, ModelMixin):
         deploy = super().to_dict(*args, **kwargs)
         deploy['app_name'] = self.app_name if hasattr(self, 'app_name') else None
         deploy['host_ids'] = json.loads(self.host_ids)
+        deploy['rst_notify'] = json.loads(self.rst_notify)
         deploy.update(self.extend_obj.to_dict())
         return deploy
 
