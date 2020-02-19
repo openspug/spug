@@ -5,4 +5,4 @@ channels_redis==2.4.1
 paramiko==2.6.0
 django-redis==4.10.0
 requests==2.22.0
-GitPython==3.0.5
+GitPython==3.0.8
