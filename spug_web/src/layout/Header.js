@@ -46,9 +46,11 @@ export default class extends React.Component {
 
   handleRead = (e, item) => {
     e.stopPropagation();
-    this.state.read.push(item.id);
-    this.setState({read: this.state.read});
-    http.patch('/api/notify/', {ids: [item.id]})
+    if (this.state.read.indexOf(item.id) === -1) {
+      this.state.read.push(item.id);
+      this.setState({read: this.state.read});
+      http.patch('/api/notify/', {ids: [item.id]})
+    }
   };
 
   handleReadAll = () => {
