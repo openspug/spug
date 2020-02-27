@@ -16,7 +16,7 @@ import json
 def get_statistic(request):
     data = {
         'app': App.objects.count(),
-        'host': Host.objects.count(),
+        'host': Host.objects.filter(deleted_at__isnull=True).count(),
         'task': Task.objects.count(),
         'detection': Detection.objects.count()
     }
