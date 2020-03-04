@@ -43,7 +43,7 @@ def get_request(request):
 
 
 def get_deploy(request):
-    host = Host.objects.count()
+    host = Host.objects.filter(deleted_at__isnull=True).count()
     data = {x.id: {'name': x.name, 'count': 0} for x in App.objects.all()}
     for dep in Deploy.objects.all():
         data[dep.app_id]['count'] += len(json.loads(dep.host_ids))
