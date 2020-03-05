@@ -101,7 +101,7 @@ class ComTable extends React.Component {
   handleActive = (text) => {
     Modal.confirm({
       title: '操作确认',
-      content: `确定要${text['is_active'] ? '禁用' : '启用'}【${text['nickname']}】?`,
+      content: `确定要${text['is_active'] ? '禁用' : '启用'}【${text['name']}】?`,
       onOk: () => {
         return http.patch(`/api/monitor/`, {id: text.id, is_active: !text['is_active']})
           .then(() => {
