@@ -58,3 +58,13 @@
     border-color: rgb(255, 96, 59);
     color: rgb(255, 96, 59);
 }
+
+.fullScreen {
+    background-color: #fff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999;
+}
