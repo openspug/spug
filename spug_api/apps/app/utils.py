@@ -4,6 +4,7 @@
 from django.conf import settings
 from apps.app.models import Deploy
 from libs.gitlib import Git
+import shutil
 import os
 
 
@@ -22,3 +23,7 @@ def fetch_versions(deploy: Deploy):
     git_repo = deploy.extend_obj.git_repo
     repo_dir = os.path.join(settings.REPOS_DIR, str(deploy.id))
     return Git(git_repo, repo_dir).fetch_branches_tags()
+
+
+def remove_repo(deploy_id):
+    shutil.rmtree(os.path.join(settings.REPOS_DIR, str(deploy_id)), True)

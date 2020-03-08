@@ -6,7 +6,7 @@ from django.db.models import F
 from libs import JsonParser, Argument, json_response
 from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
 from apps.config.models import Config
-from apps.app.utils import parse_envs, fetch_versions
+from apps.app.utils import parse_envs, fetch_versions, remove_repo
 import json
 
 
@@ -109,6 +109,9 @@ class DeployView(View):
                 extend_form.filter_rule = json.dumps(extend_form.filter_rule)
                 extend_form.custom_envs = json.dumps(parse_envs(extend_form.custom_envs))
                 if form.id:
+                    extend = DeployExtend1.objects.filter(deploy_id=form.id).first()
+                    if extend.git_repo != extend_form.git_repo:
+                        remove_repo(form.id)
                     Deploy.objects.filter(pk=form.id).update(**form)
                     DeployExtend1.objects.filter(deploy_id=form.id).update(**extend_form)
                 else:
