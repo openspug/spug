@@ -6,3 +6,4 @@ paramiko==2.6.0
 django-redis==4.10.0
 requests==2.22.0
 GitPython==3.0.8
+python-ldap==3.2.0

@@ -31,6 +31,7 @@ class LoginIndex extends React.Component {
     this.props.form.validateFields((err, formData) => {
       if (!err) {
         this.setState({loading: true});
+        formData['type'] = this.state.loginType;
         http.post('/api/account/login/', formData)
           .then(data => {
             if (!data['has_real_ip']) {
@@ -75,7 +76,7 @@ class LoginIndex extends React.Component {
         <div className={styles.formContainer}>
           <Tabs classNam={styles.tabs} onTabClick={e => this.setState({loginType: e})}>
             <Tabs.TabPane tab="普通登录" key="default"/>
-            <Tabs.TabPane disabled tab="LDAP登录" key="ldap"/>
+            <Tabs.TabPane tab="LDAP登录" key="ldap"/>
           </Tabs>
           <Form>
             <Form.Item className={styles.formItem}>

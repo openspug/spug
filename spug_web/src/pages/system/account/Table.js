@@ -35,6 +35,9 @@ class ComTable extends React.Component {
     title: '姓名',
     dataIndex: 'nickname',
   }, {
+    title: '类型',
+    dataIndex: 'type',
+  }, {
     title: '角色',
     dataIndex: 'role_name'
   }, {

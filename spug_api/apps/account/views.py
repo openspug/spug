@@ -9,6 +9,7 @@ from apps.account.models import User, Role
 import time
 import uuid
 import json
+from libs.ldap import LDAP
 
 
 class UserView(View):
@@ -30,6 +31,7 @@ class UserView(View):
         if error is None:
             form.password_hash = User.make_password(form.pop('password'))
             form.created_by = request.user
+            form.type = '系统用户'
             User.objects.create(**form)
         return json_response(error=error)
 
@@ -134,42 +136,84 @@ class SelfView(View):
 def login(request):
     form, error = JsonParser(
         Argument('username', help='请输入用户名'),
-        Argument('password', help='请输入密码')
+        Argument('password', help='请输入密码'),
+        Argument('type')
     ).parse(request.body)
     if error is None:
-        user = User.objects.filter(username=form.username).first()
-        if user:
-            if not user.is_active:
-                return json_response(error="账户已被禁用")
-            if user.verify_password(form.password):
-                cache.delete(form.username)
-                x_real_ip = request.headers.get('x-real-ip', '')
-                token_isvalid = user.access_token and len(user.access_token) == 32 and user.token_expired >= time.time()
-                user.access_token = user.access_token if token_isvalid else uuid.uuid4().hex
-                user.token_expired = time.time() + 8 * 60 * 60
-                user.last_login = human_datetime()
-                user.last_ip = x_real_ip
-                user.save()
-                return json_response({
-                    'access_token': user.access_token,
-                    'nickname': user.nickname,
-                    'is_supper': user.is_supper,
-                    'has_real_ip': True if x_real_ip else False,
-                    'permissions': [] if user.is_supper else user.page_perms
-                })
+        user = User.objects.filter(username=form.username)
+        if form.type == 'ldap':
+            u = LDAP()
+            valid = u.valid_user(form.username, form.password)
+            if valid['status']:
+                user = user.filter(type='LDAP').first()
+                if user:
+                    if not user.is_active:
+                        return json_response(error="账户已被系统禁用")
+                    if not user.role_id:
+                        return json_response(error="LDAP用户角色未分配")
 
-        value = cache.get_or_set(form.username, 0, 86400)
-        if value >= 3:
-            if user and user.is_active:
-                user.is_active = False
-                user.save()
-            return json_response(error='账户已被禁用')
-        cache.set(form.username, value + 1, 86400)
-        return json_response(error="用户名或密码错误，连续多次错误账户将会被禁用")
+                    x_real_ip = request.headers.get('x-real-ip', '')
+                    ret = handle_user_info(user, form.username, x_real_ip)
+                    return json_response(ret)
+
+                x_real_ip = request.headers.get('x-real-ip', '')
+                form.access_token = uuid.uuid4().hex
+                form.nickname = form.username
+                form.token_expired = time.time() + 8 * 60 * 60
+                form.last_login = human_datetime()
+                form.last_ip = x_real_ip
+                form.type = 'LDAP'
+                form.pop('password')
+                User.objects.create(**form)
+                return json_response({
+                    'access_token': form.access_token,
+                    'nickname': form.username,
+                    'is_supper': False,
+                    'has_real_ip': True if x_real_ip else False,
+                    'permissions': []
+                })
+            return json_response(error=valid['info'])
+        else:
+            user = user.filter(type='系统用户').first()
+            if user and user.deleted_by is None:
+                if not user.is_active:
+                    return json_response(error="账户已被系统禁用")
+                if user.verify_password(form.password):
+                    cache.delete(form.username)
+                    x_real_ip = request.headers.get('x-real-ip', '')
+                    ret = handle_user_info(user, form.username, x_real_ip)
+                    return json_response(ret)
+
+            value = cache.get_or_set(form.username, 0, 86400)
+            if value >= 3:
+                if user and user.is_active:
+                    user.is_active = False
+                    user.save()
+                return json_response(error='账户已被系统禁用')
+            cache.set(form.username, value + 1, 86400)
+            return json_response(error="用户名或密码错误，连续多次错误账户将会被禁用")
     return json_response(error=error)
+
+
+def handle_user_info(user, username, x_real_ip):
+    cache.delete(username)
+    token_isvalid = user.access_token and len(user.access_token) == 32 and user.token_expired >= time.time()
+    user.access_token = user.access_token if token_isvalid else uuid.uuid4().hex
+    user.token_expired = time.time() + 8 * 60 * 60
+    user.last_login = human_datetime()
+    user.last_ip = x_real_ip
+    user.save()
+    return {
+        'access_token': user.access_token,
+        'nickname': user.nickname,
+        'is_supper': user.is_supper,
+        'has_real_ip': True if x_real_ip else False,
+        'permissions': [] if user.is_supper else user.page_perms
+    }
 
 
 def logout(request):
     request.user.token_expired = 0
     request.user.save()
     return json_response()
+
