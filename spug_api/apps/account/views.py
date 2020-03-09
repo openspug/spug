@@ -148,7 +148,7 @@ def login(request):
             is_success, message = ldap.valid_user(form.username, form.password)
             if is_success:
                 if not user:
-                    user = User.objects.create(username=form.username, nickname=form.username)
+                    user = User.objects.create(username=form.username, nickname=form.username, type=form.type)
                 return handle_user_info(user, x_real_ip)
             elif message:
                 return json_response(error=message)

@@ -34,7 +34,7 @@ class User(models.Model, ModelMixin):
 
     @property
     def page_perms(self):
-        if self.role.page_perms:
+        if self.role and self.role.page_perms:
             data = []
             perms = json.loads(self.role.page_perms)
             for m, v in perms.items():
