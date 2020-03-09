@@ -150,6 +150,8 @@ def login(request):
                 if not user:
                     user = User.objects.create(username=form.username, nickname=form.username)
                 return handle_user_info(user, x_real_ip)
+            elif message:
+                return json_response(error=message)
         else:
             if user and user.deleted_by is None:
                 if user.verify_password(form.password):

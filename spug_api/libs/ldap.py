@@ -28,6 +28,7 @@ class LDAP:
                 conn.simple_bind_s(result_data[0][0], password)
                 return True, None
             else:
-                return False, 'LDAP用户未找到'
+                return False, None
         except Exception as error:
-            return False, '%s' % error
+            args = error.args
+            return False, args[0].get('desc', '未知错误') if args else '%s' % error
