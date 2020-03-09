@@ -11,7 +11,7 @@ class User(models.Model, ModelMixin):
     username = models.CharField(max_length=100)
     nickname = models.CharField(max_length=100)
     password_hash = models.CharField(max_length=100)  # hashed password
-    type = models.CharField(max_length=20, default='系统用户')
+    type = models.CharField(max_length=20, default='default')
     is_supper = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     access_token = models.CharField(max_length=32)
