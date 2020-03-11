@@ -82,13 +82,13 @@ class LDAPSetting extends React.Component {
           <Form.Item labelCol={{span: 8}} wrapperCol={{span: 16}} required label="LDAP搜索规则">
             {getFieldDecorator('rules', {initialValue: this.setting['rules'],
               rules: [{required: true, message: '请输入LDAP搜索规则'}]})(
-              <Input placeholder="请输入，例如：cn"/>
+              <Input placeholder="例如：cn"/>
             )}
           </Form.Item>
           <Form.Item labelCol={{span: 8}} wrapperCol={{span: 16}} required label="基本DN">
             {getFieldDecorator('base_dn', {initialValue: this.setting['base_dn'],
               rules: [{required: true, message: '请输入LDAP基本DN'}]})(
-              <Input placeholder="请输入，例如：dc=spug,dc=dev"/>
+              <Input placeholder="例如：dc=spug,dc=dev"/>
             )}
           </Form.Item>
           <Form.Item>

@@ -41,7 +41,7 @@ class Deploy(models.Model, ModelMixin):
     host_ids = models.TextField()
     extend = models.CharField(max_length=2, choices=EXTENDS)
     is_audit = models.BooleanField()
-    rst_notify = models.CharField(max_length=255)
+    rst_notify = models.CharField(max_length=255, null=True)
 
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
