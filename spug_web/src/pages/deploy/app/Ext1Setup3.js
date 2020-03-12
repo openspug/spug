@@ -14,6 +14,7 @@ import 'ace-builds/src-noconflict/theme-tomorrow';
 import store from './store';
 import http from 'libs/http';
 import styles from './index.module.css';
+import { cleanCommand } from "../../../libs";
 
 @observer
 class Ext1Setup3 extends React.Component {
@@ -86,7 +87,7 @@ class Ext1Setup3 extends React.Component {
                 height={full === '1' ? '100vh' : '100px'}
                 placeholder="每行一条规则"
                 value={info['filter_rule']['data']}
-                onChange={v => info['filter_rule']['data'] = v}
+                onChange={v => info['filter_rule']['data'] = cleanCommand(v)}
                 style={{border: '1px solid #e8e8e8'}}/>
             </Form.Item>
             <Form.Item
@@ -100,7 +101,7 @@ class Ext1Setup3 extends React.Component {
                 height={full === '3' ? '100vh' : '100px'}
                 placeholder="输入要执行的命令"
                 value={info['hook_pre_server']}
-                onChange={v => info['hook_pre_server'] = v}
+                onChange={v => info['hook_pre_server'] = cleanCommand(v)}
                 style={{border: '1px solid #e8e8e8'}}/>
             </Form.Item>
             <Form.Item
@@ -114,7 +115,7 @@ class Ext1Setup3 extends React.Component {
                 height={full === '5' ? '100vh' : '100px'}
                 placeholder="输入要执行的命令"
                 value={info['hook_pre_host']}
-                onChange={v => info['hook_pre_host'] = v}
+                onChange={v => info['hook_pre_host'] = cleanCommand(v)}
                 style={{border: '1px solid #e8e8e8'}}/>
             </Form.Item>
           </Col>
@@ -144,7 +145,7 @@ class Ext1Setup3 extends React.Component {
                 height={full === '2' ? '100vh' : '100px'}
                 placeholder="每行一个，例如：HOME=/data/spug"
                 value={info['custom_envs']}
-                onChange={v => info['custom_envs'] = v}
+                onChange={v => info['custom_envs'] = cleanCommand(v)}
                 style={{border: '1px solid #e8e8e8'}}/>
             </Form.Item>
             <Form.Item
@@ -158,7 +159,7 @@ class Ext1Setup3 extends React.Component {
                 height={full === '4' ? '100vh' : '100px'}
                 placeholder="输入要执行的命令"
                 value={info['hook_post_server']}
-                onChange={v => info['hook_post_server'] = v}
+                onChange={v => info['hook_post_server'] = cleanCommand(v)}
                 style={{border: '1px solid #e8e8e8'}}/>
             </Form.Item>
             <Form.Item
@@ -172,7 +173,7 @@ class Ext1Setup3 extends React.Component {
                 height={full === '6' ? '100vh' : '100px'}
                 placeholder="输入要执行的命令"
                 value={info['hook_post_host']}
-                onChange={v => info['hook_post_host'] = v}
+                onChange={v => info['hook_post_host'] = cleanCommand(v)}
                 style={{border: '1px solid #e8e8e8'}}/>
             </Form.Item>
           </Col>

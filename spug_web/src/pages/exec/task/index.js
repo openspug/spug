@@ -10,8 +10,8 @@ import { ACEditor, AuthCard } from 'components';
 import HostSelector from './HostSelector';
 import TemplateSelector from './TemplateSelector';
 import ExecConsole from './ExecConsole';
+import { http, cleanCommand } from 'libs';
 import store from './store';
-import http from 'libs/http';
 
 @observer
 class TaskIndex extends React.Component {
@@ -26,7 +26,7 @@ class TaskIndex extends React.Component {
   handleSubmit = () => {
     this.setState({loading: true});
     const host_ids = store.hosts.map(item => item.id);
-    http.post('/api/exec/do/', {host_ids, command: this.state.body})
+    http.post('/api/exec/do/', {host_ids, command: cleanCommand(this.state.body)})
       .then(store.switchConsole)
       .finally(() => this.setState({loading: false}))
   };

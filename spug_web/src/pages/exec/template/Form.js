@@ -7,7 +7,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, Col, Button, message } from 'antd';
 import { ACEditor } from 'components';
-import http from 'libs/http';
+import { http, cleanCommand } from 'libs';
 import store from './store';
 
 @observer
@@ -25,7 +25,7 @@ class ComForm extends React.Component {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
     formData['id'] = store.record.id;
-    formData['body'] = this.state.body;
+    formData['body'] = cleanCommand(this.state.body);
     http.post('/api/exec/template/', formData)
       .then(res => {
         message.success('操作成功');

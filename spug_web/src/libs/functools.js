@@ -26,6 +26,11 @@ export function hasPermission(strCode) {
   return false
 }
 
+// 清理输入的命令中包含的\r符号
+export function cleanCommand(text) {
+  return text ? text.replace(/\r\n/g, '\n') : ''
+}
+
 //  数组包含关系判断
 export function isSubArray(parent, child) {
   for (let item of child) {

@@ -8,7 +8,7 @@ import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, Col, Button, Steps, Tabs, InputNumber, DatePicker, Icon, message } from 'antd';
 import { LinkButton, ACEditor } from 'components';
 import TemplateSelector from '../exec/task/TemplateSelector';
-import http from 'libs/http';
+import { http, cleanCommand } from 'libs';
 import store from './store';
 import hostStore from '../host/store';
 import styles from './index.module.css';
@@ -51,7 +51,7 @@ class ComForm extends React.Component {
     }
     this.setState({loading: true});
     formData['id'] = store.record.id;
-    formData['command'] = this.state.command;
+    formData['command'] = cleanCommand(this.state.command);
     formData['targets'] = store.targets.filter(x => x);
     formData['trigger_args'] = this._parse_args(formData['trigger']);
     http.post('/api/schedule/', formData)
