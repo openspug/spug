@@ -236,15 +236,15 @@ class Helper:
         return files
 
     def send_info(self, key, message):
-        self.rds.rpush(self.token, json.dumps({'key': key, 'status': 'info', 'data': message}))
+        self.rds.lpush(self.token, json.dumps({'key': key, 'status': 'info', 'data': message}))
 
     def send_error(self, key, message):
         message = '\r\n' + message
-        self.rds.rpush(self.token, json.dumps({'key': key, 'status': 'error', 'data': message}))
+        self.rds.lpush(self.token, json.dumps({'key': key, 'status': 'error', 'data': message}))
         raise Exception(message)
 
     def send_step(self, key, step, data):
-        self.rds.rpush(self.token, json.dumps({'key': key, 'step': step, 'data': data}))
+        self.rds.lpush(self.token, json.dumps({'key': key, 'step': step, 'data': data}))
 
     def local(self, command, env=None):
         command = 'set -e\n' + command

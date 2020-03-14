@@ -109,7 +109,7 @@ class Scheduler:
         rds_cli.delete(settings.MONITOR_KEY)
         logger.info('Running monitor')
         while True:
-            _, data = rds_cli.blpop(settings.MONITOR_KEY)
+            _, data = rds_cli.brpop(settings.MONITOR_KEY)
             task = AttrDict(json.loads(data))
             if task.action in ('add', 'modify'):
                 trigger = IntervalTrigger(minutes=int(task.rate), timezone=self.timezone)

@@ -100,6 +100,7 @@ TEMPLATES = [
 
 SCHEDULE_KEY = 'spug:schedule'
 MONITOR_KEY = 'spug:monitor'
+REQUEST_KEY = 'spug:request'
 REPOS_DIR = os.path.join(BASE_DIR, 'repos')
 
 # Internationalization

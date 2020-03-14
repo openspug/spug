@@ -15,4 +15,6 @@ export default [
   makeRoute('/request', request),
   makeRoute('/do/ext1/:id', doExt1Index),
   makeRoute('/do/ext2/:id', doExt2Index),
+  makeRoute('/do/ext1/:id/:log', doExt1Index),
+  makeRoute('/do/ext2/:id/:log', doExt2Index),
 ]

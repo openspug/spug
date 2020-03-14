@@ -28,7 +28,7 @@ class Job:
     def _send(self, message, with_expire=False):
         if self.rds_cli is None:
             self.rds_cli = get_redis_connection()
-        self.rds_cli.rpush(self.token, json.dumps(message))
+        self.rds_cli.lpush(self.token, json.dumps(message))
         if with_expire:
             self.rds_cli.expire(self.token, 300)
 

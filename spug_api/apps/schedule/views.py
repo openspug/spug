@@ -40,7 +40,7 @@ class Schedule(View):
                     form.action = 'modify'
                     form.targets = json.loads(form.targets)
                     rds_cli = get_redis_connection()
-                    rds_cli.rpush(settings.SCHEDULE_KEY, json.dumps(form))
+                    rds_cli.lpush(settings.SCHEDULE_KEY, json.dumps(form))
             else:
                 Task.objects.create(created_by=request.user, **form)
         return json_response(error=error)
@@ -60,7 +60,7 @@ class Schedule(View):
                 else:
                     message = {'id': form.id, 'action': 'remove'}
                 rds_cli = get_redis_connection()
-                rds_cli.rpush(settings.SCHEDULE_KEY, json.dumps(message))
+                rds_cli.lpush(settings.SCHEDULE_KEY, json.dumps(message))
         return json_response(error=error)
 
     def delete(self, request):

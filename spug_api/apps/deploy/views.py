@@ -3,6 +3,8 @@
 # Released under the MIT License.
 from django.views.generic import View
 from django.db.models import F
+from django.conf import settings
+from django_redis import get_redis_connection
 from libs import json_response, JsonParser, Argument, human_datetime, human_time
 from apps.deploy.models import DeployRequest
 from apps.app.models import Deploy
@@ -112,10 +114,17 @@ class RequestDetailView(View):
             return json_response(error='未找到指定发布申请')
         hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
         targets = [{'id': x.id, 'title': f'{x.name}({x.hostname}:{x.port})'} for x in hosts]
-        server_actions, host_actions = [], []
+        server_actions, host_actions, outputs = [], [], []
         if req.deploy.extend == '2':
             server_actions = json.loads(req.deploy.extend_obj.server_actions)
             host_actions = json.loads(req.deploy.extend_obj.host_actions)
+        if request.GET.get('log'):
+            rds, key, counter = get_redis_connection(), f'{settings.REQUEST_KEY}:{r_id}', 0
+            data = rds.lrange(key, counter, counter + 9)
+            while data:
+                counter += 10
+                outputs.extend(x.decode() for x in data)
+                data = rds.lrange(key, counter, counter + 9)
         return json_response({
             'app_name': req.deploy.app.name,
             'env_name': req.deploy.env.name,
@@ -124,7 +133,8 @@ class RequestDetailView(View):
             'status_alias': req.get_status_display(),
             'targets': targets,
             'server_actions': server_actions,
-            'host_actions': host_actions
+            'host_actions': host_actions,
+            'outputs': outputs
         })
 
     def post(self, request, r_id):

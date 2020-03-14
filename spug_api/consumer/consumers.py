@@ -3,17 +3,24 @@
 # Released under the MIT License.
 from channels.generic.websocket import WebsocketConsumer
 from django_redis import get_redis_connection
+from django.conf import settings
 from apps.setting.utils import AppSetting
 from apps.host.models import Host
 from threading import Thread
+from urllib.parse import parse_qs
 import json
 
 
 class ExecConsumer(WebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        query = parse_qs(self.scope['query_string'].decode())
+        e_id = query.get('id', [None])[0]
         self.token = self.scope['url_route']['kwargs']['token']
+        self.log_key = f'{settings.REQUEST_KEY}:{e_id}' if e_id else None
         self.rds = get_redis_connection()
+        if self.log_key:
+            self.rds.delete(self.log_key)
 
     def connect(self):
         self.accept()
@@ -21,11 +28,18 @@ class ExecConsumer(WebsocketConsumer):
     def disconnect(self, code):
         self.rds.close()
 
+    def get_response(self):
+        if self.log_key:
+            return self.rds.brpoplpush(self.token, self.log_key, timeout=5)
+        else:
+            return self.rds.brpop(self.token, timeout=5)[1]
+
     def receive(self, **kwargs):
-        response = self.rds.blpop(self.token, timeout=5)
+        response = self.get_response()
         while response:
-            self.send(text_data=response[1].decode())
-            response = self.rds.blpop(self.token, timeout=5)
+            data = response.decode()
+            self.send(text_data=data)
+            response = self.get_response()
         self.send(text_data='pong')
 
 

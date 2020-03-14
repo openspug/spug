@@ -40,13 +40,13 @@ class DetectionView(View):
                 if task and task.is_active:
                     form.action = 'modify'
                     rds_cli = get_redis_connection()
-                    rds_cli.rpush(settings.MONITOR_KEY, json.dumps(form))
+                    rds_cli.lpush(settings.MONITOR_KEY, json.dumps(form))
             else:
                 dtt = Detection.objects.create(created_by=request.user, **form)
                 form.action = 'add'
                 form.id = dtt.id
                 rds_cli = get_redis_connection()
-                rds_cli.rpush(settings.MONITOR_KEY, json.dumps(form))
+                rds_cli.lpush(settings.MONITOR_KEY, json.dumps(form))
         return json_response(error=error)
 
     def patch(self, request):
@@ -64,7 +64,7 @@ class DetectionView(View):
                 else:
                     message = {'id': form.id, 'action': 'remove'}
                 rds_cli = get_redis_connection()
-                rds_cli.rpush(settings.MONITOR_KEY, json.dumps(message))
+                rds_cli.lpush(settings.MONITOR_KEY, json.dumps(message))
         return json_response(error=error)
 
     def delete(self, request):

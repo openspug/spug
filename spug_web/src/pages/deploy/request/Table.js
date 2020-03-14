@@ -85,6 +85,8 @@ class ComTable extends React.Component {
       switch (info.status) {
         case '-3':
           return <React.Fragment>
+            <AuthLink auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</AuthLink>
+            <Divider type="vertical"/>
             <AuthLink auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>发布</AuthLink>
             <Divider type="vertical"/>
             <LinkButton
@@ -94,11 +96,15 @@ class ComTable extends React.Component {
               onClick={() => this.handleRollback(info)}>回滚</LinkButton>
           </React.Fragment>;
         case '3':
-          return <LinkButton
-            auth="deploy.request.do"
-            disabled={info.type === '2'}
-            loading={this.state.loading}
-            onClick={() => this.handleRollback(info)}>回滚</LinkButton>;
+          return <React.Fragment>
+            <AuthLink auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</AuthLink>
+            <Divider type="vertical"/>
+            <LinkButton
+              auth="deploy.request.do"
+              disabled={info.type === '2'}
+              loading={this.state.loading}
+              onClick={() => this.handleRollback(info)}>回滚</LinkButton>
+          </React.Fragment>;
         case '-1':
           return <React.Fragment>
             <LinkButton auth="deploy.request.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>

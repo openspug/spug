@@ -87,7 +87,7 @@ class Scheduler:
         rds_cli.delete(settings.SCHEDULE_KEY)
         logger.info('Running scheduler')
         while True:
-            _, data = rds_cli.blpop(settings.SCHEDULE_KEY)
+            _, data = rds_cli.brpop(settings.SCHEDULE_KEY)
             task = AttrDict(json.loads(data))
             if task.action in ('add', 'modify'):
                 trigger = self.parse_trigger(task.trigger, task.trigger_args)
