@@ -17,14 +17,15 @@ import logo from './logo.svg';
 class Sider extends React.Component {
   constructor(props) {
     super(props);
-    this.keysMap = {};
+    this._init(props);
     this.state = {
-      selectedKeys: [props.location.pathname],
-      openKeys: [],
+      selectedKeys: [],
+      openKeys: [lodash.get(this.keysMap, props.location.pathname)],
     };
   }
 
-  componentDidMount() {
+  _init() {
+    this.keysMap = {};
     for (let item of menus.filter(x => x.child)) {
       for (let m of item.child) {
         this.keysMap[m.path] = item.title
@@ -61,7 +62,6 @@ class Sider extends React.Component {
   };
 
   handleSelect = ({key}) => {
-    this.setState({selectedKeys: [key]});
     history.push(key)
   };
 
@@ -72,13 +72,8 @@ class Sider extends React.Component {
   };
 
   render() {
-    const subKey = lodash.get(this.keysMap, this.props.location.pathname);
-    let {openKeys} = this.state;
-    if (subKey && !openKeys.includes(subKey) && !this.props.collapsed) openKeys.push(subKey);
     return (
-      <Layout.Sider
-        collapsed={this.props.collapsed}
-      >
+      <Layout.Sider collapsed={this.props.collapsed}>
         <div className={styles.logo}>
           <img src={logo} alt="Logo"/>
           <h1>Spug</h1>
@@ -86,8 +81,8 @@ class Sider extends React.Component {
         <Menu
           theme="dark"
           mode="inline"
-          selectedKeys={this.state.selectedKeys}
-          openKeys={openKeys}
+          selectedKeys={[this.props.location.pathname]}
+          openKeys={this.state.openKeys}
           onSelect={this.handleSelect}
           onClick={this.handleClick}
           onOpenChange={openKeys => this.setState({openKeys})}
