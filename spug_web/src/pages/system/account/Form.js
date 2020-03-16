@@ -4,12 +4,14 @@
  * Released under the MIT License.
  */
 import React from 'react';
-import {Modal, Form, Select, Input, message, Col} from 'antd';
+import { observer } from 'mobx-react';
+import { Modal, Form, Select, Input, message, Col } from 'antd';
 import http from 'libs/http';
 import store from './store';
 import roleStore from '../role/store';
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 
+@observer
 class ComForm extends React.Component {
   constructor(props) {
     super(props);
@@ -35,10 +37,10 @@ class ComForm extends React.Component {
       request = http.post('/api/account/user/', formData)
     }
     request.then(() => {
-        message.success('操作成功');
-        store.formVisible = false;
-        store.fetchRecords()
-      }, () => this.setState({loading: false}))
+      message.success('操作成功');
+      store.formVisible = false;
+      store.fetchRecords()
+    }, () => this.setState({loading: false}))
   };
 
   render() {
