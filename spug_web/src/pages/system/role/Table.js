@@ -20,8 +20,8 @@ class ComTable extends React.Component {
     title: '角色名称',
     dataIndex: 'name',
   }, {
-    title: '权限个数',
-    dataIndex: 'type',
+    title: '关联账户',
+    dataIndex: 'used',
   }, {
     title: '描述信息',
     dataIndex: 'desc',
