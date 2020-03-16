@@ -6,6 +6,7 @@ from django.views.generic import View
 from django.db.models import F
 from libs import JsonParser, Argument, human_datetime, json_response
 from apps.account.models import User, Role
+from apps.setting.models import Setting
 from libs.ldap import LDAP
 import time
 import uuid
@@ -144,6 +145,8 @@ def login(request):
         if user and not user.is_active:
             return json_response(error="账户已被系统禁用")
         if form.type == 'ldap':
+            if not Setting.objects.filter(key='ldap_service').exists():
+                return json_response(error='请在系统设置中配置LDAP后再尝试通过该方式登录')
             ldap = LDAP()
             is_success, message = ldap.valid_user(form.username, form.password)
             if is_success:
