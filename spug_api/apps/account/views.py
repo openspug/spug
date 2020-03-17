@@ -137,7 +137,7 @@ def login(request):
     form, error = JsonParser(
         Argument('username', help='请输入用户名'),
         Argument('password', help='请输入密码'),
-        Argument('type')
+        Argument('type', required=False)
     ).parse(request.body)
     if error is None:
         x_real_ip = request.headers.get('x-real-ip', '')
@@ -168,6 +168,7 @@ def login(request):
             return json_response(error='账户已被系统禁用')
         cache.set(form.username, value + 1, 86400)
         return json_response(error="用户名或密码错误，连续多次错误账户将会被禁用")
+    return json_response(error=error)
 
 
 def handle_user_info(user, x_real_ip):
