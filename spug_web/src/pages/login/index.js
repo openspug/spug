@@ -8,7 +8,7 @@ import {Form, Input, Icon, Button, Tabs, Modal} from 'antd';
 import styles from './login.module.css';
 import history from 'libs/history';
 import {http, updatePermissions} from 'libs';
-import logo from 'layout/logo.svg';
+import logo from 'layout/logo-spug-txt.png';
 import envStore from 'pages/config/environment/store';
 import requestStore from 'pages/deploy/request/store';
 
@@ -70,7 +70,7 @@ class LoginIndex extends React.Component {
     return (
       <div className={styles.container}>
         <div className={styles.titleContainer}>
-          <div><img className={styles.logo} src={logo} alt="logo"/>Spug</div>
+          <div><img className={styles.logo} src={logo} alt="logo"/></div>
           <div className={styles.desc}>灵活、强大、功能全面的开源运维平台</div>
         </div>
         <div className={styles.formContainer}>
