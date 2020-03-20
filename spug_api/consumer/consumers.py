@@ -32,7 +32,8 @@ class ExecConsumer(WebsocketConsumer):
         if self.log_key:
             return self.rds.brpoplpush(self.token, self.log_key, timeout=5)
         else:
-            return self.rds.brpop(self.token, timeout=5)[1]
+            response = self.rds.brpop(self.token, timeout=5)
+            return response[1] if response else None
 
     def receive(self, **kwargs):
         response = self.get_response()
