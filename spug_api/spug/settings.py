@@ -121,6 +121,8 @@ AUTHENTICATION_EXCLUDES = (
     re.compile('/apis/.*'),
 )
 
+SPUG_VERSION = 'v2.2.0'
+
 # override default config
 try:
     from spug.overrides import *

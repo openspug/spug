@@ -54,38 +54,38 @@ class LDAPSetting extends React.Component {
     return (
       <React.Fragment>
         <div className={styles.title}>LDAP设置</div>
-        <Form style={{maxWidth: 400}}>
-          <Form.Item labelCol={{span: 8}} wrapperCol={{span: 16}} required label="LDAP服务地址">
+        <Form style={{maxWidth: 400}} labelCol={{span: 8}} wrapperCol={{span: 16}}>
+          <Form.Item required label="LDAP服务地址">
             {getFieldDecorator('server', {initialValue: this.setting['server'],
               rules: [{required: true, message: '请输入LDAP服务地址'}]})(
               <Input placeholder="请输入LDAP服务地址"/>
             )}
           </Form.Item>
-          <Form.Item labelCol={{span: 8}} wrapperCol={{span: 16}} required label="LDAP服务端口">
+          <Form.Item required label="LDAP服务端口">
             {getFieldDecorator('port', {initialValue: this.setting['port'],
               rules: [{required: true, message: '请输入LDAP服务端口'}]})(
               <Input placeholder="例如：389"/>
             )}
           </Form.Item>
-          <Form.Item labelCol={{span: 8}} wrapperCol={{span: 16}} required label="管理员DN">
+          <Form.Item required label="管理员DN">
             {getFieldDecorator('admin_dn', {initialValue: this.setting['admin_dn'],
               rules: [{required: true, message: '请输入LDAP管理员DN'}]})(
               <Input placeholder="例如：cn=admin,dc=spug,dc=dev"/>
             )}
           </Form.Item>
-          <Form.Item labelCol={{span: 8}} wrapperCol={{span: 16}} required label="管理员密码">
+          <Form.Item required label="管理员密码">
             {getFieldDecorator('password', {initialValue: this.setting['password'],
               rules: [{required: true, message: '请输入LDAP管理员密码'}]})(
               <Input.Password placeholder="请输入LDAP管理员密码"/>
             )}
           </Form.Item>
-          <Form.Item labelCol={{span: 8}} wrapperCol={{span: 16}} required label="LDAP搜索规则">
+          <Form.Item required label="LDAP搜索规则">
             {getFieldDecorator('rules', {initialValue: this.setting['rules'],
               rules: [{required: true, message: '请输入LDAP搜索规则'}]})(
               <Input placeholder="例如：cn"/>
             )}
           </Form.Item>
-          <Form.Item labelCol={{span: 8}} wrapperCol={{span: 16}} required label="基本DN">
+          <Form.Item required label="基本DN">
             {getFieldDecorator('base_dn', {initialValue: this.setting['base_dn'],
               rules: [{required: true, message: '请输入LDAP基本DN'}]})(
               <Input placeholder="例如：dc=spug,dc=dev"/>

@@ -1,10 +1,13 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the MIT License.
+import django
 from django.views.generic import View
+from django.conf import settings
 from libs import JsonParser, Argument, json_response
 from apps.setting.utils import AppSetting
 from apps.setting.models import Setting
+import platform
 import ldap
 
 
@@ -40,6 +43,14 @@ def ldap_test(request):
             return json_response(error=error['desc'])
     return json_response(error=error)
 
+
+def get_about(request):
+    return json_response({
+        'python_version': platform.python_version(),
+        'system_version': platform.platform(),
+        'spug_version': settings.SPUG_VERSION,
+        'django_version': django.get_version()
+    })
 
 
 
