@@ -35,8 +35,7 @@
 .logo {
     height: 64px;
     line-height: 64px;
-    padding-left: 24px;
-    background-color: #002140;
+    padding-left: 15px;
     overflow: hidden;
 }
 
@@ -51,7 +50,7 @@
 }
 
 .logo img {
-    height: 32px;
+    width: 50px;
 }
 
 .right {
