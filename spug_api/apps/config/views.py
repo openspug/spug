@@ -4,6 +4,7 @@
 from django.views.generic import View
 from django.db.models import F
 from libs import json_response, JsonParser, Argument
+from apps.app.models import Deploy
 from apps.config.models import *
 import json
 
@@ -40,6 +41,8 @@ class EnvironmentView(View):
         if error is None:
             if Config.objects.filter(env_id=form.id).exists():
                 return json_response(error='该环境已存在关联的配置信息，请删除相关配置后再尝试删除')
+            if Deploy.objects.filter(env_id=form.id).exists():
+                return json_response(error='该环境已关联了发布配置，请删除相关发布配置后再尝试删除')
             Environment.objects.filter(pk=form.id).delete()
         return json_response(error=error)
 
