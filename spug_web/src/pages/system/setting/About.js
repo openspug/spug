@@ -38,7 +38,7 @@ class About extends React.Component {
           <Descriptions.Item label="Django版本">{info['django_version']}</Descriptions.Item>
           <Descriptions.Item label="Spug版本">{info['spug_version']}</Descriptions.Item>
           <Descriptions.Item label="官网文档">
-            <a href="https://spug.dev" target="_blank">https://spug.dev</a>
+            <a href="https://spug.dev" target="_blank" rel="noopener noreferrer">https://spug.dev</a>
           </Descriptions.Item>
         </Descriptions>
       </Spin>
