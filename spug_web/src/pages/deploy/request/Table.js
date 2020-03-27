@@ -125,6 +125,10 @@ class ComTable extends React.Component {
             <Divider type="vertical"/>
             <LinkButton auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
           </React.Fragment>;
+        case '2':
+          return (
+            <AuthLink auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</AuthLink>
+          );
         default:
           return null
       }
