@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Menu, Input, Button, Select, PageHeader, Icon } from 'antd';
+import { Menu, Input, Button, Select, PageHeader, Icon, Modal } from 'antd';
 import envStore from '../environment/store';
 import styles from './index.module.css';
 import history from 'libs/history';
@@ -33,14 +33,23 @@ class Index extends React.Component {
     store.type = type;
     store.id = id;
     if (envStore.records.length === 0) {
-      envStore.fetchRecords().then(() => this.updateEnv())
+      envStore.fetchRecords().then(() => {
+        if (envStore.records.length === 0) {
+          Modal.error({
+            title: '无可用环境',
+            content: <div>配置依赖应用的运行环境，请在 <a href="/config/environment">环境管理</a> 中创建环境。</div>
+          })
+        } else {
+          this.updateEnv()
+        }
+      })
     } else {
       this.updateEnv()
     }
   }
 
   updateEnv = (env) => {
-    store.env = env || envStore.records[0];
+    store.env = env || envStore.records[0] || {};
     this.handleRefresh()
   };
 
@@ -91,7 +100,8 @@ class Index extends React.Component {
                       onClick={store.showRecord}>更改历史</Button>
             </SearchForm.Item>
             <SearchForm.Item span={4} style={{textAlign: 'right'}}>
-              <AuthButton auth="config.app.edit_config|config.service.edit_config" disabled={view !== '1'} type="primary" icon="plus" onClick={() => store.showForm()}>新增配置</AuthButton>
+              <AuthButton auth="config.app.edit_config|config.service.edit_config" disabled={view !== '1'}
+                          type="primary" icon="plus" onClick={() => store.showForm()}>新增配置</AuthButton>
             </SearchForm.Item>
           </SearchForm>
 
