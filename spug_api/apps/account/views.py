@@ -56,10 +56,13 @@ class UserView(View):
             Argument('id', type=int, help='请指定操作对象')
         ).parse(request.GET)
         if error is None:
-            User.objects.filter(pk=form.id).update(
-                deleted_at=human_datetime(),
-                deleted_by=request.user
-            )
+            user = User.objects.filter(pk=form.id).first()
+            if user:
+                if user.type == 'ldap':
+                    return json_response(error='ldap账户无法删除，请使用禁用功能来禁止该账户访问系统')
+                user.deleted_at = human_datetime()
+                user.deleted_by = request.user
+                user.save()
         return json_response(error=error)
 
 
