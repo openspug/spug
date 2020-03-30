@@ -18,7 +18,7 @@ class AlarmSetting extends React.Component {
     this.setting = JSON.parse(lds.get(store.settings, 'mail_service.value', "{}"));
     this.state = {
       mode: this.setting['server'] === undefined ? '1' : '2',
-      spug_key: lds.get(store.settings, 'spug_key.value')
+      spug_key: lds.get(store.settings, 'spug_key.value', "")
     }
   }
 
