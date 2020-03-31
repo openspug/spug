@@ -21,7 +21,7 @@ def deploy_dispatch(request, req, token):
     try:
         api_token = uuid.uuid4().hex
         rds.setex(api_token, 60 * 60, f'{req.deploy.app_id},{req.deploy.env_id}')
-        helper = Helper(rds, token)
+        helper = Helper(rds, token, req.id)
         helper.send_step('local', 1, f'完成\r\n{human_time()} 发布准备...        ')
         env = AttrDict(
             SPUG_APP_NAME=req.deploy.app.name,
@@ -177,9 +177,11 @@ def _deploy_ext2_host(helper, h_id, actions, env):
 
 
 class Helper:
-    def __init__(self, rds, token):
+    def __init__(self, rds, token, r_id):
         self.rds = rds
         self.token = token
+        self.log_key = f'{settings.REQUEST_KEY}:{r_id}'
+        self.rds.delete(self.log_key)
 
     @staticmethod
     def send_deploy_notify(req):
@@ -235,16 +237,20 @@ class Helper:
                     files.append(line)
         return files
 
+    def _send(self, message):
+        self.rds.lpush(self.token, json.dumps(message))
+        self.rds.lpush(self.log_key, json.dumps(message))
+
     def send_info(self, key, message):
-        self.rds.lpush(self.token, json.dumps({'key': key, 'status': 'info', 'data': message}))
+        self._send({'key': key, 'status': 'info', 'data': message})
 
     def send_error(self, key, message):
         message = '\r\n' + message
-        self.rds.lpush(self.token, json.dumps({'key': key, 'status': 'error', 'data': message}))
+        self._send({'key': key, 'status': 'error', 'data': message})
         raise Exception(message)
 
     def send_step(self, key, step, data):
-        self.rds.lpush(self.token, json.dumps({'key': key, 'step': step, 'data': data}))
+        self._send({'key': key, 'step': step, 'data': data})
 
     def local(self, command, env=None):
         command = 'set -e\n' + command

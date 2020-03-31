@@ -17,6 +17,8 @@ import lds from 'lodash';
 class Ext1Index extends React.Component {
   constructor(props) {
     super(props);
+    this.id = props.match.params.id;
+    this.log = props.match.params.log;
     this.state = {
       fetching: true,
       loading: false,
@@ -25,11 +27,22 @@ class Ext1Index extends React.Component {
   }
 
   componentDidMount() {
-    this.id = this.props.match.params.id;
-    this.log = this.props.match.params.log;
+    this.fetch()
+  }
+
+  componentWillUnmount() {
+    if (this.socket) this.socket.close();
+    store.request = {targets: [], server_actions: [], host_actions: []};
+    store.outputs = {};
+  }
+
+
+  fetch = () => {
+    this.setState({fetching: true});
     http.get(`/api/deploy/request/${this.id}/`, {params: {log: this.log}})
       .then(res => {
         store.request = res;
+        store.outputs = {};
         while (res.outputs.length) {
           const msg = JSON.parse(res.outputs.pop());
           if (!store.outputs.hasOwnProperty(msg.key)) {
@@ -40,13 +53,7 @@ class Ext1Index extends React.Component {
         }
       })
       .finally(() => this.setState({fetching: false}))
-  }
-
-  componentWillUnmount() {
-    if (this.socket) this.socket.close();
-    store.request = {targets: [], server_actions: [], host_actions: []};
-    store.outputs = {};
-  }
+  };
 
   _parse_message = (message) => {
     const {key, data, step, status} = message;
@@ -62,7 +69,7 @@ class Ext1Index extends React.Component {
         store.request.status = '2';
         store.outputs = outputs;
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${token}/?id=${this.id}`);
+        this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${token}/`);
         this.socket.onopen = () => {
           this.socket.send('ok');
         };
@@ -115,8 +122,13 @@ class Ext1Index extends React.Component {
             subTitle={`${app_name} - ${env_name}`}
             style={{padding: 0}}
             tags={this.getStatusAlias()}
-            extra={<Button loading={this.state.loading} type="primary" disabled={this.log || !['1', '-3'].includes(status)}
-                           onClick={this.handleDeploy}>发布</Button>}
+            extra={this.log ? (
+              <Button icon="sync" type="primary" onClick={this.fetch}>刷新</Button>
+            ) : (
+              <Button icon="play-circle" loading={this.state.loading} type="primary"
+                      disabled={!['1', '-3'].includes(status)}
+                      onClick={this.handleDeploy}>发布</Button>
+            )}
             onBack={() => history.goBack()}/>
           <Collapse defaultActiveKey={1} className={styles.collapse}>
             <Collapse.Panel showArrow={false} key={1} header={
