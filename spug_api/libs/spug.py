@@ -15,15 +15,13 @@ notify_source = 'info-circle'
 
 def _parse_args(grp):
     spug_key = AppSetting.get_default('spug_key')
-    if not spug_key:
-        Notify.make_notify(notify_source, '1', '发送报警信息失败', '未配置报警服务调用凭据，请在系统管理/系统设置/报警服务设置中配置。')
-        return None, None
     return spug_key, sum([json.loads(x.contacts) for x in Group.objects.filter(id__in=grp)], [])
 
 
 def notify_by_wx(event, subject, n_grp):
     spug_key, u_ids = _parse_args(n_grp)
-    if u_ids is None:
+    if not spug_key:
+        Notify.make_notify(notify_source, '1', '发送报警信息失败', '未配置报警服务调用凭据，请在系统管理/系统设置/报警服务设置中配置。')
         return
     users = set(x.wx_token for x in Contact.objects.filter(id__in=u_ids, wx_token__isnull=False))
     if users:
@@ -34,12 +32,12 @@ def notify_by_wx(event, subject, n_grp):
             'users': list(users)
         }
         requests.post(f'{spug_server}/apis/notify/wx/', json=data)
+    else:
+        Notify.make_notify(notify_source, '1', '发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的微信Token。')
 
 
 def notify_by_email(event, subject, grp):
     spug_key, u_ids = _parse_args(grp)
-    if u_ids is None:
-        return
     users = set(x.email for x in Contact.objects.filter(id__in=u_ids, email__isnull=False))
     if users:
         mail_service = json.loads(AppSetting.get_default('mail_service', '{}'))
@@ -48,7 +46,7 @@ def notify_by_email(event, subject, grp):
             subject = f'{event_map[event]}-{subject}'
             mail = Mail(**mail_service)
             mail.send_text_mail(users, subject, f'{subject}\r\n\r\n自动发送，请勿回复。')
-        else:
+        elif spug_key:
             data = {
                 'token': spug_key,
                 'event': event,
@@ -56,11 +54,16 @@ def notify_by_email(event, subject, grp):
                 'users': list(users)
             }
             requests.post(f'{spug_server}/apis/notify/mail/', json=data)
+        else:
+            Notify.make_notify(notify_source, '1', '发送报警信息失败', '未配置报警服务调用凭据，请在系统管理/系统设置/报警服务设置中配置。')
+    else:
+        Notify.make_notify(notify_source, '1', '发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的邮件地址。')
 
 
 def notify_by_dd(event, subject, grp):
     spug_key, u_ids = _parse_args(grp)
-    if u_ids is None:
+    if not spug_key:
+        Notify.make_notify(notify_source, '1', '发送报警信息失败', '未配置报警服务调用凭据，请在系统管理/系统设置/报警服务设置中配置。')
         return
     users = set(x.ding for x in Contact.objects.filter(id__in=u_ids, email__isnull=False))
     if users:
@@ -80,3 +83,5 @@ def notify_by_dd(event, subject, grp):
         }
         for url in users:
             requests.post(url, json=data)
+    else:
+        Notify.make_notify(notify_source, '1', '发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的钉钉。')
