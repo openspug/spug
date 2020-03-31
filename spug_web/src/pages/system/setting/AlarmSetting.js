@@ -101,13 +101,13 @@ class AlarmSetting extends React.Component {
                   <Input placeholder="请输入，例如：dev@exmail.com"/>
                 )}
               </Form.Item>
-              <Form.Item labelCol={{span: 8}} wrapperCol={{span: 16}} required label="账号密码">
+              <Form.Item labelCol={{span: 8}} wrapperCol={{span: 16}} required label="密码/授权码">
                 {getFieldDecorator('password', {
                   initialValue: this.setting['password'], rules: [
-                    {required: true, message: '请输入邮箱账号对应的密码'}
+                    {required: true, message: '请输入邮箱账号对应的密码或授权码'}
                   ]
                 })(
-                  <Input.Password placeholder="请输入邮箱账号对应的密码"/>
+                  <Input.Password placeholder="请输入邮箱账号对应的密码或授权码"/>
                 )}
               </Form.Item>
               <Form.Item labelCol={{span: 8}} wrapperCol={{span: 16}} label="发件人昵称">
