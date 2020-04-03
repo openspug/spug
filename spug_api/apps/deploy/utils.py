@@ -27,6 +27,7 @@ def deploy_dispatch(request, req, token):
             SPUG_APP_NAME=req.deploy.app.name,
             SPUG_APP_ID=str(req.deploy.app_id),
             SPUG_REQUEST_NAME=req.name,
+            SPUG_DEPLOY_ID=req.deploy.id,
             SPUG_REQUEST_ID=str(req.id),
             SPUG_ENV_ID=str(req.deploy.env_id),
             SPUG_ENV_KEY=req.deploy.env.key,
@@ -127,6 +128,7 @@ def _deploy_ext1_host(helper, h_id, extend, env):
     host = Host.objects.filter(pk=h_id).first()
     if not host:
         helper.send_error(h_id, 'no such host')
+    env.update({'SPUG_HOST_ID': h_id, 'SPUG_HOST_NAME': host.hostname})
     ssh = host.get_ssh()
     code, _ = ssh.exec_command(f'mkdir -p {extend.dst_repo} && [ -e {extend.dst_dir} ] && [ ! -L {extend.dst_dir} ]')
     if code == 0:
@@ -171,6 +173,7 @@ def _deploy_ext2_host(helper, h_id, actions, env):
     host = Host.objects.filter(pk=h_id).first()
     if not host:
         helper.send_error(h_id, 'no such host')
+    env.update({'SPUG_HOST_ID': h_id, 'SPUG_HOST_NAME': host.hostname})
     ssh = host.get_ssh()
     helper.send_step(h_id, 2, '完成\r\n')
     for index, action in enumerate(actions):
