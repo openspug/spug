@@ -11,6 +11,7 @@ class Store {
   @observable deploys = [];
   @observable types = [];
   @observable record = {};
+  @observable refs = {};
   @observable isLoading = false;
   @observable isFetching = false;
   @observable addVisible = false;
