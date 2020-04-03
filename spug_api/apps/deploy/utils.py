@@ -91,8 +91,10 @@ def _ext1_deploy(req, helper, env):
         for h_id in json.loads(req.host_ids):
             threads.append(executor.submit(_deploy_ext1_host, helper, h_id, extend, env))
         for t in futures.as_completed(threads):
-            if t.exception():
-                raise t.exception()
+            exception = t.exception()
+            if exception:
+                helper.send_error(h_id, f'Exception: {exception}')
+                raise exception
 
 
 def _ext2_deploy(req, helper, env):
@@ -114,8 +116,10 @@ def _ext2_deploy(req, helper, env):
             for h_id in json.loads(req.host_ids):
                 threads.append(executor.submit(_deploy_ext2_host, helper, h_id, host_actions, env))
             for t in futures.as_completed(threads):
-                if t.exception():
-                    raise t.exception()
+                exception = t.exception()
+                if exception:
+                    helper.send_error(h_id, f'Exception: {exception}')
+                    raise exception
 
 
 def _deploy_ext1_host(helper, h_id, extend, env):
