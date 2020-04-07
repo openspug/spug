@@ -27,7 +27,7 @@ def deploy_dispatch(request, req, token):
             SPUG_APP_NAME=req.deploy.app.name,
             SPUG_APP_ID=str(req.deploy.app_id),
             SPUG_REQUEST_NAME=req.name,
-            SPUG_DEPLOY_ID=req.deploy.id,
+            SPUG_DEPLOY_ID=str(req.deploy.id),
             SPUG_REQUEST_ID=str(req.id),
             SPUG_ENV_ID=str(req.deploy.env_id),
             SPUG_ENV_KEY=req.deploy.env.key,
