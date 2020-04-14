@@ -46,7 +46,10 @@ class User(models.Model, ModelMixin):
 
     @property
     def deploy_perms(self):
-        return json.loads(self.role.deploy_perms) if self.role.deploy_perms else {'apps': [], 'envs': []}
+        perms = json.loads(self.role.deploy_perms) if self.role.deploy_perms else {}
+        perms.setdefault('apps', [])
+        perms.setdefault('envs', [])
+        return perms
 
     def has_perms(self, codes):
         # return self.is_supper or self.role in codes
