@@ -6,3 +6,4 @@ __pycache__/
 migrations/
 /access.log
 /repos/*
+/logs/*
