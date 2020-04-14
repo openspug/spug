@@ -26,10 +26,10 @@ class ComTable extends React.Component {
     title: '类别',
     dataIndex: 'zone',
   }, {
-    title: '名称',
+    title: '主机名称',
     dataIndex: 'name',
   }, {
-    title: '主机',
+    title: '连接地址',
     dataIndex: 'hostname',
   },  {
     title: '端口',

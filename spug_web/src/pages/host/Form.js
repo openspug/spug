@@ -114,9 +114,9 @@ class ComForm extends React.Component {
               <Button type="link" onClick={this.handleAddZone}>添加类别</Button>
             </Col>
           </Form.Item>
-          <Form.Item required label="主机别名">
+          <Form.Item required label="主机名称">
             {getFieldDecorator('name', {initialValue: info['name']})(
-              <Input placeholder="请输入主机别名"/>
+              <Input placeholder="请输入主机名称"/>
             )}
           </Form.Item>
           <Form.Item required label="连接地址" style={{marginBottom: 0}}>
