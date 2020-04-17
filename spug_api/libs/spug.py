@@ -10,7 +10,7 @@ import requests
 import json
 
 spug_server = 'http://spug-wx.qbangmang.com'
-notify_source = 'info-circle'
+notify_source = 'monitor'
 
 
 def _parse_args(grp):
@@ -65,7 +65,7 @@ def notify_by_dd(event, subject, grp):
     if not spug_key:
         Notify.make_notify(notify_source, '1', '发送报警信息失败', '未配置报警服务调用凭据，请在系统管理/系统设置/报警服务设置中配置。')
         return
-    users = set(x.ding for x in Contact.objects.filter(id__in=u_ids, email__isnull=False))
+    users = set(x.ding for x in Contact.objects.filter(id__in=u_ids, ding__isnull=False))
     if users:
         texts = [
             '## %s ## ' % '监控告警通知' if event == '1' else '告警恢复通知',
