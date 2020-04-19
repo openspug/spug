@@ -177,7 +177,6 @@ class ComTable extends React.Component {
       data = data.filter(item => item['env_id'] === store.f_env_id)
     }
     if (store.f_s_date) {
-      console.log(store.f_s_date, store.f_e_date);
       data = data.filter(item => {
         const date = item['created_at'].substr(0, 10);
         return date >= store.f_s_date && date <= store.f_e_date
