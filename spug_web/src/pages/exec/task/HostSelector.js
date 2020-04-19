@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Table, Input, Button, Select } from 'antd';
+import { Modal, Table, Input, Button, Select, Checkbox } from 'antd';
 import { SearchForm } from 'components';
 import store from '../../host/store';
 
@@ -13,7 +13,6 @@ import store from '../../host/store';
 class HostSelector extends React.Component {
   constructor(props) {
     super(props);
-
     this.state = {
       selectedRows: []
     }
@@ -34,6 +33,21 @@ class HostSelector extends React.Component {
       selectedRows.push(record)
     }
     this.setState({selectedRows});
+  };
+
+  handleCheck = (e) => {
+    if (e.target.checked) {
+      let data = store.records;
+      if (store.f_name) {
+        data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
+      }
+      if (store.f_zone) {
+        data = data.filter(item => item['zone'].toLowerCase().includes(store.f_zone.toLowerCase()))
+      }
+      this.setState({selectedRows: data})
+    } else {
+      this.setState({selectedRows: []})
+    }
   };
 
   handleSubmit = () => {
@@ -71,7 +85,7 @@ class HostSelector extends React.Component {
     return (
       <Modal
         visible
-        width={800}
+        width={1000}
         title="选择执行主机"
         onCancel={this.props.onCancel}
         onOk={this.handleSubmit}
@@ -87,7 +101,10 @@ class HostSelector extends React.Component {
           <SearchForm.Item span={8} title="主机别名">
             <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
           </SearchForm.Item>
-          <SearchForm.Item span={8}>
+          <SearchForm.Item span={4} title="全选">
+            <Checkbox onChange={this.handleCheck}/>
+          </SearchForm.Item>
+          <SearchForm.Item span={4}>
             <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
           </SearchForm.Item>
         </SearchForm>
