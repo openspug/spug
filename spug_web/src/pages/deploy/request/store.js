@@ -19,8 +19,10 @@ class Store {
   @observable ext2Visible = false;
   @observable approveVisible = false;
 
-  @observable f_name;
-  @observable f_app_name;
+  @observable f_app_id;
+  @observable f_env_id;
+  @observable f_s_date;
+  @observable f_e_date;
 
   fetchRecords = () => {
     this.isFetching = true;
@@ -34,6 +36,16 @@ class Store {
     http.get('/api/app/deploy/')
       .then(res => this.deploys = res)
       .finally(() => this.isLoading = false)
+  };
+
+  updateDate = (data) => {
+    if (data.length === 2) {
+      this.f_s_date = data[0].format('YYYY-MM-DD');
+      this.f_e_date = data[1].format('YYYY-MM-DD')
+    } else {
+      this.f_s_date = null;
+      this.f_e_date = null
+    }
   };
 
   showForm = (info) => {

@@ -24,13 +24,17 @@ class RequestView(View):
             query['deploy__app_id__in'] = perms['apps']
             query['deploy__env_id__in'] = perms['envs']
         for item in DeployRequest.objects.filter(**query).annotate(
+                env_id=F('deploy__env_id'),
                 env_name=F('deploy__env__name'),
+                app_id=F('deploy__app_id'),
                 app_name=F('deploy__app__name'),
                 app_host_ids=F('deploy__host_ids'),
                 app_extend=F('deploy__extend'),
                 created_by_user=F('created_by__nickname')):
             tmp = item.to_dict()
+            tmp['env_id'] = item.env_id
             tmp['env_name'] = item.env_name
+            tmp['app_id'] = item.app_id
             tmp['app_name'] = item.app_name
             tmp['app_extend'] = item.app_extend
             tmp['extra'] = json.loads(item.extra)

@@ -170,11 +170,18 @@ class ComTable extends React.Component {
 
   render() {
     let data = store.records;
-    if (store.f_name) {
-      data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
+    if (store.f_app_id) {
+      data = data.filter(item => item['app_id'] === store.f_app_id)
     }
-    if (store.f_app_name) {
-      data = data.filter(item => item['app_name'].toLowerCase().includes(store.f_app_name.toLowerCase()))
+    if (store.f_env_id) {
+      data = data.filter(item => item['env_id'] === store.f_env_id)
+    }
+    if (store.f_s_date) {
+      console.log(store.f_s_date, store.f_e_date);
+      data = data.filter(item => {
+        const date = item['created_at'].substr(0, 10);
+        return date >= store.f_s_date && date <= store.f_e_date
+      })
     }
     return (
       <Table rowKey="id" loading={store.isFetching} dataSource={data} columns={this.columns}/>
