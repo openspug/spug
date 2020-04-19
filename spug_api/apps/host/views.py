@@ -4,9 +4,13 @@
 from django.views.generic import View
 from django.shortcuts import render
 from django.http.response import HttpResponseBadRequest
+from django.db.models import F
 from libs import json_response, JsonParser, Argument
 from apps.setting.utils import AppSetting
 from apps.host.models import Host
+from apps.app.models import Deploy
+from apps.schedule.models import Task
+from apps.monitor.models import Detection
 from libs.ssh import SSH, AuthenticationException
 from libs import human_datetime
 
@@ -44,6 +48,18 @@ class HostView(View):
             Argument('id', type=int, help='请指定操作对象')
         ).parse(request.GET)
         if error is None:
+            deploy = Deploy.objects.filter(host_ids__regex=fr'\D{form.id}\D').annotate(
+                app_name=F('app__name'),
+                env_name=F('env__name')
+            ).first()
+            if deploy:
+                return json_response(error=f'应用【{deploy.app_name}】在【{deploy.env_name}】的发布配置关联了该主机，请解除关联后再尝试删除该主机')
+            task = Task.objects.filter(targets__regex=fr'\D{form.id}\D').first()
+            if task:
+                return json_response(error=f'任务计划中的任务【{task.name}】关联了该主机，请解除关联后再尝试删除该主机')
+            detection = Detection.objects.filter(type__in=('3', '4'), addr=form.id).first()
+            if detection:
+                return json_response(error=f'监控中心的任务【{detection.name}】关联了该主机，请解除关联后再尝试删除该主机')
             Host.objects.filter(pk=form.id).update(
                 deleted_at=human_datetime(),
                 deleted_by=request.user,
