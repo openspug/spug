@@ -43,13 +43,28 @@ class Ext1Form extends React.Component {
       .finally(() => this.setState({fetching: false}))
   };
 
+  _getDefaultBranch = (branches) => {
+    branches = Object.keys(branches);
+    let branch = branches[0];
+    for (let item of store.records) {
+      if (item['deploy_id'] === store.record['deploy_id']) {
+        const b = lds.get(item, 'extra.1');
+        if (branches.includes(b)) {
+          branch = b
+        }
+        break
+      }
+    }
+    return branch
+  };
+
   _initExtra1 = () => {
     if (this.isReady === true || this.state.extra1 === undefined) {
       const {git_type, versions: {branches, tags}} = this.state;
       let [extra1, extra2] = [undefined, undefined];
       if (git_type === 'branch') {
         if (branches) {
-          extra1 = lds.get(Object.keys(branches), 0);
+          extra1 = this._getDefaultBranch(branches);
           extra2 = lds.get(branches[extra1], '0.id')
         }
       } else {
