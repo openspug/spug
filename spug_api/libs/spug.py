@@ -61,10 +61,7 @@ def notify_by_email(event, subject, grp):
 
 
 def notify_by_dd(event, subject, grp):
-    spug_key, u_ids = _parse_args(grp)
-    if not spug_key:
-        Notify.make_notify(notify_source, '1', '发送报警信息失败', '未配置报警服务调用凭据，请在系统管理/系统设置/报警服务设置中配置。')
-        return
+    _, u_ids = _parse_args(grp)
     users = set(x.ding for x in Contact.objects.filter(id__in=u_ids, ding__isnull=False))
     if users:
         texts = [
