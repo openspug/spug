@@ -58,6 +58,10 @@ class RequestView(View):
             deploy = Deploy.objects.filter(pk=form.deploy_id).first()
             if not deploy:
                 return json_response(error='未找到该发布配置')
+            if form.extra[0] == 'tag' and not form.extra[1]:
+                return json_response(error='请选择要发布的Tag')
+            if form.extra[0] == 'branch' and not form.extra[2]:
+                return json_response(error='请选择要发布的分支及Commit ID')
             form.status = '0' if deploy.is_audit else '1'
             form.extra = json.dumps(form.extra)
             form.host_ids = json.dumps(form.host_ids)
