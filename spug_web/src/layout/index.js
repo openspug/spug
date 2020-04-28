@@ -30,8 +30,8 @@ export default class extends React.Component {
 
   render() {
     return (
-      <Layout style={{minHeight: '100vh'}}>
-        <Sider collapsed={this.state.collapsed}/>
+      <Layout>
+        <Sider collapsed={this.state.collapsed} />
         <Layout>
           <Header
             collapsed={this.state.collapsed}
