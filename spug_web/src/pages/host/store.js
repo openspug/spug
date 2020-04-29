@@ -16,6 +16,7 @@ class Store {
 
   @observable f_name;
   @observable f_zone;
+  @observable f_host;
 
   fetchRecords = () => {
     this.isFetching = true;

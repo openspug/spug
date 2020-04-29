@@ -78,6 +78,9 @@ class ComTable extends React.Component {
     if (store.f_zone) {
       data = data.filter(item => item['zone'].toLowerCase().includes(store.f_zone.toLowerCase()))
     }
+    if (store.f_host) {
+      data = data.filter(item => item['hostname'].toLowerCase().includes(store.f_host.toLowerCase()))
+    }
     return (
       <React.Fragment>
         <Table rowKey="id" loading={store.isFetching} dataSource={data} columns={this.columns}/>
