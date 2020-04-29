@@ -51,7 +51,7 @@ class Store {
   showPagePerm = (info) => {
     this.record = info;
     this.pagePermVisible = true;
-    this.permissions = lds.merge(this.initPerms, info.page_perms)
+    this.permissions = lds.merge({}, this.initPerms, info.page_perms)
   };
 
   showDeployPerm = (info) => {
