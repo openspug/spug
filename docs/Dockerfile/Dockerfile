@@ -6,7 +6,7 @@ FROM python:3.6.10-alpine3.11
 
 RUN echo -e "http://mirrors.aliyun.com/alpine/v3.11/main\nhttp://mirrors.aliyun.com/alpine/v3.11/community" > /etc/apk/repositories
 RUN apk update && apk add --no-cache  nginx mariadb nodejs-npm git build-base openldap-dev supervisor redis bash
-RUN apk add --no-cache --virtual .build-deps  openssl-dev gcc musl-dev python3-dev libffi-dev openssl-dev make \
+RUN apk add --no-cache --virtual .build-deps  openssl-dev gcc musl-dev python3-dev libffi-dev openssh-client make \
     && mkdir /etc/supervisor.d
 
 
