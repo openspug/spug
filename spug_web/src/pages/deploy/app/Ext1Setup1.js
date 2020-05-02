@@ -42,6 +42,7 @@ export default observer(function Ext2Setup1() {
             value={info['rst_notify']['mode']} style={{width: 100}} onChange={v => info['rst_notify']['mode'] = v}>
             <Select.Option value="0">关闭</Select.Option>
             <Select.Option value="1">钉钉</Select.Option>
+            <Select.Option value="3">企业微信</Select.Option>
             <Select.Option value="2">Webhook</Select.Option>
           </Select>
         )}

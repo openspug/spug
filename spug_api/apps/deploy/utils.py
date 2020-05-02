@@ -224,7 +224,7 @@ class Helper:
                         'text': '\n\n'.join(texts)
                     }
                 }
-                res = requests.post(rst_notify['value'], json=data)
+                requests.post(rst_notify['value'], json=data)
             elif rst_notify['mode'] == '2':
                 data = {
                     'req_id': req.id,
@@ -236,6 +236,25 @@ class Helper:
                     'targets': hosts,
                     'is_success': req.status == '3',
                     'deploy_at': human_datetime()
+                }
+                requests.post(rst_notify['value'], json=data)
+            elif rst_notify['mode'] == '3':
+                color, text = ('info', '成功') if req.status == '3' else ('warning', '失败')
+                texts = [
+                    '## %s' % '发布结果通知',
+                    f'**应用名称：** {req.deploy.app.name} ',
+                    f'**应用版本：** {version} ',
+                    f'**发布环境：** {req.deploy.env.name} ',
+                    f'**发布主机：** {",".join(x["name"] for x in hosts)} ',
+                    f'**发布结果：** <font color="{color}">{text}</font>',
+                    f'**发布时间：** {human_datetime()} ',
+                    '> 来自 Spug运维平台'
+                ]
+                data = {
+                    'msgtype': 'markdown',
+                    'markdown': {
+                        'content': '\n'.join(texts)
+                    }
                 }
                 requests.post(rst_notify['value'], json=data)
 
