@@ -25,6 +25,7 @@ function init_system_lib() {
     case $ID in
         centos|fedora|rhel)
             echo "开始安装/更新可能缺少的依赖: git mariadb-server mariadb-devel python3-devel gcc openldap-devel redis nginx supervisor python36"
+            yum install -y epel-release
             yum install -y git mariadb-server mariadb-devel python3-devel gcc openldap-devel redis nginx supervisor python36
             sed -i 's/ default_server//g' /etc/nginx/nginx.conf
             MYSQL_CONF=/etc/my.cnf.d/spug.cnf
