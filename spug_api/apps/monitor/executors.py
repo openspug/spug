@@ -12,27 +12,30 @@ logging.captureWarnings(True)
 
 
 def site_check(url):
-    status_code = -1
     try:
         res = requests.get(url, timeout=10, verify=False)
-        status_code = res.status_code
-    finally:
-        return status_code == 200
+        return 200 <= res.status_code < 400, f'返回状态码：{res.status_code}'
+    except Exception as e:
+        return False, f'异常信息：{e}'
 
 
 def port_check(addr, port):
-    sock = socket()
-    sock.settimeout(5)
-    return sock.connect_ex((addr, int(port))) == 0
+    try:
+        sock = socket()
+        sock.settimeout(5)
+        sock.connect((addr, int(port)))
+        return True, None
+    except Exception as e:
+        return False, f'异常信息：{e}'
 
 
 def host_executor(host, pkey, command):
-    exit_code = -1
     try:
         cli = SSH(host.hostname, host.port, host.username, pkey=pkey)
-        exit_code, _ = cli.exec_command(command)
-    finally:
-        return exit_code == 0
+        exit_code, out = cli.exec_command(command)
+        return exit_code == 0, out.decode()
+    except Exception as e:
+        return False, f'异常信息：{e}'
 
 
 def dispatch(tp, addr, extra):

@@ -18,8 +18,8 @@ def _parse_args(grp):
     return spug_key, sum([json.loads(x.contacts) for x in Group.objects.filter(id__in=grp)], [])
 
 
-def notify_by_wx(event, subject, n_grp):
-    spug_key, u_ids = _parse_args(n_grp)
+def notify_by_wx(event, obj):
+    spug_key, u_ids = _parse_args(obj.grp)
     if not spug_key:
         Notify.make_notify(notify_source, '1', '发送报警信息失败', '未配置报警服务调用凭据，请在系统管理/系统设置/报警服务设置中配置。')
         return
@@ -28,7 +28,9 @@ def notify_by_wx(event, subject, n_grp):
         data = {
             'token': spug_key,
             'event': event,
-            'subject': subject,
+            'subject': obj.name,
+            'desc': obj.out,
+            'remark': f'故障持续{obj.duration}' if event == '2' else None,
             'users': list(users)
         }
         requests.post(f'{spug_server}/apis/notify/wx/', json=data)
@@ -36,21 +38,25 @@ def notify_by_wx(event, subject, n_grp):
         Notify.make_notify(notify_source, '1', '发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的微信Token。')
 
 
-def notify_by_email(event, subject, grp):
-    spug_key, u_ids = _parse_args(grp)
+def notify_by_email(event, obj):
+    spug_key, u_ids = _parse_args(obj.grp)
     users = set(x.email for x in Contact.objects.filter(id__in=u_ids, email__isnull=False))
     if users:
         mail_service = json.loads(AppSetting.get_default('mail_service', '{}'))
+        body = ['告警名称：' + obj.name, '告警时间：' + human_datetime(), '告警描述：' + obj.out]
+        if event == '2':
+            body.append('故障持续：' + obj.duration)
         if mail_service.get('server'):
-            event_map = {'1': '告警', '2': '恢复'}
-            subject = f'{event_map[event]}-{subject}'
+            event_map = {'1': '告警发生', '2': '告警恢复'}
+            subject = f'{event_map[event]}-{obj.name}'
             mail = Mail(**mail_service)
-            mail.send_text_mail(users, subject, f'{subject}\r\n\r\n自动发送，请勿回复。')
+            mail.send_text_mail(users, subject, '\r\n'.join(body) + '\r\n\r\n自动发送，请勿回复。')
         elif spug_key:
             data = {
                 'token': spug_key,
                 'event': event,
-                'subject': subject,
+                'subject': obj.name,
+                'body': '\r\n'.join(body),
                 'users': list(users)
             }
             requests.post(f'{spug_server}/apis/notify/mail/', json=data)
@@ -60,22 +66,23 @@ def notify_by_email(event, subject, grp):
         Notify.make_notify(notify_source, '1', '发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的邮件地址。')
 
 
-def notify_by_dd(event, subject, grp):
-    _, u_ids = _parse_args(grp)
+def notify_by_dd(event, obj):
+    _, u_ids = _parse_args(obj.grp)
     users = set(x.ding for x in Contact.objects.filter(id__in=u_ids, ding__isnull=False))
     if users:
         texts = [
-            '## %s ## ' % '监控告警通知' if event == '1' else '告警恢复通知',
-            f'**告警名称：** <font color="#{"f90202" if event == "1" else "8ece60"}">{subject}</font> ',
+            '## %s ## ' % ('监控告警通知' if event == '1' else '告警恢复通知'),
+            f'**告警名称：** <font color="#{"f90202" if event == "1" else "8ece60"}">{obj.name}</font> ',
             f'**告警时间：** {human_datetime()} ',
-            '**告警描述：** %s ' % '请在运维平台监控中心查看详情' if event == '1' else '告警已恢复',
-            '> ###### 来自 Spug运维平台'
+            f'**告警描述：** {obj.out} ',
         ]
+        if event == '2':
+            texts.append(f'**持续时间：** {obj.duration} ')
         data = {
             'msgtype': 'markdown',
             'markdown': {
                 'title': '监控告警通知',
-                'text': '\n\n'.join(texts)
+                'text': '\n\n'.join(texts) + '\n\n> ###### 来自 Spug运维平台'
             }
         }
         for url in users:

@@ -13,7 +13,8 @@ from apps.monitor.executors import dispatch
 from apps.monitor.utils import seconds_to_human
 from apps.notify.models import Notify
 from django.conf import settings
-from libs import spug, AttrDict, human_datetime
+from libs import spug, AttrDict, human_datetime, human_diff_time
+from datetime import datetime
 import logging
 import json
 import time
@@ -40,22 +41,25 @@ class Scheduler:
             notify_grp=obj.notify_grp,
             notify_mode=obj.notify_mode)
 
-    def _do_notify(self, event, obj):
-        grp = json.loads(obj.notify_grp)
+    def _do_notify(self, event, obj, out):
+        obj.out = out
+        obj.grp = json.loads(obj.notify_grp)
+        if event == '2':
+            obj.duration = human_diff_time(datetime.now(), datetime.fromtimestamp(obj.latest_fault_time))
         for mode in json.loads(obj.notify_mode):
             if mode == '1':
-                spug.notify_by_wx(event, obj.name, grp)
+                spug.notify_by_wx(event, obj)
             elif mode == '3':
-                spug.notify_by_dd(event, obj.name, grp)
+                spug.notify_by_dd(event, obj)
             elif mode == '4':
-                spug.notify_by_email(event, obj.name, grp)
+                spug.notify_by_email(event, obj)
 
-    def _handle_notify(self, obj, old_status):
+    def _handle_notify(self, obj, old_status, out):
         if obj.latest_status == 0:
             if old_status == 1:
                 self._record_alarm(obj, '2')
                 logger.info(f'{human_datetime()} recover job_id: {obj.id}')
-                self._do_notify('2', obj)
+                self._do_notify('2', obj, out)
         else:
             if obj.fault_times >= obj.threshold:
                 if time.time() - obj.latest_notify_time >= obj.quiet * 60:
@@ -63,7 +67,7 @@ class Scheduler:
                     obj.save()
                     self._record_alarm(obj, '1')
                     logger.info(f'{human_datetime()} notify job_id: {obj.id}')
-                    self._do_notify('1', obj)
+                    self._do_notify('1', obj, out)
 
     def _handle_event(self, event):
         close_old_connections()
@@ -78,11 +82,12 @@ class Scheduler:
             logger.info(f'EVENT_JOB_ERROR: job_id {event.job_id} exception: {event.exception}')
             Notify.make_notify('monitor', '1', f'{obj.name} - 执行异常', f'{event.exception}')
         elif event.code == EVENT_JOB_EXECUTED:
+            is_ok, out = event.retval
             obj = Detection.objects.filter(pk=event.job_id).first()
             old_status = obj.latest_status
-            obj.latest_status = 0 if event.retval else 1
+            obj.latest_status = 0 if is_ok else 1
             obj.latest_run_time = human_datetime(event.scheduled_run_time)
-            if old_status in [0, None] and event.retval is False:
+            if old_status in [0, None] and is_ok is False:
                 obj.latest_fault_time = int(time.time())
             if obj.latest_status == 0:
                 obj.latest_notify_time = 0
@@ -90,7 +95,7 @@ class Scheduler:
             else:
                 obj.fault_times += 1
             obj.save()
-            self._handle_notify(obj, old_status)
+            self._handle_notify(obj, old_status, out)
 
     def _init(self):
         self.scheduler.start()
