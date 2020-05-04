@@ -53,7 +53,7 @@ function init_system_lib() {
 
 function install_spug() {
   echo "开始安装Spug..."
-  curl -o /tmp/spug_latest.tar.gz https://spug.dev/installer/spug_latest.tar.gz
+  curl -o /tmp/spug_latest.tar.gz https://spug.dev/installer/latest/spug_latest.tar.gz
   mkdir -p /data
   cd /data
   tar xf /tmp/spug_latest.tar.gz
