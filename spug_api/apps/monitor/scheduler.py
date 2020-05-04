@@ -54,9 +54,9 @@ class Scheduler:
             elif mode == '4':
                 spug.notify_by_email(event, obj)
 
-    def _handle_notify(self, obj, old_status, out):
+    def _handle_notify(self, obj, is_notified, out):
         if obj.latest_status == 0:
-            if old_status == 1:
+            if is_notified:
                 self._record_alarm(obj, '2')
                 logger.info(f'{human_datetime()} recover job_id: {obj.id}')
                 self._do_notify('2', obj, out)
@@ -84,18 +84,18 @@ class Scheduler:
         elif event.code == EVENT_JOB_EXECUTED:
             is_ok, out = event.retval
             obj = Detection.objects.filter(pk=event.job_id).first()
-            old_status = obj.latest_status
-            obj.latest_status = 0 if is_ok else 1
-            obj.latest_run_time = human_datetime(event.scheduled_run_time)
-            if old_status in [0, None] and is_ok is False:
+            is_notified = True if obj.latest_notify_time else False
+            if obj.latest_status in [0, None] and is_ok is False:
                 obj.latest_fault_time = int(time.time())
-            if obj.latest_status == 0:
+            if is_ok:
                 obj.latest_notify_time = 0
                 obj.fault_times = 0
             else:
                 obj.fault_times += 1
+            obj.latest_status = 0 if is_ok else 1
+            obj.latest_run_time = human_datetime(event.scheduled_run_time)
             obj.save()
-            self._handle_notify(obj, old_status, out)
+            self._handle_notify(obj, is_notified, out)
 
     def _init(self):
         self.scheduler.start()
