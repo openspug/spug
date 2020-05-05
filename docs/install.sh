@@ -53,17 +53,14 @@ function init_system_lib() {
 
 function install_spug() {
   echo "开始安装Spug..."
-  curl -o /tmp/spug_latest.tar.gz https://spug.dev/installer/latest/spug_latest.tar.gz
   mkdir -p /data
   cd /data
-  tar xf /tmp/spug_latest.tar.gz
-  cd spug
+  git clone --depth=1 https://gitee.com/openspug/spug.git
+  curl -o /tmp/web_latest.tar.gz https://spug.dev/installer/web_latest.tar.gz
+  tar xf /tmp/web_latest.tar.gz -C spug/spug_web/
+  cd spug/spug_api
   python3 -m venv venv
   source venv/bin/activate
-  ln -s /data/spug/venv /data/spug/spug_api/venv
-  mkdir repos
-  ln -s /data/spug/repos /data/spug/spug_api/repos
-  cd spug_api
 
   pip install wheel -i https://pypi.doubanio.com/simple/
   pip install gunicorn mysqlclient -i https://pypi.doubanio.com/simple/
@@ -136,7 +133,7 @@ EOF
 cat << EOF > /etc/nginx/conf.d/spug.conf
 server {
         listen 80 default_server;
-        root /data/spug/spug_web/;
+        root /data/spug/spug_web/build/;
 
         location ^~ /api/ {
                 rewrite ^/api(.*) \$1 break;
