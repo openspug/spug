@@ -1,30 +1,22 @@
-# This is a basic workflow to help you get started with Actions
-
-name: CI
-
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
+name: github repos to gitee job
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+# 如果需要PR触发把push前的#去掉
+# push:
+  schedule:
+    # 每天北京时间1点跑
+    - cron:  '0 1 * * *'
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Mirror the Github organization repos to Gitee.
-        uses: Yikun/hub-mirror-action@master
-        with:
-          src: github.com/openspug
-          dst: gitee.com/openspug
-          dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
-          dst_token: ${{ secrets.GITEE_TOKEN }}
-          account_type: org
-
+    - name: Mirror the Github organization repos to Gitee.
+      uses: Yikun/gitee-mirror-action@v0.01
+      with:
+        src: github.com/openspug
+        dst: gitee.com/openspug
+        # Gitee对应的秘钥
+        private_key: ${{ secrets.mac_pro_videojj }}
+        # 需要同步的Github组织名（源）
+        github_org: openspug
+        # 需要同步到的Gitee的组织名（目的）
+        gitee_org: openspug
