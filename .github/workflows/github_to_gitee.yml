@@ -12,8 +12,8 @@ jobs:
     - name: Mirror the Github organization repos to Gitee.
       uses: Yikun/gitee-mirror-action@v0.01
       with:
-        src: github.com/openspug
-        dst: gitee.com/openspug
+        src: github/openspug
+        dst: gitee/openspug
         # Gitee对应的秘钥
         private_key: ${{ secrets.mac_pro_videojj }}
         # 需要同步的Github组织名（源）
