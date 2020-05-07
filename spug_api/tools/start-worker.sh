@@ -5,5 +5,7 @@
 # start worker service
 
 cd $(dirname $(dirname $0))
-source ./venv/bin/activate
+if [ -f ./venv/bin/activate ]; then
+  source ./venv/bin/activate
+fi
 exec python manage.py runworker ssh_exec
