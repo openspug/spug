@@ -108,10 +108,15 @@ class RequestView(View):
 
     def delete(self, request):
         form, error = JsonParser(
-            Argument('id', type=int, help='缺少必要参数')
+            Argument('id', type=int, required=False),
+            Argument('expire', required=False)
         ).parse(request.GET)
         if error is None:
-            DeployRequest.objects.filter(pk=form.id, status__in=('0', '1', '-1')).delete()
+            if form.id:
+                DeployRequest.objects.filter(pk=form.id, status__in=('0', '1', '-1')).delete()
+            if form.expire:
+                count, _ = DeployRequest.objects.filter(created_at__lt=form.expire).delete()
+                return json_response(count)
         return json_response(error=error)
 
 
@@ -186,15 +191,3 @@ class RequestDetailView(View):
             req.reason = form.reason
             req.save()
         return json_response(error=error)
-
-
-class RequestBatchView(View):
-
-    def delete(self, request):
-        form, error = JsonParser(
-            Argument('expire_time', type=str, help="缺少必要参赛"),
-        ).parse(request.body)
-        if error is None:
-            DeployRequest.objects.filter(created_at__lt=form.expire_time).delete()
-        return json_response(error=error)
-    

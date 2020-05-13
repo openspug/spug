@@ -12,6 +12,7 @@ class Store {
   @observable types = [];
   @observable record = {};
   @observable refs = {};
+  @observable counter = {};
   @observable isLoading = false;
   @observable isFetching = false;
   @observable addVisible = false;
@@ -19,6 +20,7 @@ class Store {
   @observable ext2Visible = false;
   @observable approveVisible = false;
 
+  @observable f_status = 'all';
   @observable f_app_id;
   @observable f_env_id;
   @observable f_s_date;
@@ -28,7 +30,21 @@ class Store {
     this.isFetching = true;
     http.get('/api/deploy/request/')
       .then(res => this.records = res)
+      .then(this._updateCounter)
       .finally(() => this.isFetching = false)
+  };
+
+  _updateCounter = () => {
+    const counter = {'all': 0, '-3': 0, '-1': 0, '0': 0, '1': 0, '2': 0, '3': 0};
+    for (let item of this.records) {
+      counter['all'] += 1;
+      if (['-1', '2'].includes(item['status'])) {
+        counter['99'] += 1
+      } else {
+        counter[item['status']] += 1
+      }
+    }
+    this.counter = counter
   };
 
   loadDeploys = () => {

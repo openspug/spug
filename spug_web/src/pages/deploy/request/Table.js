@@ -70,7 +70,7 @@ class ComTable extends React.Component {
       } else if (info.status === '-3') {
         return <Tag color="red">{info['status_alias']}</Tag>
       } else {
-        return info['status_alias']
+        return <Tag>{info['status_alias']}</Tag>
       }
     }
   }, {
@@ -181,6 +181,13 @@ class ComTable extends React.Component {
         const date = item['created_at'].substr(0, 10);
         return date >= store.f_s_date && date <= store.f_e_date
       })
+    }
+    if (store.f_status !== 'all') {
+      if (store.f_status === '99') {
+        data = data.filter(item => ['-1', '2'].includes(item['status']))
+      } else {
+        data = data.filter(item => item['status'] === store.f_status)
+      }
     }
     return (
       <Table rowKey="id" loading={store.isFetching} dataSource={data} columns={this.columns}/>
