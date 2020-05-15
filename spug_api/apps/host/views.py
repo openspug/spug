@@ -12,7 +12,8 @@ from apps.app.models import Deploy
 from apps.schedule.models import Task
 from apps.monitor.models import Detection
 from libs.ssh import SSH, AuthenticationException
-from libs import human_datetime
+from libs import human_datetime, AttrDict
+from openpyxl import load_workbook
 
 
 class HostView(View):
@@ -67,6 +68,38 @@ class HostView(View):
                 deleted_by=request.user,
             )
         return json_response(error=error)
+
+
+def post_import(request):
+    password = request.POST.get('password')
+    file = request.FILES['file']
+    ws = load_workbook(file, read_only=True)['Sheet1']
+    summary = {'invalid': [], 'skip': [], 'fail': [], 'success': []}
+    for i, row in enumerate(ws.rows):
+        if i == 0:  # 第1行是表头 略过
+            continue
+        if not all([row[x].value for x in range(5)]):
+            summary['invalid'].append(i)
+            continue
+        data = AttrDict(
+            zone=row[0].value,
+            name=row[1].value,
+            hostname=row[2].value,
+            port=row[3].value,
+            username=row[4].value,
+            password=row[5].value,
+            desc=row[6].value
+        )
+        if Host.objects.filter(hostname=data.hostname, port=data.port, username=data.username,
+                               deleted_by_id__isnull=True).exists():
+            summary['skip'].append(i)
+            continue
+        if valid_ssh(data.hostname, data.port, data.username, data.pop('password') or password) is False:
+            summary['fail'].append(i)
+            continue
+        Host.objects.create(created_by=request.user, **data)
+        summary['success'].append(i)
+    return json_response(summary)
 
 
 def web_ssh(request, h_id):

@@ -33,6 +33,8 @@ export default observer(function () {
       </SearchForm>
       <AuthDiv auth="host.host.add" style={{marginBottom: 16}}>
         <Button type="primary" icon="plus" onClick={() => store.showForm()}>新建</Button>
+        <Button style={{marginLeft: 20}} type="primary" icon="import"
+                onClick={() => store.importVisible = true}>批量导入</Button>
       </AuthDiv>
       <ComTable/>
     </AuthCard>
