@@ -14,6 +14,9 @@
 }
 
 .title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 12px;
     color: rgba(0, 0, 0, .85);
     font-weight: 500;

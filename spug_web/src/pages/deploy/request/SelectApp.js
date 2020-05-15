@@ -6,7 +6,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react';
-import { Modal, Button, Menu, Spin, Icon, Tooltip } from 'antd';
+import { Modal, Button, Menu, Spin, Icon, Input, Tooltip } from 'antd';
 import store from './store';
 import styles from './index.module.css';
 import envStore from 'pages/config/environment/store';
@@ -17,7 +17,8 @@ class SelectApp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      env_id: 0
+      env_id: 0,
+      search: ''
     }
   }
 
@@ -58,7 +59,10 @@ class SelectApp extends React.Component {
 
   render() {
     const {env_id} = this.state;
-    const records = store.deploys.filter(x => x.env_id === Number(env_id));
+    let records = store.deploys.filter(x => x.env_id === Number(env_id));
+    if (this.state.search) {
+      records = records.filter(x => x['app_name'].toLowerCase().includes(this.state.search.toLowerCase()))
+    }
     return (
       <Modal
         visible
@@ -83,7 +87,14 @@ class SelectApp extends React.Component {
 
           <div className={styles.right}>
             <Spin spinning={store.isLoading}>
-              <div className={styles.title}>{lds.get(envStore.idMap, `${env_id}.name`)}</div>
+              <div className={styles.title}>
+                <div>{lds.get(envStore.idMap, `${env_id}.name`)}</div>
+                <Input.Search
+                  allowClear
+                  style={{width: 200}}
+                  placeholder="请输入快速搜应用"
+                  onChange={e => this.setState({search: e.target.value})}/>
+              </div>
               {records.map(item => (
                 <Tooltip key={item.id} title={store.refs[item.id] ? item['app_name'] : null}>
                   <Button type="primary" className={styles.appBlock} onClick={() => this.handleClick(item)}>

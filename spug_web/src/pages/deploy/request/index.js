@@ -6,7 +6,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Button, Select, DatePicker, Radio, Row, Col, Modal, Form, message } from 'antd';
-import { SearchForm, AuthButton, AuthCard } from 'components';
+import { SearchForm, AuthFragment, AuthCard } from 'components';
 import SelectApp from './SelectApp';
 import Ext1Form from './Ext1Form';
 import Ext2Form from './Ext2Form';
@@ -91,18 +91,16 @@ class Index extends React.Component {
             </Radio.Group>
           </Col>
           <Col span={8} style={{textAlign: 'right'}}>
-            <AuthButton
-              hide
-              type="primary"
-              icon="delete"
-              auth="deploy.request.del"
-              onClick={this.handleBatchDel} style={{marginRight: 20}}>批量删除</AuthButton>
-            <AuthButton
-              hide
-              type="primary"
-              icon="plus"
-              auth="deploy.request.add"
-              onClick={() => store.addVisible = true}>新建发布申请</AuthButton>
+            <AuthFragment auth="deploy.request.del">
+              <Button type="primary" icon="delete" onClick={this.handleBatchDel}>批量删除</Button>
+            </AuthFragment>
+            <AuthFragment auth="deploy.request.add">
+              <Button
+                type="primary"
+                icon="plus"
+                onClick={() => store.addVisible = true}
+                style={{marginLeft: 20}}>新建发布申请</Button>
+            </AuthFragment>
           </Col>
         </Row>
         <ComTable/>
