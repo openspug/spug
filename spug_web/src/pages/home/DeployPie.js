@@ -73,7 +73,8 @@ export default class AlarmTrend extends React.Component {
             <Label
               content="percent"
               formatter={(val, item) => {
-                return item.point.name + ": " + val;
+                const percent = (item.point['percent'] * 100).toFixed(2) + '%';
+                return item.point.name + ": " + percent;
               }}
             />
           </Geom>
