@@ -32,7 +32,7 @@ export default observer(function () {
           <Input
             value={lds.get(store.settings, 'api_key.value')}
             onChange={e => lds.set(store.settings, 'api_key.value', e.target.value)}
-            placeholder="请输入"/>
+            placeholder="请输入自定义Token"/>
         </Form.Item>
         <Form.Item>
           <Button type="primary" loading={store.loading} onClick={handleSubmit}>保存设置</Button>
