@@ -205,7 +205,7 @@ class ComForm extends React.Component {
                 <Checkbox.Group options={modeOptions}/>
               )}
             </Form.Item>
-            <Form.Item label="通道沉默">
+            <Form.Item label="通道沉默" help="相同的告警信息，沉默期内只发送一次。">
               {getFieldDecorator('quiet', {initialValue: info['quiet'] || 24 * 60})(
                 <Select placeholder="请选择">
                   <Select.Option value={5}>5分钟</Select.Option>
