@@ -44,6 +44,15 @@ class Command(BaseCommand):
         if task.wait() != 0:
             return self.stderr.write(self.style.ERROR('获取更新失败，排除网络问题后可至官方论坛反馈。'))
 
+        # update dep
+        commands = [
+            f'cd {settings.BASE_DIR}',
+            'pip install -r requirements.txt'
+        ]
+        task = subprocess.Popen(' && '.join(commands), shell=True)
+        if task.wait() != 0:
+            return self.stderr.write(self.style.ERROR('更新依赖包失败，排除网络问题后可至官方论坛反馈。'))
+
         # update db
         apps = [x.split('.')[-1] for x in settings.INSTALLED_APPS if x.startswith('apps.')]
         call_command('makemigrations', *apps)
