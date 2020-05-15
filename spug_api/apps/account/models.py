@@ -79,6 +79,12 @@ class Role(models.Model, ModelMixin):
         tmp['used'] = self.user_set.count()
         return tmp
 
+    def add_deploy_perm(self, target, value):
+        perms = json.loads(self.deploy_perms) if self.deploy_perms else {'apps': [], 'envs': []}
+        perms[target].append(value)
+        self.deploy_perms = json.dumps(perms)
+        self.save()
+
     def __repr__(self):
         return '<Role name=%r>' % self.name
 

@@ -32,7 +32,9 @@ class AppView(View):
             if form.id:
                 App.objects.filter(pk=form.id).update(**form)
             else:
-                App.objects.create(created_by=request.user, **form)
+                app = App.objects.create(created_by=request.user, **form)
+                if request.user.role:
+                    request.user.role.add_deploy_perm('apps', app.id)
         return json_response(error=error)
 
     def patch(self, request):

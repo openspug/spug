@@ -31,7 +31,9 @@ class EnvironmentView(View):
             if form.id:
                 Environment.objects.filter(pk=form.id).update(**form)
             else:
-                Environment.objects.create(created_by=request.user, **form)
+                env = Environment.objects.create(created_by=request.user, **form)
+                if request.user.role:
+                    request.user.role.add_deploy_perm('envs', env.id)
         return json_response(error=error)
 
     def delete(self, request):
