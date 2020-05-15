@@ -13,6 +13,7 @@ import store from './store';
 import hostStore from '../host/store';
 import styles from './index.module.css';
 import moment from 'moment';
+import lds from 'lodash';
 
 @observer
 class ComForm extends React.Component {
@@ -39,6 +40,13 @@ class ComForm extends React.Component {
     switch (trigger) {
       case 'date':
         return this.state.args['date'].format('YYYY-MM-DD HH:mm:ss');
+      case 'cron':
+        const {rule, start, stop} = this.state.args['cron'];
+        return JSON.stringify({
+          rule,
+          start: start ? start.format('YYYY-MM-DD HH:mm:ss') : null,
+          stop: stop ? stop.format('YYYY-MM-DD HH:mm:ss') : null
+        });
       default:
         return this.state.args[trigger];
     }
@@ -87,6 +95,12 @@ class ComForm extends React.Component {
   handleArgs = (type, value) => {
     const args = Object.assign(this.state.args, {[type]: value});
     this.setState({args})
+  };
+
+  handleCronArgs = (key, value) => {
+    let args = this.state.args['cron'] || {};
+    args = Object.assign(args, {[key]: value});
+    this.setState({args: Object.assign(this.state.args, {cron: args})})
   };
 
   verifyButtonStatus = () => {
@@ -210,7 +224,29 @@ class ComForm extends React.Component {
                         onChange={v => this.handleArgs('date', v)}/>
                     </Form.Item>
                   </Tabs.TabPane>
-                  <Tabs.TabPane disabled tab="UNIX Cron" key="cron">
+                  <Tabs.TabPane tab="UNIX Cron" key="cron">
+                    <Form.Item required label="执行规则" help="兼容Cron风格，可参考官方例子">
+                      <Input
+                        value={lds.get(args, 'cron.rule')}
+                        placeholder="例如每天凌晨1点执行：0 1 * * *"
+                        onChange={e => this.handleCronArgs('rule', e.target.value)}/>
+                    </Form.Item>
+                    <Form.Item label="生效时间" help="定义的执行规则在到达该时间后生效">
+                      <DatePicker
+                        showTime
+                        style={{width: '100%'}}
+                        placeholder="可选输入"
+                        value={lds.get(args, 'cron.start') ? moment(args['cron']['start']) : undefined}
+                        onChange={v => this.handleCronArgs('start', v)}/>
+                    </Form.Item>
+                    <Form.Item label="结束时间" help="执行规则在到达该时间后不再执行">
+                      <DatePicker
+                        showTime
+                        style={{width: '100%'}}
+                        placeholder="可选输入"
+                        value={lds.get(args, 'cron.stop') ? moment(args['cron']['stop']) : undefined}
+                        onChange={v => this.handleCronArgs('stop', v)}/>
+                    </Form.Item>
                   </Tabs.TabPane>
                   <Tabs.TabPane disabled tab="日历间隔" key="calendarinterval">
                   </Tabs.TabPane>

@@ -40,6 +40,8 @@ class Task(models.Model, ModelMixin):
         tmp = super().to_dict(*args, **kwargs)
         tmp['targets'] = json.loads(self.targets)
         tmp['latest_status_alias'] = self.get_latest_status_display()
+        if self.trigger == 'cron':
+            tmp['trigger_args'] = json.loads(self.trigger_args)
         return tmp
 
     def __repr__(self):

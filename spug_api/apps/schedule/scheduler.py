@@ -4,6 +4,7 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.date import DateTrigger
+from apscheduler.triggers.cron import CronTrigger
 from apscheduler.events import EVENT_SCHEDULER_SHUTDOWN, EVENT_JOB_MAX_INSTANCES, EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 from django_redis import get_redis_connection
 from django.utils.functional import SimpleLazyObject
@@ -37,6 +38,11 @@ class Scheduler:
             return IntervalTrigger(seconds=int(trigger_args), timezone=cls.timezone)
         elif trigger == 'date':
             return DateTrigger(run_date=trigger_args, timezone=cls.timezone)
+        elif trigger == 'cron':
+            args = json.loads(trigger_args) if not isinstance(trigger_args, dict) else trigger_args
+            minute, hour, day, month, week = args['rule'].split()
+            return CronTrigger(minute=minute, hour=hour, day=day, month=month, week=week, start_date=args['start'],
+                               end_date=args['stop'])
         else:
             raise TypeError(f'unknown schedule policy: {trigger!r}')
 
