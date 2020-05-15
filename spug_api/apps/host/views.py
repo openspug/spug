@@ -33,16 +33,15 @@ class HostView(View):
             Argument('password', required=False),
         ).parse(request.body)
         if error is None:
-            if Host.objects.filter(name=form.name, deleted_by_id__isnull=True).exists():
-                return json_response(error=f'已存在的主机名称【{form.name}】')
             if valid_ssh(form.hostname, form.port, form.username, form.pop('password')) is False:
                 return json_response('auth fail')
 
             if form.id:
                 Host.objects.filter(pk=form.pop('id')).update(**form)
+            elif Host.objects.filter(name=form.name, deleted_by_id__isnull=True).exists():
+                return json_response(error=f'已存在的主机名称【{form.name}】')
             else:
-                form.created_by = request.user
-                Host.objects.create(**form)
+                Host.objects.create(created_by=request.user, **form)
         return json_response(error=error)
 
     def delete(self, request):
