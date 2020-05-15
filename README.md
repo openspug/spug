@@ -2,11 +2,10 @@
 
 <div align="center">
 
-Spug是面向中小型企业设计的无 Agent的自动化运维平台，整合了主机管理、主机批量执行、主机在线终端、应用发布、任务计划、配置中心、监控、报警等一系列功能。
+Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台，整合了主机管理、主机批量执行、主机在线终端、应用发布部署、在线任务计划、配置中心、监控、报警等一系列功能。
 
 </div>
 
-- 演示地址：https://demo.spug.dev
 - 官网地址：https://www.spug.dev
 - 使用文档：https://www.spug.dev/docs/about-spug/
 - 更新日志: https://www.spug.dev/docs/change-log/
@@ -22,10 +21,10 @@ Spug是面向中小型企业设计的无 Agent的自动化运维平台，整合�
 
 ## 特性
 
-- **批量执行**: 命令可以在线批量执行
+- **批量执行**: 主机命令在线批量执行
 - **在线终端**: 主机支持浏览器在线终端登录
-- **任务计划**: 灵活的任务计划
-- **发布部署**: 支持自定义发布流程
+- **任务计划**: 灵活的在线任务计划
+- **发布部署**: 支持自定义发布部署流程
 - **配置中心**: 支持KV、文本、json等格式的配置
 - **监控中心**: 支持站点、端口、进程、自定义等监控
 - **报警中心**: 支持短信、邮件、钉钉、微信等报警方式
@@ -83,13 +82,19 @@ Spug是面向中小型企业设计的无 Agent的自动化运维平台，整合�
 
 我们非常欢迎你的贡献，你可以通过以下方式和我们一起共建 :smiley:：
 
-- 在你的公司使用 Spug。
 - 通过 [Issue](https://github.com/openspug/spug/issues) 报告 bug 或进行咨询。
 - 提交 [Pull Request](https://github.com/openspug/spug/pulls) 改进Spug的代码。
 
 ## 开发者群
 #### QQ群号: 783951751
-![image](http://image.qbangmang.com/spug.png)
+<div >
+   <img src="http://image.qbangmang.com/spug.png" width = "300" height = "300" alt="spug-qq" align=center />
+<div>
 
+#### 微信群: 关注Spug公众号拉你进群
+<div >
+   <img src="http://image.qbangmang.com/spug-weixin.jpeg" width = "300" height = "300" alt="spug-qq" align=center />
+<div>
+  
 ## License & Copyright
 [MIT](https://opensource.org/licenses/MIT)
