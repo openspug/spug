@@ -19,9 +19,21 @@ class AlarmSetting extends React.Component {
     this.setting = JSON.parse(lds.get(store.settings, 'mail_service.value', "{}"));
     this.state = {
       mode: this.setting['server'] === undefined ? '1' : '2',
-      spug_key: lds.get(store.settings, 'spug_key.value', "")
+      spug_key: lds.get(store.settings, 'spug_key.value', ""),
+      mail_test_loading: false,
     }
   }
+
+  handleEmailTest = () => {
+    this.props.form.validateFields((error, data) => {
+      if (!error) {
+        this.setState({mail_test_loading: true});
+        http.post('/api/setting/email_test/', data).then(()=> {
+          message.success('邮件服务连接成功')
+        }).finally(()=> this.setState({mail_test_loading: false}))
+      }
+    })
+  };
 
   _doSubmit = (formData) => {
     store.loading = true;
@@ -126,11 +138,15 @@ class AlarmSetting extends React.Component {
               </Form.Item>
             </div>
           </Form.Item>
+          <div>
           <Button
-            type="primary"
-            loading={store.loading}
-            style={{marginTop: 20}}
+            type="danger" loading={this.state.mail_test_loading}
+            style={{ display: mode === '1' ? 'none' : 'inline-block' ,marginRight: 10}}
+            onClick={this.handleEmailTest}>测试邮件服务</Button>
+          <Button
+            type="primary" loading={store.loading} style={{ marginTop: 20}}
             onClick={this.handleSubmit}>保存设置</Button>
+          </div>
         </Form>
       </React.Fragment>
     )

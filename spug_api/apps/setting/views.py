@@ -9,6 +9,7 @@ from apps.setting.utils import AppSetting
 from apps.setting.models import Setting
 import platform
 import ldap
+import smtplib
 
 
 class SettingView(View):
@@ -41,6 +42,24 @@ def ldap_test(request):
         except Exception as e:
             error = eval(str(e))
             return json_response(error=error['desc'])
+    return json_response(error=error)
+
+
+def email_test(request):
+    form, error = JsonParser(
+        Argument('server'),
+        Argument('port', type=int),
+        Argument('username'),
+        Argument('password'),
+    ).parse(request.body)
+    if error is None:
+        try:
+            server = smtplib.SMTP_SSL(form.server, form.port)
+            server.login(form.username, form.password)
+            return json_response()
+        except Exception as e:
+            error = e.smtp_error.decode('utf-8')
+            return json_response(error=error)
     return json_response(error=error)
 
 
