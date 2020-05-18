@@ -6,13 +6,16 @@ import smtplib
 class Mail:
     def __init__(self, server, port, username, password, nickname=None):
         self.host = server
-        self.port = port
+        self.port = int(port)
         self.user = username
         self.password = password
         self.nickname = nickname
 
     def _get_server(self):
-        server = smtplib.SMTP_SSL(self.host, self.port)
+        if self.port == 465:
+            server = smtplib.SMTP_SSL(self.host, self.port)
+        else:
+            server = smtplib.SMTP(self.host, self.port)
         server.login(self.user, self.password)
         return server
 

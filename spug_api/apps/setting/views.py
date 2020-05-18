@@ -47,14 +47,17 @@ def ldap_test(request):
 
 def email_test(request):
     form, error = JsonParser(
-        Argument('server'),
-        Argument('port', type=int),
-        Argument('username'),
-        Argument('password'),
+        Argument('server', help='请输入邮件服务地址'),
+        Argument('port', type=int, help='请输入邮件服务端口号'),
+        Argument('username', help='请输入邮箱账号'),
+        Argument('password', help='请输入密码/授权码'),
     ).parse(request.body)
     if error is None:
         try:
-            server = smtplib.SMTP_SSL(form.server, form.port)
+            if form.port == 465:
+                server = smtplib.SMTP_SSL(form.server, form.port)
+            else:
+                server = smtplib.SMTP(form.server, form.port)
             server.login(form.username, form.password)
             return json_response()
         except Exception as e:
