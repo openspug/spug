@@ -42,6 +42,7 @@ class TemplateSelector extends React.Component {
   }, {
     title: '名称',
     dataIndex: 'name',
+    ellipsis: true
   }, {
     title: '内容',
     dataIndex: 'body',
@@ -64,7 +65,7 @@ class TemplateSelector extends React.Component {
     return (
       <Modal
         visible
-        width={800}
+        width={1000}
         title="选择执行模板"
         onCancel={this.props.onCancel}
         onOk={this.handleSubmit}

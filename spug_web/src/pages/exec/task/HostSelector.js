@@ -61,6 +61,7 @@ class HostSelector extends React.Component {
   }, {
     title: '主机名称',
     dataIndex: 'name',
+    ellipsis: true
   }, {
     title: '连结地址',
     dataIndex: 'hostname',

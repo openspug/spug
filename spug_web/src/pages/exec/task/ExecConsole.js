@@ -69,7 +69,7 @@ class ExecConsole extends React.Component {
     return (
       <Modal
         visible
-        width={800}
+        width={1000}
         title="执行控制台"
         footer={null}
         onCancel={this.props.onCancel}
