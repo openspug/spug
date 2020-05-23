@@ -121,6 +121,8 @@ def _ext2_deploy(req, helper, env):
                 if exception:
                     helper.send_error(h_id, f'Exception: {exception}')
                     raise exception
+    else:
+        helper.send_step('local', 100, f'\r\n{human_time()} ** 发布成功 **')
 
 
 def _deploy_ext1_host(helper, h_id, extend, env):
@@ -180,7 +182,7 @@ def _deploy_ext2_host(helper, h_id, actions, env):
         helper.send_step(h_id, 2 + index, f'{human_time()} {action["title"]}...\r\n')
         helper.remote(host.id, ssh, f'cd /tmp && {action["data"]}', env)
 
-    helper.send_step(h_id, 100, f'\r\n{human_time()}** 发布成功 **')
+    helper.send_step(h_id, 100, f'\r\n{human_time()} ** 发布成功 **')
 
 
 class Helper:

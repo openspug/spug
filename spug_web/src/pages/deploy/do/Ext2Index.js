@@ -99,7 +99,8 @@ class Ext1Index extends React.Component {
 
   getStatusAlias = () => {
     if (Object.keys(store.outputs).length !== 0) {
-      for (let item of [{id: 'local'}, ...store.request.targets]) {
+      const {targets, host_actions} = store.request;
+      for (let item of [{id: 'local'}, ...(host_actions.length > 0 ? targets : [])]) {
         if (lds.get(store.outputs, `${item.id}.status`) === 'error') {
           return <Tag color="red">发布异常</Tag>
         } else if (lds.get(store.outputs, `${item.id}.step`, -1) < 100) {
