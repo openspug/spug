@@ -4,9 +4,11 @@
 from channels.generic.websocket import WebsocketConsumer
 from django_redis import get_redis_connection
 from apps.setting.utils import AppSetting
+from apps.account.models import User
 from apps.host.models import Host
 from threading import Thread
 import json
+import time
 
 
 class ExecConsumer(WebsocketConsumer):
@@ -69,7 +71,14 @@ class SSHConsumer(WebsocketConsumer):
         # print('Connection close')
 
     def connect(self):
-        self.accept()
+        user = User.objects.filter(access_token=self.token).first()
+        if user and user.token_expired >= time.time() and user.is_active:
+            self.accept()
+            self._init()
+        else:
+            self.close()
+
+    def _init(self):
         self.send(bytes_data=b'Connecting ...\r\n')
         host = Host.objects.filter(pk=self.id).first()
         if not host:
