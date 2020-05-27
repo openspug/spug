@@ -62,3 +62,11 @@ export function human_time(date) {
   const second = now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds();
   return `${human_date()} ${hour}:${minute}:${second}`
 }
+
+// 生成唯一id
+export function uniqueId() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
+  });
+}

@@ -53,7 +53,7 @@ class ComTable extends React.Component {
   }];
 
   handleConsole = (info) => {
-    window.open(`/api/host/ssh/${info.id}/?x-token=${localStorage.getItem('token')}`)
+    window.open(`/ssh/${info.id}`)
   };
 
   handleDelete = (text) => {

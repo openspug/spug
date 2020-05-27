@@ -1,0 +1,41 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.header {
+    height: 46px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    background-color: #e6f7ff;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+}
+
+.terminal {
+    flex: 1;
+    display: flex;
+    background-color: #000;
+    padding-left: 5px;
+}
+
+.terminal > div {
+    flex: 1
+}
+
+.fileSize {
+    padding-right: 24px !important;
+}
+
+.drawerHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}

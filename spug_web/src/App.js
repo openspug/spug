@@ -6,6 +6,7 @@
 import React, { Component } from 'react';
 import {Switch, Route} from 'react-router-dom';
 import Login from './pages/login';
+import WebSSH from './pages/ssh';
 import Layout from './layout';
 
 class App extends Component {
@@ -13,6 +14,7 @@ class App extends Component {
     return (
       <Switch>
         <Route path="/" exact component={Login} />
+        <Route path="/ssh/:id" exact component={WebSSH} />
         <Route component={Layout} />
       </Switch>
     );

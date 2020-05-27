@@ -31,5 +31,6 @@ urlpatterns = [
     path('deploy/', include('apps.deploy.urls')),
     path('home/', include('apps.home.urls')),
     path('notify/', include('apps.notify.urls')),
+    path('file/', include('apps.file.urls')),
     path('apis/', include('apps.apis.urls')),
 ]

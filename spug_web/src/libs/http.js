@@ -39,7 +39,7 @@ http.interceptors.request.use(request => {
   if (request.url.startsWith('/api/')) {
     request.headers['X-Token'] = localStorage.getItem('token')
   }
-  request.timeout = 30000;
+  request.timeout = request.timeout || 30000;
   return request;
 });
 

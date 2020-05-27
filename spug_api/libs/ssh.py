@@ -85,6 +85,21 @@ class SSH:
                 out = stdout.readline()
             yield chan.recv_exit_status(), out
 
+    def put_file_by_fl(self, fl, remote_path, callback=None):
+        with self as cli:
+            sftp = cli.open_sftp()
+            sftp.putfo(fl, remote_path, callback=callback)
+
+    def list_dir_attr(self, path):
+        with self as cli:
+            sftp = cli.open_sftp()
+            return sftp.listdir_attr(path)
+
+    def remove_file(self, path):
+        with self as cli:
+            sftp = cli.open_sftp()
+            sftp.remove(path)
+
     def __enter__(self):
         if self.client is not None:
             raise RuntimeError('Already connected')
