@@ -10,6 +10,7 @@ from apps.deploy.models import DeployRequest
 from apps.app.models import Deploy
 from apps.deploy.utils import deploy_dispatch
 from apps.host.models import Host
+from collections import defaultdict
 from threading import Thread
 from datetime import datetime
 import json
@@ -109,14 +110,29 @@ class RequestView(View):
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
-            Argument('expire', required=False)
+            Argument('expire', required=False),
+            Argument('count', type=int, required=False, help='请输入数字')
         ).parse(request.GET)
         if error is None:
             if form.id:
                 DeployRequest.objects.filter(pk=form.id, status__in=('0', '1', '-1')).delete()
-            if form.expire:
+                return json_response()
+            elif form.count:
+                if form.count < 1:
+                    return json_response(error='请输入正确的保留数量')
+                counter, ids = defaultdict(int), []
+                for item in DeployRequest.objects.all():
+                    if counter[item.deploy_id] == form.count:
+                        ids.append(item.id)
+                    else:
+                        counter[item.deploy_id] += 1
+                count, _ = DeployRequest.objects.filter(id__in=ids).delete()
+                return json_response(count)
+            elif form.expire:
                 count, _ = DeployRequest.objects.filter(created_at__lt=form.expire).delete()
                 return json_response(count)
+            else:
+                return json_response(error='请至少使用一个删除条件')
         return json_response(error=error)
 
 

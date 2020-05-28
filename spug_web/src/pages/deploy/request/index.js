@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Button, Select, DatePicker, Radio, Row, Col, Modal, Form, message } from 'antd';
+import { Button, Select, DatePicker, Radio, Row, Col, Modal, Form, Input, message } from 'antd';
 import { SearchForm, AuthFragment, AuthCard } from 'components';
 import SelectApp from './SelectApp';
 import Ext1Form from './Ext1Form';
@@ -22,7 +22,8 @@ class Index extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      expire: undefined
+      expire: undefined,
+      count: ''
     }
   }
 
@@ -41,16 +42,22 @@ class Index extends React.Component {
       title: '批量删除发布申请',
       content: (
         <Form>
-          <Form.Item required label="截止日期" help={<div>将删除截止日期<span style={{color: 'red'}}>之前</span>的所有发布申请记录。</div>}>
-            <DatePicker placeholder="请输入" onChange={val => this.setState({expire: val.format('YYYY-MM-DD')})}/>
+          <Form.Item label="截止日期" help={<div>将删除截止日期<span style={{color: 'red'}}>之前</span>的所有发布申请记录。</div>}>
+            <DatePicker style={{width: 200}} placeholder="请输入" onChange={val => this.setState({expire: val.format('YYYY-MM-DD')})}/>
+          </Form.Item>
+          <Form.Item label="保留记录" help="每个应用每个环境仅保留最新的N条发布申请，优先级高于截止日期">
+            <Input allowClear style={{width: 200}} placeholder="请输入保留个数" onChange={e => this.setState({count: e.target.value})} />
           </Form.Item>
         </Form>
       ),
-      onOk: () => http.delete(`/api/deploy/request/?expire=${this.state.expire}`)
-        .then(res => {
-          message.success(`成功删除${res}条记录`);
-          store.fetchRecords()
-        }),
+      onOk: () => {
+        const {expire, count} = this.state;
+        return http.delete('/api/deploy/request/', {params: {expire, count}})
+          .then(res => {
+            message.success(`成功删除${res}条记录`);
+            store.fetchRecords()
+          })
+      },
     })
   };
 
