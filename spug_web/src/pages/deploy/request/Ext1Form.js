@@ -79,7 +79,7 @@ class Ext1Form extends React.Component {
   };
 
   switchType = (v) => {
-    this.setState({git_type: v, extra1: null}, this._initExtra1)
+    this.setState({git_type: v, extra1: undefined}, this._initExtra1)
   };
 
   switchExtra1 = (v) => {
@@ -157,7 +157,7 @@ class Ext1Form extends React.Component {
                     Object.keys(branches || {}).map(b => <Select.Option key={b} value={b}>{b}</Select.Option>)
                   ) : (
                     Object.entries(tags || {}).map(([tag, info]) => (
-                      <Select.Option key={tag} value={tag}>{tag} {info.author}</Select.Option>
+                      <Select.Option key={tag} value={tag}>{tag} {info.author} {info.message}</Select.Option>
                     ))
                   )}
                 </Select>

@@ -27,8 +27,14 @@ class Git:
                     'author': ref.tag.tagger.name,
                     'date': ref.tag.tagged_date,
                     'message': ref.tag.message.strip()
-                } if ref.tag else {}
-        return branches, tags
+                } if ref.tag else {
+                    'id': ref.commit.binsha.hex(),
+                    'author': ref.commit.author.name,
+                    'date': ref.commit.authored_date,
+                    'message': ref.commit.message.strip()
+                }
+        tags = sorted(tags.items(), key=lambda x: x[1]['date'], reverse=True)
+        return branches, dict(tags)
 
     def _get_repo(self, git_repo, repo_dir):
         if os.path.exists(repo_dir):
