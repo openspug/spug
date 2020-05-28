@@ -15,6 +15,7 @@ class Store {
   @observable isFetching = false;
   @observable formVisible = false;
   @observable infoVisible = false;
+  @observable recordVisible = false;
 
   @observable f_status;
   @observable f_name;
@@ -40,8 +41,14 @@ class Store {
     this.record = info
   };
 
-  showInfo = (info = {}) => {
+  showInfo = (info = {}, isTask) => {
+    const record = isTask ? {id: info['latest_id']} : info;
     this.infoVisible = true;
+    this.record = record
+  };
+
+  showRecord = (info) => {
+    this.recordVisible = true;
     this.record = info
   };
 

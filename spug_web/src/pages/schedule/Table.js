@@ -11,6 +11,7 @@ import http from 'libs/http';
 import store from './store';
 import { LinkButton } from "components";
 import Info from './Info';
+import Record from './Record';
 
 @observer
 class ComTable extends React.Component {
@@ -25,7 +26,10 @@ class ComTable extends React.Component {
       <Menu.Item>
         <LinkButton auth="schedule.schedule.edit" onClick={() => this.handleActive(info)}>{info.is_active ? '禁用' : '激活'}</LinkButton>
       </Menu.Item>
-      <Menu.Divider />
+      <Menu.Item>
+        <LinkButton onClick={() => store.showRecord(info)}>历史</LinkButton>
+      </Menu.Item>
+      <Menu.Divider/>
       <Menu.Item>
         <LinkButton auth="schedule.schedule.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
       </Menu.Item>
@@ -68,7 +72,7 @@ class ComTable extends React.Component {
     width: 180,
     render: info => (
       <span>
-        <LinkButton disabled={!info['latest_run_time']} onClick={() => store.showInfo(info)}>详情</LinkButton>
+        <LinkButton disabled={!info['latest_run_time']} onClick={() => store.showInfo(info, true)}>详情</LinkButton>
         <Divider type="vertical"/>
         <LinkButton auth="schedule.schedule.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
@@ -134,6 +138,7 @@ class ComTable extends React.Component {
         <Table rowKey="id" loading={store.isFetching} dataSource={data} columns={this.columns}/>
         {store.formVisible && <ComForm/>}
         {store.infoVisible && <Info/>}
+        {store.recordVisible && <Record/>}
       </React.Fragment>
     )
   }

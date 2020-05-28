@@ -39,13 +39,13 @@ class ComForm extends React.Component {
   _parse_args = (trigger) => {
     switch (trigger) {
       case 'date':
-        return this.state.args['date'].format('YYYY-MM-DD HH:mm:ss');
+        return moment(this.state.args['date']).format('YYYY-MM-DD HH:mm:ss');
       case 'cron':
         const {rule, start, stop} = this.state.args['cron'];
         return JSON.stringify({
           rule,
-          start: start ? start.format('YYYY-MM-DD HH:mm:ss') : null,
-          stop: stop ? stop.format('YYYY-MM-DD HH:mm:ss') : null
+          start: start ? moment(start).format('YYYY-MM-DD HH:mm:ss') : null,
+          stop: stop ? moment(stop).format('YYYY-MM-DD HH:mm:ss') : null
         });
       default:
         return this.state.args[trigger];
