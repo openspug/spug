@@ -16,7 +16,8 @@ class ComForm extends React.Component {
     this.state = {
       loading: false,
       password: null,
-      zone: null,
+      addZone: null,
+      editZone: store.record.zone,
     }
   }
 
@@ -65,26 +66,48 @@ class ComForm extends React.Component {
   };
 
   handleAddZone = () => {
-    Modal.confirm({
-      icon: 'exclamation-circle',
-      title: '添加主机类别',
-      content: this.addZoneForm,
-      onOk: () => {
-        if (this.state.zone) {
-          store.zones.push(this.state.zone);
-          this.props.form.setFieldsValue({'zone': this.state.zone})
-        }
-      },
-    })
+    this.setState({zone: ''}, () => {
+      Modal.confirm({
+        icon: 'exclamation-circle',
+        title: '添加主机类别',
+        content: (
+          <Form>
+            <Form.Item required label="主机类别">
+              <Input onChange={e => this.setState({addZone: e.target.value})}/>
+            </Form.Item>
+          </Form>
+        ),
+        onOk: () => {
+          if (this.state.addZone) {
+            store.zones.push(this.state.addZone);
+            this.props.form.setFieldsValue({'zone': this.state.addZone})
+          }
+        },
+      })
+    });
   };
 
-  addZoneForm = (
-    <Form>
-      <Form.Item required label="主机类别">
-        <Input onChange={val => this.setState({zone: val.target.value})}/>
-      </Form.Item>
-    </Form>
-  );
+  handleEditZone = () => {
+    this.setState({zone: store.record.zone}, () => {
+      Modal.confirm({
+        icon: 'exclamation-circle',
+        title: '编辑主机类别',
+        content: (
+          <Form>
+            <Form.Item required label="主机类别" help="该操作将批量更新所有属于该类别的主机并立即生效，如过只是想修改单个主机的类别请使用添加类别或下拉框选择切换类别。">
+              <Input defaultValue={store.record.zone} onChange={e => this.setState({editZone: e.target.value})}/>
+            </Form.Item>
+          </Form>
+        ),
+        onOk: () => http.patch('/api/host/', {id: store.record.id, zone: this.state.editZone})
+          .then(res => {
+            message.success(`成功修改${res}条记录`);
+            store.fetchRecords();
+            this.props.form.setFieldsValue({'zone': this.state.editZone})
+          })
+      })
+    });
+  };
 
   render() {
     const info = store.record;
@@ -101,7 +124,7 @@ class ComForm extends React.Component {
         onOk={this.handleSubmit}>
         <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
           <Form.Item required label="主机类别">
-            <Col span={16}>
+            <Col span={14}>
               {getFieldDecorator('zone', {initialValue: info['zone']})(
                 <Select placeholder="请选择主机类别/区域/分组">
                   {store.zones.map(item => (
@@ -110,8 +133,11 @@ class ComForm extends React.Component {
                 </Select>
               )}
             </Col>
-            <Col span={6} offset={2}>
+            <Col span={4} offset={1}>
               <Button type="link" onClick={this.handleAddZone}>添加类别</Button>
+            </Col>
+            <Col span={4} offset={1}>
+              <Button type="link" onClick={this.handleEditZone}>编辑类别</Button>
             </Col>
           </Form.Item>
           <Form.Item required label="主机名称">

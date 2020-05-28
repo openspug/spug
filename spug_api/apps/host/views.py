@@ -46,6 +46,19 @@ class HostView(View):
                 Host.objects.create(created_by=request.user, **form)
         return json_response(error=error)
 
+    def patch(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, required=False),
+            Argument('zone', help='请输入主机类别')
+        ).parse(request.body)
+        if error is None:
+            host = Host.objects.filter(pk=form.id).first()
+            if not host:
+                return json_response(error='未找到指定主机')
+            count = Host.objects.filter(zone=host.zone, deleted_by_id__isnull=True).update(zone=form.zone)
+            return json_response(count)
+        return json_response(error=error)
+
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='请指定操作对象')
