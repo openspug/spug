@@ -59,5 +59,8 @@ class Job:
         except socket.timeout:
             code = 130
             self.send_error('### Time out')
+        except Exception as e:
+            code = 131
+            self.send_error(f'{e}')
         finally:
             self.send_status(code)
