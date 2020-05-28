@@ -10,6 +10,7 @@ import BasicSetting from './BasicSetting';
 import AlarmSetting from './AlarmSetting';
 import LDAPSetting from './LDAPSetting';
 import OpenService from './OpenService';
+import KeySetting from './KeySetting';
 import About from './About';
 import styles from './index.module.css';
 import store from './store';
@@ -39,6 +40,7 @@ class Index extends React.Component {
             onSelect={({selectedKeys}) => this.setState({selectedKeys})}>
             <Menu.Item key="basic">基本设置</Menu.Item>
             <Menu.Item key="ldap">LDAP设置</Menu.Item>
+            <Menu.Item key="key">密钥设置</Menu.Item>
             <Menu.Item key="alarm">报警服务设置</Menu.Item>
             <Menu.Item key="service">开放服务设置</Menu.Item>
             <Menu.Item key="about">关于</Menu.Item>
@@ -49,6 +51,7 @@ class Index extends React.Component {
           {selectedKeys[0] === 'ldap' && <LDAPSetting />}
           {selectedKeys[0] === 'alarm' && <AlarmSetting />}
           {selectedKeys[0] === 'service' && <OpenService />}
+          {selectedKeys[0] === 'key' && <KeySetting />}
           {selectedKeys[0] === 'about' && <About />}
         </div>
       </AuthDiv>

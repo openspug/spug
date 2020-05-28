@@ -14,8 +14,8 @@ import smtplib
 
 class SettingView(View):
     def get(self, request):
-        settings = Setting.objects.exclude(key__in=('public_key', 'private_key'))
-        return json_response(settings)
+        data = Setting.objects.all()
+        return json_response(data)
 
     def post(self, request):
         form, error = JsonParser(
