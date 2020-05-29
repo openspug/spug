@@ -67,11 +67,13 @@ class HostPerm extends React.Component {
           description="主机权限将全局影响属于该角色的用户能够看到的主机。"/>
         <Form.Item label="设置可访问的主机" style={{padding: '0 20px'}}>
           <Transfer
-            listStyle={{width: 325, minHeight: 300}}
+            showSearch
+            listStyle={{width: 325, maxHeight: 500, minHeight: 300}}
             titles={['所有主机', '已选主机']}
             dataSource={this.state.hosts}
             targetKeys={store.hostPerms}
             onChange={keys => store.hostPerms = keys}
+            filterOption={(inputValue, option) => `${option.zone}${option.name}`.toLowerCase().indexOf(inputValue.toLowerCase()) > -1}
             render={item => `${item.zone} - ${item.name}`}/>
         </Form.Item>
       </Modal>
