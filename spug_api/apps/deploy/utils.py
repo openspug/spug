@@ -93,6 +93,7 @@ def _ext1_deploy(req, helper, env):
     with futures.ThreadPoolExecutor(max_workers=min(10, os.cpu_count() + 5)) as executor:
         threads = []
         for h_id in json.loads(req.host_ids):
+            env = AttrDict(env.items())
             threads.append(executor.submit(_deploy_ext1_host, helper, h_id, extend, env))
         for t in futures.as_completed(threads):
             exception = t.exception()
