@@ -83,7 +83,7 @@ class FileManager extends React.Component {
   fetchFiles = () => {
     this.setState({fetching: true});
     const path = '/' + this.state.pwd.join('/');
-    http.get('/api/file/', {params: {id: 1, path}})
+    http.get('/api/file/', {params: {id: this.id, path}})
       .then(res => {
         const objects = lds.orderBy(res, [this._kindSort, 'name'], ['desc', 'asc']);
         this.setState({objects})

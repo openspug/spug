@@ -33,7 +33,7 @@ class ObjectView(View):
             Argument('file', help='请输入文件路径')
         ).parse(request.GET)
         if error is None:
-            host = Host.objects.filter(pk=1).first()
+            host = Host.objects.filter(pk=form.id).first()
             if not host:
                 return json_response(error='未找到指定主机')
             filename = os.path.basename(form.file)
