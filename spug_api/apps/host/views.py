@@ -13,6 +13,7 @@ from apps.account.models import Role
 from libs.ssh import SSH, AuthenticationException
 from libs import human_datetime, AttrDict
 from openpyxl import load_workbook
+import socket
 
 
 class HostView(View):
@@ -96,7 +97,7 @@ def post_import(request):
     password = request.POST.get('password')
     file = request.FILES['file']
     ws = load_workbook(file, read_only=True)['Sheet1']
-    summary = {'invalid': [], 'skip': [], 'fail': [], 'success': []}
+    summary = {'invalid': [], 'skip': [], 'fail': [], 'network': [], 'success': []}
     for i, row in enumerate(ws.rows):
         if i == 0:  # 第1行是表头 略过
             continue
@@ -116,8 +117,15 @@ def post_import(request):
                                deleted_by_id__isnull=True).exists():
             summary['skip'].append(i)
             continue
-        if valid_ssh(data.hostname, data.port, data.username, data.pop('password') or password) is False:
+        try:
+            if valid_ssh(data.hostname, data.port, data.username, data.pop('password') or password) is False:
+                summary['fail'].append(i)
+                continue
+        except AuthenticationException:
             summary['fail'].append(i)
+            continue
+        except socket.error:
+            summary['network'].append(i)
             continue
         host = Host.objects.create(created_by=request.user, **data)
         if request.user.role:
@@ -135,7 +143,7 @@ def valid_ssh(hostname, port, username, password):
         AppSetting.set('private_key', private_key, 'ssh private key')
         AppSetting.set('public_key', public_key, 'ssh public key')
     if password:
-        cli = SSH(hostname, port, username, password=password)
+        cli = SSH(hostname, port, username, password=str(password))
         code, out = cli.exec_command('mkdir -p -m 700 ~/.ssh && \
                 echo %r >> ~/.ssh/authorized_keys && \
                 chmod 600 ~/.ssh/authorized_keys' % public_key)

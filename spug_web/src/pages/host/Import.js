@@ -34,6 +34,9 @@ class ComImport extends React.Component {
             {res['fail'].length > 0 && <Form.Item style={{margin: 0, color: '#1890ff'}} label="验证失败">
               <Tooltip title={`相关行：${res['fail'].join(', ')}`}>{res['fail'].length}</Tooltip>
             </Form.Item>}
+            {res['network'].length > 0 && <Form.Item style={{margin: 0, color: '#1890ff'}} label="网络错误">
+              <Tooltip title={`相关行：${res['network'].join(', ')}`}>{res['network'].length}</Tooltip>
+            </Form.Item>}
             {res['skip'].length > 0 && <Form.Item style={{margin: 0, color: '#1890ff'}} label="重复数据">
               <Tooltip title={`相关行：${res['skip'].join(', ')}`}>{res['skip'].length}</Tooltip>
             </Form.Item>}
