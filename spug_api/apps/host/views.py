@@ -19,7 +19,7 @@ class HostView(View):
     def get(self, request):
         host_id = request.GET.get('id')
         if host_id:
-            if int(host_id) not in request.user.host_perms:
+            if not request.user.has_host_perm(host_id):
                 return json_response(error='无权访问该主机，请联系管理员')
             return json_response(Host.objects.get(pk=host_id))
         hosts = Host.objects.filter(deleted_by_id__isnull=True)

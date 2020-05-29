@@ -46,14 +46,14 @@ class User(models.Model, ModelMixin):
 
     @property
     def deploy_perms(self):
-        perms = json.loads(self.role.deploy_perms) if self.role.deploy_perms else {}
+        perms = json.loads(self.role.deploy_perms) if self.role and self.role.deploy_perms else {}
         perms.setdefault('apps', [])
         perms.setdefault('envs', [])
         return perms
 
     @property
     def host_perms(self):
-        return json.loads(self.role.host_perms) if self.role.host_perms else []
+        return json.loads(self.role.host_perms) if self.role and self.role.host_perms else []
 
     def has_host_perm(self, host_id):
         if isinstance(host_id, (list, set, tuple)):
