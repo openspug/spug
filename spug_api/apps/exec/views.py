@@ -47,6 +47,8 @@ def do_task(request):
         Argument('command', help='请输入执行命令内容')
     ).parse(request.body)
     if error is None:
+        if not request.user.has_host_perm(form.host_ids):
+            return json_response(error='无权访问主机，请联系管理员')
         token = Channel.get_token()
         for host in Host.objects.filter(id__in=form.host_ids):
             Channel.send_ssh_executor(

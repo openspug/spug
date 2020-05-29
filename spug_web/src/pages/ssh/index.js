@@ -25,6 +25,7 @@ class WebSSH extends React.Component {
     this.state = {
       visible: false,
       uploading: false,
+      managerDisabled: true,
       host: {},
       percent: 0
     }
@@ -71,17 +72,17 @@ class WebSSH extends React.Component {
     http.get(`/api/host/?id=${this.id}`)
       .then(res => {
         document.title = res.name;
-        this.setState({host: res})
+        this.setState({host: res, managerDisabled: false})
       })
   };
 
   render() {
-    const {host, visible} = this.state;
+    const {host, visible, managerDisabled} = this.state;
     return (
       <div className={styles.container}>
         <div className={styles.header}>
           <div>{host.name} | {host.username}@{host.hostname}:{host.port}</div>
-          <Button type="primary" icon="folder-open" onClick={this.handleShow}>文件管理器</Button>
+          <Button disabled={managerDisabled} type="primary" icon="folder-open" onClick={this.handleShow}>文件管理器</Button>
         </div>
         <div className={styles.terminal}>
           <div ref={ref => this.container = ref}/>

@@ -28,7 +28,7 @@ class ComTable extends React.Component {
     ellipsis: true
   }, {
     title: '操作',
-    width: 300,
+    width: 400,
     render: info => (
       <span>
         <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
@@ -36,6 +36,8 @@ class ComTable extends React.Component {
         <LinkButton onClick={() => store.showPagePerm(info)}>功能权限</LinkButton>
         <Divider type="vertical"/>
         <LinkButton onClick={() => store.showDeployPerm(info)}>发布权限</LinkButton>
+        <Divider type="vertical"/>
+        <LinkButton onClick={() => store.showHostPerm(info)}>主机权限</LinkButton>
         <Divider type="vertical"/>
         <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
       </span>

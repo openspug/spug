@@ -72,7 +72,7 @@ class SSHConsumer(WebsocketConsumer):
 
     def connect(self):
         user = User.objects.filter(access_token=self.token).first()
-        if user and user.token_expired >= time.time() and user.is_active:
+        if user and user.token_expired >= time.time() and user.is_active and user.has_host_perm(self.id):
             self.accept()
             self._init()
         else:

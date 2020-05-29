@@ -11,6 +11,7 @@ import ComTable from './Table';
 import ComForm from './Form';
 import PagePerm from './PagePerm';
 import DeployPerm from './DeployPerm';
+import HostPerm from './HostPerm';
 import store from './store';
 
 export default observer(function () {
@@ -31,6 +32,7 @@ export default observer(function () {
       {store.formVisible && <ComForm/>}
       {store.pagePermVisible && <PagePerm/>}
       {store.deployPermVisible && <DeployPerm/>}
+      {store.hostPermVisible && <HostPerm/>}
     </AuthCard>
   )
 })

@@ -17,6 +17,8 @@ class FileView(View):
             Argument('path', help='参数错误')
         ).parse(request.GET)
         if error is None:
+            if not request.user.has_host_perm(form.id):
+                return json_response(error='无权访问主机，请联系管理员')
             host = Host.objects.get(pk=form.id)
             if not host:
                 return json_response(error='未找到指定主机')
@@ -33,6 +35,8 @@ class ObjectView(View):
             Argument('file', help='请输入文件路径')
         ).parse(request.GET)
         if error is None:
+            if not request.user.has_host_perm(form.id):
+                return json_response(error='无权访问主机，请联系管理员')
             host = Host.objects.filter(pk=form.id).first()
             if not host:
                 return json_response(error='未找到指定主机')
@@ -50,6 +54,8 @@ class ObjectView(View):
             Argument('path', help='参数错误'),
         ).parse(request.POST)
         if error is None:
+            if not request.user.has_host_perm(form.id):
+                return json_response(error='无权访问主机，请联系管理员')
             file = request.FILES.get('file')
             if not file:
                 return json_response(error='请选择要上传的文件')
@@ -68,6 +74,8 @@ class ObjectView(View):
             Argument('file', help='请输入文件路径')
         ).parse(request.GET)
         if error is None:
+            if not request.user.has_host_perm(form.id):
+                return json_response(error='无权访问主机，请联系管理员')
             host = Host.objects.get(pk=form.id)
             if not host:
                 return json_response(error='未找到指定主机')

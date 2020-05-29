@@ -9,6 +9,7 @@ from apps.host.models import Host
 from apps.app.models import Deploy
 from apps.schedule.models import Task
 from apps.monitor.models import Detection
+from apps.account.models import Role
 from libs.ssh import SSH, AuthenticationException
 from libs import human_datetime, AttrDict
 from openpyxl import load_workbook
@@ -18,10 +19,13 @@ class HostView(View):
     def get(self, request):
         host_id = request.GET.get('id')
         if host_id:
+            if int(host_id) not in request.user.host_perms:
+                return json_response(error='无权访问该主机，请联系管理员')
             return json_response(Host.objects.get(pk=host_id))
         hosts = Host.objects.filter(deleted_by_id__isnull=True)
         zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
-        return json_response({'zones': zones, 'hosts': [x.to_dict() for x in hosts]})
+        perms = [x.id for x in hosts] if request.user.is_supper else request.user.host_perms
+        return json_response({'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
 
     def post(self, request):
         form, error = JsonParser(
@@ -43,7 +47,9 @@ class HostView(View):
             elif Host.objects.filter(name=form.name, deleted_by_id__isnull=True).exists():
                 return json_response(error=f'已存在的主机名称【{form.name}】')
             else:
-                Host.objects.create(created_by=request.user, **form)
+                host = Host.objects.create(created_by=request.user, **form)
+                if request.user.role:
+                    request.user.role.add_host_perm(host.id)
         return json_response(error=error)
 
     def patch(self, request):
@@ -76,6 +82,9 @@ class HostView(View):
             detection = Detection.objects.filter(type__in=('3', '4'), addr=form.id).first()
             if detection:
                 return json_response(error=f'监控中心的任务【{detection.name}】关联了该主机，请解除关联后再尝试删除该主机')
+            role = Role.objects.filter(host_perms__regex=fr'\D{form.id}\D').first()
+            if role:
+                return json_response(error=f'角色【{role.name}】的主机权限关联了该主机，请解除关联后再尝试删除该主机')
             Host.objects.filter(pk=form.id).update(
                 deleted_at=human_datetime(),
                 deleted_by=request.user,
@@ -110,7 +119,9 @@ def post_import(request):
         if valid_ssh(data.hostname, data.port, data.username, data.pop('password') or password) is False:
             summary['fail'].append(i)
             continue
-        Host.objects.create(created_by=request.user, **data)
+        host = Host.objects.create(created_by=request.user, **data)
+        if request.user.role:
+            request.user.role.add_host_perm(host.id)
         summary['success'].append(i)
     return json_response(summary)
 

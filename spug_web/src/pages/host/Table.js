@@ -72,7 +72,7 @@ class ComTable extends React.Component {
   };
 
   render() {
-    let data = store.records;
+    let data = store.permRecords;
     if (store.f_name) {
       data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
     }
