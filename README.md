@@ -97,4 +97,4 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
 <div>
   
 ## License & Copyright
-[MIT](https://opensource.org/licenses/MIT)
+[AGPL-3.0](https://opensource.org/licenses/AGPL-3.0)
