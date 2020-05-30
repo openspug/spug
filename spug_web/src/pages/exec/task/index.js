@@ -23,6 +23,10 @@ class TaskIndex extends React.Component {
     }
   }
 
+  componentDidMount() {
+    store.hosts = []
+  }
+
   handleSubmit = () => {
     this.setState({loading: true});
     const host_ids = store.hosts.map(item => item.id);
@@ -38,7 +42,12 @@ class TaskIndex extends React.Component {
         <Form>
           <Form.Item label="执行主机">
             {store.hosts.map(item => (
-              <Tag color="#108ee9" key={item.id}>{item.name}({item.hostname}:{item.port})</Tag>
+              <Tag
+                closable
+                color="#108ee9"
+                key={item.id}
+                onClose={() => store.hosts = store.hosts.filter(x => x.id !== item.id)}>
+                {item.name}({item.hostname}:{item.port})</Tag>
             ))}
           </Form.Item>
           <Button icon="plus" onClick={store.switchHost}>从主机列表中选择</Button>

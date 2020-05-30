@@ -184,7 +184,7 @@ class Ext1Form extends React.Component {
               <Input placeholder="请输入备注信息"/>
             )}
           </Form.Item>
-          <Form.Item required label="发布目标主机">
+          <Form.Item required label="发布目标主机" help="通过点击主机名称自由选择本次发布的主机。">
             {info['app_host_ids'].map(id => (
               <Tag.CheckableTag key={id} checked={host_ids.includes(id)} onChange={() => this.handleChange(id)}>
                 {lds.get(hostStore.idMap, `${id}.name`)}({lds.get(hostStore.idMap, `${id}.hostname`)}:{lds.get(hostStore.idMap, `${id}.port`)})

@@ -76,7 +76,7 @@ class Ext2Form extends React.Component {
               <Input placeholder="请输入申请标题"/>
             )}
           </Form.Item>
-          <Form.Item label="环境变量（SPUG_RELEASE）" help="可以在自定义脚本中引用该变量，用于设置本次发布相关的动态变量，在脚本中通过 $SPUG_RELEASE 来使用该值">
+          <Form.Item label="环境变量（SPUG_RELEASE）" help="可以在自定义脚本中引用该变量，用于设置本次发布相关的动态变量，在脚本中通过 $SPUG_RELEASE 来使用该值。">
             {getFieldDecorator('extra', {initialValue: info['extra']})(
               <Input placeholder="请输入环境变量 SPUG_RELEASE 的值"/>
             )}
@@ -86,7 +86,7 @@ class Ext2Form extends React.Component {
               <Input placeholder="请输入备注信息"/>
             )}
           </Form.Item>
-          <Form.Item required label="发布目标主机">
+          <Form.Item required label="发布目标主机" help="通过点击主机名称自由选择本次发布的主机。">
             {info['app_host_ids'].map(id => (
               <Tag.CheckableTag key={id} checked={host_ids.includes(id)} onChange={v => this.handleChange(id, v)}>
                 {lds.get(hostStore.idMap, `${id}.name`)}({lds.get(hostStore.idMap, `${id}.hostname`)}:{lds.get(hostStore.idMap, `${id}.port`)})
