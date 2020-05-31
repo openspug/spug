@@ -13,7 +13,7 @@ class Command(BaseCommand):
         parser.add_argument('-u', required=False, help='账户名称')
         parser.add_argument('-p', required=False, help='账户密码')
         parser.add_argument('-n', required=False, help='账户昵称')
-        parser.add_argument('-s', default=False, help='是否是超级用户（默认否）')
+        parser.add_argument('-s', default=False, action='store_true', help='是否是超级用户（默认否）')
 
     def echo_success(self, msg):
         self.stdout.write(self.style.SUCCESS(msg))

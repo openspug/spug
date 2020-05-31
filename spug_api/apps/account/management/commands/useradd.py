@@ -24,4 +24,4 @@ class Command(BaseCommand):
             is_supper=options['s'],
         )
         self.stdout.write(self.style.SUCCESS('创建成功'))
-        self.stdout.write(self.style.WARNING('废弃警告，v2.3.0之后将会移除该命令，请使用 python manage.py user add 来代替！'))
+        self.stdout.write(self.style.WARNING('废弃警告，v2.4.0之后将会移除该命令，请使用 python manage.py user add 来代替！'))
