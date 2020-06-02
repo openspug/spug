@@ -72,8 +72,6 @@ class Scheduler:
             logger.info(f'EVENT_JOB_ERROR: job_id {event.job_id} exception: {event.exception}')
             Notify.make_notify('schedule', '1', f'{obj.name} - 执行异常', f'{event.exception}')
         elif event.code == EVENT_JOB_EXECUTED:
-            job = self.scheduler.get_job('3')
-            print(job.id, job.name, job.next_run_time)
             if event.retval:
                 score = 0
                 for item in event.retval:
