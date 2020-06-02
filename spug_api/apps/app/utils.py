@@ -3,6 +3,7 @@
 # Released under the MIT License.
 from django.conf import settings
 from apps.app.models import Deploy
+from apps.setting.utils import AppSetting
 from libs.gitlib import Git
 import shutil
 import os
@@ -22,7 +23,12 @@ def parse_envs(text):
 def fetch_versions(deploy: Deploy):
     git_repo = deploy.extend_obj.git_repo
     repo_dir = os.path.join(settings.REPOS_DIR, str(deploy.id))
-    return Git(git_repo, repo_dir).fetch_branches_tags()
+    try:
+        pkey = AppSetting.get('private_key')
+    except KeyError:
+        pkey = None
+    with Git(git_repo, repo_dir, pkey) as git:
+        return git.fetch_branches_tags()
 
 
 def remove_repo(deploy_id):

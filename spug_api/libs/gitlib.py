@@ -1,21 +1,27 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the MIT License.
-from git import Repo, RemoteReference, TagReference, InvalidGitRepositoryError
+from git import Repo, RemoteReference, TagReference, InvalidGitRepositoryError, GitCommandError
+from tempfile import NamedTemporaryFile
 import shutil
 import os
 
 
 class Git:
-    def __init__(self, git_repo, repo_dir):
-        self.repo = self._get_repo(git_repo, repo_dir)
+    def __init__(self, git_repo, repo_dir, pkey=None):
+        self.git_repo = git_repo
+        self.repo_dir = repo_dir
+        self.repo = None
+        self.pkey = pkey
+        self.fd = None
+        self.env = {}
 
     def archive(self, filepath, commit):
         with open(filepath, 'wb') as f:
             self.repo.archive(f, commit)
 
     def fetch_branches_tags(self):
-        self.repo.remotes.origin.fetch()
+        self._fetch()
         branches, tags = {}, {}
         for ref in self.repo.references:
             if isinstance(ref, RemoteReference):
@@ -36,16 +42,32 @@ class Git:
         tags = sorted(tags.items(), key=lambda x: x[1]['date'], reverse=True)
         return branches, dict(tags)
 
-    def _get_repo(self, git_repo, repo_dir):
-        if os.path.exists(repo_dir):
+    def _fetch(self):
+        try:
+            self.repo.remotes.origin.fetch()
+        except GitCommandError as e:
+            if self.env:
+                self.repo.remotes.origin.fetch(env=self.env)
+            else:
+                raise e
+
+    def _get_repo(self):
+        if os.path.exists(self.repo_dir):
             try:
-                return Repo(repo_dir)
+                return Repo(self.repo_dir)
             except InvalidGitRepositoryError:
-                if os.path.isdir(repo_dir):
-                    shutil.rmtree(repo_dir)
+                if os.path.isdir(self.repo_dir):
+                    shutil.rmtree(self.repo_dir)
                 else:
-                    os.remove(repo_dir)
-        return Repo.clone_from(git_repo, repo_dir)
+                    os.remove(self.repo_dir)
+        try:
+            repo = Repo.clone_from(self.git_repo, self.repo_dir)
+        except GitCommandError as e:
+            if self.env:
+                repo = Repo.clone_from(self.git_repo, self.repo_dir, env=self.env)
+            else:
+                raise e
+        return repo
 
     def _get_commits(self, branch, count=10):
         commits = []
@@ -59,3 +81,16 @@ class Git:
                 'message': commit.message.strip()
             })
         return commits
+
+    def __enter__(self):
+        if self.pkey:
+            self.fd = NamedTemporaryFile()
+            self.fd.write(self.pkey.encode())
+            self.fd.flush()
+            self.env = {'GIT_SSH_COMMAND': f'ssh -i {self.fd.name}'}
+        self.repo = self._get_repo()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.fd:
+            self.fd.close()
