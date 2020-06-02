@@ -36,7 +36,7 @@ class Ext1Form extends React.Component {
 
   fetchVersions = () => {
     this.setState({fetching: true});
-    http.get(`/api/app/deploy/${store.record.deploy_id}/versions/`)
+    http.get(`/api/app/deploy/${store.record.deploy_id}/versions/`, {timeout: 120000})
       .then(res => {
         this.setState({versions: res}, this._initExtra1);
       })

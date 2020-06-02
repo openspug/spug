@@ -25,7 +25,7 @@ class ComImport extends React.Component {
     const formData = new FormData();
     formData.append('file', this.state.fileList[0]);
     formData.append('password', this.state.password);
-    http.post('/api/host/import/', formData)
+    http.post('/api/host/import/', formData, {timeout: 120000})
       .then(res => {
         Modal.info({
           title: '导入结果',
