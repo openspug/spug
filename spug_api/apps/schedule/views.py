@@ -35,8 +35,9 @@ class Schedule(View):
                 if len(args) != 5:
                     return json_response(error='无效的执行规则，请更正后再试')
                 minute, hour, day, month, week = args
+                week = '0' if week == '7' else week
                 try:
-                    CronTrigger(minute=minute, hour=hour, day=day, month=month, week=week)
+                    CronTrigger(minute=minute, hour=hour, day=day, month=month, day_of_week=week)
                 except ValueError:
                     return json_response(error='无效的执行规则，请更正后再试')
             if form.id:

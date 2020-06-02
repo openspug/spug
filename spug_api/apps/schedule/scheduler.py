@@ -26,6 +26,17 @@ counter = dict()
 
 class Scheduler:
     timezone = settings.TIME_ZONE
+    week_map = {
+        '*': '*',
+        '7': '6',
+        '0': '6',
+        '1': '0',
+        '2': '1',
+        '3': '2',
+        '4': '3',
+        '5': '4',
+        '6': '5',
+    }
 
     def __init__(self):
         self.scheduler = BackgroundScheduler(timezone=self.timezone)
@@ -42,8 +53,9 @@ class Scheduler:
         elif trigger == 'cron':
             args = json.loads(trigger_args) if not isinstance(trigger_args, dict) else trigger_args
             minute, hour, day, month, week = args['rule'].split()
-            return CronTrigger(minute=minute, hour=hour, day=day, month=month, week=week, start_date=args['start'],
-                               end_date=args['stop'])
+            week = cls.week_map[week]
+            return CronTrigger(minute=minute, hour=hour, day=day, month=month, day_of_week=week,
+                               start_date=args['start'], end_date=args['stop'])
         else:
             raise TypeError(f'unknown schedule policy: {trigger!r}')
 
@@ -60,6 +72,8 @@ class Scheduler:
             logger.info(f'EVENT_JOB_ERROR: job_id {event.job_id} exception: {event.exception}')
             Notify.make_notify('schedule', '1', f'{obj.name} - 执行异常', f'{event.exception}')
         elif event.code == EVENT_JOB_EXECUTED:
+            job = self.scheduler.get_job('3')
+            print(job.id, job.name, job.next_run_time)
             if event.retval:
                 score = 0
                 for item in event.retval:
