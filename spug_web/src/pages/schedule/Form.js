@@ -177,13 +177,16 @@ class ComForm extends React.Component {
                 <React.Fragment key={index}>
                   <Select
                     value={id}
+                    showSearch
                     placeholder="请选择"
-                    style={{width: '60%', marginRight: 10}}
+                    optionFilterProp="children"
+                    style={{width: '80%', marginRight: 10}}
+                    filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                     onChange={v => store.editTarget(index, v)}>
                     <Select.Option value="local" disabled={store.targets.includes('local')}>本机</Select.Option>
                     {hostStore.records.map(item => (
                       <Select.Option key={item.id} value={item.id} disabled={store.targets.includes(item.id)}>
-                        {item.name}({item['hostname']}:{item['port']})
+                        {`${item.name}(${item['hostname']}:${item['port']})`}
                       </Select.Option>
                     ))}
                   </Select>

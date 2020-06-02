@@ -9,6 +9,10 @@
     top: 4px
 }
 
+.delIcon:hover {
+    color: #f5222d;
+}
+
 .deployBlock {
     height: 100px;
     margin-top: 63px;

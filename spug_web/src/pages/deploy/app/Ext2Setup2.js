@@ -27,12 +27,15 @@ class Ext2Setup2 extends React.Component {
             <React.Fragment key={index}>
               <Select
                 value={id}
+                showSearch
                 placeholder="请选择"
+                optionFilterProp="children"
                 style={{width: '80%', marginRight: 10}}
+                filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                 onChange={v => store.editHost(index, v)}>
                 {hostStore.records.map(item => (
                   <Select.Option key={item.id} value={item.id} disabled={info['host_ids'].includes(item.id)}>
-                    {item.name}({item['hostname']}:{item['port']})
+                    {`${item.name}(${item['hostname']}:${item['port']})`}
                   </Select.Option>
                 ))}
               </Select>

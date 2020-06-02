@@ -143,10 +143,17 @@ class ComForm extends React.Component {
               <Input value={addr['2']} placeholder="请输入监控地址（IP/域名）" onChange={e => this.handleAddr('2', e)}/>
             </Form.Item>
             <Form.Item required label="监控主机" style={this.getStyle('34')}>
-              <Select value={addr['3']} placeholder="请选择主机" onChange={v => this.handleAddr('3', v)}>
+              <Select
+                showSearch
+                value={addr['3']}
+                placeholder="请选择主机"
+                optionFilterProp="children"
+                filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+                onChange={v => this.handleAddr('3', v)}>
                 {hostStore.records.map(item => (
-                  <Select.Option value={String(item.id)}
-                                 key={item.id}>{item.name}({item.hostname}:{item.port})</Select.Option>
+                  <Select.Option value={String(item.id)} key={item.id}>
+                    {`${item.name}(${item.hostname}:${item.port})`}
+                  </Select.Option>
                 ))}
               </Select>
             </Form.Item>

@@ -8,3 +8,7 @@
     position: relative;
     top: 4px
 }
+
+.delIcon:hover {
+    color: #f5222d;
+}
