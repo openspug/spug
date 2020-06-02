@@ -63,14 +63,25 @@ ASGI_APPLICATION = 'spug.routing.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ATOMIC_REQUESTS': True,
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
+#DATABASES = {
+#    'default': {
+#        'ATOMIC_REQUESTS': True,
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#    }
+#}
 
+DATABASES = {
+        'default': {
+        'ATOMIC_REQUESTS': True,
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'spug',
+        'USER': 'spug',
+        'PASSWORD': 'spug.dev',
+        'HOST': 'db',
+        'PORT': '3306',
+     }
+ }
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
