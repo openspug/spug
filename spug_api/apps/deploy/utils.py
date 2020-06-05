@@ -290,6 +290,8 @@ class Helper:
         self._send({'key': key, 'step': step, 'data': data})
 
     def local(self, command, env=None):
+        if env:
+            env = os.environ.copy().update(env)
         command = 'set -e\n' + command
         task = subprocess.Popen(command, env=env, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         while True:
