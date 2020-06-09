@@ -5,11 +5,13 @@
  */
 let Permission = {
   isSuper: false,
+  hostPerms: [],
   permissions: []
 };
 
-export function updatePermissions(isSupper, data) {
+export function updatePermissions(isSupper, hostPerms, data) {
   Permission.isSuper = isSupper;
+  Permission.hostPerms = hostPerms;
   Permission.permissions = data;
 }
 
@@ -24,6 +26,11 @@ export function hasPermission(strCode) {
     }
   }
   return false
+}
+
+export function hasHostPermission(id) {
+  const {isSuper, hostPerms} = Permission;
+  return isSuper || hostPerms.includes(id)
 }
 
 // 清理输入的命令中包含的\r符号

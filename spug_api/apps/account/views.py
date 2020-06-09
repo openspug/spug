@@ -193,6 +193,7 @@ def handle_user_info(user, x_real_ip):
         'nickname': user.nickname,
         'is_supper': user.is_supper,
         'has_real_ip': True if x_real_ip else False,
+        'host_perms': [] if user.is_supper else user.host_perms,
         'permissions': [] if user.is_supper else user.page_perms
     })
 

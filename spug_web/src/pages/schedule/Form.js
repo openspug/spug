@@ -8,7 +8,7 @@ import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, Col, Button, Steps, Tabs, InputNumber, DatePicker, Icon, message } from 'antd';
 import { LinkButton, ACEditor } from 'components';
 import TemplateSelector from '../exec/task/TemplateSelector';
-import { http, cleanCommand } from 'libs';
+import { http, cleanCommand, hasHostPermission } from 'libs';
 import store from './store';
 import hostStore from '../host/store';
 import styles from './index.module.css';
@@ -184,7 +184,7 @@ class ComForm extends React.Component {
                     filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                     onChange={v => store.editTarget(index, v)}>
                     <Select.Option value="local" disabled={store.targets.includes('local')}>本机</Select.Option>
-                    {hostStore.records.map(item => (
+                    {hostStore.records.filter(x => x.id === id || hasHostPermission(x.id)).map(item => (
                       <Select.Option key={item.id} value={item.id} disabled={store.targets.includes(item.id)}>
                         {`${item.name}(${item['hostname']}:${item['port']})`}
                       </Select.Option>
@@ -197,7 +197,7 @@ class ComForm extends React.Component {
               ))}
             </Form.Item>
             <Form.Item wrapperCol={{span: 14, offset: 6}}>
-              <Button type="dashed" style={{width: '60%'}} onClick={store.addTarget}>
+              <Button type="dashed" style={{width: '80%'}} onClick={store.addTarget}>
                 <Icon type="plus"/>添加执行对象
               </Button>
             </Form.Item>

@@ -61,7 +61,8 @@ class LoginIndex extends React.Component {
     localStorage.setItem('nickname', data['nickname']);
     localStorage.setItem('is_supper', data['is_supper']);
     localStorage.setItem('permissions', JSON.stringify(data['permissions']));
-    updatePermissions(data['is_supper'], data['permissions']);
+    localStorage.setItem('host_perms', JSON.stringify(data['host_perms']));
+    updatePermissions(data['is_supper'], data['host_perms'], data['permissions']);
     if (history.location.state && history.location.state['from']) {
       history.push(history.location.state['from'])
     } else {

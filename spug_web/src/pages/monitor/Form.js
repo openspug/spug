@@ -8,7 +8,7 @@ import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, Radio, message, Steps, Button, Transfer, Checkbox } from 'antd';
 import TemplateSelector from '../exec/task/TemplateSelector';
 import { LinkButton, ACEditor } from 'components';
-import { http, cleanCommand } from 'libs';
+import { http, cleanCommand, hasHostPermission } from 'libs';
 import store from './store';
 import hostStore from '../host/store';
 import groupStore from '../alarm/group/store';
@@ -152,7 +152,7 @@ class ComForm extends React.Component {
                 optionFilterProp="children"
                 filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                 onChange={v => this.handleAddr('3', v)}>
-                {hostStore.records.map(item => (
+                {hostStore.records.filter(x => x.id === Number(addr['3']) || hasHostPermission(x.id)).map(item => (
                   <Select.Option value={String(item.id)} key={item.id}>
                     {`${item.name}(${item.hostname}:${item.port})`}
                   </Select.Option>
