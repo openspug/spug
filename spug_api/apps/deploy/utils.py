@@ -56,10 +56,10 @@ def _ext1_deploy(req, helper, env):
     extras = json.loads(req.extra)
     if extras[0] == 'branch':
         tree_ish = extras[2]
-        env.update(SPUG_BRANCH=extras[1], SPUG_COMMIT_ID=extras[2])
+        env.update(SPUG_GIT_BRANCH=extras[1], SPUG_GIT_COMMIT_ID=extras[2])
     else:
         tree_ish = extras[1]
-        env.update(SPUG_TAG=extras[1])
+        env.update(SPUG_GIT_TAG=extras[1])
     if req.type == '2':
         helper.send_step('local', 6, f'完成\r\n{human_time()} 回滚发布...        跳过')
     else:
@@ -291,7 +291,7 @@ class Helper:
 
     def local(self, command, env=None):
         if env:
-            env = os.environ.copy().update(env)
+            env.update(os.environ)
         command = 'set -e\n' + command
         task = subprocess.Popen(command, env=env, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         while True:
