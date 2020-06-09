@@ -139,7 +139,7 @@ def _deploy_ext1_host(helper, h_id, extend, env):
     if env.SPUG_DEPLOY_TYPE != '2':
         code, _ = ssh.exec_command(f'mkdir -p {extend.dst_repo} && [ -e {extend.dst_dir} ] && [ ! -L {extend.dst_dir} ]')
         if code == 0:
-            helper.send_error(host.id, f'please make sure the {extend.dst_dir!r} is not exists.')
+            helper.send_error(host.id, f'检测到该主机的发布目录 {extend.dst_dir!r} 已存在，为了数据安全请自行备份后删除该目录，Spug 将会创建并接管该目录。')
         # clean
         clean_command = f'ls -d {extend.deploy_id}_* 2> /dev/null | sort -t _ -rnk2 | tail -n +{extend.versions + 1} | xargs rm -rf'
         helper.remote(host.id, ssh, f'cd {extend.dst_repo} && rm -rf {env.SPUG_VERSION} && {clean_command}')
