@@ -29,7 +29,9 @@ class ComForm extends React.Component {
         {label: '微信', 'value': '1'},
         {label: '短信', 'value': '2', disabled: true},
         {label: '钉钉', 'value': '3'},
-        {label: '邮件', 'value': '4'}]
+        {label: '邮件', 'value': '4'},
+        {label: '企业微信', 'value': '5'},
+      ]
     }
   }
 
@@ -165,7 +167,8 @@ class ComForm extends React.Component {
             </Form.Item>
             <Form.Item required label="脚本内容" style={this.getStyle('4')}
                        extra={<LinkButton onClick={() => this.setState({showTmp: true})}>从模板添加</LinkButton>}>
-              <ACEditor mode="sh" value={extra['4']} height="200px" onChange={e => this.handleExtra('4', cleanCommand(e))}/>
+              <ACEditor mode="sh" value={extra['4']} height="200px"
+                        onChange={e => this.handleExtra('4', cleanCommand(e))}/>
             </Form.Item>
             <Form.Item label="备注信息">
               {getFieldDecorator('desc', {initialValue: info['desc']})(

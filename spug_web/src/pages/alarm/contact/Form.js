@@ -65,7 +65,12 @@ class ComForm extends React.Component {
           </Form.Item>
           <Form.Item label="钉钉">
             {getFieldDecorator('ding', {initialValue: info['ding']})(
-              <Input placeholder="请输入钉钉机器人地址"/>
+              <Input placeholder="请输入钉钉机器人完整地址"/>
+            )}
+          </Form.Item>
+          <Form.Item label="企业微信">
+            {getFieldDecorator('qy_wx', {initialValue: info['qy_wx']})(
+              <Input placeholder="请输入企业微信机器人完整地址"/>
             )}
           </Form.Item>
         </Form>

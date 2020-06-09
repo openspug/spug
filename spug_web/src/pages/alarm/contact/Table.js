@@ -37,6 +37,10 @@ class ComTable extends React.Component {
     dataIndex: 'ding',
     ellipsis: true
   }, {
+    title: '企业微信',
+    dataIndex: 'qy_wx',
+    ellipsis: true
+  }, {
     title: '操作',
     render: info => (
       <span>

@@ -13,6 +13,7 @@ class Alarm(models.Model, ModelMixin):
         ('2', '短信'),
         ('3', '钉钉'),
         ('4', '邮件'),
+        ('5', '企业微信'),
     )
     STATUS = (
         ('1', '报警发生'),
@@ -67,6 +68,7 @@ class Contact(models.Model, ModelMixin):
     email = models.CharField(max_length=255, null=True)
     ding = models.CharField(max_length=255, null=True)
     wx_token = models.CharField(max_length=255, null=True)
+    qy_wx = models.CharField(max_length=255, null=True)
 
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')

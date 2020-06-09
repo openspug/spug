@@ -53,6 +53,8 @@ class Scheduler:
                 spug.notify_by_dd(event, obj)
             elif mode == '4':
                 spug.notify_by_email(event, obj)
+            elif mode == '5':
+                spug.notify_by_qy_wx(event, obj)
 
     def _handle_notify(self, obj, is_notified, out):
         if obj.latest_status == 0:

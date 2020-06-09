@@ -89,3 +89,28 @@ def notify_by_dd(event, obj):
             requests.post(url, json=data)
     else:
         Notify.make_notify(notify_source, '1', '发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的钉钉。')
+
+
+def notify_by_qy_wx(event, obj):
+    _, u_ids = _parse_args(obj.grp)
+    users = set(x.qy_wx for x in Contact.objects.filter(id__in=u_ids, qy_wx__isnull=False))
+    if users:
+        color, title = ('warning', '监控告警通知') if event == '1' else ('info', '告警恢复通知')
+        texts = [
+            f'## {title}',
+            f'**告警名称：** <font color="{color}">{obj.name}</font> ',
+            f'**告警时间：** {human_datetime()} ',
+            f'**告警描述：** {obj.out} ',
+        ]
+        if event == '2':
+            texts.append(f'**持续时间：** {obj.duration} ')
+        data = {
+            'msgtype': 'markdown',
+            'markdown': {
+                'content': '\n'.join(texts) + '\n> 来自 Spug运维平台'
+            }
+        }
+        for url in users:
+            requests.post(url, json=data)
+    else:
+        Notify.make_notify(notify_source, '1', '发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的企业微信。')

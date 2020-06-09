@@ -60,6 +60,7 @@ class ContactView(View):
             Argument('email', required=False),
             Argument('ding', required=False),
             Argument('wx_token', required=False),
+            Argument('qy_wx', required=False),
         ).parse(request.body)
         if error is None:
             if form.id:
