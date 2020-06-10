@@ -31,7 +31,11 @@ class ComForm extends React.Component {
         {label: '钉钉', 'value': '3'},
         {label: '邮件', 'value': '4'},
         {label: '企业微信', 'value': '5'},
-      ]
+      ],
+      helpMap: {
+        '1': '返回HTTP状态码200-399则判定为正常，其他为异常。',
+        '4': '脚本执行退出状态码为 0 则判定为正常，其他为异常。'
+      }
     }
   }
 
@@ -105,8 +109,8 @@ class ComForm extends React.Component {
 
   render() {
     const info = store.record;
-    const {loading, extra, addr, showTmp, page, modeOptions} = this.state;
-    const {getFieldDecorator} = this.props.form;
+    const {loading, extra, addr, showTmp, page, modeOptions, helpMap} = this.state;
+    const {getFieldDecorator, getFieldValue} = this.props.form;
     const [b1, b2] = this.verifyButtonStatus();
     return (
       <Modal
@@ -122,7 +126,7 @@ class ComForm extends React.Component {
         </Steps>
         <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
           <div style={{display: page === 0 ? 'block' : 'none'}}>
-            <Form.Item label="监控类型">
+            <Form.Item label="监控类型" help={helpMap[getFieldValue('type')]}>
               {getFieldDecorator('type', {initialValue: info['type'] || '1'})(
                 <Select placeholder="请选择监控类型">
                   <Select.Option value="1">站点检测</Select.Option>
@@ -162,11 +166,15 @@ class ComForm extends React.Component {
             <Form.Item required label="检测端口" style={this.getStyle('2')}>
               <Input value={extra['2']} placeholder="请输入端口号" onChange={e => this.handleExtra('2', e)}/>
             </Form.Item>
-            <Form.Item required label="进程名称" style={this.getStyle('3')}>
+            <Form.Item required label="进程名称" style={this.getStyle('3')} help="执行 ps -ef 看到的进程名称。">
               <Input value={extra['3']} placeholder="请输入进程名称" onChange={e => this.handleExtra('3', e)}/>
             </Form.Item>
-            <Form.Item required label="脚本内容" style={this.getStyle('4')}
-                       extra={<LinkButton onClick={() => this.setState({showTmp: true})}>从模板添加</LinkButton>}>
+            <Form.Item
+              required
+              label="脚本内容"
+              style={this.getStyle('4')}
+
+              extra={<LinkButton onClick={() => this.setState({showTmp: true})}>从模板添加</LinkButton>}>
               <ACEditor mode="sh" value={extra['4']} height="200px"
                         onChange={e => this.handleExtra('4', cleanCommand(e))}/>
             </Form.Item>
