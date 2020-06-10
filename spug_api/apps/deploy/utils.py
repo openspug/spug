@@ -219,7 +219,7 @@ class Helper:
                     f'**应用名称：** {req.deploy.app.name} ',
                     f'**应用版本：** {version} ',
                     f'**发布环境：** {req.deploy.env.name} ',
-                    f'**发布主机：** {",".join(x["name"] for x in hosts)} ',
+                    f'**发布主机：** {",".join(x["name"] for x in hosts[0:2])} ' + ( '等%s台主机' % len(hosts) if len(hosts) > 2 else '' ),
                     f'**发布结果：** <font color="{color}">{text}</font>',
                     f'**发布时间：** {human_datetime()} ',
                     '> 来自 Spug运维平台'
@@ -252,7 +252,7 @@ class Helper:
                     f'**应用名称：** {req.deploy.app.name} ',
                     f'**应用版本：** {version} ',
                     f'**发布环境：** {req.deploy.env.name} ',
-                    f'**发布主机：** {",".join(x["name"] for x in hosts)} ',
+                    f'**发布主机：** {",".join(x["name"] for x in hosts[0:2])} ' + ( '等%s台主机' % len(hosts) if len(hosts) > 2 else '' ),
                     f'**发布结果：** <font color="{color}">{text}</font>',
                     f'**发布时间：** {human_datetime()} ',
                     '> 来自 Spug运维平台'
