@@ -21,7 +21,7 @@ class Record extends React.Component {
   }
 
   componentDidMount() {
-    http.get(`/api/schedule/${store.record.id}/history/`)
+    http.get(`/api/schedule/${store.record.id}/`)
       .then(res => this.setState({records: res}))
       .finally(() => this.setState({loading: false}))
   }
@@ -36,7 +36,7 @@ class Record extends React.Component {
     render: info => <Tag color={this.colors[info['status']]}>{info['status_alias']}</Tag>
   }, {
     title: '操作',
-    render: info => <LinkButton onClick={() => store.showInfo(info)}>详情</LinkButton>
+    render: info => <LinkButton onClick={() => store.showInfo(null, info.id)}>详情</LinkButton>
   }];
 
   render() {

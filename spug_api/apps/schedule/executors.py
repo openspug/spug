@@ -36,8 +36,9 @@ def host_executor(q, host, pkey, command):
         q.put((host.id, exit_code, round(time.time() - now, 3), out))
 
 
-def dispatch(command, targets):
-    close_old_connections()
+def dispatch(command, targets, in_view=False):
+    if not in_view:
+        close_old_connections()
     threads, pkey, q = [], AppSetting.get('private_key'), Queue()
     for t in targets:
         if t == 'local':

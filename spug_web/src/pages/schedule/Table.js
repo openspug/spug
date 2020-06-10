@@ -24,10 +24,13 @@ class ComTable extends React.Component {
   moreMenus = (info) => (
     <Menu>
       <Menu.Item>
-        <LinkButton auth="schedule.schedule.edit" onClick={() => this.handleActive(info)}>{info.is_active ? '禁用' : '激活'}</LinkButton>
+        <LinkButton onClick={() => this.handleTest(info)}>执行测试</LinkButton>
       </Menu.Item>
       <Menu.Item>
-        <LinkButton onClick={() => store.showRecord(info)}>历史</LinkButton>
+        <LinkButton auth="schedule.schedule.edit" onClick={() => this.handleActive(info)}>{info.is_active ? '禁用任务' : '激活任务'}</LinkButton>
+      </Menu.Item>
+      <Menu.Item>
+        <LinkButton onClick={() => store.showRecord(info)}>历史记录</LinkButton>
       </Menu.Item>
       <Menu.Divider/>
       <Menu.Item>
@@ -72,7 +75,7 @@ class ComTable extends React.Component {
     width: 180,
     render: info => (
       <span>
-        <LinkButton disabled={!info['latest_run_time']} onClick={() => store.showInfo(info, true)}>详情</LinkButton>
+        <LinkButton disabled={!info['latest_run_time']} onClick={() => store.showInfo(info)}>详情</LinkButton>
         <Divider type="vertical"/>
         <LinkButton auth="schedule.schedule.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
@@ -110,6 +113,15 @@ class ComTable extends React.Component {
             store.fetchRecords()
           })
       }
+    })
+  };
+
+  handleTest = (text) => {
+    Modal.confirm({
+      title: '操作确认',
+      content: '立即执行该任务（不影响调度规则）？',
+      onOk: () => http.post(`/api/schedule/${text.id}/`)
+        .then(res => store.showInfo(text, res))
     })
   };
 

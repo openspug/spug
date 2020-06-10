@@ -41,10 +41,10 @@ class Store {
     this.record = info
   };
 
-  showInfo = (info = {}, isTask) => {
-    const record = isTask ? {id: info['latest_id']} : info;
-    this.infoVisible = true;
-    this.record = record
+  showInfo = (info, h_id='latest') => {
+    if (info) this.record = info;
+    this.record.h_id = h_id;
+    this.infoVisible = true
   };
 
   showRecord = (info) => {

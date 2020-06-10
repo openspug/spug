@@ -7,6 +7,5 @@ from .views import *
 
 urlpatterns = [
     path('', Schedule.as_view()),
-    path('<int:h_id>/', ScheduleInfo.as_view()),
-    path('<int:t_id>/history/', HistoryView.as_view()),
+    path('<int:t_id>/', HistoryView.as_view()),
 ]

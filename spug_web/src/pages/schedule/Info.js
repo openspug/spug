@@ -20,7 +20,7 @@ class ComForm extends React.Component {
   }
 
   componentDidMount() {
-    http.get(`/api/schedule/${store.record.id}/`)
+    http.get(`/api/schedule/${store.record.id}/?id=${store.record.h_id}`)
       .then(info => this.setState({info}))
       .finally(() => this.setState({loading: false}))
   }
@@ -56,7 +56,7 @@ class ComForm extends React.Component {
                   tab={item.code === 0 ? item.name : <span style={{color: 'red'}}>{item.name}</span>}>
                   <div>执行时间： {run_time}（{moment(run_time).fromNow()}）</div>
                   <div style={{marginTop: 5}}>运行耗时： {item.duration} s</div>
-                  <div style={{marginTop: 5}}>返回状态： {item.code}</div>
+                  <div style={{marginTop: 5}}>返回状态： {item.code}（非 0 则判定为失败）</div>
                   <div style={{marginTop: 5}}>执行输出： <pre style={preStyle}>{item.output}</pre></div>
                 </Tabs.TabPane>
               ))}
