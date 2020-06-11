@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Form, Input, Select, Button, Icon } from "antd";
+import { Form, Input, Select, Button, Icon, message } from "antd";
 import store from './store';
 import hostStore from 'pages/host/store';
 import styles from './index.module.css';
@@ -21,6 +21,15 @@ class Ext1Setup2 extends React.Component {
   checkStatus = () => {
     const info = store.deploy;
     return info['dst_dir'] && info['dst_repo'] && info['versions'] && info['host_ids'].filter(x => x).length > 0
+  };
+
+  handleNext = () => {
+    const {dst_dir, dst_repo} = store.deploy;
+    if (dst_repo.includes(dst_dir)) {
+      message.error('仓库目录不能位于发布部署目录内')
+    } else {
+       store.page += 1
+    }
   };
 
   render() {
@@ -65,7 +74,7 @@ class Ext1Setup2 extends React.Component {
           </Button>
         </Form.Item>
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <Button disabled={!this.checkStatus()} type="primary" onClick={() => store.page += 1}>下一步</Button>
+          <Button disabled={!this.checkStatus()} type="primary" onClick={this.handleNext}>下一步</Button>
           <Button style={{marginLeft: 20}} onClick={() => store.page -= 1}>上一步</Button>
         </Form.Item>
       </Form>
