@@ -46,7 +46,7 @@ class Command(BaseCommand):
         # update dep
         commands = [
             f'cd {settings.BASE_DIR}',
-            'pip install -r requirements.txt'
+            'pip install -r requirements.txt -i https://pypi.doubanio.com/simple/'
         ]
         task = subprocess.Popen(' && '.join(commands), shell=True)
         if task.wait() != 0:
