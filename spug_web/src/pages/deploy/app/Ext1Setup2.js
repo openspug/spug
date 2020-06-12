@@ -6,6 +6,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Form, Input, Select, Button, Icon, message } from "antd";
+import { isSubArray } from 'libs';
 import store from './store';
 import hostStore from 'pages/host/store';
 import styles from './index.module.css';
@@ -25,7 +26,7 @@ class Ext1Setup2 extends React.Component {
 
   handleNext = () => {
     const {dst_dir, dst_repo} = store.deploy;
-    if (dst_repo.includes(dst_dir)) {
+    if (isSubArray(dst_repo.split('/'), dst_dir.split('/'))) {
       message.error('仓库目录不能位于发布部署目录内')
     } else {
        store.page += 1
