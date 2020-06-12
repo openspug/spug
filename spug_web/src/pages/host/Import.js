@@ -24,7 +24,7 @@ class ComImport extends React.Component {
     this.setState({loading: true});
     const formData = new FormData();
     formData.append('file', this.state.fileList[0]);
-    formData.append('password', this.state.password);
+    if (this.state.password) formData.append('password', this.state.password);
     http.post('/api/host/import/', formData, {timeout: 120000})
       .then(res => {
         Modal.info({
