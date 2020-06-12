@@ -124,7 +124,7 @@ class LoginIndex extends React.Component {
             <a title="文档" href="https://www.spug.dev/docs/about-spug/"  target="_blank"
                rel="noopener noreferrer">文档</a>
           </div>
-          <div style={{color: 'rgba(0, 0, 0, .45)'}}>Copyright <Icon type="copyright" /> 2019 By OpenSpug</div>
+          <div style={{color: 'rgba(0, 0, 0, .45)'}}>Copyright <Icon type="copyright" /> 2020 By OpenSpug</div>
         </div>
       </div>
     )
