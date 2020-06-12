@@ -108,6 +108,7 @@ class DeployView(View):
                 ).parse(request.body)
                 if error:
                     return json_response(error=error)
+                extend_form.dst_dir = extend_form.dst_dir.rstrip('/')
                 extend_form.filter_rule = json.dumps(extend_form.filter_rule)
                 extend_form.custom_envs = json.dumps(parse_envs(extend_form.custom_envs))
                 if form.id:
