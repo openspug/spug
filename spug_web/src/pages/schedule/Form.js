@@ -20,10 +20,13 @@ class ComForm extends React.Component {
   constructor(props) {
     super(props);
     this.isFirstRender = true;
+    this.lastFetchId = 0;
+    this._fetchNextRunTime = lds.debounce(this._fetchNextRunTime, 500);
     this.state = {
       loading: false,
       type: null,
       page: 0,
+      nextRunTime: null,
       args: {[store.record['trigger']]: store.record['trigger_args']},
       command: store.record['command'],
     }
@@ -100,7 +103,35 @@ class ComForm extends React.Component {
   handleCronArgs = (key, value) => {
     let args = this.state.args['cron'] || {};
     args = Object.assign(args, {[key]: value});
-    this.setState({args: Object.assign(this.state.args, {cron: args})})
+    this.setState({args: Object.assign(this.state.args, {cron: args})}, () => {
+      if (key === 'rule') {
+        value = value.trim();
+        if (value.split(' ').length === 5) {
+          this.setState({nextRunTime: <Icon type="loading"/>});
+          this._fetchNextRunTime()
+        } else {
+          this.setState({nextRunTime: null})
+        }
+      } else {
+        this.setState({nextRunTime: <Icon type="loading"/>});
+        this._fetchNextRunTime()
+      }
+    });
+  };
+
+  _fetchNextRunTime = () => {
+    this.lastFetchId += 1;
+    const fetchId = this.lastFetchId;
+    const args = this._parse_args('cron');
+    http.post('/api/schedule/run_time/', JSON.parse(args))
+      .then(({success, msg}) => {
+        if (fetchId !== this.lastFetchId) return;
+        if (success) {
+          this.setState({nextRunTime: <span style={{fontSize: 12, color: '#52c41a'}}>{msg}</span>})
+        } else {
+          this.setState({nextRunTime: <span style={{fontSize: 12, color: '#ff4d4f'}}>{msg}</span>})
+        }
+      })
   };
 
   verifyButtonStatus = () => {
@@ -118,7 +149,7 @@ class ComForm extends React.Component {
   render() {
     const info = store.record;
     const {getFieldDecorator} = this.props.form;
-    const {page, args, loading, showTmp} = this.state;
+    const {page, args, loading, showTmp, nextRunTime} = this.state;
     const [b1, b2, b3] = this.verifyButtonStatus();
     return (
       <Modal
@@ -230,6 +261,7 @@ class ComForm extends React.Component {
                   <Tabs.TabPane tab="UNIX Cron" key="cron">
                     <Form.Item required label="执行规则" help="兼容Cron风格，可参考官方例子">
                       <Input
+                        suffix={nextRunTime || <span/>}
                         value={lds.get(args, 'cron.rule')}
                         placeholder="例如每天凌晨1点执行：0 1 * * *"
                         onChange={e => this.handleCronArgs('rule', e.target.value)}/>

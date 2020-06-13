@@ -3,7 +3,9 @@
 # Released under the MIT License.
 from django.views.generic import View
 from django_redis import get_redis_connection
+from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
+from apps.schedule.scheduler import Scheduler
 from apps.schedule.models import Task, History
 from apps.schedule.executors import dispatch
 from apps.host.models import Host
@@ -135,3 +137,29 @@ class HistoryView(View):
                 'output': out})
         data['duration'] = f"{data['duration'] / len(outputs):.3f}"
         return data
+
+
+def next_run_time(request):
+    form, error = JsonParser(
+        Argument('rule', help='参数错误'),
+        Argument('start', required=False),
+        Argument('stop', required=False)
+    ).parse(request.body)
+    if error is None:
+        try:
+            minute, hour, day, month, week = form.rule.split()
+            week = Scheduler.week_map[week]
+            trigger = CronTrigger(minute=minute, hour=hour, day=day, month=month, day_of_week=week,
+                                  start_date=form.start, end_date=form.stop)
+        except (ValueError, KeyError):
+            return json_response({'success': False, 'msg': '无效的执行规则'})
+        scheduler = BackgroundScheduler(timezone=settings.TIME_ZONE)
+        scheduler.start()
+        job = scheduler.add_job(lambda: None, trigger)
+        run_time = job.next_run_time
+        scheduler.shutdown()
+        if run_time:
+            return json_response({'success': True, 'msg': run_time.strftime('%Y-%m-%d %H:%M:%S')})
+        else:
+            return json_response({'success': False, 'msg': '无法被触发'})
+    return json_response(error=error)
