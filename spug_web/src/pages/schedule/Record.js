@@ -48,7 +48,17 @@ class Record extends React.Component {
         title={`任务执行记录 - ${store.record.name}`}
         onCancel={() => store.recordVisible = false}
         footer={null}>
-        <Table rowKey="id" columns={this.columns} dataSource={this.state.records} loading={this.state.loading}/>
+        <Table
+          rowKey="id"
+          columns={this.columns}
+          dataSource={this.state.records}
+          pagination={{
+            showSizeChanger: true,
+            showLessItems: true,
+            hideOnSinglePage: true,
+            pageSizeOptions: ['10', '20', '50', '100']
+          }}
+          loading={this.state.loading}/>
       </Modal>
     )
   }

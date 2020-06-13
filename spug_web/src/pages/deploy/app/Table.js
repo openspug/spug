@@ -119,7 +119,7 @@ class ComTable extends React.Component {
       loading={record['deploys'] === undefined}
       columns={columns}
       dataSource={record['deploys']}
-      pagination={false} />
+      pagination={false}/>
   };
 
   render() {
@@ -134,6 +134,12 @@ class ComTable extends React.Component {
         loading={store.isFetching}
         dataSource={data}
         expandedRowRender={this.expandedRowRender}
+        pagination={{
+          showSizeChanger: true,
+          showLessItems: true,
+          hideOnSinglePage: true,
+          pageSizeOptions: ['10', '20', '50', '100']
+        }}
         columns={this.columns}/>
     )
   }

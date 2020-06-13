@@ -46,7 +46,7 @@ class ComTable extends React.Component {
       <span>
         <LinkButton auth="alarm.contact.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton auth="alarm.contact.del"  onClick={() => this.handleDelete(info)}>删除</LinkButton>
+        <LinkButton auth="alarm.contact.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
       </span>
     )
   }];
@@ -72,7 +72,17 @@ class ComTable extends React.Component {
     }
     return (
       <React.Fragment>
-        <Table rowKey="id" loading={store.isFetching} dataSource={data} columns={this.columns}/>
+        <Table
+          rowKey="id"
+          loading={store.isFetching}
+          dataSource={data}
+          pagination={{
+            showSizeChanger: true,
+            showLessItems: true,
+            hideOnSinglePage: true,
+            pageSizeOptions: ['10', '20', '50', '100']
+          }}
+          columns={this.columns}/>
         {store.formVisible && <ComForm/>}
       </React.Fragment>
     )

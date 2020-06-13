@@ -32,7 +32,7 @@ class ComTable extends React.Component {
   }, {
     title: '连接地址',
     dataIndex: 'hostname',
-  },  {
+  }, {
     title: '端口',
     dataIndex: 'port'
   }, {
@@ -84,7 +84,17 @@ class ComTable extends React.Component {
     }
     return (
       <React.Fragment>
-        <Table rowKey="id" loading={store.isFetching} dataSource={data} columns={this.columns}/>
+        <Table
+          rowKey="id"
+          loading={store.isFetching}
+          dataSource={data}
+          pagination={{
+            showSizeChanger: true,
+            showLessItems: true,
+            hideOnSinglePage: true,
+            pageSizeOptions: ['10', '20', '50', '100']
+          }}
+          columns={this.columns}/>
         {store.formVisible && <ComForm/>}
         {store.importVisible && <ComImport/>}
       </React.Fragment>

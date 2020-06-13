@@ -64,7 +64,17 @@ class Record extends React.Component {
         title={`${store.env.name} - 更改历史记录`}
         onCancel={() => store.recordVisible = false}
         footer={null}>
-        <Table rowKey="id" loading={loading} dataSource={records} columns={this.columns} />
+        <Table
+          rowKey="id"
+          loading={loading}
+          dataSource={records}
+          pagination={{
+            showSizeChanger: true,
+            showLessItems: true,
+            hideOnSinglePage: true,
+            pageSizeOptions: ['10', '20', '50', '100']
+          }}
+          columns={this.columns}/>
       </Modal>
     )
   }

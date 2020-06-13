@@ -73,7 +73,18 @@ class TableView extends React.Component {
     }
     return (
       <React.Fragment>
-        <Table size="small" rowKey="id" loading={store.isFetching} dataSource={data} columns={this.columns}/>
+        <Table
+          size="small"
+          rowKey="id"
+          loading={store.isFetching}
+          dataSource={data}
+          pagination={{
+            showSizeChanger: true,
+            showLessItems: true,
+            hideOnSinglePage: true,
+            pageSizeOptions: ['10', '20', '50', '100']
+          }}
+          columns={this.columns}/>
         {store.formVisible && <ComForm/>}
       </React.Fragment>
     )

@@ -64,7 +64,17 @@ class ComTable extends React.Component {
       data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
     }
     return (
-      <Table rowKey="id" loading={store.isFetching} dataSource={data} columns={this.columns}/>
+      <Table
+        rowKey="id"
+        loading={store.isFetching}
+        dataSource={data}
+        pagination={{
+          showSizeChanger: true,
+          showLessItems: true,
+          hideOnSinglePage: true,
+          pageSizeOptions: ['10', '20', '50', '100']
+        }}
+        columns={this.columns}/>
     )
   }
 }
