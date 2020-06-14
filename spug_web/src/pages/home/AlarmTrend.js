@@ -35,7 +35,7 @@ export default class AlarmTrend extends React.Component {
               type: "y"
             }}
           />
-          <Geom type="line" position="date*value" size={2}/>
+          <Geom type="line" position="date*value" size={2} shape={"smooth"}/>
           <Geom
             type="point"
             position="date*value"
