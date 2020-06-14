@@ -11,6 +11,7 @@ from django_redis import get_redis_connection
 from django.utils.functional import SimpleLazyObject
 from django.db import close_old_connections
 from apps.schedule.models import Task, History
+from apps.schedule.utils import send_fail_notify
 from apps.notify.models import Notify
 from apps.schedule.executors import dispatch
 from apps.schedule.utils import auto_clean_schedule_history
@@ -19,10 +20,8 @@ from django.conf import settings
 from libs import AttrDict, human_datetime
 import logging
 import json
-import time
 
 logger = logging.getLogger("django.apps.scheduler")
-counter = dict()
 
 
 class Scheduler:
@@ -68,10 +67,10 @@ class Scheduler:
             Notify.make_notify('schedule', '1', '调度器已关闭', '调度器意外关闭，你可以在github上提交issue')
         elif event.code == EVENT_JOB_MAX_INSTANCES:
             logger.info(f'EVENT_JOB_MAX_INSTANCES: {event}')
-            Notify.make_notify('schedule', '1', f'{obj.name} - 达到调度实例上限', '一般为上个周期的执行任务还未结束，请增加调度间隔或减少任务执行耗时')
+            send_fail_notify(obj, '达到调度实例上限，一般为上个周期的执行任务还未结束，请增加调度间隔或减少任务执行耗时')
         elif event.code == EVENT_JOB_ERROR:
             logger.info(f'EVENT_JOB_ERROR: job_id {event.job_id} exception: {event.exception}')
-            Notify.make_notify('schedule', '1', f'{obj.name} - 执行异常', f'{event.exception}')
+            send_fail_notify(obj, f'执行异常：{event.exception}')
         elif event.code == EVENT_JOB_EXECUTED:
             if event.retval:
                 score = 0
@@ -84,9 +83,8 @@ class Scheduler:
                     output=json.dumps(event.retval)
                 )
                 Task.objects.filter(pk=event.job_id).update(latest=history)
-                if score != 0 and time.time() - counter.get(event.job_id, 0) > 3600:
-                    counter[event.job_id] = time.time()
-                    Notify.make_notify('schedule', '1', f'{obj.name} - 执行失败', '请在任务计划中查看失败详情')
+                if score != 0:
+                    send_fail_notify(obj)
 
     def _init_builtin_jobs(self):
         self.scheduler.add_job(auto_clean_records, 'cron', hour=0, minute=0)

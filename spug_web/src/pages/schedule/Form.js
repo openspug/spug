@@ -148,7 +148,7 @@ class ComForm extends React.Component {
 
   render() {
     const info = store.record;
-    const {getFieldDecorator} = this.props.form;
+    const {getFieldDecorator, getFieldValue} = this.props.form;
     const {page, args, loading, showTmp, nextRunTime} = this.state;
     const [b1, b2, b3] = this.verifyButtonStatus();
     return (
@@ -195,6 +195,21 @@ class ComForm extends React.Component {
                 value={this.state.command}
                 onChange={val => this.setState({command: val})}
                 height="150px"/>
+            </Form.Item>
+            <Form.Item label="失败通知" help="任务执行失败告警通知">
+              {getFieldDecorator('rst_notify.value', {initialValue: info['rst_notify']['value']})(
+                <Input
+                  addonBefore={getFieldDecorator('rst_notify.mode', {initialValue: info['rst_notify']['mode']})(
+                    <Select style={{width: 100}}>
+                      <Select.Option value="0">关闭</Select.Option>
+                      <Select.Option value="1">钉钉</Select.Option>
+                      <Select.Option value="3">企业微信</Select.Option>
+                      <Select.Option value="2">Webhook</Select.Option>
+                    </Select>
+                  )}
+                  disabled={getFieldValue('rst_notify.mode') === '0'}
+                  placeholder="请输入"/>
+              )}
             </Form.Item>
             <Form.Item label="备注信息">
               {getFieldDecorator('desc', {initialValue: info['desc']})(

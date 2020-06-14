@@ -44,6 +44,7 @@ class Task(models.Model, ModelMixin):
     is_active = models.BooleanField(default=False)
     desc = models.CharField(max_length=255, null=True)
     latest = models.ForeignKey(History, on_delete=models.PROTECT, null=True)
+    rst_notify = models.CharField(max_length=255, null=True)
 
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
@@ -56,6 +57,7 @@ class Task(models.Model, ModelMixin):
         tmp['latest_status'] = self.latest.status if self.latest else None
         tmp['latest_run_time'] = self.latest.run_time if self.latest else None
         tmp['latest_status_alias'] = self.latest.get_status_display() if self.latest else None
+        tmp['rst_notify'] = json.loads(self.rst_notify) if self.rst_notify else {'mode': '0'}
         if self.trigger == 'cron':
             tmp['trigger_args'] = json.loads(self.trigger_args)
         return tmp
