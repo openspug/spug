@@ -1,5 +1,5 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
-# Released under the MIT License.
+# Released under the AGPL-3.0 License.
 from apps.alarm.models import Alarm
 from datetime import datetime, timedelta
 

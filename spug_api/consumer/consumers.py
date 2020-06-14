@@ -1,6 +1,6 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
-# Released under the MIT License.
+# Released under the AGPL-3.0 License.
 from channels.generic.websocket import WebsocketConsumer
 from django_redis import get_redis_connection
 from apps.setting.utils import AppSetting
