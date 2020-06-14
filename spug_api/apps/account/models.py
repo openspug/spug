@@ -91,7 +91,9 @@ class Role(models.Model, ModelMixin):
         return tmp
 
     def add_deploy_perm(self, target, value):
-        perms = json.loads(self.deploy_perms) if self.deploy_perms else {'apps': [], 'envs': []}
+        perms = {'apps': [], 'envs': []}
+        if self.deploy_perms:
+            perms.update(json.loads(self.deploy_perms))
         perms[target].append(value)
         self.deploy_perms = json.dumps(perms)
         self.save()
