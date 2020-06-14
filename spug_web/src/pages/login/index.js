@@ -12,6 +12,7 @@ import logo from 'layout/logo-spug-txt.png';
 import envStore from 'pages/config/environment/store';
 import appStore from 'pages/config/app/store';
 import requestStore from 'pages/deploy/request/store';
+import execStore from 'pages/exec/task/store';
 import hostStore from 'pages/host/store';
 
 class LoginIndex extends React.Component {
@@ -29,6 +30,7 @@ class LoginIndex extends React.Component {
     requestStore.records = [];
     requestStore.deploys = [];
     hostStore.records = [];
+    execStore.hosts = [];
   }
 
   handleSubmit = () => {

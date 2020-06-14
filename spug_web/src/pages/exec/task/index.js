@@ -23,10 +23,6 @@ class TaskIndex extends React.Component {
     }
   }
 
-  componentDidMount() {
-    store.hosts = []
-  }
-
   handleSubmit = () => {
     this.setState({loading: true});
     const host_ids = store.hosts.map(item => item.id);
