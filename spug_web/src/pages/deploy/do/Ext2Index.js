@@ -19,6 +19,7 @@ class Ext1Index extends React.Component {
     super(props);
     this.id = props.match.params.id;
     this.log = props.match.params.log;
+    this.elements = {};
     this.state = {
       fetching: true,
       loading: false,
@@ -57,7 +58,10 @@ class Ext1Index extends React.Component {
 
   _parse_message = (message) => {
     const {key, data, step, status} = message;
-    if (data !== undefined) store.outputs[key]['data'] += data;
+    if (data !== undefined) {
+      store.outputs[key]['data'] += data;
+      this.elements[key].scrollIntoView()
+    }
     if (step !== undefined) store.outputs[key]['step'] = step;
     if (status !== undefined) store.outputs[key]['status'] = status;
   };
@@ -140,7 +144,10 @@ class Ext1Index extends React.Component {
                   <Steps.Step {...this.getStatus('local', 2 + index)} key={index} title={item.title}/>
                 ))}
               </Steps>}>
-              <pre className={styles.ext1Console}>{lds.get(store.outputs, 'local.data')}</pre>
+              <pre className={styles.ext1Console}>
+                {lds.get(store.outputs, 'local.data')}
+                <div ref={el => this.elements['local'] = el}/>
+              </pre>
             </Collapse.Panel>
           </Collapse>
 
@@ -160,7 +167,10 @@ class Ext1Index extends React.Component {
                       ))}
                     </Steps>
                   </div>}>
-                  <pre className={styles.ext1Console}>{lds.get(store.outputs, `${item.id}.data`)}</pre>
+                  <pre className={styles.ext1Console}>
+                    {lds.get(store.outputs, `${item.id}.data`)}
+                    <div ref={el => this.elements[item.id] = el}/>
+                  </pre>
                 </Collapse.Panel>
               ))}
             </Collapse>
