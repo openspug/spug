@@ -27,7 +27,7 @@ class Store {
       .then(({types, tasks}) => {
         tasks.map(item => {
           const value = item['latest_run_time'];
-          item['latest_run_time'] = value ? moment(value).fromNow() : null;
+          item['latest_run_time_alias'] = value ? moment(value).fromNow() : null;
           return null
         });
         this.records = tasks;

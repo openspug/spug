@@ -29,9 +29,11 @@ class ComTable extends React.Component {
   }, {
     title: '主机名称',
     dataIndex: 'name',
+    sorter: (a, b) => a.name.localeCompare(b.name)
   }, {
     title: '连接地址',
     dataIndex: 'hostname',
+    sorter: (a, b) => a.name.localeCompare(b.name)
   }, {
     title: '端口',
     dataIndex: 'port'

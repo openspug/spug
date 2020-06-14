@@ -83,7 +83,8 @@ class ComTable extends React.Component {
     }
   }, {
     title: '更新于',
-    dataIndex: 'latest_run_time',
+    dataIndex: 'latest_run_time_alias',
+    sorter: (a, b) => a.latest_run_time.localeCompare(b.latest_run_time)
   }, {
     title: '操作',
     render: info => (

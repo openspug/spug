@@ -78,7 +78,8 @@ class ComTable extends React.Component {
     dataIndex: 'created_by_user',
   }, {
     title: '申请时间',
-    dataIndex: 'created_at'
+    dataIndex: 'created_at',
+    sorter: (a, b) => a['created_at'].localeCompare(b['created_at'])
   }, {
     title: '操作',
     render: info => {
