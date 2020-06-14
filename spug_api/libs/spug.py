@@ -1,6 +1,6 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
-# Released under the MIT License.
+# Released under the AGPL-3.0 License.
 from apps.alarm.models import Group, Contact
 from apps.setting.utils import AppSetting
 from apps.notify.models import Notify
