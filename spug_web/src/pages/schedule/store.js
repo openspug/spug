@@ -36,12 +36,12 @@ class Store {
       .finally(() => this.isFetching = false)
   };
 
-  showForm = (info = {}) => {
+  showForm = (info = {rst_notify: {mode: '0'}}) => {
     this.formVisible = true;
     this.record = info
   };
 
-  showInfo = (info, h_id='latest') => {
+  showInfo = (info, h_id = 'latest') => {
     if (info) this.record = info;
     this.record.h_id = h_id;
     this.infoVisible = true
