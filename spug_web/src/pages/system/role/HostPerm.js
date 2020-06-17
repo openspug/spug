@@ -74,7 +74,7 @@ class HostPerm extends React.Component {
             targetKeys={store.hostPerms}
             onChange={keys => store.hostPerms = keys}
             filterOption={(inputValue, option) => `${option.zone}${option.name}`.toLowerCase().indexOf(inputValue.toLowerCase()) > -1}
-            render={item => `${item.zone} - ${item.name}`}/>
+            render={item => `${item.zone} - ${item.name}(${item.hostname})`}/>
         </Form.Item>
       </Modal>
     )
