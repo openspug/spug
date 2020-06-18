@@ -26,7 +26,7 @@ class Ext1Setup2 extends React.Component {
 
   handleNext = () => {
     const {dst_dir, dst_repo} = store.deploy;
-    if (isSubArray(dst_repo.split('/'), dst_dir.split('/'))) {
+    if (dst_repo.includes(dst_dir.replace(/\/*$/, '/'))) {
       message.error('仓库目录不能位于发布部署目录内')
     } else {
        store.page += 1
