@@ -11,6 +11,7 @@ from apps.schedule.models import Task
 from apps.monitor.models import Detection
 from apps.account.models import Role
 from libs.ssh import SSH, AuthenticationException
+from paramiko.ssh_exception import BadAuthenticationType
 from libs import human_datetime, AttrDict
 from openpyxl import load_workbook
 import socket
@@ -118,7 +119,7 @@ def post_import(request):
             summary['skip'].append(i)
             continue
         try:
-            if valid_ssh(data.hostname, data.port, data.username, data.pop('password') or password) is False:
+            if valid_ssh(data.hostname, data.port, data.username, data.pop('password') or password, False) is False:
                 summary['fail'].append(i)
                 continue
         except AuthenticationException:
@@ -137,7 +138,7 @@ def post_import(request):
     return json_response(summary)
 
 
-def valid_ssh(hostname, port, username, password):
+def valid_ssh(hostname, port, username, password, with_expect=True):
     try:
         private_key = AppSetting.get('private_key')
         public_key = AppSetting.get('public_key')
@@ -145,18 +146,20 @@ def valid_ssh(hostname, port, username, password):
         private_key, public_key = SSH.generate_key()
         AppSetting.set('private_key', private_key, 'ssh private key')
         AppSetting.set('public_key', public_key, 'ssh public key')
+    cli = SSH(hostname, port, username, private_key)
     if password:
-        cli = SSH(hostname, port, username, password=str(password))
-        code, out = cli.exec_command('mkdir -p -m 700 ~/.ssh && \
+        _cli = SSH(hostname, port, username, password=str(password))
+        code, out = _cli.exec_command('mkdir -p -m 700 ~/.ssh && \
                 echo %r >> ~/.ssh/authorized_keys && \
                 chmod 600 ~/.ssh/authorized_keys' % public_key)
         if code != 0:
             raise Exception(f'add public key error: {out!r}')
-    else:
-        cli = SSH(hostname, port, username, private_key)
-
     try:
         cli.ping()
+    except BadAuthenticationType:
+        if with_expect:
+            raise TypeError('该主机不支持密钥认证，请参考官方文档，错误代码：E01')
+        return False
     except AuthenticationException:
         return False
     return True
