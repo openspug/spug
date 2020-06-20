@@ -1,4 +1,5 @@
-from email.message import EmailMessage
+from email.header import Header
+from email.mime.text import MIMEText
 from email.utils import formataddr
 import smtplib
 
@@ -19,14 +20,10 @@ class Mail:
         server.login(self.user, self.password)
         return server
 
-    def send_text_mail(self, to_addrs, subject, body):
-        if isinstance(to_addrs, (list, tuple)):
-            to_addrs = ', '.join(to_addrs)
+    def send_text_mail(self, receivers, subject, body):
         server = self._get_server()
-        msg = EmailMessage()
-        msg.set_content(body)
-        msg['Subject'] = subject
+        msg = MIMEText(body, 'plain', 'utf-8')
+        msg['Subject'] = Header(subject, 'utf-8')
         msg['From'] = formataddr((self.nickname, self.user)) if self.nickname else self.user
-        msg['To'] = to_addrs
-        server.send_message(msg)
+        server.sendmail(self.user, receivers, msg.as_string())
         server.quit()
