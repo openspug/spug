@@ -173,10 +173,13 @@ class ComForm extends React.Component {
               required
               label="脚本内容"
               style={this.getStyle('4')}
-
               extra={<LinkButton onClick={() => this.setState({showTmp: true})}>从模板添加</LinkButton>}>
-              <ACEditor mode="sh" value={extra['4']} height="200px"
-                        onChange={e => this.handleExtra('4', cleanCommand(e))}/>
+              <ACEditor
+                mode="sh"
+                value={extra['4']}
+                width="100%"
+                height="200px"
+                onChange={e => this.handleExtra('4', cleanCommand(e))}/>
             </Form.Item>
             <Form.Item label="备注信息">
               {getFieldDecorator('desc', {initialValue: info['desc']})(

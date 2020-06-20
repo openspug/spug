@@ -16,7 +16,7 @@ export default observer(function Ext1From() {
   return (
     <Modal
       visible
-      width={800}
+      width={900}
       maskClosable={false}
       title={store.deploy.id ? '编辑常规发布' : '新建常规发布'}
       onCancel={() => store.ext1Visible = false}

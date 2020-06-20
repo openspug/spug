@@ -16,7 +16,7 @@ export default observer(function Ext2From() {
   return (
     <Modal
       visible
-      width={800}
+      width={900}
       maskClosable={false}
       title={store.deploy.id ? '编辑自定义发布' : '新建自定义发布'}
       onCancel={() => store.ext2Visible = false}

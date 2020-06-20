@@ -13,6 +13,7 @@ import 'ace-builds/src-noconflict/snippets/sh';
 export default function (props) {
   return (
     <Editor
+      wrapEnabled
       theme="tomorrow"
       enableLiveAutocompletion={true}
       enableBasicAutocompletion={true}

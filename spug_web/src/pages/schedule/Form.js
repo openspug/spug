@@ -193,8 +193,9 @@ class ComForm extends React.Component {
               <ACEditor
                 mode="sh"
                 value={this.state.command}
-                onChange={val => this.setState({command: val})}
-                height="150px"/>
+                width="100%"
+                height="150px"
+                onChange={val => this.setState({command: val})}/>
             </Form.Item>
             <Form.Item label="失败通知" help="任务执行失败告警通知">
               {getFieldDecorator('rst_notify.value', {initialValue: info['rst_notify']['value']})(
