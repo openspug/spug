@@ -72,7 +72,7 @@ class FileManager extends React.Component {
 
   onShow = (visible) => {
     if (visible) {
-      this.fetchFiles()
+      this.fetchFiles(this.state.pwd)
     }
   };
 
@@ -80,19 +80,19 @@ class FileManager extends React.Component {
     return item.kind === 'd'
   };
 
-  fetchFiles = () => {
+  fetchFiles = (pwd) => {
     this.setState({fetching: true});
-    const path = '/' + this.state.pwd.join('/');
+    const path = '/' + pwd.join('/');
     http.get('/api/file/', {params: {id: this.id, path}})
       .then(res => {
         const objects = lds.orderBy(res, [this._kindSort, 'name'], ['desc', 'asc']);
-        this.setState({objects})
+        this.setState({objects, pwd})
       })
       .finally(() => this.setState({fetching: false}))
   };
 
   handleChdir = (name, action) => {
-    let pwd = this.state.pwd;
+    let pwd = this.state.pwd.map(x => x);
     if (action === '1') {
       pwd.push(name)
     } else if (action === '2') {
@@ -101,7 +101,7 @@ class FileManager extends React.Component {
     } else {
       pwd = []
     }
-    this.setState({pwd}, this.fetchFiles);
+    this.fetchFiles(pwd)
   };
 
   handleUpload = () => {
