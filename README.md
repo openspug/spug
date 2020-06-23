@@ -88,11 +88,18 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
 <table>
   <thead>
     <tr>
-      <th align="center" style="width: 80px;">
+      <th align="center" style="width: 115px;">
         <a href="https://www.ucloud.cn/site/active/1111.html?invitation_code=C1xD0E5678FBA77">
-          <img src="http://image.qbangmang.com/ucloud.png" width="50px"><br>
+          <img src="http://image.qbangmang.com/ucloud.png" width="115px"><br>
           <sub>UCloud</sub><br>
           <sub>7.3 元/月云主机</sub>
+        </a>
+      </th>
+        <th align="center" style="width: 115px;">
+        <a href="https://www.aliyun.com/minisite/goods?userCode=8vdj3myc">
+          <img src="http://image.qbangmang.com/ecs_223.jpg" width="115px"><br>
+          <sub>阿里云</sub><br>
+          <sub>74元/年云主机</sub>
         </a>
       </th>
     </tr>
