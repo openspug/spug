@@ -291,6 +291,7 @@ class Helper:
 
     def local(self, command, env=None):
         if env:
+            env = dict(env.items())
             env.update(os.environ)
         command = 'set -e\n' + command
         task = subprocess.Popen(command, env=env, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
