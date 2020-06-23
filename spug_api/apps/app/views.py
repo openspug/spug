@@ -3,11 +3,14 @@
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
 from django.db.models import F
+from django.conf import settings
 from libs import JsonParser, Argument, json_response
 from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
 from apps.config.models import Config
 from apps.app.utils import parse_envs, fetch_versions, remove_repo
+import subprocess
 import json
+import os
 
 
 class AppView(View):
@@ -145,6 +148,8 @@ class DeployView(View):
         ).parse(request.GET)
         if error is None:
             Deploy.objects.filter(pk=form.id).delete()
+            repo_dir = os.path.join(settings.REPOS_DIR, str(form.id))
+            subprocess.Popen(f'rm -rf {repo_dir} {repo_dir + "_*"}', shell=True)
         return json_response(error=error)
 
 

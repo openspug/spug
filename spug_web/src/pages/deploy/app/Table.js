@@ -67,7 +67,7 @@ class ComTable extends React.Component {
   handleDeployDelete = (text) => {
     Modal.confirm({
       title: '删除确认',
-      content: `确定要删除【${lds.get(envStore.idMap, `${text.env_id}.name`)}】的发布配置?`,
+      content: `删除发布配置将会影响基于该配置所创建发布申请的发布和回滚功能，确定要删除【${lds.get(envStore.idMap, `${text.env_id}.name`)}】的发布配置?`,
       onOk: () => {
         return http.delete('/api/app/deploy/', {params: {id: text.id}})
           .then(() => {
