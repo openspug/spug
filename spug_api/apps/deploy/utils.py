@@ -34,6 +34,7 @@ def deploy_dispatch(request, req, token):
             SPUG_VERSION=req.version,
             SPUG_DEPLOY_TYPE=req.type,
             SPUG_API_TOKEN=api_token,
+            SPUG_REPOS_DIR=REPOS_DIR,
         )
         if req.deploy.extend == '1':
             env.update(json.loads(req.deploy.extend_obj.custom_envs))
