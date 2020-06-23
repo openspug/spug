@@ -60,7 +60,7 @@ class Ext1Index extends React.Component {
     const {key, data, step, status} = message;
     if (data !== undefined) {
       store.outputs[key]['data'] += data;
-      this.elements[key].scrollIntoView()
+      if (this.elements[key]) this.elements[key].scrollIntoView()
     }
     if (step !== undefined) store.outputs[key]['step'] = step;
     if (status !== undefined) store.outputs[key]['status'] = status;
