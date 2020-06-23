@@ -161,5 +161,7 @@ def valid_ssh(hostname, port, username, password, with_expect=True):
             raise TypeError('该主机不支持密钥认证，请参考官方文档，错误代码：E01')
         return False
     except AuthenticationException:
+        if password and with_expect:
+            raise ValueError('密钥认证失败，请参考官方文档，错误代码：E02')
         return False
     return True
