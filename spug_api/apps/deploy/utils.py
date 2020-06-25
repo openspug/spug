@@ -138,7 +138,8 @@ def _deploy_ext1_host(helper, h_id, extend, env):
     env.update({'SPUG_HOST_ID': h_id, 'SPUG_HOST_NAME': host.hostname})
     ssh = host.get_ssh()
     if env.SPUG_DEPLOY_TYPE != '2':
-        code, _ = ssh.exec_command(f'mkdir -p {extend.dst_repo} && [ -e {extend.dst_dir} ] && [ ! -L {extend.dst_dir} ]')
+        code, _ = ssh.exec_command(
+            f'mkdir -p {extend.dst_repo} && [ -e {extend.dst_dir} ] && [ ! -L {extend.dst_dir} ]')
         if code == 0:
             helper.send_error(host.id, f'检测到该主机的发布目录 {extend.dst_dir!r} 已存在，为了数据安全请自行备份后删除该目录，Spug 将会创建并接管该目录。')
         # clean
@@ -213,14 +214,18 @@ class Helper:
             else:
                 version = extra[0]
             hosts = [{'id': x.id, 'name': x.name} for x in Host.objects.filter(id__in=host_ids)]
+            host_str = ', '.join(x['name'] for x in hosts[:2])
+            if len(hosts) > 2:
+                host_str += f'等{len(hosts)}台主机'
             if rst_notify['mode'] == '1':
                 color, text = ('#8ece60', '成功') if req.status == '3' else ('#f90202', '失败')
                 texts = [
                     '## %s ## ' % '发布结果通知',
+                    f'**申请标题：** {req.name} ',
                     f'**应用名称：** {req.deploy.app.name} ',
                     f'**应用版本：** {version} ',
                     f'**发布环境：** {req.deploy.env.name} ',
-                    f'**发布主机：** {",".join(x["name"] for x in hosts[0:2])} ' + ( '等%s台主机' % len(hosts) if len(hosts) > 2 else '' ),
+                    f'**发布主机：** {host_str} ',
                     f'**发布结果：** <font color="{color}">{text}</font>',
                     f'**发布时间：** {human_datetime()} ',
                     '> 来自 Spug运维平台'
@@ -236,6 +241,7 @@ class Helper:
             elif rst_notify['mode'] == '2':
                 data = {
                     'req_id': req.id,
+                    'req_name': req.name,
                     'app_id': req.deploy.app_id,
                     'app_name': req.deploy.app.name,
                     'env_id': req.deploy.env_id,
@@ -250,10 +256,11 @@ class Helper:
                 color, text = ('info', '成功') if req.status == '3' else ('warning', '失败')
                 texts = [
                     '## %s' % '发布结果通知',
+                    f'**申请标题：** {req.name} ',
                     f'**应用名称：** {req.deploy.app.name} ',
                     f'**应用版本：** {version} ',
                     f'**发布环境：** {req.deploy.env.name} ',
-                    f'**发布主机：** {",".join(x["name"] for x in hosts[0:2])} ' + ( '等%s台主机' % len(hosts) if len(hosts) > 2 else '' ),
+                    f'**发布主机：** {host_str} ',
                     f'**发布结果：** <font color="{color}">{text}</font>',
                     f'**发布时间：** {human_datetime()} ',
                     '> 来自 Spug运维平台'
