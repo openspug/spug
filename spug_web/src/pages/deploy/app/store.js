@@ -19,6 +19,7 @@ class Store {
   @observable ext2Visible = false;
 
   @observable f_name;
+  @observable f_desc;
 
   fetchRecords = () => {
     this.isFetching = true;

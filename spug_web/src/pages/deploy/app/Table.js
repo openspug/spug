@@ -127,6 +127,9 @@ class ComTable extends React.Component {
     if (store.f_name) {
       data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
     }
+    if (store.f_desc) {
+      data = data.filter(item => item['desc'] && item['desc'].toLowerCase().includes(store.f_desc.toLowerCase()))
+    }
 
     return (
       <Table

@@ -18,8 +18,11 @@ export default observer(function () {
   return (
     <AuthCard auth="deploy.app.view">
       <SearchForm>
-        <SearchForm.Item span={8} title="应用名称">
+        <SearchForm.Item span={6} title="应用名称">
           <Input allowClear onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
+        </SearchForm.Item>
+        <SearchForm.Item span={6} title="描述信息">
+          <Input allowClear onChange={e => store.f_desc = e.target.value} placeholder="请输入"/>
         </SearchForm.Item>
         <SearchForm.Item span={8}>
           <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
