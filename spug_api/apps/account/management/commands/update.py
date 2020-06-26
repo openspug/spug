@@ -46,7 +46,7 @@ class Command(BaseCommand):
         # update dep
         commands = [
             f'cd {settings.BASE_DIR}',
-            'pip install -r requirements.txt -i https://pypi.doubanio.com/simple/'
+            'pip3 install -r requirements.txt -i https://pypi.doubanio.com/simple/'
         ]
         task = subprocess.Popen(' && '.join(commands), shell=True)
         if task.wait() != 0:
@@ -56,14 +56,14 @@ class Command(BaseCommand):
         apps = [x.split('.')[-1] for x in settings.INSTALLED_APPS if x.startswith('apps.')]
         commands = [
             f'cd {settings.BASE_DIR}',
-            f'./manage.py makemigrations ' + ' '.join(apps),
-            f'./manage.py migrate'
+            f'python3 ./manage.py makemigrations ' + ' '.join(apps),
+            f'python3 ./manage.py migrate'
         ]
         task = subprocess.Popen(' && '.join(commands), shell=True)
         if task.wait() != 0:
             return self.stderr.write(self.style.ERROR('更新表结构失败，请附带输出内容至官方论坛反馈。'))
 
         self.stdout.write(self.style.SUCCESS('''升级成功，请自行重启服务，如果通过官方文档安装一般重启命令为
-        Docker: docker restart $CONTAINER_ID
+        Docker: docker restart spug
         Centos: systemctl restart supervisord 
         Ubuntu: systemctl restart supervisor'''))
