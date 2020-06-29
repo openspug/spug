@@ -82,6 +82,8 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
 
 [![Feature Requests](https://feathub.com/openspug/spug?format=svg)](https://feathub.com/openspug/spug)
 
+## 推荐项目
+[Yearning — MYSQL 开源SQL语句审核平台](https://github.com/cookieY/Yearning)
 
 ## 赞助
 
