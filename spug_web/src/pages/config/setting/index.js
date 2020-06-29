@@ -90,7 +90,7 @@ class Index extends React.Component {
               </Select>
             </SearchForm.Item>
             <SearchForm.Item span={7} title="Key">
-              <Input allowClear onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
+              <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
             </SearchForm.Item>
             <SearchForm.Item span={3}>
               <Button type="primary" icon="sync" onClick={this.handleRefresh}>刷新</Button>

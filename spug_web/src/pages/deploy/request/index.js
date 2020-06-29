@@ -16,6 +16,7 @@ import http from 'libs/http';
 import envStore from 'pages/config/environment/store';
 import appStore from 'pages/config/app/store'
 import store from './store';
+import moment from 'moment';
 
 @observer
 class Index extends React.Component {
@@ -43,10 +44,12 @@ class Index extends React.Component {
       content: (
         <Form>
           <Form.Item label="截止日期" help={<div>将删除截止日期<span style={{color: 'red'}}>之前</span>的所有发布申请记录。</div>}>
-            <DatePicker style={{width: 200}} placeholder="请输入" onChange={val => this.setState({expire: val.format('YYYY-MM-DD')})}/>
+            <DatePicker style={{width: 200}} placeholder="请输入"
+                        onChange={val => this.setState({expire: val.format('YYYY-MM-DD')})}/>
           </Form.Item>
           <Form.Item label="保留记录" help="每个应用每个环境仅保留最新的N条发布申请，优先级高于截止日期">
-            <Input allowClear style={{width: 200}} placeholder="请输入保留个数" onChange={e => this.setState({count: e.target.value})} />
+            <Input allowClear style={{width: 200}} placeholder="请输入保留个数"
+                   onChange={e => this.setState({count: e.target.value})}/>
           </Form.Item>
         </Form>
       ),
@@ -66,21 +69,23 @@ class Index extends React.Component {
       <AuthCard auth="deploy.request.view">
         <SearchForm>
           <SearchForm.Item span={6} title="发布环境">
-            <Select allowClear onChange={v => store.f_env_id = v} placeholder="请选择">
+            <Select allowClear value={store.f_env_id} onChange={v => store.f_env_id = v} placeholder="请选择">
               {envStore.records.map(item => (
                 <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
               ))}
             </Select>
           </SearchForm.Item>
           <SearchForm.Item span={6} title="应用名称">
-            <Select allowClear onChange={v => store.f_app_id = v} placeholder="请选择">
+            <Select allowClear value={store.f_app_id} onChange={v => store.f_app_id = v} placeholder="请选择">
               {appStore.records.map(item => (
                 <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
               ))}
             </Select>
           </SearchForm.Item>
           <SearchForm.Item span={8} title="申请时间">
-            <DatePicker.RangePicker onChange={store.updateDate}/>
+            <DatePicker.RangePicker
+              value={store.f_s_date ? [moment(store.f_s_date), moment(store.f_e_date)] : undefined}
+              onChange={store.updateDate}/>
           </SearchForm.Item>
           <SearchForm.Item span={4} style={{textAlign: 'right'}}>
             <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
