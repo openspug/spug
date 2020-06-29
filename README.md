@@ -19,6 +19,7 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
 演示密码：spug
 ```
 
+
 ## 特性
 
 - **批量执行**: 主机命令在线批量执行
@@ -45,6 +46,10 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
 [官方文档](https://spug.dev/docs/install/)
 
 更多使用帮助请参考 [使用文档](https://www.spug.dev/docs/host-manage/)。
+
+## 推荐项目
+[Yearning — MYSQL 开源SQL语句审核平台](https://github.com/cookieY/Yearning)
+
 
 ## 预览
 
@@ -82,8 +87,6 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
 
 [![Feature Requests](https://feathub.com/openspug/spug?format=svg)](https://feathub.com/openspug/spug)
 
-## 推荐项目
-[Yearning — MYSQL 开源SQL语句审核平台](https://github.com/cookieY/Yearning)
 
 ## 赞助
 
