@@ -81,7 +81,6 @@ class Ext1Setup3 extends React.Component {
               className={full === '1' ? styles.fullScreen : null}
               label={<this.FilterLabel type={info['filter_rule']['type']}/>}>
               <Editor
-                wrapEnabled
                 mode="text"
                 theme="tomorrow"
                 width="100%"
@@ -96,7 +95,6 @@ class Ext1Setup3 extends React.Component {
               className={full === '3' ? styles.fullScreen : null}
               label={<this.NormalLabel title="代码检出前执行" id="3"/>}>
               <Editor
-                wrapEnabled
                 mode="sh"
                 theme="tomorrow"
                 width="100%"
@@ -111,7 +109,6 @@ class Ext1Setup3 extends React.Component {
               className={full === '5' ? styles.fullScreen : null}
               label={<this.NormalLabel title="应用发布前执行" id="5"/>}>
               <Editor
-                wrapEnabled
                 mode="sh"
                 theme="tomorrow"
                 width="100%"
@@ -142,7 +139,6 @@ class Ext1Setup3 extends React.Component {
               className={full === '2' ? styles.fullScreen : null}
               label={<this.NormalLabel title="自定义全局变量" id="2"/>}>
               <Editor
-                wrapEnabled
                 mode="text"
                 theme="tomorrow"
                 width="100%"
@@ -157,7 +153,6 @@ class Ext1Setup3 extends React.Component {
               className={full === '4' ? styles.fullScreen : null}
               label={<this.NormalLabel title="代码检出后执行" id="4"/>}>
               <Editor
-                wrapEnabled
                 mode="sh"
                 theme="tomorrow"
                 width="100%"
@@ -172,7 +167,6 @@ class Ext1Setup3 extends React.Component {
               className={full === '6' ? styles.fullScreen : null}
               label={<this.NormalLabel title="应用发布后执行" id="6"/>}>
               <Editor
-                wrapEnabled
                 mode="sh"
                 theme="tomorrow"
                 width="100%"

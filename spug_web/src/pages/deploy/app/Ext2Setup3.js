@@ -63,7 +63,6 @@ class Ext2Setup3 extends React.Component {
 
             <Form.Item required label="执行内容">
               <Editor
-                wrapEnabled
                 mode="sh"
                 theme="tomorrow"
                 width="100%"
@@ -91,7 +90,6 @@ class Ext2Setup3 extends React.Component {
 
             <Form.Item required label="执行内容">
               <Editor
-                wrapEnabled
                 mode="sh"
                 theme="tomorrow"
                 width="100%"
