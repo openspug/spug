@@ -152,8 +152,8 @@ class Ext1Form extends React.Component {
                   value={extra1}
                   placeholder="请稍等"
                   onChange={this.switchExtra1}
-                  filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
-                  {git_type === 'branch' ? (
+                  filterOption={(input, option) => (Array.isArray(option.props.children) ? option.props.children[0]: option.props.children).toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+                {git_type === 'branch' ? (
                     Object.keys(branches || {}).map(b => <Select.Option key={b} value={b}>{b}</Select.Option>)
                   ) : (
                     Object.entries(tags || {}).map(([tag, info]) => (
