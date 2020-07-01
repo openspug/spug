@@ -24,7 +24,7 @@ def port_check(addr, port):
         sock = socket()
         sock.settimeout(5)
         sock.connect((addr, int(port)))
-        return True, None
+        return True, '端口状态检测正常'
     except Exception as e:
         return False, f'异常信息：{e}'
 
@@ -33,7 +33,10 @@ def host_executor(host, pkey, command):
     try:
         cli = SSH(host.hostname, host.port, host.username, pkey=pkey)
         exit_code, out = cli.exec_command(command)
-        return exit_code == 0, out.decode()
+        if exit_code == 0:
+            return True, out.decode() or '检测状态正常'
+        else:
+            return False, out.decode() or f'退出状态码：{exit_code}'
     except Exception as e:
         return False, f'异常信息：{e}'
 
