@@ -9,8 +9,9 @@ import Sider from './Sider';
 import Header from './Header';
 import Footer from './Footer'
 import { Router } from '../libs/router';
-import { updatePermissions} from '../libs';
+import { updatePermissions } from '../libs';
 import styles from './layout.module.css';
+import Breadcrumb from './Breadcrumb';
 
 
 export default class extends React.Component {
@@ -39,7 +40,12 @@ export default class extends React.Component {
             toggle={() => this.setState({collapsed: !this.state.collapsed})}
           />
           <Layout.Content className={styles.content} style={{height: `${document.body.clientHeight - 64}px`}}>
-            <Router/>
+            <div>
+              <Breadcrumb/>
+              <div className={styles.router} >
+                <Router/>
+              </div>
+            </div>
             <Footer/>
           </Layout.Content>
         </Layout>
