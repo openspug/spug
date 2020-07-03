@@ -72,7 +72,7 @@ class FileManager extends React.Component {
 
   onShow = (visible) => {
     if (visible) {
-      this.fetchFiles(this.state.pwd)
+      this.fetchFiles()
     }
   };
 
@@ -82,6 +82,7 @@ class FileManager extends React.Component {
 
   fetchFiles = (pwd) => {
     this.setState({fetching: true});
+    pwd = pwd || this.state.pwd;
     const path = '/' + pwd.join('/');
     http.get('/api/file/', {params: {id: this.id, path}})
       .then(res => {
