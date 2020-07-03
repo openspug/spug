@@ -43,27 +43,30 @@ class Ext1Index extends React.Component {
     http.get(`/api/deploy/request/${this.id}/`, {params: {log: this.log}})
       .then(res => {
         store.request = res;
-        store.outputs = {};
+        const outputs = {};
         while (res.outputs.length) {
           const msg = JSON.parse(res.outputs.pop());
-          if (!store.outputs.hasOwnProperty(msg.key)) {
+          if (!outputs.hasOwnProperty(msg.key)) {
             const data = msg.key === 'local' ? '读取数据...        ' : '';
-            store.outputs[msg.key] = {data}
+            outputs[msg.key] = {data}
           }
-          this._parse_message(msg)
+          this._parse_message(msg, outputs)
         }
+        store.outputs = outputs
       })
       .finally(() => this.setState({fetching: false}))
   };
 
-  _parse_message = (message) => {
+  _parse_message = (message, outputs) => {
+    outputs = outputs || store.outputs;
     const {key, data, step, status} = message;
     if (data !== undefined) {
-      store.outputs[key]['data'] += data;
-      if (this.elements[key]) this.elements[key].scrollIntoView()
+      outputs[key]['data'] += data;
+      const el = this.elements[key];
+      if (el) el.scrollTop = el.scrollHeight
     }
-    if (step !== undefined) store.outputs[key]['step'] = step;
-    if (status !== undefined) store.outputs[key]['status'] = status;
+    if (step !== undefined) outputs[key]['step'] = step;
+    if (status !== undefined) outputs[key]['status'] = status;
   };
 
   handleDeploy = () => {
@@ -144,9 +147,8 @@ class Ext1Index extends React.Component {
                   <Steps.Step {...this.getStatus('local', 2 + index)} key={index} title={item.title}/>
                 ))}
               </Steps>}>
-              <pre className={styles.ext1Console}>
+              <pre ref={el => this.elements['local'] = el} className={styles.ext1Console}>
                 {lds.get(store.outputs, 'local.data')}
-                <div ref={el => this.elements['local'] = el}/>
               </pre>
             </Collapse.Panel>
           </Collapse>
@@ -167,9 +169,8 @@ class Ext1Index extends React.Component {
                       ))}
                     </Steps>
                   </div>}>
-                  <pre className={styles.ext1Console}>
+                  <pre ref={el => this.elements[item.id] = el} className={styles.ext1Console}>
                     {lds.get(store.outputs, `${item.id}.data`)}
-                    <div ref={el => this.elements[item.id] = el}/>
                   </pre>
                 </Collapse.Panel>
               ))}
