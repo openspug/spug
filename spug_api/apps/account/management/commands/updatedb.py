@@ -7,12 +7,11 @@ from django.conf import settings
 
 
 class Command(BaseCommand):
-    help = '初始化数据库'
+    help = '初始化/更新数据库'
 
     def handle(self, *args, **options):
         args = ['manage.py', 'makemigrations']
         apps = [x.split('.')[-1] for x in settings.INSTALLED_APPS if x.startswith('apps.')]
         execute_from_command_line(args + apps)
         execute_from_command_line(['manage.py', 'migrate'])
-        self.stdout.write(self.style.SUCCESS('初始化成功'))
-        self.stdout.write(self.style.WARNING('废弃警告，v2.4.0之后将会移除该命令，请使用 python manage.py updatedb 来代替！'))
+        self.stdout.write(self.style.SUCCESS('初始化/更新成功'))
