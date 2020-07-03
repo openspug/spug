@@ -179,8 +179,8 @@ class RequestDetailView(View):
             return json_response(error='该申请单当前状态还不能执行发布')
         hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
         token = uuid.uuid4().hex
-        outputs = {str(x.id): {'data': ''} for x in hosts}
-        outputs.update(local={'data': f'{human_time()} 建立接连...        '})
+        outputs = {str(x.id): {'data': []} for x in hosts}
+        outputs.update(local={'data': [f'{human_time()} 建立接连...        ']})
         req.status = '2'
         if not req.version:
             req.version = f'{req.deploy_id}_{req.id}_{datetime.now().strftime("%Y%m%d%H%M%S")}'

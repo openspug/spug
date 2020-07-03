@@ -8,6 +8,7 @@ import { observer } from 'mobx-react';
 import { Steps, Collapse, PageHeader, Spin, Tag, Button, Icon } from 'antd';
 import http from 'libs/http';
 import { AuthDiv } from 'components';
+import OutView from './OutView';
 import history from 'libs/history';
 import styles from './index.module.css';
 import store from './store';
@@ -19,11 +20,9 @@ class Ext1Index extends React.Component {
     super(props);
     this.id = props.match.params.id;
     this.log = props.match.params.log;
-    this.elements = {};
     this.state = {
       fetching: true,
       loading: false,
-      request: {},
     }
   }
 
@@ -46,7 +45,7 @@ class Ext1Index extends React.Component {
         while (res.outputs.length) {
           const msg = JSON.parse(res.outputs.pop());
           if (!outputs.hasOwnProperty(msg.key)) {
-            const data = msg.key === 'local' ? '读取数据...        ' : '';
+            const data = msg.key === 'local' ? ['读取数据...        '] : [];
             outputs[msg.key] = {data}
           }
           this._parse_message(msg, outputs)
@@ -60,9 +59,7 @@ class Ext1Index extends React.Component {
     outputs = outputs || store.outputs;
     const {key, data, step, status} = message;
     if (data !== undefined) {
-      outputs[key]['data'] += data;
-      const el = this.elements[key];
-      if (el) el.scrollTop = el.scrollHeight
+      outputs[key]['data'].push(data);
     }
     if (step !== undefined) outputs[key]['step'] = step;
     if (status !== undefined) outputs[key]['status'] = status;
@@ -146,9 +143,7 @@ class Ext1Index extends React.Component {
                 <Steps.Step {...this.getStatus('local', 4)} title="检出后任务"/>
                 <Steps.Step {...this.getStatus('local', 5)} title="执行打包"/>
               </Steps>}>
-              <pre ref={el => this.elements['local'] = el} className={styles.ext1Console}>
-                {lds.get(store.outputs, 'local.data')}
-              </pre>
+              <OutView outputs={lds.get(store.outputs, 'local.data', [])}/>
             </Collapse.Panel>
           </Collapse>
 
@@ -167,9 +162,7 @@ class Ext1Index extends React.Component {
                     <Steps.Step {...this.getStatus(item.id, 4)} title="发布后任务"/>
                   </Steps>
                 </div>}>
-                <pre ref={el => this.elements[item.id] = el} className={styles.ext1Console}>
-                  {lds.get(store.outputs, `${item.id}.data`)}
-                </pre>
+                <OutView outputs={lds.get(store.outputs, `${item.id}.data`, [])}/>
               </Collapse.Panel>
             ))}
           </Collapse>
