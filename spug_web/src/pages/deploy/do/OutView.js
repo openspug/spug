@@ -4,8 +4,11 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import styles from './index.module.css';
+import store from './store';
+import lds from 'lodash';
 
 @observer
 class OutView extends React.Component {
@@ -19,9 +22,10 @@ class OutView extends React.Component {
   }
 
   render() {
+    const outputs = lds.get(store.outputs, `${this.props.id}.data`, []);
     return (
       <pre ref={el => this.el = el} className={styles.ext1Console}>
-        {this.props.outputs}
+        {toJS(outputs)}
       </pre>
     )
   }

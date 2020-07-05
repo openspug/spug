@@ -143,7 +143,7 @@ class Ext1Index extends React.Component {
                 <Steps.Step {...this.getStatus('local', 4)} title="检出后任务"/>
                 <Steps.Step {...this.getStatus('local', 5)} title="执行打包"/>
               </Steps>}>
-              <OutView outputs={lds.get(store.outputs, 'local.data', [])}/>
+              <OutView id="local"/>
             </Collapse.Panel>
           </Collapse>
 
@@ -162,7 +162,7 @@ class Ext1Index extends React.Component {
                     <Steps.Step {...this.getStatus(item.id, 4)} title="发布后任务"/>
                   </Steps>
                 </div>}>
-                <OutView outputs={lds.get(store.outputs, `${item.id}.data`, [])}/>
+                <OutView id={item.id}/>
               </Collapse.Panel>
             ))}
           </Collapse>
