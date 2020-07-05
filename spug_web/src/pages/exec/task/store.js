@@ -30,10 +30,9 @@ class Store {
         const key = `${item.hostname}:${item.port}`;
         this.outputs[key] = {
           title: `${item.name}(${key})`,
-          system: '### Establishing communication\n',
-          info: '',
-          error: '',
-          latest: '',
+          system: ['### Establishing communication\n'],
+          info: [],
+          error: [],
           status: -2
         }
       }

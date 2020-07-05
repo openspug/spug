@@ -5,6 +5,7 @@
 .console {
     max-height: 300px;
     padding: 10px 15px;
+    overflow: scroll;
 }
 
 .header {
