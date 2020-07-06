@@ -10,22 +10,25 @@ import StatisticsCard from './StatisticCard';
 import AlarmTrend from './AlarmTrend';
 import RequestTop from './RequestTop';
 import DeployPie from './DeployPie';
+import PageWrapper from 'components/PageWrapper';
 
 class HomeIndex extends React.Component {
   render() {
     return (
-      <AuthDiv auth="home.home.view">
-        <StatisticsCard/>
-        <AlarmTrend/>
-        <Row style={{marginTop: 20}}>
-          <Col span={13}>
-            <RequestTop/>
-          </Col>
-          <Col span={10} offset={1}>
-            <DeployPie/>
-          </Col>
-        </Row>
-      </AuthDiv>
+      <PageWrapper>
+        <AuthDiv auth="home.home.view">
+          <StatisticsCard/>
+          <AlarmTrend/>
+          <Row style={{marginTop: 20}}>
+            <Col span={13}>
+              <RequestTop/>
+            </Col>
+            <Col span={10} offset={1}>
+              <DeployPie/>
+            </Col>
+          </Row>
+        </AuthDiv>
+      </PageWrapper>
     )
   }
 }

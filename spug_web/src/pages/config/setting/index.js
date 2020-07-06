@@ -16,6 +16,7 @@ import TextView from './TextView';
 import JSONView from './JSONView';
 import Record from './Record';
 import store from './store';
+import PageWrapper from 'components/PageWrapper';
 
 @observer
 class Index extends React.Component {
@@ -60,58 +61,69 @@ class Index extends React.Component {
     })
   };
 
+  chooseBread() {
+    const curPath = window.location.pathname;
+    if (curPath.indexOf('src') !== -1) {
+      return [{title:'配置中心'}, {title:'服务配置'}, {title:'环境列表'}]
+    } else if (curPath.indexOf('app') !== -1) {
+      return [{title:'配置中心'}, {title:'应用配置'}, {title:'环境列表'}]
+    }
+  }
+
   render() {
     const {view} = this.state;
     return (
-      <AuthDiv auth={`config.${store.type}.view_config`} className={styles.container}>
-        <div className={styles.left}>
-          <PageHeader
-            title="环境列表"
-            style={{padding: '0 0 10px 10px'}}
-            onBack={() => history.goBack()}
-            extra={<Button type="link" icon="diff" onClick={store.showDiff}>对比配置</Button>}/>
-          <Menu
-            mode="inline"
-            selectedKeys={[String(store.env.id)]}
-            style={{border: 'none'}}
-            onSelect={({item}) => this.updateEnv(item.props.env)}>
-            {envStore.records.map(item => (
-              <Menu.Item key={item.id} env={item}>{item.name} ({item.key})</Menu.Item>
-            ))}
-          </Menu>
-        </div>
-        <div className={styles.right}>
-          <SearchForm>
-            <SearchForm.Item span={6} title="视图">
-              <Select value={view} style={{width: '100%'}} onChange={v => this.setState({view: v})}>
-                <Select.Option value="1"><Icon type="table" style={{marginRight: 10}}/>表格</Select.Option>
-                <Select.Option value="2"><Icon type="unordered-list" style={{marginRight: 10}}/>文本</Select.Option>
-                <Select.Option value="3"><Icon type="number" style={{marginRight: 10}}/>JSON</Select.Option>
-              </Select>
-            </SearchForm.Item>
-            <SearchForm.Item span={7} title="Key">
-              <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
-            </SearchForm.Item>
-            <SearchForm.Item span={3}>
-              <Button type="primary" icon="sync" onClick={this.handleRefresh}>刷新</Button>
-            </SearchForm.Item>
-            <SearchForm.Item span={4}>
-              <Button type="primary" style={{backgroundColor: 'orange', borderColor: 'orange'}} icon="history"
-                      onClick={store.showRecord}>更改历史</Button>
-            </SearchForm.Item>
-            <SearchForm.Item span={4} style={{textAlign: 'right'}}>
-              <AuthButton auth="config.app.edit_config|config.service.edit_config" disabled={view !== '1'}
-                          type="primary" icon="plus" onClick={() => store.showForm()}>新增配置</AuthButton>
-            </SearchForm.Item>
-          </SearchForm>
+      <PageWrapper breadcrumbs={this.chooseBread()}>
+        <AuthDiv auth={`config.${store.type}.view_config`} className={styles.container}>
+          <div className={styles.left}>
+            <PageHeader
+              title="环境列表"
+              style={{padding: '0 0 10px 10px'}}
+              onBack={() => history.goBack()}
+              extra={<Button type="link" icon="diff" onClick={store.showDiff}>对比配置</Button>}/>
+            <Menu
+              mode="inline"
+              selectedKeys={[String(store.env.id)]}
+              style={{border: 'none'}}
+              onSelect={({item}) => this.updateEnv(item.props.env)}>
+              {envStore.records.map(item => (
+                <Menu.Item key={item.id} env={item}>{item.name} ({item.key})</Menu.Item>
+              ))}
+            </Menu>
+          </div>
+          <div className={styles.right}>
+            <SearchForm>
+              <SearchForm.Item span={6} title="视图">
+                <Select value={view} style={{width: '100%'}} onChange={v => this.setState({view: v})}>
+                  <Select.Option value="1"><Icon type="table" style={{marginRight: 10}}/>表格</Select.Option>
+                  <Select.Option value="2"><Icon type="unordered-list" style={{marginRight: 10}}/>文本</Select.Option>
+                  <Select.Option value="3"><Icon type="number" style={{marginRight: 10}}/>JSON</Select.Option>
+                </Select>
+              </SearchForm.Item>
+              <SearchForm.Item span={7} title="Key">
+                <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
+              </SearchForm.Item>
+              <SearchForm.Item span={3}>
+                <Button type="primary" icon="sync" onClick={this.handleRefresh}>刷新</Button>
+              </SearchForm.Item>
+              <SearchForm.Item span={4}>
+                <Button type="primary" style={{backgroundColor: 'orange', borderColor: 'orange'}} icon="history"
+                        onClick={store.showRecord}>更改历史</Button>
+              </SearchForm.Item>
+              <SearchForm.Item span={4} style={{textAlign: 'right'}}>
+                <AuthButton auth="config.app.edit_config|config.service.edit_config" disabled={view !== '1'}
+                            type="primary" icon="plus" onClick={() => store.showForm()}>新增配置</AuthButton>
+              </SearchForm.Item>
+            </SearchForm>
 
-          {view === '1' && <TableView/>}
-          {view === '2' && <TextView ref={ref => this.textView = ref}/>}
-          {view === '3' && <JSONView ref={ref => this.JSONView = ref}/>}
-        </div>
-        {store.recordVisible && <Record/>}
-        {store.diffVisible && <DiffConfig/>}
-      </AuthDiv>
+            {view === '1' && <TableView/>}
+            {view === '2' && <TextView ref={ref => this.textView = ref}/>}
+            {view === '3' && <JSONView ref={ref => this.JSONView = ref}/>}
+          </div>
+          {store.recordVisible && <Record/>}
+          {store.diffVisible && <DiffConfig/>}
+        </AuthDiv>
+      </PageWrapper>
     )
   }
 }

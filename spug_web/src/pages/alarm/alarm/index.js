@@ -9,19 +9,22 @@ import { Input, Button } from 'antd';
 import { SearchForm, AuthCard } from 'components';
 import ComTable from './Table';
 import store from './store';
+import PageWrapper from 'components/PageWrapper';
 
 export default observer(function () {
   return (
-    <AuthCard auth="alarm.alarm.view">
-      <SearchForm>
-        <SearchForm.Item span={8} title="任务名称">
-          <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
-        </SearchForm.Item>
-        <SearchForm.Item span={8}>
-          <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
-        </SearchForm.Item>
-      </SearchForm>
-      <ComTable/>
-    </AuthCard>
+    <PageWrapper>
+      <AuthCard auth="alarm.alarm.view">
+        <SearchForm>
+          <SearchForm.Item span={8} title="任务名称">
+            <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
+          </SearchForm.Item>
+          <SearchForm.Item span={8}>
+            <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
+          </SearchForm.Item>
+        </SearchForm>
+        <ComTable/>
+      </AuthCard>
+    </PageWrapper>
   )
 })

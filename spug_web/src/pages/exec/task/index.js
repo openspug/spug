@@ -12,6 +12,7 @@ import TemplateSelector from './TemplateSelector';
 import ExecConsole from './ExecConsole';
 import { http, cleanCommand } from 'libs';
 import store from './store';
+import PageWrapper from 'components/PageWrapper';
 
 @observer
 class TaskIndex extends React.Component {
@@ -34,31 +35,33 @@ class TaskIndex extends React.Component {
   render() {
     const {body, token} = this.state;
     return (
-      <AuthCard auth="exec.task.do">
-        <Form>
-          <Form.Item label="执行主机">
-            {store.hosts.map(item => (
-              <Tag
-                closable
-                color="#108ee9"
-                key={item.id}
-                onClose={() => store.hosts = store.hosts.filter(x => x.id !== item.id)}>
-                {item.name}({item.hostname}:{item.port})</Tag>
-            ))}
-          </Form.Item>
-          <Button icon="plus" onClick={store.switchHost}>从主机列表中选择</Button>
-          <Form.Item label="执行命令">
-            <ACEditor mode="sh" value={body} height="300px" onChange={body => this.setState({body})}/>
-          </Form.Item>
-          <Form.Item>
-            <Button icon="plus" onClick={store.switchTemplate}>从执行模版中选择</Button>
-          </Form.Item>
-          <Button icon="thunderbolt" type="primary" onClick={this.handleSubmit}>开始执行</Button>
-        </Form>
-        {store.showHost && <HostSelector onCancel={store.switchHost} onOk={hosts => store.hosts = hosts}/>}
-        {store.showTemplate && <TemplateSelector onCancel={store.switchTemplate} onOk={body => this.setState({body})}/>}
-        {store.showConsole && <ExecConsole token={token} onCancel={store.switchConsole}/>}
-      </AuthCard>
+      <PageWrapper>
+        <AuthCard auth="exec.task.do">
+          <Form>
+            <Form.Item label="执行主机">
+              {store.hosts.map(item => (
+                <Tag
+                  closable
+                  color="#108ee9"
+                  key={item.id}
+                  onClose={() => store.hosts = store.hosts.filter(x => x.id !== item.id)}>
+                  {item.name}({item.hostname}:{item.port})</Tag>
+              ))}
+            </Form.Item>
+            <Button icon="plus" onClick={store.switchHost}>从主机列表中选择</Button>
+            <Form.Item label="执行命令">
+              <ACEditor mode="sh" value={body} height="300px" onChange={body => this.setState({body})}/>
+            </Form.Item>
+            <Form.Item>
+              <Button icon="plus" onClick={store.switchTemplate}>从执行模版中选择</Button>
+            </Form.Item>
+            <Button icon="thunderbolt" type="primary" onClick={this.handleSubmit}>开始执行</Button>
+          </Form>
+          {store.showHost && <HostSelector onCancel={store.switchHost} onOk={hosts => store.hosts = hosts}/>}
+          {store.showTemplate && <TemplateSelector onCancel={store.switchTemplate} onOk={body => this.setState({body})}/>}
+          {store.showConsole && <ExecConsole token={token} onCancel={store.switchConsole}/>}
+        </AuthCard>
+      </PageWrapper>
     )
   }
 }

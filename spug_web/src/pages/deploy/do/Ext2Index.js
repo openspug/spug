@@ -13,6 +13,7 @@ import history from 'libs/history';
 import styles from './index.module.css';
 import store from './store';
 import lds from 'lodash';
+import PageWrapper from 'components/PageWrapper';
 
 @observer
 class Ext1Index extends React.Component {
@@ -120,60 +121,62 @@ class Ext1Index extends React.Component {
   render() {
     const {app_name, env_name, status, server_actions, host_actions} = store.request;
     return (
-      <AuthDiv auth="deploy.request.do">
-        <Spin spinning={this.state.fetching}>
-          <PageHeader
-            title="应用发布"
-            subTitle={`${app_name} - ${env_name}`}
-            style={{padding: 0}}
-            tags={this.getStatusAlias()}
-            extra={this.log ? (
-              <Button icon="sync" type="primary" onClick={this.fetch}>刷新</Button>
-            ) : (
-              <Button icon="play-circle" loading={this.state.loading} type="primary"
-                      disabled={!['1', '-3'].includes(status)}
-                      onClick={this.handleDeploy}>发布</Button>
-            )}
-            onBack={() => history.goBack()}/>
-          <Collapse defaultActiveKey={1} className={styles.collapse}>
-            <Collapse.Panel showArrow={false} key={1} header={
-              <Steps style={{maxWidth: 400 + server_actions.length * 200}}>
-                <Steps.Step {...this.getStatus('local', 0)} title="建立连接"/>
-                <Steps.Step {...this.getStatus('local', 1)} title="发布准备"/>
-                {server_actions.map((item, index) => (
-                  <Steps.Step {...this.getStatus('local', 2 + index)} key={index} title={item.title}/>
-                ))}
-              </Steps>}>
-              <OutView outputs={lds.get(store.outputs, 'local.data', [])}/>
-            </Collapse.Panel>
-          </Collapse>
-
-          {host_actions.length > 0 && (
-            <Collapse
-              defaultActiveKey={'0'}
-              className={styles.collapse}
-              expandIcon={({isActive}) => <Icon type="caret-right" style={{fontSize: 16}} rotate={isActive ? 90 : 0}/>}>
-              {store.request.targets.map((item, index) => (
-                <Collapse.Panel key={index} header={
-                  <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                    <b>{item.title}</b>
-                    <Steps size="small" style={{maxWidth: 150 + host_actions.length * 150}}>
-                      <Steps.Step {...this.getStatus(item.id, 1)} title="数据准备"/>
-                      {host_actions.map((action, index) => (
-                        <Steps.Step {...this.getStatus(item.id, 2 + index)} key={index} title={action.title}/>
-                      ))}
-                    </Steps>
-                  </div>}>
-                  <OutView outputs={lds.get(store.outputs, `${item.id}.data`, [])}/>
-                </Collapse.Panel>
-              ))}
+      <PageWrapper>
+        <AuthDiv auth="deploy.request.do">
+          <Spin spinning={this.state.fetching}>
+            <PageHeader
+              title="应用发布"
+              subTitle={`${app_name} - ${env_name}`}
+              style={{padding: 0}}
+              tags={this.getStatusAlias()}
+              extra={this.log ? (
+                <Button icon="sync" type="primary" onClick={this.fetch}>刷新</Button>
+              ) : (
+                <Button icon="play-circle" loading={this.state.loading} type="primary"
+                        disabled={!['1', '-3'].includes(status)}
+                        onClick={this.handleDeploy}>发布</Button>
+              )}
+              onBack={() => history.goBack()}/>
+            <Collapse defaultActiveKey={1} className={styles.collapse}>
+              <Collapse.Panel showArrow={false} key={1} header={
+                <Steps style={{maxWidth: 400 + server_actions.length * 200}}>
+                  <Steps.Step {...this.getStatus('local', 0)} title="建立连接"/>
+                  <Steps.Step {...this.getStatus('local', 1)} title="发布准备"/>
+                  {server_actions.map((item, index) => (
+                    <Steps.Step {...this.getStatus('local', 2 + index)} key={index} title={item.title}/>
+                  ))}
+                </Steps>}>
+                <OutView outputs={lds.get(store.outputs, 'local.data', [])}/>
+              </Collapse.Panel>
             </Collapse>
-          )}
-          {host_actions.length === 0 && this.state.fetching === false && (
-            <div className={styles.ext2Tips}>无目标主机动作</div>
-          )}
-        </Spin>
-      </AuthDiv>
+
+            {host_actions.length > 0 && (
+              <Collapse
+                defaultActiveKey={'0'}
+                className={styles.collapse}
+                expandIcon={({isActive}) => <Icon type="caret-right" style={{fontSize: 16}} rotate={isActive ? 90 : 0}/>}>
+                {store.request.targets.map((item, index) => (
+                  <Collapse.Panel key={index} header={
+                    <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                      <b>{item.title}</b>
+                      <Steps size="small" style={{maxWidth: 150 + host_actions.length * 150}}>
+                        <Steps.Step {...this.getStatus(item.id, 1)} title="数据准备"/>
+                        {host_actions.map((action, index) => (
+                          <Steps.Step {...this.getStatus(item.id, 2 + index)} key={index} title={action.title}/>
+                        ))}
+                      </Steps>
+                    </div>}>
+                    <OutView outputs={lds.get(store.outputs, `${item.id}.data`, [])}/>
+                  </Collapse.Panel>
+                ))}
+              </Collapse>
+            )}
+            {host_actions.length === 0 && this.state.fetching === false && (
+              <div className={styles.ext2Tips}>无目标主机动作</div>
+            )}
+          </Spin>
+        </AuthDiv>
+      </PageWrapper>
     )
   }
 }
