@@ -33,4 +33,5 @@ urlpatterns = [
     path('notify/', include('apps.notify.urls')),
     path('file/', include('apps.file.urls')),
     path('apis/', include('apps.apis.urls')),
+    path('domain/', include('apps.domain.urls')),
 ]

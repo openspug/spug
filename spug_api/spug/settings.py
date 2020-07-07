@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'apps.app',
     'apps.deploy',
     'apps.notify',
+    'apps.domain',
 ]
 
 MIDDLEWARE = [
