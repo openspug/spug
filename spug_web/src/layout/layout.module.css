@@ -15,8 +15,11 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 24px 24px 0;
     overflow-y: scroll;
+}
+
+.content .router {
+    padding: 24px 24px 0;
 }
 
 .trigger {

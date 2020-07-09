@@ -60,10 +60,16 @@ class Index extends React.Component {
     })
   };
 
+  chooseBread() {
+    const currentPath = window.location.pathname;
+    if (currentPath.indexOf('src') !== -1) return [{title:'配置中心'}, {title:'服务配置'}, {title:this.props.location.state.title}];
+    if (currentPath.indexOf('app') !== -1) return [{title:'配置中心'}, {title:'应用配置'}, {title:this.props.location.state.title}];
+  }
+
   render() {
     const {view} = this.state;
     return (
-      <AuthDiv auth={`config.${store.type}.view_config`} className={styles.container}>
+      <AuthDiv breadcrumbs={this.chooseBread()} auth={`config.${store.type}.view_config`} className={styles.container}>
         <div className={styles.left}>
           <PageHeader
             title="环境列表"
