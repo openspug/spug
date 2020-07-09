@@ -40,7 +40,7 @@ class ComTable extends React.Component {
         <Divider type="vertical"/>
         <LinkButton auth="config.src.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
         <Divider type="vertical"/>
-        <AuthLink auth="config.src.view_config" to={`/config/setting/src/${info.id}`}>配置</AuthLink>
+        <AuthLink auth="config.src.view_config" to={{pathname:`/config/setting/src/${info.id}`,state:{title:info.name}}}>配置</AuthLink>
       </span>
     )
   }];

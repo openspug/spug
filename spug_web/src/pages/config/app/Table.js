@@ -41,7 +41,7 @@ class ComTable extends React.Component {
         <Divider type="vertical"/>
         <LinkButton auth="config.app.view_config" onClick={() => store.showRel(info)}>依赖</LinkButton>
         <Divider type="vertical"/>
-        <AuthLink auth="config.app.view_config" to={`/config/setting/app/${info.id}`}>配置</AuthLink>
+        <AuthLink auth="config.app.view_config" to={{pathname:`/config/setting/app/${info.id}`,state:{title:info.name}}}>配置</AuthLink>
       </span>
     )
   }];

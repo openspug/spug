@@ -55,14 +55,16 @@ def email_test(request):
     if error is None:
         try:
             if form.port == 465:
-                server = smtplib.SMTP_SSL(form.server, form.port)
+                server = smtplib.SMTP_SSL(form.server, form.port, timeout=3)
             else:
-                server = smtplib.SMTP(form.server, form.port)
+                server = smtplib.SMTP(form.server, form.port, timeout=3)
             server.login(form.username, form.password)
-            return json_response()
+            return json_response()    
+
         except Exception as e:
-            error = e.smtp_error.decode('utf-8')
+            error = f'{e}'
             return json_response(error=error)
+
     return json_response(error=error)
 
 

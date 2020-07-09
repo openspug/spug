@@ -144,7 +144,7 @@ class Ext1Index extends React.Component {
                   <Steps.Step {...this.getStatus('local', 2 + index)} key={index} title={item.title}/>
                 ))}
               </Steps>}>
-              <OutView outputs={lds.get(store.outputs, 'local.data', [])}/>
+              <OutView id="local"/>
             </Collapse.Panel>
           </Collapse>
 
@@ -164,7 +164,7 @@ class Ext1Index extends React.Component {
                       ))}
                     </Steps>
                   </div>}>
-                  <OutView outputs={lds.get(store.outputs, `${item.id}.data`, [])}/>
+                  <OutView id={item.id}/>
                 </Collapse.Panel>
               ))}
             </Collapse>
