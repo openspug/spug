@@ -72,7 +72,7 @@ def notify_by_dd(event, obj):
     if users:
         texts = [
             '## %s ## ' % ('监控告警通知' if event == '1' else '告警恢复通知'),
-            f'**告警名称：** <font color="#{"f90202" if event == "1" else "8ece60"}">{obj.name}</font> ',
+            f'**告警名称：** <font color="#{"f90202" if event == "1" else "008000"}">{obj.name}</font> ',
             f'**告警时间：** {human_datetime()} ',
             f'**告警描述：** {obj.out} ',
         ]
