@@ -77,7 +77,7 @@ class Ext2Form extends React.Component {
             )}
           </Form.Item>
           <Form.Item label="环境变量（SPUG_RELEASE）" help="可以在自定义脚本中引用该变量，用于设置本次发布相关的动态变量，在脚本中通过 $SPUG_RELEASE 来使用该值。">
-            {getFieldDecorator('extra', {initialValue: info['extra']})(
+            {getFieldDecorator('extra', {initialValue: lds.get(info, 'extra.0')})(
               <Input placeholder="请输入环境变量 SPUG_RELEASE 的值"/>
             )}
           </Form.Item>
