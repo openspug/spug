@@ -5,6 +5,7 @@ from django_redis import get_redis_connection
 from django.conf import settings
 from libs.utils import AttrDict, human_time, human_datetime
 from apps.host.models import Host
+from apps.notify.models import Notify
 from concurrent import futures
 import requests
 import socket
@@ -329,7 +330,13 @@ class Helper:
                 data = cls._make_wx_notify(action, req, version, host_str)
             else:
                 raise NotImplementedError
-            requests.post(rst_notify['value'], json=data)
+            res = requests.post(rst_notify['value'], json=data)
+            if res.status_code != 200:
+                Notify.make_notify('flag', '1', '发布通知发送失败', f'返回状态码：{res.status_code}, 请求URL：{res.url}')
+            if rst_notify['mode'] in ['1', '3']:
+                res = res.json()
+                if res.get('errcode') != 0:
+                    Notify.make_notify('flag', '1', '发布通知发送失败', f'返回数据：{res}')
 
     def parse_filter_rule(self, data: str):
         data, files = data.strip(), []

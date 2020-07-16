@@ -18,6 +18,19 @@ def _parse_args(grp):
     return spug_key, sum([json.loads(x.contacts) for x in Group.objects.filter(id__in=grp)], [])
 
 
+def _handle_response(res, mode):
+    if res.status_code != 200:
+        Notify.make_notify(notify_source, '1', '告警通知发送失败', f'返回状态码：{res.status_code}, 请求URL：{res.url}')
+    if mode in ['dd', 'wx']:
+        res = res.json()
+        if res.get('errcode') != 0:
+            Notify.make_notify(notify_source, '1', '告警通知发送失败', f'返回数据：{res}')
+    if mode == 'spug':
+        res = res.json()
+        if res.get('error'):
+            Notify.make_notify(notify_source, '1', '告警通知发送失败', f'错误信息：{res}')
+
+
 def notify_by_wx(event, obj):
     spug_key, u_ids = _parse_args(obj.grp)
     if not spug_key:
@@ -33,7 +46,8 @@ def notify_by_wx(event, obj):
             'remark': f'故障持续{obj.duration}' if event == '2' else None,
             'users': list(users)
         }
-        requests.post(f'{spug_server}/apis/notify/wx/', json=data)
+        res = requests.post(f'{spug_server}/apis/notify/wx/', json=data)
+        _handle_response(res, 'spug')
     else:
         Notify.make_notify(notify_source, '1', '发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的微信Token。')
 
@@ -59,7 +73,8 @@ def notify_by_email(event, obj):
                 'body': '\r\n'.join(body),
                 'users': list(users)
             }
-            requests.post(f'{spug_server}/apis/notify/mail/', json=data)
+            res = requests.post(f'{spug_server}/apis/notify/mail/', json=data)
+            _handle_response(res, 'spug')
         else:
             Notify.make_notify(notify_source, '1', '发送报警信息失败', '未配置报警服务调用凭据，请在系统管理/系统设置/报警服务设置中配置。')
     else:
@@ -86,7 +101,8 @@ def notify_by_dd(event, obj):
             }
         }
         for url in users:
-            requests.post(url, json=data)
+            res = requests.post(url, json=data)
+            _handle_response(res, 'dd')
     else:
         Notify.make_notify(notify_source, '1', '发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的钉钉。')
 
@@ -111,6 +127,7 @@ def notify_by_qy_wx(event, obj):
             }
         }
         for url in users:
-            requests.post(url, json=data)
+            res = requests.post(url, json=data)
+            _handle_response(res, 'wx')
     else:
         Notify.make_notify(notify_source, '1', '发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的企业微信。')
