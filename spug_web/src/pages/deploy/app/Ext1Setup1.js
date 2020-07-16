@@ -36,7 +36,7 @@ export default observer(function Ext2Setup1() {
           checked={info['is_audit']}
           onChange={v => info['is_audit'] = v}/>
       </Form.Item>
-      <Form.Item label="结果通知" help="应用发布成功或失败结果通知">
+      <Form.Item label="消息通知" help="应用审核及发布成功或失败结果通知">
         <Input addonBefore={(
           <Select
             value={info['rst_notify']['mode']} style={{width: 100}} onChange={v => info['rst_notify']['mode'] = v}>

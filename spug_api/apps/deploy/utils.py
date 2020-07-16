@@ -199,8 +199,98 @@ class Helper:
         self.log_key = f'{settings.REQUEST_KEY}:{r_id}'
         self.rds.delete(self.log_key)
 
-    @staticmethod
-    def send_deploy_notify(req):
+    @classmethod
+    def _make_dd_notify(cls, action, req, version, host_str):
+        texts = [
+            f'**申请标题：** {req.name}',
+            f'**应用名称：** {req.deploy.app.name}',
+            f'**应用版本：** {version}',
+            f'**发布环境：** {req.deploy.env.name}',
+            f'**发布主机：** {host_str}',
+        ]
+        if action == 'approve_req':
+            texts.insert(0, '## %s ## ' % '发布审核申请')
+            texts.extend([
+                f'**申请人员：** {req.created_by.nickname}',
+                f'**申请时间：** {human_datetime()}',
+                '> 来自 Spug运维平台'
+            ])
+        elif action == 'approve_rst':
+            color, text = ('#008000', '通过') if req.status == '1' else ('#f90202', '驳回')
+            texts.insert(0, '## %s ## ' % '发布审核结果')
+            texts.extend([
+                f'**审核人员：** {req.approve_by.nickname}',
+                f'**审核结果：** <font color="{color}">{text}</font>',
+                f'**审核意见：** {req.reason or ""}',
+                f'**审核时间：** {human_datetime()}',
+                '> 来自 Spug运维平台'
+            ])
+        else:
+            color, text = ('#008000', '成功') if req.status == '3' else ('#f90202', '失败')
+            texts.insert(0, '## %s ## ' % '发布结果通知')
+            if req.approve_at:
+                texts.append(f'**审核人员：** {req.approve_by.nickname}')
+            texts.extend([
+                f'**执行人员：** {req.do_by.nickname}',
+                f'**发布结果：** <font color="{color}">{text}</font>',
+                f'**发布时间：** {human_datetime()}',
+                '> 来自 Spug运维平台'
+            ])
+        return {
+            'msgtype': 'markdown',
+            'markdown': {
+                'title': 'Spug 发布消息通知',
+                'text': '\n\n'.join(texts)
+            }
+        }
+
+    @classmethod
+    def _make_wx_notify(cls, action, req, version, host_str):
+        texts = [
+            f'申请标题： {req.name}',
+            f'应用名称： {req.deploy.app.name}',
+            f'应用版本： {version}',
+            f'发布环境： {req.deploy.env.name}',
+            f'发布主机： {host_str}',
+        ]
+
+        if action == 'approve_req':
+            texts.insert(0, '## %s' % '发布审核申请')
+            texts.extend([
+                f'申请人员： {req.created_by.nickname}',
+                f'申请时间： {human_datetime()}',
+                '> 来自 Spug运维平台'
+            ])
+        elif action == 'approve_rst':
+            color, text = ('info', '通过') if req.status == '1' else ('warning', '驳回')
+            texts.insert(0, '## %s' % '发布审核结果')
+            texts.extend([
+                f'审核人员： {req.approve_by.nickname}',
+                f'审核结果： <font color="{color}">{text}</font>',
+                f'审核意见： {req.reason or ""}',
+                f'审核时间： {human_datetime()}',
+                '> 来自 Spug运维平台'
+            ])
+        else:
+            color, text = ('info', '成功') if req.status == '3' else ('warning', '失败')
+            texts.insert(0, '## %s' % '发布结果通知')
+            if req.approve_at:
+                texts.append(f'审核人员： {req.approve_by.nickname}')
+            texts.extend([
+                f'执行人员： {req.do_by.nickname}',
+                f'发布结果： <font color="{color}">{text}</font>',
+                f'发布时间： {human_datetime()}',
+                '> 来自 Spug运维平台'
+            ])
+        return {
+            'msgtype': 'markdown',
+            'markdown': {
+                'content': '\n'.join(texts)
+            }
+        }
+
+    @classmethod
+    def send_deploy_notify(cls, req, action=None):
         rst_notify = json.loads(req.deploy.rst_notify)
         host_ids = json.loads(req.host_ids)
         if rst_notify['mode'] != '0' and rst_notify.get('value'):
@@ -212,66 +302,34 @@ class Helper:
                 else:
                     version = extra1
             else:
-                version = extra[0]
+                version = extra[0] or ''
             hosts = [{'id': x.id, 'name': x.name} for x in Host.objects.filter(id__in=host_ids)]
             host_str = ', '.join(x['name'] for x in hosts[:2])
             if len(hosts) > 2:
                 host_str += f'等{len(hosts)}台主机'
             if rst_notify['mode'] == '1':
-                color, text = ('#8ece60', '成功') if req.status == '3' else ('#f90202', '失败')
-                texts = [
-                    '## %s ## ' % '发布结果通知',
-                    f'**申请标题：** {req.name} ',
-                    f'**应用名称：** {req.deploy.app.name} ',
-                    f'**应用版本：** {version} ',
-                    f'**发布环境：** {req.deploy.env.name} ',
-                    f'**发布主机：** {host_str} ',
-                    f'**发布结果：** <font color="{color}">{text}</font>',
-                    f'**发布时间：** {human_datetime()} ',
-                    '> 来自 Spug运维平台'
-                ]
-                data = {
-                    'msgtype': 'markdown',
-                    'markdown': {
-                        'title': '发布结果通知',
-                        'text': '\n\n'.join(texts)
-                    }
-                }
-                requests.post(rst_notify['value'], json=data)
+                data = cls._make_dd_notify(action, req, version, host_str)
             elif rst_notify['mode'] == '2':
                 data = {
+                    'action': action,
                     'req_id': req.id,
                     'req_name': req.name,
                     'app_id': req.deploy.app_id,
                     'app_name': req.deploy.app.name,
                     'env_id': req.deploy.env_id,
                     'env_name': req.deploy.env.name,
+                    'status': req.status,
+                    'reason': req.reason,
                     'version': version,
                     'targets': hosts,
                     'is_success': req.status == '3',
-                    'deploy_at': human_datetime()
+                    'created_at': human_datetime()
                 }
-                requests.post(rst_notify['value'], json=data)
             elif rst_notify['mode'] == '3':
-                color, text = ('info', '成功') if req.status == '3' else ('warning', '失败')
-                texts = [
-                    '## %s' % '发布结果通知',
-                    f'**申请标题：** {req.name} ',
-                    f'**应用名称：** {req.deploy.app.name} ',
-                    f'**应用版本：** {version} ',
-                    f'**发布环境：** {req.deploy.env.name} ',
-                    f'**发布主机：** {host_str} ',
-                    f'**发布结果：** <font color="{color}">{text}</font>',
-                    f'**发布时间：** {human_datetime()} ',
-                    '> 来自 Spug运维平台'
-                ]
-                data = {
-                    'msgtype': 'markdown',
-                    'markdown': {
-                        'content': '\n'.join(texts)
-                    }
-                }
-                requests.post(rst_notify['value'], json=data)
+                data = cls._make_wx_notify(action, req, version, host_str)
+            else:
+                raise NotImplementedError
+            requests.post(rst_notify['value'], json=data)
 
     def parse_filter_rule(self, data: str):
         data, files = data.strip(), []

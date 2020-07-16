@@ -8,7 +8,7 @@ from django_redis import get_redis_connection
 from libs import json_response, JsonParser, Argument, human_datetime, human_time
 from apps.deploy.models import DeployRequest
 from apps.app.models import Deploy
-from apps.deploy.utils import deploy_dispatch
+from apps.deploy.utils import deploy_dispatch, Helper
 from apps.host.models import Host
 from collections import defaultdict
 from threading import Thread
@@ -67,13 +67,18 @@ class RequestView(View):
             form.extra = json.dumps(form.extra)
             form.host_ids = json.dumps(form.host_ids)
             if form.id:
+                req = DeployRequest.objects.get(pk=form.id)
+                is_required_notify = deploy.is_audit and req.status == '-1'
                 DeployRequest.objects.filter(pk=form.id).update(
                     created_by=request.user,
                     reason=None,
                     **form
                 )
             else:
-                DeployRequest.objects.create(created_by=request.user, **form)
+                req = DeployRequest.objects.create(created_by=request.user, **form)
+                is_required_notify = deploy.is_audit
+            if is_required_notify:
+                Thread(target=Helper.send_deploy_notify, args=(req, 'approve_req')).start()
         return json_response(error=error)
 
     def put(self, request):
@@ -182,6 +187,8 @@ class RequestDetailView(View):
         outputs = {str(x.id): {'data': []} for x in hosts}
         outputs.update(local={'data': [f'{human_time()} 建立接连...        ']})
         req.status = '2'
+        req.do_at = human_datetime()
+        req.do_by = request.user
         if not req.version:
             req.version = f'{req.deploy_id}_{req.id}_{datetime.now().strftime("%Y%m%d%H%M%S")}'
         req.save()
@@ -206,4 +213,5 @@ class RequestDetailView(View):
             req.status = '1' if form.is_pass else '-1'
             req.reason = form.reason
             req.save()
+            Thread(target=Helper.send_deploy_notify, args=(req, 'approve_rst')).start()
         return json_response(error=error)
