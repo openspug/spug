@@ -149,11 +149,7 @@ def valid_ssh(hostname, port, username, password, with_expect=True):
     cli = SSH(hostname, port, username, private_key)
     if password:
         _cli = SSH(hostname, port, username, password=str(password))
-        code, out = _cli.exec_command('mkdir -p -m 700 ~/.ssh && \
-                echo %r >> ~/.ssh/authorized_keys && \
-                chmod 600 ~/.ssh/authorized_keys' % public_key)
-        if code != 0:
-            raise Exception(f'add public key error: {out!r}')
+        _cli.add_public_key(public_key)
     try:
         cli.ping()
     except BadAuthenticationType:

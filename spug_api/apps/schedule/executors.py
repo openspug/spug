@@ -27,7 +27,7 @@ def host_executor(q, host, pkey, command):
     try:
         cli = SSH(host.hostname, host.port, host.username, pkey=pkey)
         exit_code, out = cli.exec_command(command)
-        out = out.decode() if out else None
+        out = out if out else None
     except AuthenticationException:
         out = 'ssh authentication fail'
     except socket.error as e:

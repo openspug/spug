@@ -34,9 +34,9 @@ def host_executor(host, pkey, command):
         cli = SSH(host.hostname, host.port, host.username, pkey=pkey)
         exit_code, out = cli.exec_command(command)
         if exit_code == 0:
-            return True, out.decode() or '检测状态正常'
+            return True, out or '检测状态正常'
         else:
-            return False, out.decode() or f'退出状态码：{exit_code}'
+            return False, out or f'退出状态码：{exit_code}'
     except Exception as e:
         return False, f'异常信息：{e}'
 
