@@ -50,8 +50,12 @@ class UserView(View):
             if form.get('password'):
                 form.token_expired = 0
                 form.password_hash = User.make_password(form.pop('password'))
-            if User.objects.filter(username=form.username, deleted_by_id__isnull=True).exclude(id=form.id).exists():
-                return json_response(error=f'已存在登录名为【{form.username}】的用户')
+            if 'username' in form:
+                if User.objects.filter(username=form.username, deleted_by_id__isnull=True).exclude(id=form.id).exists():
+                    return json_response(error=f'已存在登录名为【{form.username}】的用户')
+            if 'is_active' in form:
+                user = User.objects.get(pk=form.id)
+                cache.delete(user.username)
             User.objects.filter(pk=form.pop('id')).update(**form)
         return json_response(error=error)
 

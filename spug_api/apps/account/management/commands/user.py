@@ -2,6 +2,7 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.core.management.base import BaseCommand
+from django.core.cache import cache
 from apps.account.models import User
 
 
@@ -55,6 +56,7 @@ class Command(BaseCommand):
                 return self.echo_error(f'未找到登录名为【{options["u"]}】的账户')
             user.is_active = True
             user.save()
+            cache.delete(user.username)
             self.echo_success('账户已启用')
         elif action == 'reset':
             if not all((options['u'], options['p'])):
