@@ -139,7 +139,7 @@ class Ext1Form extends React.Component {
               <Input placeholder="请输入申请标题"/>
             )}
           </Form.Item>
-          <Form.Item required label="选择分支/标签/版本" help="根据网络情况，刷新可能会很慢，请耐心等待。">
+          <Form.Item required label="选择分支/标签/版本" help="根据网络情况，首次刷新可能会很慢，请耐心等待。">
             <Col span={19}>
               <Input.Group compact>
                 <Select value={git_type} onChange={this.switchType} style={{width: 100}}>
