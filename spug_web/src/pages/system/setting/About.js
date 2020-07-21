@@ -41,6 +41,9 @@ class About extends React.Component {
           <Descriptions.Item label="官网文档">
             <a href="https://spug.dev" target="_blank" rel="noopener noreferrer">https://spug.dev</a>
           </Descriptions.Item>
+          <Descriptions.Item label="更新日志">
+            <a href="https://spug.dev/docs/change-log/" target="_blank" rel="noopener noreferrer">https://spug.dev/docs/change-log/</a>
+          </Descriptions.Item>
         </Descriptions>
       </Spin>
     )
