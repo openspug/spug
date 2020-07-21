@@ -197,7 +197,11 @@ class ComForm extends React.Component {
                 height="150px"
                 onChange={val => this.setState({command: val})}/>
             </Form.Item>
-            <Form.Item label="失败通知" help="任务执行失败告警通知">
+            <Form.Item label="失败通知" extra={<span>
+              任务执行失败告警通知，
+              <a target="_blank" rel="noopener noreferrer"
+                 href="https://spug.dev/docs/install-error/#%E9%92%89%E9%92%89%E6%94%B6%E4%B8%8D%E5%88%B0%E9%80%9A%E7%9F%A5%EF%BC%9F">钉钉收不到通知？</a>
+            </span>}>
               {getFieldDecorator('rst_notify.value', {initialValue: info['rst_notify']['value']})(
                 <Input
                   addonBefore={getFieldDecorator('rst_notify.mode', {initialValue: info['rst_notify']['mode']})(
