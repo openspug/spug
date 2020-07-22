@@ -39,12 +39,14 @@ class Store {
       .then(res => this.records[app_id]['deploys'] = res)
   };
 
-  showForm = (info) => {
+  showForm = (e, info) => {
+    if (e) e.stopPropagation();
     this.record = info || {};
     this.formVisible = true;
   };
 
-  showExtForm = (app_id, info, isClone) => {
+  showExtForm = (e, app_id, info, isClone) => {
+    if (e) e.stopPropagation();
     this.page = 0;
     this.app_id = app_id;
     if (info) {
