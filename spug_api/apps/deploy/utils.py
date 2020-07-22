@@ -125,6 +125,28 @@ def _ext2_deploy(req, helper, env):
         helper.local(f'cd /tmp && {action["data"]}', env)
         step += 1
     helper.send_step('local', 100, '完成\r\n' if step == 2 else '\r\n')
+
+    for action in host_actions:
+        if action.get('type') == 'transfer':
+            helper.send_info('local', f'{human_time()} 检测到数据传输动作，执行打包...   ')
+            action['src'] = action['src'].rstrip('/ ')
+            action['dst'] = action['dst'].rstrip('/ ')
+            if not action['src'] or not action['dst']:
+                helper.send_error('local', f'invalid path for transfer, src: {action["src"]} dst: {action["dst"]}')
+            is_dir, exclude = os.path.isdir(action['src']), ''
+            sp_dir, sd_dst = os.path.split(action['src'])
+            contain = sd_dst
+            if action['mode'] != '0' and is_dir:
+                files = helper.parse_filter_rule(action['rule'], ',')
+                if files:
+                    if action['mode'] == '1':
+                        contain = ' '.join(f'{sd_dst}/{x}' for x in files)
+                    else:
+                        exclude = ' '.join(f'--exclude={sd_dst}/{x}' for x in files)
+            tar_gz_file = f'{env.SPUG_VERSION}.tar.gz'
+            helper.local(f'cd {sp_dir} && rm -f {req.deploy_id}_*.tar.gz && tar zcf {tar_gz_file} {exclude} {contain}')
+            helper.send_info('local', '完成\r\n')
+            break
     if host_actions:
         threads, latest_exception = [], None
         with futures.ThreadPoolExecutor(max_workers=min(10, os.cpu_count() + 5)) as executor:
@@ -202,7 +224,19 @@ def _deploy_ext2_host(helper, h_id, actions, env):
     helper.send_step(h_id, 2, '完成\r\n')
     for index, action in enumerate(actions):
         helper.send_step(h_id, 2 + index, f'{human_time()} {action["title"]}...\r\n')
-        helper.remote(host.id, ssh, f'cd /tmp && {action["data"]}', env)
+        if action.get('type') == 'transfer':
+            sp_dir, sd_dst = os.path.split(action['src'])
+            tar_gz_file = f'{env.SPUG_VERSION}.tar.gz'
+            try:
+                ssh.put_file(os.path.join(sp_dir, tar_gz_file), f'/tmp/{tar_gz_file}')
+            except Exception as e:
+                helper.send_error(host.id, f'exception: {e}')
+
+            command = f'cd /tmp && tar xf {tar_gz_file} && rm -f {tar_gz_file} '
+            command += f'&& rm -rf {action["dst"]} && mv /tmp/{sd_dst} {action["dst"]} && echo "transfer completed"'
+        else:
+            command = f'cd /tmp && {action["data"]}'
+        helper.remote(host.id, ssh, command, env)
 
     helper.send_step(h_id, 100, f'\r\n{human_time()} ** 发布成功 **')
 
