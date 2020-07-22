@@ -126,6 +126,7 @@ def _ext2_deploy(req, helper, env):
         step += 1
     helper.send_step('local', 100, '完成\r\n' if step == 2 else '\r\n')
 
+    tmp_transfer_file = None
     for action in host_actions:
         if action.get('type') == 'transfer':
             helper.send_info('local', f'{human_time()} 检测到数据传输动作，执行打包...   ')
@@ -144,8 +145,9 @@ def _ext2_deploy(req, helper, env):
                     else:
                         exclude = ' '.join(f'--exclude={sd_dst}/{x}' for x in files)
             tar_gz_file = f'{env.SPUG_VERSION}.tar.gz'
-            helper.local(f'cd {sp_dir} && rm -f {req.deploy_id}_*.tar.gz && tar zcf {tar_gz_file} {exclude} {contain}')
+            helper.local(f'cd {sp_dir} && tar zcf {tar_gz_file} {exclude} {contain}')
             helper.send_info('local', '完成\r\n')
+            tmp_transfer_file = os.path.join(sp_dir, tar_gz_file)
             break
     if host_actions:
         threads, latest_exception = [], None
@@ -161,6 +163,8 @@ def _ext2_deploy(req, helper, env):
                     latest_exception = exception
                     if not isinstance(exception, SpugError):
                         helper.send_error(t.h_id, f'Exception: {exception}', False)
+            if tmp_transfer_file:
+                os.remove(tmp_transfer_file)
         if latest_exception:
             raise latest_exception
     else:
