@@ -18,7 +18,9 @@ class OutView extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    setTimeout(() => this.el.scrollTop = this.el.scrollHeight, 100)
+    setTimeout(() => {
+      if (this.el) this.el.scrollTop = this.el.scrollHeight
+    }, 100)
   }
 
   render() {
