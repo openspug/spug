@@ -90,7 +90,7 @@ def _ext1_deploy(req, helper, env):
         files = helper.parse_filter_rule(filter_rule['data'])
         if files:
             if filter_rule['type'] == 'exclude':
-                exclude = ' '.join(f'--exclude={x}' for x in files)
+                exclude = ' '.join(f'--exclude={env.SPUG_VERSION}/{x}' for x in files)
             else:
                 contain = ' '.join(f'{env.SPUG_VERSION}/{x}' for x in files)
         helper.local(f'cd {REPOS_DIR} && tar zcf {env.SPUG_VERSION}.tar.gz {exclude} {contain}')
@@ -352,10 +352,10 @@ class Helper:
                 if res.get('errcode') != 0:
                     Notify.make_notify('flag', '1', '发布通知发送失败', f'返回数据：{res}')
 
-    def parse_filter_rule(self, data: str):
+    def parse_filter_rule(self, data: str, sep='\n'):
         data, files = data.strip(), []
         if data:
-            for line in data.split('\n'):
+            for line in data.split(sep):
                 line = line.strip()
                 if line and not line.startswith('#'):
                     files.append(line)
