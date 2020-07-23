@@ -35,7 +35,7 @@ class Store {
   };
 
   _updateCounter = () => {
-    const counter = {'all': 0, '-3': 0, '-1': 0, '0': 0, '1': 0, '2': 0, '3': 0};
+    const counter = {'all': 0, '-3': 0, '0': 0, '1': 0, '3': 0, '99': 0};
     for (let item of this.records) {
       counter['all'] += 1;
       if (['-1', '2'].includes(item['status'])) {
