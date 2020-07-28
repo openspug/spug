@@ -18,6 +18,11 @@ import lds from 'lodash';
 class Ext2Setup3 extends React.Component {
   constructor(props) {
     super(props);
+    this.helpMap = {
+      '0': null,
+      '1': '相对于输入的本地路径的文件路径，仅将匹配到文件传输至要发布的目标主机。',
+      '2': '支持模糊匹配，如果路径以 / 开头则基于输入的本地路径匹配，匹配到文件将不会被传输。'
+    }
     this.state = {
       loading: false,
     }
@@ -89,7 +94,7 @@ class Ext2Setup3 extends React.Component {
               <Input value={item['title']} onChange={e => item['title'] = e.target.value} placeholder="请输入"/>
             </Form.Item>
             {item['type'] === 'transfer' ? ([
-              <Form.Item key={0} label="过滤规则">
+              <Form.Item key={0} label="过滤规则" help={this.helpMap[item['mode']]}>
                 <Input
                   spellCheck={false}
                   placeholder="请输入逗号分割的过滤规则"
