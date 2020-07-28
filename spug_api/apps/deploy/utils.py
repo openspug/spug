@@ -90,7 +90,13 @@ def _ext1_deploy(req, helper, env):
         files = helper.parse_filter_rule(filter_rule['data'])
         if files:
             if filter_rule['type'] == 'exclude':
-                exclude = ' '.join(f'--exclude={env.SPUG_VERSION}/{x}' for x in files)
+                excludes = []
+                for x in files:
+                    if x.startswith('/'):
+                        excludes.append(f'--exclude={env.SPUG_VERSION}{x}')
+                    else:
+                        excludes.append(f'--exclude={x}')
+                exclude = ' '.join(excludes)
             else:
                 contain = ' '.join(f'{env.SPUG_VERSION}/{x}' for x in files)
         helper.local(f'cd {REPOS_DIR} && tar zcf {env.SPUG_VERSION}.tar.gz {exclude} {contain}')
@@ -143,7 +149,13 @@ def _ext2_deploy(req, helper, env):
                     if action['mode'] == '1':
                         contain = ' '.join(f'{sd_dst}/{x}' for x in files)
                     else:
-                        exclude = ' '.join(f'--exclude={sd_dst}/{x}' for x in files)
+                        excludes = []
+                        for x in files:
+                            if x.startswith('/'):
+                                excludes.append(f'--exclude={sd_dst}{x}')
+                            else:
+                                excludes.append(f'--exclude={x}')
+                        exclude = ' '.join(excludes)
             tar_gz_file = f'{env.SPUG_VERSION}.tar.gz'
             helper.local(f'cd {sp_dir} && tar zcf {tar_gz_file} {exclude} {contain}')
             helper.send_info('local', '完成\r\n')
