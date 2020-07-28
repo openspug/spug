@@ -12,6 +12,7 @@ class Store {
   @observable deploy = {};
   @observable page = 0;
   @observable loading = {};
+  @observable isReadOnly = false;
   @observable isFetching = false;
   @observable formVisible = false;
   @observable addVisible = false;
@@ -35,7 +36,7 @@ class Store {
   };
 
   loadDeploys = (app_id) => {
-    http.get('/api/app/deploy/', {params: {app_id}})
+    return http.get('/api/app/deploy/', {params: {app_id}})
       .then(res => this.records[app_id]['deploys'] = res)
   };
 
@@ -45,10 +46,11 @@ class Store {
     this.formVisible = true;
   };
 
-  showExtForm = (e, app_id, info, isClone) => {
+  showExtForm = (e, app_id, info, isClone, isReadOnly = false) => {
     if (e) e.stopPropagation();
     this.page = 0;
     this.app_id = app_id;
+    this.isReadOnly = isReadOnly
     if (info) {
       if (info.extend === '1') {
         this.ext1Visible = true

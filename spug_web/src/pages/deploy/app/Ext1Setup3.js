@@ -55,6 +55,7 @@ class Ext1Setup3 extends React.Component {
     <div style={{display: 'inline-block', height: 39, width: 390}}>
       <span style={{float: 'left'}}>文件过滤<span style={{margin: '0 8px 0 2px'}}>:</span></span>
       <Radio.Group
+        disabled={store.isReadOnly}
         style={{marginLeft: 20, float: 'left'}}
         value={props.type}
         onChange={e => store.deploy['filter_rule']['type'] = e.target.value}>
@@ -105,6 +106,7 @@ class Ext1Setup3 extends React.Component {
               className={full === '1' ? styles.fullScreen : null}
               label={<this.FilterLabel type={info['filter_rule']['type']}/>}>
               <Editor
+                readOnly={store.isReadOnly}
                 mode="text"
                 theme="tomorrow"
                 width="100%"
@@ -119,6 +121,7 @@ class Ext1Setup3 extends React.Component {
               className={full === '3' ? styles.fullScreen : null}
               label={<this.NormalLabel title="代码检出前执行" id="3"/>}>
               <Editor
+                readOnly={store.isReadOnly}
                 mode="sh"
                 theme="tomorrow"
                 width="100%"
@@ -133,6 +136,7 @@ class Ext1Setup3 extends React.Component {
               className={full === '5' ? styles.fullScreen : null}
               label={<this.NormalLabel title="应用发布前执行" id="5"/>}>
               <Editor
+                readOnly={store.isReadOnly}
                 mode="sh"
                 theme="tomorrow"
                 width="100%"
@@ -163,6 +167,7 @@ class Ext1Setup3 extends React.Component {
               className={full === '2' ? styles.fullScreen : null}
               label={<this.NormalLabel title="自定义全局变量" id="2"/>}>
               <Editor
+                readOnly={store.isReadOnly}
                 mode="text"
                 theme="tomorrow"
                 width="100%"
@@ -177,6 +182,7 @@ class Ext1Setup3 extends React.Component {
               className={full === '4' ? styles.fullScreen : null}
               label={<this.NormalLabel title="代码检出后执行" id="4"/>}>
               <Editor
+                readOnly={store.isReadOnly}
                 mode="sh"
                 theme="tomorrow"
                 width="100%"
@@ -191,6 +197,7 @@ class Ext1Setup3 extends React.Component {
               className={full === '6' ? styles.fullScreen : null}
               label={<this.NormalLabel title="应用发布后执行" id="6"/>}>
               <Editor
+                readOnly={store.isReadOnly}
                 mode="sh"
                 theme="tomorrow"
                 width="100%"
@@ -203,7 +210,7 @@ class Ext1Setup3 extends React.Component {
           </Col>
         </Row>
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <Button type="primary" onClick={this.handleSubmit}>提交</Button>
+          <Button disabled={store.isReadOnly} type="primary" onClick={this.handleSubmit}>提交</Button>
           <Button style={{marginLeft: 20}} onClick={() => store.page -= 1}>上一步</Button>
         </Form.Item>
       </React.Fragment>

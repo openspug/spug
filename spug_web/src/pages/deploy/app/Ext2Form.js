@@ -13,12 +13,19 @@ import Setup3 from './Ext2Setup3';
 import store from './store';
 
 export default observer(function Ext2From() {
+  const appName = store.records[store.app_id].name;
+  let title = `自定义发布 - ${appName}`;
+  if (store.deploy.id) {
+    store.isReadOnly ? title = '查看' + title : title = '编辑' + title;
+  } else {
+    title = '新建' + title
+  }
   return (
     <Modal
       visible
       width={900}
       maskClosable={false}
-      title={store.deploy.id ? '编辑自定义发布' : '新建自定义发布'}
+      title={title}
       onCancel={() => store.ext2Visible = false}
       footer={null}>
       <Steps current={store.page} className={styles.steps}>

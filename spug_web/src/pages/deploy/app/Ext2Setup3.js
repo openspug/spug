@@ -64,11 +64,13 @@ class Ext2Setup3 extends React.Component {
         {server_actions.map((item, index) => (
           <div key={index} style={{marginBottom: 30, position: 'relative'}}>
             <Form.Item required label={`本地动作${index + 1}`}>
-              <Input value={item['title']} onChange={e => item['title'] = e.target.value} placeholder="请输入"/>
+              <Input disabled={store.isReadOnly} value={item['title']} onChange={e => item['title'] = e.target.value}
+                     placeholder="请输入"/>
             </Form.Item>
 
             <Form.Item required label="执行内容">
               <Editor
+                readOnly={store.isReadOnly}
                 mode="sh"
                 theme="tomorrow"
                 width="100%"
@@ -77,21 +79,26 @@ class Ext2Setup3 extends React.Component {
                 onChange={v => item['data'] = cleanCommand(v)}
                 placeholder="请输入要执行的动作"/>
             </Form.Item>
-            <div className={styles.delAction} onClick={() => server_actions.splice(index, 1)}>
-              <Icon type="minus-circle"/>移除
-            </div>
+            {!store.isReadOnly && (
+              <div className={styles.delAction} onClick={() => server_actions.splice(index, 1)}>
+                <Icon type="minus-circle"/>移除
+              </div>
+            )}
           </div>
         ))}
-        <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <Button type="dashed" block onClick={() => server_actions.push({})}>
-            <Icon type="plus"/>添加本地执行动作（在服务端本地执行）
-          </Button>
-        </Form.Item>
+        {!store.isReadOnly && (
+          <Form.Item wrapperCol={{span: 14, offset: 6}}>
+            <Button type="dashed" block onClick={() => server_actions.push({})}>
+              <Icon type="plus"/>添加本地执行动作（在服务端本地执行）
+            </Button>
+          </Form.Item>
+        )}
         <Divider/>
         {host_actions.map((item, index) => (
           <div key={index} style={{marginBottom: 30, position: 'relative'}}>
             <Form.Item required label={`目标主机动作${index + 1}`}>
-              <Input value={item['title']} onChange={e => item['title'] = e.target.value} placeholder="请输入"/>
+              <Input disabled={store.isReadOnly} value={item['title']} onChange={e => item['title'] = e.target.value}
+                     placeholder="请输入"/>
             </Form.Item>
             {item['type'] === 'transfer' ? ([
               <Form.Item key={0} label="过滤规则" help={this.helpMap[item['mode']]}>
@@ -100,9 +107,10 @@ class Ext2Setup3 extends React.Component {
                   placeholder="请输入逗号分割的过滤规则"
                   value={item['rule']}
                   onChange={e => item['rule'] = e.target.value.replace('，', ',')}
-                  disabled={item['mode'] === '0'}
+                  disabled={store.isReadOnly || item['mode'] === '0'}
                   addonBefore={(
-                    <Select style={{width: 100}} value={item['mode']} onChange={v => item['mode'] = v}>
+                    <Select disabled={store.isReadOnly} style={{width: 100}} value={item['mode']}
+                            onChange={v => item['mode'] = v}>
                       <Select.Option value="0">关闭</Select.Option>
                       <Select.Option value="1">包含</Select.Option>
                       <Select.Option value="2">排除</Select.Option>
@@ -113,11 +121,13 @@ class Ext2Setup3 extends React.Component {
                 target="_blank" rel="noopener noreferrer"
                 href="https://spug.dev/docs/deploy-config#%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93">使用前请务必阅读官方文档。</a>}>
                 <Input
+                  disabled={store.isReadOnly}
                   spellCheck={false}
                   value={item['src']}
                   placeholder="请输入本地路径（部署spug的容器或主机）"
                   onChange={e => item['src'] = e.target.value}/>
                 <Input
+                  disabled={store.isReadOnly}
                   spellCheck={false}
                   value={item['dst']}
                   placeholder="请输入目标主机路径"
@@ -126,6 +136,7 @@ class Ext2Setup3 extends React.Component {
             ]) : (
               <Form.Item required label="执行内容">
                 <Editor
+                  readOnly={store.isReadOnly}
                   mode="sh"
                   theme="tomorrow"
                   width="100%"
@@ -135,27 +146,31 @@ class Ext2Setup3 extends React.Component {
                   placeholder="请输入要执行的动作"/>
               </Form.Item>
             )}
-            <div className={styles.delAction} onClick={() => host_actions.splice(index, 1)}>
-              <Icon type="minus-circle"/>移除
-            </div>
+            {!store.isReadOnly && (
+              <div className={styles.delAction} onClick={() => host_actions.splice(index, 1)}>
+                <Icon type="minus-circle"/>移除
+              </div>
+            )}
           </div>
         ))}
-        <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <Button type="dashed" block onClick={() => host_actions.push({})}>
-            <Icon type="plus"/>添加目标主机执行动作（在部署目标主机执行）
-          </Button>
-          <Button
-            block
-            type="dashed"
-            disabled={lds.findIndex(host_actions, x => x.type === 'transfer') !== -1}
-            onClick={() => host_actions.push({type: 'transfer', title: '数据传输', mode: '0'})}>
-            <Icon type="plus"/>添加数据传输动作（仅能添加一个）
-          </Button>
-        </Form.Item>
+        {!store.isReadOnly && (
+          <Form.Item wrapperCol={{span: 14, offset: 6}}>
+            <Button disabled={store.isReadOnly} type="dashed" block onClick={() => host_actions.push({})}>
+              <Icon type="plus"/>添加目标主机执行动作（在部署目标主机执行）
+            </Button>
+            <Button
+              block
+              type="dashed"
+              disabled={store.isReadOnly || lds.findIndex(host_actions, x => x.type === 'transfer') !== -1}
+              onClick={() => host_actions.push({type: 'transfer', title: '数据传输', mode: '0'})}>
+              <Icon type="plus"/>添加数据传输动作（仅能添加一个）
+            </Button>
+          </Form.Item>
+        )}
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
           <Button
             type="primary"
-            disabled={[...host_actions, ...server_actions].filter(x => x.title && x.data).length === 0}
+            disabled={store.isReadOnly || [...host_actions, ...server_actions].filter(x => x.title && x.data).length === 0}
             loading={this.state.loading}
             onClick={this.handleSubmit}>提交</Button>
           <Button style={{marginLeft: 20}} onClick={() => store.page -= 1}>上一步</Button>
