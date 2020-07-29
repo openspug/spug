@@ -123,7 +123,7 @@ class ComTable extends React.Component {
       title: '操作',
       render: info => (
         <span>
-          <LinkButton auth="deploy.app.edit"
+          <LinkButton auth="deploy.app.config"
                       onClick={e => store.showExtForm(e, record.id, info, false, true)}>查看</LinkButton>
           <Divider type="vertical"/>
           <LinkButton auth="deploy.app.edit" onClick={e => store.showExtForm(e, record.id, info)}>编辑</LinkButton>
