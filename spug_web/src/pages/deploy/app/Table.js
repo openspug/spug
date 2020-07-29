@@ -18,7 +18,7 @@ import lds from 'lodash';
 class ComTable extends React.Component {
   constructor(props) {
     super(props);
-    this.cloneObj = {};
+    this.cloneObj = null;
   }
 
   componentDidMount() {
@@ -60,11 +60,16 @@ class ComTable extends React.Component {
 
   handleClone = (e, id) => {
     e.stopPropagation();
+    this.cloneObj = null;
     Modal.confirm({
       icon: 'exclamation-circle',
       title: '选择克隆对象',
       content: <CloneConfirm onChange={v => this.cloneObj = v[1]}/>,
       onOk: () => {
+        if (!this.cloneObj) {
+          message.error('请选择目标应用及环境')
+          return Promise.reject()
+        }
         const info = JSON.parse(this.cloneObj);
         store.showExtForm(null, id, info, true)
       },

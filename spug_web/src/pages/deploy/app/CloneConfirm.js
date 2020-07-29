@@ -49,6 +49,7 @@ class CloneConfirm extends React.Component {
         <Form.Item required label="应用及环境" help="克隆配置，将基于选择对象的配置来创建新的发布配置。">
           <Cascader
             options={options}
+            placeholder="请选择目标应用及环境"
             loadData={this.handleLoadData}
             onChange={this.props.onChange}/>
         </Form.Item>
