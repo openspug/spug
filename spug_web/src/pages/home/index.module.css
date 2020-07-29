@@ -1,0 +1,19 @@
+:global(.ant-card-extra) {
+    padding: 12px 0;
+}
+
+.spanButton {
+    cursor: pointer;
+    margin-right: 24px;
+    color: rgba(0, 0, 0, .65);
+}
+
+.spanButtonActive {
+    cursor: pointer;
+    margin-right: 24px;
+    color: #1890ff;
+}
+
+.spanButton:hover {
+    color: #1890ff;
+}
