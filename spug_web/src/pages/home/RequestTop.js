@@ -61,7 +61,7 @@ export default function () {
         <DatePicker.RangePicker value={duration} onChange={handleClick}/>
       </div>
     )}>
-      <Chart height={300} data={res} padding={[10, 0, 30, 35]} forceFit>
+      <Chart height={300} data={res} padding={[10, 0, 30, 35]} scale={{count: {alias: '发布申请数量'}}} forceFit>
         <Axis name="name"/>
         <Axis name="count" title/>
         <Tooltip/>

@@ -27,7 +27,7 @@ export default class AlarmTrend extends React.Component {
     const {res, loading} = this.state;
     return (
       <Card loading={loading} title="报警趋势">
-        <Chart height={300} data={res} padding={[10, 10, 30, 35]} forceFit>
+        <Chart height={300} data={res} padding={[10, 10, 30, 35]} scale={{value: {alias: '报警次数'}}} forceFit>
           <Axis name="date"/>
           <Axis name="value"/>
           <Tooltip
