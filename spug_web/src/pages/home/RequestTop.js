@@ -50,7 +50,7 @@ export default function () {
   }
 
   return (
-    <Card loading={loading} title="发布申请Top5" extra={(
+    <Card loading={loading} title="发布申请Top10" extra={(
       <div style={{display: 'flex', alignItems: 'center'}}>
         <span className={range === 'day' ? styles.spanButtonActive : styles.spanButton}
               onClick={() => handleClick('day')}>今日</span>
