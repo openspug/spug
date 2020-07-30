@@ -7,6 +7,7 @@ import React from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import styles from './index.module.css';
+import store from './store';
 
 @observer
 class OutView extends React.Component {
@@ -23,8 +24,9 @@ class OutView extends React.Component {
 
   render() {
     const outputs = toJS(this.props.outputs);
+    const maxHeight = store.isFullscreen ? 500 : 300;
     return (
-      <div ref={ref => this.el = ref} className={styles.console}>
+      <div ref={ref => this.el = ref} className={styles.console} style={{maxHeight}}>
         <pre style={{color: '#91d5ff'}}>{outputs['system']}</pre>
         <pre>{outputs['info']}</pre>
         <pre style={{color: '#ffa39e'}}>{outputs['error']}</pre>

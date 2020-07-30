@@ -2,8 +2,24 @@
     padding: 0;
 }
 
+.fullscreen {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: block;
+    width: 56px;
+    height: 56px;
+    line-height: 56px;
+    text-align: center;
+    cursor: pointer;
+    color: rgba(0, 0, 0, .45);
+    margin-right: 56px;
+}
+.fullscreen:hover {
+    color: #000;
+}
+
 .console {
-    max-height: 300px;
     padding: 10px 15px;
     overflow: scroll;
 }

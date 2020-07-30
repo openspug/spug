@@ -46,7 +46,8 @@ class ExecConsole extends React.Component {
   }
 
   componentWillUnmount() {
-    this.socket.close()
+    this.socket.close();
+    store.isFullscreen = false;
   }
 
   genExtra = (outputs) => {
@@ -72,8 +73,13 @@ class ExecConsole extends React.Component {
     return (
       <Modal
         visible
-        width={1000}
-        title="执行控制台"
+        width={store.isFullscreen ? '100%' : 1000}
+        title={[
+          <span key="1">执行控制台</span>,
+          <div key="2" className={styles.fullscreen} onClick={() => store.isFullscreen = !store.isFullscreen}>
+            <Icon type={store.isFullscreen ? 'fullscreen-exit' : 'fullscreen'}/>
+          </div>
+        ]}
         footer={null}
         onCancel={this.props.onCancel}
         onOk={this.handleSubmit}
