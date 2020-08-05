@@ -59,6 +59,7 @@ def deploy_dispatch(request, req, token):
 def _ext1_deploy(req, helper, env):
     extend = req.deploy.extend_obj
     extras = json.loads(req.extra)
+    env.update(SPUG_DST_DIR=extend.dst_dir)
     if extras[0] == 'branch':
         tree_ish = extras[2]
         env.update(SPUG_GIT_BRANCH=extras[1], SPUG_GIT_COMMIT_ID=extras[2])
