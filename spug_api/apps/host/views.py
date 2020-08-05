@@ -98,7 +98,7 @@ def post_import(request):
     password = request.POST.get('password')
     file = request.FILES['file']
     ws = load_workbook(file, read_only=True)['Sheet1']
-    summary = {'invalid': [], 'skip': [], 'fail': [], 'network': [], 'repeat': [], 'success': []}
+    summary = {'invalid': [], 'skip': [], 'fail': [], 'network': [], 'repeat': [], 'success': [], 'error': []}
     for i, row in enumerate(ws.rows):
         if i == 0:  # 第1行是表头 略过
             continue
@@ -127,6 +127,9 @@ def post_import(request):
             continue
         except socket.error:
             summary['network'].append(i)
+            continue
+        except Exception:
+            summary['error'].append(i)
             continue
         if Host.objects.filter(name=data.name, deleted_by_id__isnull=True).exists():
             summary['repeat'].append(i)
