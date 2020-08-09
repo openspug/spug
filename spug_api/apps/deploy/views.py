@@ -69,7 +69,7 @@ class RequestView(View):
             if deploy.extend == '2':
                 if form.extra[0]:
                     form.extra[0] = form.extra[0].replace("'", '')
-                if DeployExtend2.objects.filter(host_actions__contains='"src_mode": "1"').exists():
+                if DeployExtend2.objects.filter(deploy=deploy, host_actions__contains='"src_mode": "1"').exists():
                     if len(form.extra) < 2:
                         return json_response(error='该应用的发布配置中使用了数据传输动作且设置为发布时上传，请上传要传输的数据')
                     form.version = form.extra[1].get('path')
