@@ -42,6 +42,8 @@ def get_configs(request):
     fmt = request.GET.get('format', 'kv')
     if fmt == 'kv':
         return _kv_response(data)
+    elif fmt == 'env':
+        return _env_response(data)
     elif fmt == 'json':
         return _json_response(data)
     else:
@@ -52,6 +54,13 @@ def _kv_response(data):
     output = ''
     for k, v in sorted(data.items()):
         output += f'{k} = {v}\r\n'
+    return HttpResponse(output, content_type='text/plain; charset=utf-8')
+
+
+def _env_response(data):
+    output = ''
+    for k, v in sorted(data.items()):
+        output += f'{k}={v}\n'
     return HttpResponse(output, content_type='text/plain; charset=utf-8')
 
 
