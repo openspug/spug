@@ -136,7 +136,9 @@ def _ext2_deploy(req, helper, env):
     tmp_transfer_file = None
     for action in host_actions:
         if action.get('type') == 'transfer':
-            helper.send_info('local', f'{human_time()} 检测到数据传输动作，执行打包...   ')
+            if action.get('src_mode') == '1':
+                break
+            helper.send_info('local', f'{human_time()} 检测到来源为本地路径的数据传输动作，执行打包...   ')
             action['src'] = action['src'].rstrip('/ ')
             action['dst'] = action['dst'].rstrip('/ ')
             if not action['src'] or not action['dst']:
@@ -242,15 +244,23 @@ def _deploy_ext2_host(helper, h_id, actions, env):
     for index, action in enumerate(actions):
         helper.send_step(h_id, 2 + index, f'{human_time()} {action["title"]}...\r\n')
         if action.get('type') == 'transfer':
-            sp_dir, sd_dst = os.path.split(action['src'])
-            tar_gz_file = f'{env.SPUG_VERSION}.tar.gz'
-            try:
-                ssh.put_file(os.path.join(sp_dir, tar_gz_file), f'/tmp/{tar_gz_file}')
-            except Exception as e:
-                helper.send_error(host.id, f'exception: {e}')
+            if action.get('src_mode') == '1':
+                try:
+                    ssh.put_file(os.path.join(REPOS_DIR, env.SPUG_DEPLOY_ID, env.SPUG_VERSION), action['dst'])
+                except Exception as e:
+                    helper.send_error(host.id, f'exception: {e}')
+                helper.send_info(host.id, 'transfer completed\r\n')
+                continue
+            else:
+                sp_dir, sd_dst = os.path.split(action['src'])
+                tar_gz_file = f'{env.SPUG_VERSION}.tar.gz'
+                try:
+                    ssh.put_file(os.path.join(sp_dir, tar_gz_file), f'/tmp/{tar_gz_file}')
+                except Exception as e:
+                    helper.send_error(host.id, f'exception: {e}')
 
-            command = f'cd /tmp && tar xf {tar_gz_file} && rm -f {tar_gz_file} '
-            command += f'&& rm -rf {action["dst"]} && mv /tmp/{sd_dst} {action["dst"]} && echo "transfer completed"'
+                command = f'cd /tmp && tar xf {tar_gz_file} && rm -f {tar_gz_file} '
+                command += f'&& rm -rf {action["dst"]} && mv /tmp/{sd_dst} {action["dst"]} && echo "transfer completed"'
         else:
             command = f'cd /tmp && {action["data"]}'
         helper.remote(host.id, ssh, command, env)

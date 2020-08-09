@@ -33,7 +33,7 @@ class Ext2Setup3 extends React.Component {
     const info = store.deploy;
     info['app_id'] = store.app_id;
     info['extend'] = '2';
-    info['host_actions'] = info['host_actions'].filter(x => (x.title && x.data) || (x.title && x.src && x.dst));
+    info['host_actions'] = info['host_actions'].filter(x => (x.title && x.data) || (x.title && (x.src || x.src_mode === '1') && x.dst));
     info['server_actions'] = info['server_actions'].filter(x => x.title && x.data);
     http.post('/api/app/deploy/', info)
       .then(res => {
@@ -101,31 +101,42 @@ class Ext2Setup3 extends React.Component {
                      placeholder="请输入"/>
             </Form.Item>
             {item['type'] === 'transfer' ? ([
-              <Form.Item key={0} label="过滤规则" help={this.helpMap[item['mode']]}>
+              <Form.Item key={0} required label="数据来源">
                 <Input
                   spellCheck={false}
-                  placeholder="请输入逗号分割的过滤规则"
-                  value={item['rule']}
-                  onChange={e => item['rule'] = e.target.value.replace('，', ',')}
-                  disabled={store.isReadOnly || item['mode'] === '0'}
+                  disabled={store.isReadOnly || item['src_mode'] === '1'}
+                  placeholder="请输入本地（部署spug的容器或主机）路径"
+                  value={item['src']}
+                  onChange={e => item['src'] = e.target.value}
                   addonBefore={(
-                    <Select disabled={store.isReadOnly} style={{width: 100}} value={item['mode']}
-                            onChange={v => item['mode'] = v}>
-                      <Select.Option value="0">关闭</Select.Option>
-                      <Select.Option value="1">包含</Select.Option>
-                      <Select.Option value="2">排除</Select.Option>
+                    <Select disabled={store.isReadOnly} style={{width: 120}} value={item['src_mode'] || '0'}
+                            onChange={v => item['src_mode'] = v}>
+                      <Select.Option value="0">本地路径</Select.Option>
+                      <Select.Option value="1">发布时上传</Select.Option>
                     </Select>
                   )}/>
               </Form.Item>,
-              <Form.Item key={1} required label="传输路径" extra={<a
+              item['src_mode'] === '0' ? (
+                <Form.Item key={1} label="过滤规则" help={this.helpMap[item['mode']]}>
+                  <Input
+                    spellCheck={false}
+                    placeholder="请输入逗号分割的过滤规则"
+                    value={item['rule']}
+                    onChange={e => item['rule'] = e.target.value.replace('，', ',')}
+                    disabled={store.isReadOnly || item['mode'] === '0'}
+                    addonBefore={(
+                      <Select disabled={store.isReadOnly} style={{width: 120}} value={item['mode']}
+                              onChange={v => item['mode'] = v}>
+                        <Select.Option value="0">关闭</Select.Option>
+                        <Select.Option value="1">包含</Select.Option>
+                        <Select.Option value="2">排除</Select.Option>
+                      </Select>
+                    )}/>
+                </Form.Item>
+              ) : null,
+              <Form.Item key={2} required label="目标路径" extra={<a
                 target="_blank" rel="noopener noreferrer"
                 href="https://spug.dev/docs/deploy-config#%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93">使用前请务必阅读官方文档。</a>}>
-                <Input
-                  disabled={store.isReadOnly}
-                  spellCheck={false}
-                  value={item['src']}
-                  placeholder="请输入本地路径（部署spug的容器或主机）"
-                  onChange={e => item['src'] = e.target.value}/>
                 <Input
                   disabled={store.isReadOnly}
                   spellCheck={false}
@@ -162,7 +173,7 @@ class Ext2Setup3 extends React.Component {
               block
               type="dashed"
               disabled={store.isReadOnly || lds.findIndex(host_actions, x => x.type === 'transfer') !== -1}
-              onClick={() => host_actions.push({type: 'transfer', title: '数据传输', mode: '0'})}>
+              onClick={() => host_actions.push({type: 'transfer', title: '数据传输', mode: '0', src_mode: '0'})}>
               <Icon type="plus"/>添加数据传输动作（仅能添加一个）
             </Button>
           </Form.Item>
