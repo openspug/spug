@@ -67,10 +67,13 @@ class RequestView(View):
             if form.extra[0] == 'branch' and not form.extra[2]:
                 return json_response(error='请选择要发布的分支及Commit ID')
             if deploy.extend == '2':
+                if form.extra[0]:
+                    form.extra[0] = form.extra[0].replace("'", '')
                 if DeployExtend2.objects.filter(host_actions__contains='"src_mode": "1"').exists():
                     if len(form.extra) < 2:
                         return json_response(error='该应用的发布配置中使用了数据传输动作且设置为发布时上传，请上传要传输的数据')
                     form.version = form.extra[1].get('path')
+            form.name = form.name.replace("'", '')
             form.status = '0' if deploy.is_audit else '1'
             form.extra = json.dumps(form.extra)
             form.host_ids = json.dumps(form.host_ids)

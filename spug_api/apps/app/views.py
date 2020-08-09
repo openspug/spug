@@ -29,6 +29,7 @@ class AppView(View):
             Argument('desc', required=False)
         ).parse(request.body)
         if error is None:
+            form.name = form.name.replace("'", '')
             app = App.objects.filter(key=form.key).first()
             if app and app.id != form.id:
                 return json_response(error=f'唯一标识符 {form.key} 已存在，请更改后重试')

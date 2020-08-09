@@ -25,6 +25,7 @@ class EnvironmentView(View):
             Argument('desc', required=False)
         ).parse(request.body)
         if error is None:
+            form.key = form.key.replace("'", '')
             env = Environment.objects.filter(key=form.key).first()
             if env and env.id != form.id:
                 return json_response(error=f'唯一标识符 {form.key} 已存在，请更改后重试')
