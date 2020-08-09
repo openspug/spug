@@ -116,7 +116,7 @@ class Ext2Setup3 extends React.Component {
                     </Select>
                   )}/>
               </Form.Item>,
-              item['src_mode'] === '0' ? (
+              [undefined, '0'].includes(item['src_mode']) ? (
                 <Form.Item key={1} label="过滤规则" help={this.helpMap[item['mode']]}>
                   <Input
                     spellCheck={false}
