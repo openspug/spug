@@ -8,6 +8,7 @@ import { observer } from 'mobx-react';
 import { Modal, Table, Row, Col, Checkbox, Form, Button, Alert } from 'antd';
 import http from 'libs/http';
 import envStore from '../environment/store';
+import styles from './index.module.css';
 import store from './store';
 
 @observer
@@ -73,9 +74,9 @@ class Record extends React.Component {
                 onClick={() => this.handleEnvCheck(item)}
                 style={{cursor: 'pointer', borderTop: index ? '1px solid #e8e8e8' : ''}}>
                 <Col span={2}><Checkbox checked={envs.map(x => x.id).includes(item.id)}/></Col>
-                <Col span={3}>{item.key}</Col>
-                <Col span={4}>{item.name}</Col>
-                <Col span={15}>{item.desc}</Col>
+                <Col span={4} className={styles.ellipsis}>{item.key}</Col>
+                <Col span={9} className={styles.ellipsis}>{item.name}</Col>
+                <Col span={9} className={styles.ellipsis}>{item.desc}</Col>
               </Row>
             ))}
           </Form.Item>

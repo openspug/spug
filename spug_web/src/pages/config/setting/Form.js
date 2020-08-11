@@ -9,6 +9,7 @@ import {Modal, Form, Input, Checkbox, Switch, Row, Col, message} from 'antd';
 import http from 'libs/http';
 import store from './store';
 import envStore from '../environment/store'
+import styles from './index.module.css';
 
 @observer
 class ComForm extends React.Component {
@@ -100,9 +101,9 @@ class ComForm extends React.Component {
                 onClick={() => this.handleEnvCheck(item.id)}
                 style={{cursor: 'pointer', borderTop: index ? '1px solid #e8e8e8' : ''}}>
                 <Col span={2}><Checkbox disabled={this.isModify} checked={envs.includes(item.id)}/></Col>
-                <Col span={3}>{item.key}</Col>
-                <Col span={4}>{item.name}</Col>
-                <Col span={15}>{item.desc}</Col>
+                <Col span={4} className={styles.ellipsis}>{item.key}</Col>
+                <Col span={9} className={styles.ellipsis}>{item.name}</Col>
+                <Col span={9} className={styles.ellipsis}>{item.desc}</Col>
               </Row>
             ))}
           </Form.Item>

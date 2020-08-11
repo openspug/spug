@@ -23,3 +23,9 @@
 .form {
     max-width: 320px;
 }
+
+.ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
