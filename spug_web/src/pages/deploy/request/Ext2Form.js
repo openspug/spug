@@ -70,8 +70,6 @@ class Ext2Form extends React.Component {
   handleUploadChange = (v) => {
     if (v.fileList.length === 0) {
       this.setState({fileList: []})
-    } else {
-      this.setState({fileList: [v.file]})
     }
   };
 
@@ -81,7 +79,10 @@ class Ext2Form extends React.Component {
     formData.append('file', file);
     formData.append('deploy_id', store.record.deploy_id);
     http.post('/api/deploy/request/upload/', formData)
-      .then(res => file.path = res)
+      .then(res => {
+        file.path = res;
+        this.setState({fileList: [file]})
+      })
       .finally(() => this.setState({uploading: false}))
     return false
   };
@@ -113,7 +114,7 @@ class Ext2Form extends React.Component {
           <Form.Item label="上传数据" help="通过数据传输动作来使用上传的文件。">
             <Upload name="file" fileList={fileList} headers={{'X-Token': this.token}} beforeUpload={this.handleUpload}
                     data={{deploy_id: info.deploy_id}} onChange={this.handleUploadChange}>
-              {fileList.length === 0 ? <Button loading={uploading}><Icon type="upload"/> 点击上传</Button> : null}
+              {fileList.length === 0 ? <Button loading={uploading} icon="upload">点击上传</Button> : null}
             </Upload>
           </Form.Item>
           <Form.Item required label="发布目标主机" help="通过点击主机名称自由选择本次发布的主机。">
