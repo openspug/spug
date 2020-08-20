@@ -8,6 +8,7 @@ import { observer } from 'mobx-react';
 import { Input, Button, Select } from 'antd';
 import { SearchForm, AuthDiv, AuthCard } from 'components';
 import ComTable from './Table';
+import Tags from './Tags';
 import store from './store';
 
 export default observer(function () {
@@ -29,6 +30,11 @@ export default observer(function () {
         </SearchForm.Item>
         <SearchForm.Item span={6}>
           <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
+        </SearchForm.Item>
+      </SearchForm>
+      <SearchForm>
+        <SearchForm.Item span={24}>
+          <Tags/>
         </SearchForm.Item>
       </SearchForm>
       <AuthDiv auth="host.host.add" style={{marginBottom: 16}}>

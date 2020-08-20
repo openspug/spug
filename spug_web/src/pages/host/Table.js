@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, message } from 'antd';
+import { Table, Divider, Modal, Tag, message } from 'antd';
 import { LinkButton } from 'components';
 import ComForm from './Form';
 import ComImport from './Import';
@@ -26,6 +26,20 @@ class ComTable extends React.Component {
   }, {
     title: '类别',
     dataIndex: 'zone',
+  }, {
+    title: '标签',
+    dataIndex: 'tags',
+    render: tags => (
+      <>
+        {tags.map(tag => (
+              <Tag key={tag}>
+                {tag}
+              </Tag>
+            )
+          )
+        }
+      </>
+    )
   }, {
     title: '主机名称',
     dataIndex: 'name',
@@ -83,6 +97,9 @@ class ComTable extends React.Component {
     }
     if (store.f_host) {
       data = data.filter(item => item['hostname'].toLowerCase().includes(store.f_host.toLowerCase()))
+    }
+    if (store.selectedTags.length > 0) {
+      data = data.filter(item => store.selectedTags.every(tag => item['tags'].includes(tag)))
     }
     return (
       <React.Fragment>
