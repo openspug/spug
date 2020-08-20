@@ -8,9 +8,21 @@ from apps.setting.utils import AppSetting
 from libs.ssh import SSH
 
 
+class Tag(models.Model, ModelMixin):
+    name = models.CharField(max_length=30)
+
+    def __str__(self):
+        return f'<Tag: {self.name}>'
+
+    class Meta:
+        db_table = 'tags'
+        ordering = ['name']
+
+
 class Host(models.Model, ModelMixin):
     name = models.CharField(max_length=50)
     zone = models.CharField(max_length=50)
+    tags = models.ManyToManyField(Tag)
     hostname = models.CharField(max_length=50)
     port = models.IntegerField()
     username = models.CharField(max_length=50)
@@ -29,6 +41,22 @@ class Host(models.Model, ModelMixin):
     def get_ssh(self, pkey=None):
         pkey = pkey or self.private_key
         return SSH(self.hostname, self.port, self.username, pkey)
+
+    def to_dict(self):
+        res = {f.attname: getattr(self, f.attname) for f in self._meta.fields}
+        res['tags'] = []
+        for tag in self.tags.all():
+            res['tags'].append(tag.name)
+        return res
+
+    def update_tags(self, tags):
+        for tag in self.tags.all():
+            if tag.name not in tags:
+                self.tags.remove(tag)
+        for tag in tags:
+            t, created = Tag.objects.get_or_create(name=tag)
+            self.tags.add(t)
+        self.save()
 
     def __repr__(self):
         return '<Host %r>' % self.name

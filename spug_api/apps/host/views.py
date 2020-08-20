@@ -6,7 +6,7 @@ from django.db.models import F
 from django.http.response import HttpResponseBadRequest
 from libs import json_response, JsonParser, Argument
 from apps.setting.utils import AppSetting
-from apps.host.models import Host
+from apps.host.models import Host, Tag
 from apps.app.models import Deploy
 from apps.schedule.models import Task
 from apps.monitor.models import Detection
@@ -27,13 +27,15 @@ class HostView(View):
             return json_response(Host.objects.get(pk=host_id))
         hosts = Host.objects.filter(deleted_by_id__isnull=True)
         zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
+        tags = [tag.name for tag in Tag.objects.all() if tag.host_set.filter(deleted_by_id__isnull=True).count() > 0]
         perms = [x.id for x in hosts] if request.user.is_supper else request.user.host_perms
-        return json_response({'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
+        return json_response({'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms, 'tags': tags})
 
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
             Argument('zone', help='请输入主机类型'),
+            Argument('tags', type=list, required=False),
             Argument('name', help='请输主机名称'),
             Argument('username', handler=str.strip, help='请输入登录用户名'),
             Argument('hostname', handler=str.strip, help='请输入主机名或IP'),
@@ -48,11 +50,17 @@ class HostView(View):
                 return json_response('auth fail')
 
             if form.id:
-                Host.objects.filter(pk=form.pop('id')).update(**form)
+                pk = form.pop('id')
+                Host.objects.filter(pk=pk).update(**{k: v for k, v in form.items() if k != 'tags'})
+                if 'tags' in form:
+                    host = Host.objects.get(pk=pk)
+                    host.update_tags(form.tags)
             elif Host.objects.filter(name=form.name, deleted_by_id__isnull=True).exists():
                 return json_response(error=f'已存在的主机名称【{form.name}】')
             else:
-                host = Host.objects.create(created_by=request.user, **form)
+                host = Host.objects.create(created_by=request.user, **{k: v for k, v in form.items() if k != 'tags'})
+                if 'tags' in form:
+                    host.update_tags(form.tags)
                 if request.user.role:
                     request.user.role.add_host_perm(host.id)
         return json_response(error=error)

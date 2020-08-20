@@ -5,7 +5,8 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, Select, Col, Button, Upload, message } from 'antd';
+import { Modal, Form, Input, Select, Col, Button, Upload, Tag, Tooltip, message } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import http from 'libs/http';
 import store from './store';
 
@@ -21,6 +22,11 @@ class ComForm extends React.Component {
       addZone: null,
       fileList: [],
       editZone: store.record.zone,
+      tags: store.record.tags || [],
+      inputVisible: false,
+      inputValue: '',
+      editInputIndex: -1,
+      editInputValue: '',
     }
   }
 
@@ -32,12 +38,64 @@ class ComForm extends React.Component {
     }
   }
 
+  handleCloseTag = removedTag => {
+    const tags = this.state.tags.filter(tag => tag !== removedTag);
+    this.setState({ tags });
+  };
+
+  showInputTag = () => {
+    this.setState({ inputVisible: true }, () => this.input.focus());
+  };
+
+  handleInputTagChange = e => {
+    this.setState({ inputValue: e.target.value });
+  };
+
+  handleInputTagConfirm = () => {
+    const { inputValue } = this.state;
+    let { tags } = this.state;
+    if (inputValue && tags.indexOf(inputValue) === -1) {
+      tags = [...tags, inputValue];
+    }
+    this.setState({
+      tags,
+      inputVisible: false,
+      inputValue: '',
+    });
+  };
+
+  handleEditInputChange = e => {
+    this.setState({ editInputValue: e.target.value });
+  };
+
+  handleEditInputConfirm = () => {
+    this.setState(({ tags, editInputIndex, editInputValue }) => {
+      const newTags = [...tags];
+      newTags[editInputIndex] = editInputValue;
+
+      return {
+        tags: newTags,
+        editInputIndex: -1,
+        editInputValue: '',
+      };
+    });
+  };
+
+  saveInputRef = input => {
+    this.input = input;
+  };
+
+  saveEditInputRef = input => {
+    this.editInput = input;
+  };
+
   handleSubmit = () => {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
     formData['id'] = store.record.id;
     const file = this.state.fileList[0];
     if (file && file.data) formData['pkey'] = file.data;
+    formData['tags'] = this.state.tags;
     http.post('/api/host/', formData)
       .then(res => {
         if (res === 'auth fail') {
@@ -63,6 +121,7 @@ class ComForm extends React.Component {
   handleConfirm = (formData) => {
     if (this.state.password) {
       formData['password'] = this.state.password;
+      formData['tags'] = this.state.tags;
       return http.post('/api/host/', formData).then(res => {
         message.success('验证成功');
         store.formVisible = false;
@@ -149,6 +208,7 @@ class ComForm extends React.Component {
     const info = store.record;
     const {fileList, loading, uploading} = this.state;
     const {getFieldDecorator} = this.props.form;
+    const { tags, inputVisible, inputValue, editInputIndex, editInputValue } = this.state;
     return (
       <Modal
         visible
@@ -176,6 +236,72 @@ class ComForm extends React.Component {
             <Col span={4} offset={1}>
               <Button type="link" onClick={this.handleEditZone}>编辑类别</Button>
             </Col>
+          </Form.Item>
+          <Form.Item label="标签">
+            {tags.map((tag, index) => {
+              if (editInputIndex === index) {
+                return (
+                  <Input
+                    ref={this.saveEditInputRef}
+                    key={tag}
+                    size="small"
+                    className="tag-input"
+                    value={editInputValue}
+                    onChange={this.handleEditInputChange}
+                    onBlur={this.handleEditInputConfirm}
+                    onPressEnter={this.handleEditInputConfirm}
+                  />
+                );
+              }
+
+              const isLongTag = tag.length > 20;
+
+              const tagElem = (
+                <Tag
+                  className="edit-tag"
+                  key={tag}
+                  closable={/*index !== 0*/true}
+                  onClose={() => this.handleCloseTag(tag)}
+                >
+                  <span
+                    onDoubleClick={e => {
+                      if (index !== 0) {
+                        this.setState({ editInputIndex: index, editInputValue: tag }, () => {
+                          this.editInput.focus();
+                        });
+                        e.preventDefault();
+                      }
+                    }}
+                  >
+                    {isLongTag ? `${tag.slice(0, 20)}...` : tag}
+                  </span>
+                </Tag>
+              );
+              return isLongTag ? (
+                <Tooltip title={tag} key={tag}>
+                  {tagElem}
+                </Tooltip>
+              ) : (
+                tagElem
+              );
+            })}
+            {inputVisible && (
+              <Input
+                ref={this.saveInputRef}
+                type="text"
+                size="small"
+                className="tag-input"
+                value={inputValue}
+                onChange={this.handleInputTagChange}
+                onBlur={this.handleInputTagConfirm}
+                onPressEnter={this.handleInputTagConfirm}
+              />
+            )}
+            {!inputVisible && (
+              <Tag className="site-tag-plus" onClick={this.showInputTag}>
+                <PlusOutlined /> New Tag
+              </Tag>
+            )}
           </Form.Item>
           <Form.Item required label="主机名称">
             {getFieldDecorator('name', {initialValue: info['name']})(
