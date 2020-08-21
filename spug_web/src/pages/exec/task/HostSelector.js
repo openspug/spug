@@ -5,8 +5,9 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Table, Input, Button, Select, Checkbox } from 'antd';
+import { Modal, Table, Input, Button, Select, Checkbox, Tag } from 'antd';
 import { SearchForm } from 'components';
+import Tags from '../../host/Tags'
 import store from '../../host/store';
 
 @observer
@@ -44,6 +45,9 @@ class HostSelector extends React.Component {
       if (store.f_zone) {
         data = data.filter(item => item['zone'].toLowerCase().includes(store.f_zone.toLowerCase()))
       }
+      if (store.selectedTags.length > 0) {
+        data = data.filter(item => store.selectedTags.every(tag => item['tags'].includes(tag)))
+      }
       this.setState({selectedRows: data})
     } else {
       this.setState({selectedRows: []})
@@ -58,6 +62,20 @@ class HostSelector extends React.Component {
   columns = [{
     title: '类别',
     dataIndex: 'zone',
+  }, {
+    title: '标签',
+    dataIndex: 'tags',
+    render: tags => (
+      <>
+        {tags.map(tag => (
+              <Tag key={tag}>
+                {tag}
+              </Tag>
+            )
+          )
+        }
+      </>
+    )
   }, {
     title: '主机名称',
     dataIndex: 'name',
@@ -83,6 +101,9 @@ class HostSelector extends React.Component {
     if (store.f_zone) {
       data = data.filter(item => item['zone'].toLowerCase().includes(store.f_zone.toLowerCase()))
     }
+    if (store.selectedTags.length > 0) {
+      data = data.filter(item => store.selectedTags.every(tag => item['tags'].includes(tag)))
+    }
     return (
       <Modal
         visible
@@ -107,6 +128,11 @@ class HostSelector extends React.Component {
           </SearchForm.Item>
           <SearchForm.Item span={4}>
             <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
+          </SearchForm.Item>
+        </SearchForm>
+        <SearchForm>
+          <SearchForm.Item span={24}>
+            <Tags/>
           </SearchForm.Item>
         </SearchForm>
         <Table
