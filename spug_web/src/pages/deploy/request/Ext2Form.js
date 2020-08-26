@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, Tag, Upload, message, Button, Icon } from 'antd';
+import { Modal, Form, Input, Tag, Upload, message, Button } from 'antd';
 import hostStore from 'pages/host/store';
 import http from 'libs/http';
 import store from './store';

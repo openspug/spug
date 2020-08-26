@@ -8,7 +8,7 @@ import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import zhCN from 'antd/es/locale/zh_CN';
-import history from 'libs/history';
+import { history, updatePermissions } from 'libs';
 import './index.css';
 import App from './App';
 import moment from 'moment';
@@ -16,6 +16,7 @@ import 'moment/locale/zh-cn';
 import * as serviceWorker from './serviceWorker';
 
 moment.locale('zh-cn');
+updatePermissions()
 
 ReactDOM.render(
   <Router history={history}>

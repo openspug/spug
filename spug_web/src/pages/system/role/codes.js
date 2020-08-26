@@ -26,6 +26,12 @@ export default [{
       {key: 'del', label: '删除主机'},
       {key: 'console', label: 'Console'},
     ]
+  }, {
+    key: 'console',
+    label: 'Console',
+    perms: [
+      {key: 'manager', label: '文件管理器'},
+    ]
   }]
 }, {
   key: 'exec',
