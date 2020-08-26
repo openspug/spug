@@ -3,14 +3,29 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
 import { Switch, Col, Form, Input, Select, Button } from "antd";
 import envStore from 'pages/config/environment/store';
 import store from './store';
 
-export default observer(function Ext2Setup1() {
+export default observer(function Ext1Setup1() {
+  const [envs, setEnvs] = useState([]);
+
+  function updateEnvs() {
+    const ids = store.records[store.app_id]['deploys'].map(x => x.env_id);
+    setEnvs(ids.filter(x => x !== store.deploy.env_id))
+  }
+
+  useEffect(() => {
+    if (store.records[store.app_id]['deploys'] === undefined) {
+      store.loadDeploys(store.app_id).then(updateEnvs)
+    } else {
+      updateEnvs()
+    }
+  }, [])
+
   const info = store.deploy;
   return (
     <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
@@ -18,7 +33,7 @@ export default observer(function Ext2Setup1() {
         <Col span={16}>
           <Select disabled={store.isReadOnly} value={info.env_id} onChange={v => info.env_id = v} placeholder="请选择发布环境">
             {envStore.records.map(item => (
-              <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+              <Select.Option disabled={envs.includes(item.id)} value={item.id} key={item.id}>{item.name}</Select.Option>
             ))}
           </Select>
         </Col>
@@ -45,7 +60,8 @@ export default observer(function Ext2Setup1() {
       </span>}>
         <Input addonBefore={(
           <Select disabled={store.isReadOnly}
-            value={info['rst_notify']['mode']} style={{width: 100}} onChange={v => info['rst_notify']['mode'] = v}>
+                  value={info['rst_notify']['mode']} style={{width: 100}}
+                  onChange={v => info['rst_notify']['mode'] = v}>
             <Select.Option value="0">关闭</Select.Option>
             <Select.Option value="1">钉钉</Select.Option>
             <Select.Option value="3">企业微信</Select.Option>

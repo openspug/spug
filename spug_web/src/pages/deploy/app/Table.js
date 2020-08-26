@@ -71,6 +71,7 @@ class ComTable extends React.Component {
           return Promise.reject()
         }
         const info = JSON.parse(this.cloneObj);
+        info.env_id = undefined;
         store.showExtForm(null, id, info, true)
       },
     })
