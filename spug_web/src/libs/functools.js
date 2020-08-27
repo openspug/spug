@@ -11,8 +11,8 @@ let Permission = {
 
 export function updatePermissions() {
   Permission.isSuper = localStorage.getItem('is_supper') === 'true';
-  Permission.hostPerms = JSON.parse(localStorage.getItem('host_perms') || []);
-  Permission.permissions = JSON.parse(localStorage.getItem('permissions') || []);
+  Permission.hostPerms = JSON.parse(localStorage.getItem('host_perms') || '[]');
+  Permission.permissions = JSON.parse(localStorage.getItem('permissions') || '[]');
 }
 
 // 前端页面的权限判断(仅作为前端功能展示的控制，具体权限控制应在后端实现)
