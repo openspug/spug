@@ -1,9 +1,7 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
-from libs.ssh import SSH
 from apps.host.models import Host
-from apps.setting.utils import AppSetting
 from socket import socket
 import requests
 import logging
@@ -29,9 +27,9 @@ def port_check(addr, port):
         return False, f'异常信息：{e}'
 
 
-def host_executor(host, pkey, command):
+def host_executor(host, command):
     try:
-        cli = SSH(host.hostname, host.port, host.username, pkey=pkey)
+        cli = host.get_ssh()
         exit_code, out = cli.exec_command(command)
         if exit_code == 0:
             return True, out or '检测状态正常'
@@ -52,6 +50,5 @@ def dispatch(tp, addr, extra):
         command = extra
     else:
         raise TypeError(f'invalid monitor type: {tp!r}')
-    pkey = AppSetting.get('private_key')
     host = Host.objects.filter(pk=addr).first()
-    return host_executor(host, pkey, command)
+    return host_executor(host, command)

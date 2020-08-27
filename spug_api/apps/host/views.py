@@ -3,6 +3,7 @@
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
 from django.db.models import F
+from django.http.response import HttpResponseBadRequest
 from libs import json_response, JsonParser, Argument
 from apps.setting.utils import AppSetting
 from apps.host.models import Host
@@ -37,11 +38,13 @@ class HostView(View):
             Argument('username', handler=str.strip, help='请输入登录用户名'),
             Argument('hostname', handler=str.strip, help='请输入主机名或IP'),
             Argument('port', type=int, help='请输入SSH端口'),
+            Argument('pkey', required=False),
             Argument('desc', required=False),
             Argument('password', required=False),
         ).parse(request.body)
         if error is None:
-            if valid_ssh(form.hostname, form.port, form.username, form.pop('password')) is False:
+            if valid_ssh(form.hostname, form.port, form.username, password=form.pop('password'),
+                         pkey=form.pkey) is False:
                 return json_response('auth fail')
 
             if form.id:
@@ -119,7 +122,8 @@ def post_import(request):
             summary['skip'].append(i)
             continue
         try:
-            if valid_ssh(data.hostname, data.port, data.username, data.pop('password') or password, False) is False:
+            if valid_ssh(data.hostname, data.port, data.username, data.pop('password') or password, None,
+                         False) is False:
                 summary['fail'].append(i)
                 continue
         except AuthenticationException:
@@ -141,7 +145,7 @@ def post_import(request):
     return json_response(summary)
 
 
-def valid_ssh(hostname, port, username, password, with_expect=True):
+def valid_ssh(hostname, port, username, password=None, pkey=None, with_expect=True):
     try:
         private_key = AppSetting.get('private_key')
         public_key = AppSetting.get('public_key')
@@ -149,11 +153,13 @@ def valid_ssh(hostname, port, username, password, with_expect=True):
         private_key, public_key = SSH.generate_key()
         AppSetting.set('private_key', private_key, 'ssh private key')
         AppSetting.set('public_key', public_key, 'ssh public key')
-    cli = SSH(hostname, port, username, private_key)
     if password:
         _cli = SSH(hostname, port, username, password=str(password))
         _cli.add_public_key(public_key)
+    if pkey:
+        private_key = pkey
     try:
+        cli = SSH(hostname, port, username, private_key)
         cli.ping()
     except BadAuthenticationType:
         if with_expect:
@@ -164,3 +170,12 @@ def valid_ssh(hostname, port, username, password, with_expect=True):
             raise ValueError('密钥认证失败，请参考官方文档，错误代码：E02')
         return False
     return True
+
+
+def post_parse(request):
+    file = request.FILES['file']
+    if file:
+        data = file.read()
+        return json_response(data.decode())
+    else:
+        return HttpResponseBadRequest()

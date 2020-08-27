@@ -3,9 +3,8 @@
 # Released under the AGPL-3.0 License.
 from queue import Queue
 from threading import Thread
-from libs.ssh import SSH, AuthenticationException
+from libs.ssh import AuthenticationException
 from apps.host.models import Host
-from apps.setting.utils import AppSetting
 from django.db import close_old_connections
 import subprocess
 import socket
@@ -22,10 +21,10 @@ def local_executor(q, command):
         q.put(('local', exit_code, round(time.time() - now, 3), out.decode()))
 
 
-def host_executor(q, host, pkey, command):
+def host_executor(q, host, command):
     exit_code, out, now = -1, None, time.time()
     try:
-        cli = SSH(host.hostname, host.port, host.username, pkey=pkey)
+        cli = host.get_ssh()
         exit_code, out = cli.exec_command(command)
         out = out if out else None
     except AuthenticationException:
@@ -39,7 +38,7 @@ def host_executor(q, host, pkey, command):
 def dispatch(command, targets, in_view=False):
     if not in_view:
         close_old_connections()
-    threads, pkey, q = [], AppSetting.get('private_key'), Queue()
+    threads, q = [], Queue()
     for t in targets:
         if t == 'local':
             threads.append(Thread(target=local_executor, args=(q, command)))
@@ -47,7 +46,7 @@ def dispatch(command, targets, in_view=False):
             host = Host.objects.filter(pk=t).first()
             if not host:
                 raise ValueError(f'unknown host id: {t!r}')
-            threads.append(Thread(target=host_executor, args=(q, host, pkey, command)))
+            threads.append(Thread(target=host_executor, args=(q, host, command)))
         else:
             raise ValueError(f'invalid target: {t!r}')
     for t in threads:

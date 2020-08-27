@@ -8,4 +8,5 @@ from .views import *
 urlpatterns = [
     path('', HostView.as_view()),
     path('import/', post_import),
+    path('parse/', post_parse),
 ]
