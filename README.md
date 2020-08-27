@@ -107,6 +107,13 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
           <sub>74元/年云主机</sub>
         </a>
       </th>
+      <th align="center" style="width: 125px;">
+        <a href="http://www.magedu.com">
+          <img src="http://image.qbangmang.com/magedu-logo.jpeg" width="115px"><br>
+          <sub>马哥教育</sub><br>
+          <sub>IT人高薪职业学院</sub>
+        </a>
+      </th>
     </tr>
   </thead>
 </table>
