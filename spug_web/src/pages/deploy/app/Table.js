@@ -10,11 +10,17 @@ import { Table, Divider, Modal, Tag, Icon, message } from 'antd';
 import http from 'libs/http';
 import store from './store';
 import { LinkButton } from "components";
+import CloneConfirm from './CloneConfirm';
 import envStore from 'pages/config/environment/store';
 import lds from 'lodash';
 
 @observer
 class ComTable extends React.Component {
+  constructor(props) {
+    super(props);
+    this.cloneObj = null;
+  }
+
   componentDidMount() {
     store.fetchRecords();
     if (envStore.records.length === 0) {
@@ -41,16 +47,38 @@ class ComTable extends React.Component {
     title: '操作',
     render: info => (
       <span>
-        <LinkButton auth="deploy.app.edit" onClick={() => store.showExtForm(info.id)}>新建发布</LinkButton>
+        <LinkButton auth="deploy.app.edit" onClick={e => store.showExtForm(e, info.id)}>新建发布</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton auth="deploy.app.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
+        <LinkButton auth="deploy.app.edit" onClick={e => this.handleClone(e, info.id)}>克隆发布</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton auth="deploy.app.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
+        <LinkButton auth="deploy.app.edit" onClick={e => store.showForm(e, info)}>编辑</LinkButton>
+        <Divider type="vertical"/>
+        <LinkButton auth="deploy.app.del" onClick={e => this.handleDelete(e, info)}>删除</LinkButton>
       </span>
     )
   }];
 
-  handleDelete = (text) => {
+  handleClone = (e, id) => {
+    e.stopPropagation();
+    this.cloneObj = null;
+    Modal.confirm({
+      icon: 'exclamation-circle',
+      title: '选择克隆对象',
+      content: <CloneConfirm onChange={v => this.cloneObj = v[1]}/>,
+      onOk: () => {
+        if (!this.cloneObj) {
+          message.error('请选择目标应用及环境')
+          return Promise.reject()
+        }
+        const info = JSON.parse(this.cloneObj);
+        info.env_id = undefined;
+        store.showExtForm(null, id, info, true)
+      },
+    })
+  };
+
+  handleDelete = (e, text) => {
+    e.stopPropagation();
     Modal.confirm({
       title: '删除确认',
       content: `确定要删除应用【${text['name']}】?`,
@@ -101,12 +129,13 @@ class ComTable extends React.Component {
       title: '操作',
       render: info => (
         <span>
-        <LinkButton auth="deploy.app.edit" onClick={() => store.showExtForm(record.id, info)}>编辑</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="deploy.app.edit" onClick={() => store.showExtForm(record.id, info, true)}>克隆配置</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="deploy.app.edit" onClick={() => this.handleDeployDelete(info)}>删除</LinkButton>
-      </span>
+          <LinkButton auth="deploy.app.config"
+                      onClick={e => store.showExtForm(e, record.id, info, false, true)}>查看</LinkButton>
+          <Divider type="vertical"/>
+          <LinkButton auth="deploy.app.edit" onClick={e => store.showExtForm(e, record.id, info)}>编辑</LinkButton>
+          <Divider type="vertical"/>
+          <LinkButton auth="deploy.app.edit" onClick={() => this.handleDeployDelete(info)}>删除</LinkButton>
+        </span>
       )
     }];
 
@@ -134,6 +163,7 @@ class ComTable extends React.Component {
     return (
       <Table
         rowKey="id"
+        expandRowByClick
         loading={store.isFetching}
         dataSource={data}
         expandedRowRender={this.expandedRowRender}

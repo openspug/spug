@@ -46,15 +46,21 @@ class ComImport extends React.Component {
             {res['repeat'].length > 0 && <Form.Item style={{margin: 0, color: '#1890ff'}} label="重复主机名">
               <Tooltip title={`相关行：${res['repeat'].join(', ')}`}>{res['repeat'].length}</Tooltip>
             </Form.Item>}
+            {res['error'].length > 0 && <Form.Item style={{margin: 0, color: '#1890ff'}} label="其他错误">
+              <Tooltip title={`请通过新建主机查看具体错误信息，相关行：${res['error'].join(', ')}`}>{res['error'].length}</Tooltip>
+            </Form.Item>}
           </Form>
         })
       })
       .finally(() => this.setState({loading: false}))
   };
 
-  beforeUpload = (file) => {
-    this.setState({fileList: [file]});
-    return false
+  handleUpload = (v) => {
+    if (v.fileList.length === 0) {
+      this.setState({fileList: []})
+    } else {
+      this.setState({fileList: [v.file]})
+    }
   };
 
   render() {
@@ -83,7 +89,8 @@ class ComImport extends React.Component {
               placeholder="请输入默认主机密码"/>
           </Form.Item>
           <Form.Item required label="导入数据">
-            <Upload name="file" accept=".xls, .xlsx" fileList={this.state.fileList} beforeUpload={this.beforeUpload}>
+            <Upload name="file" accept=".xls, .xlsx" fileList={this.state.fileList} beforeUpload={() => false}
+                    onChange={this.handleUpload}>
               <Button>
                 <Icon type="upload"/> 点击上传
               </Button>

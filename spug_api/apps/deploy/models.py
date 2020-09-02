@@ -34,6 +34,8 @@ class DeployRequest(models.Model, ModelMixin):
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
     approve_at = models.CharField(max_length=20, null=True)
     approve_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)
+    do_at = models.CharField(max_length=20, null=True)
+    do_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)
 
     def __repr__(self):
         return f'<DeployRequest name={self.name}>'

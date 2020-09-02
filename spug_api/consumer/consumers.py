@@ -3,7 +3,6 @@
 # Released under the AGPL-3.0 License.
 from channels.generic.websocket import WebsocketConsumer
 from django_redis import get_redis_connection
-from apps.setting.utils import AppSetting
 from apps.account.models import User
 from apps.host.models import Host
 from threading import Thread
@@ -85,7 +84,7 @@ class SSHConsumer(WebsocketConsumer):
             self.send(text_data='Unknown host\r\n')
             self.close()
         try:
-            self.ssh = host.get_ssh(AppSetting.get('private_key')).get_client()
+            self.ssh = host.get_ssh().get_client()
         except Exception as e:
             self.send(bytes_data=f'Exception: {e}\r\n'.encode())
             self.close()

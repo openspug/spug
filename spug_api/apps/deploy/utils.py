@@ -5,15 +5,19 @@ from django_redis import get_redis_connection
 from django.conf import settings
 from libs.utils import AttrDict, human_time, human_datetime
 from apps.host.models import Host
+from apps.notify.models import Notify
 from concurrent import futures
 import requests
-import socket
 import subprocess
 import json
 import uuid
 import os
 
 REPOS_DIR = settings.REPOS_DIR
+
+
+class SpugError(Exception):
+    pass
 
 
 def deploy_dispatch(request, req, token):
@@ -55,6 +59,7 @@ def deploy_dispatch(request, req, token):
 def _ext1_deploy(req, helper, env):
     extend = req.deploy.extend_obj
     extras = json.loads(req.extra)
+    env.update(SPUG_DST_DIR=extend.dst_dir)
     if extras[0] == 'branch':
         tree_ish = extras[2]
         env.update(SPUG_GIT_BRANCH=extras[1], SPUG_GIT_COMMIT_ID=extras[2])
@@ -86,21 +91,32 @@ def _ext1_deploy(req, helper, env):
         files = helper.parse_filter_rule(filter_rule['data'])
         if files:
             if filter_rule['type'] == 'exclude':
-                exclude = ' '.join(f'--exclude={x}' for x in files)
+                excludes = []
+                for x in files:
+                    if x.startswith('/'):
+                        excludes.append(f'--exclude={env.SPUG_VERSION}{x}')
+                    else:
+                        excludes.append(f'--exclude={x}')
+                exclude = ' '.join(excludes)
             else:
                 contain = ' '.join(f'{env.SPUG_VERSION}/{x}' for x in files)
         helper.local(f'cd {REPOS_DIR} && tar zcf {env.SPUG_VERSION}.tar.gz {exclude} {contain}')
         helper.send_step('local', 6, f'完成')
+    threads, latest_exception = [], None
     with futures.ThreadPoolExecutor(max_workers=min(10, os.cpu_count() + 5)) as executor:
-        threads = []
         for h_id in json.loads(req.host_ids):
             env = AttrDict(env.items())
-            threads.append(executor.submit(_deploy_ext1_host, helper, h_id, extend, env))
+            t = executor.submit(_deploy_ext1_host, helper, h_id, extend, env)
+            t.h_id = h_id
+            threads.append(t)
         for t in futures.as_completed(threads):
             exception = t.exception()
             if exception:
-                helper.send_error(h_id, f'Exception: {exception}')
-                raise exception
+                latest_exception = exception
+                if not isinstance(exception, SpugError):
+                    helper.send_error(t.h_id, f'Exception: {exception}', False)
+    if latest_exception:
+        raise latest_exception
 
 
 def _ext2_deploy(req, helper, env):
@@ -116,16 +132,56 @@ def _ext2_deploy(req, helper, env):
         helper.local(f'cd /tmp && {action["data"]}', env)
         step += 1
     helper.send_step('local', 100, '完成\r\n' if step == 2 else '\r\n')
+
+    tmp_transfer_file = None
+    for action in host_actions:
+        if action.get('type') == 'transfer':
+            if action.get('src_mode') == '1':
+                break
+            helper.send_info('local', f'{human_time()} 检测到来源为本地路径的数据传输动作，执行打包...   ')
+            action['src'] = action['src'].rstrip('/ ')
+            action['dst'] = action['dst'].rstrip('/ ')
+            if not action['src'] or not action['dst']:
+                helper.send_error('local', f'invalid path for transfer, src: {action["src"]} dst: {action["dst"]}')
+            is_dir, exclude = os.path.isdir(action['src']), ''
+            sp_dir, sd_dst = os.path.split(action['src'])
+            contain = sd_dst
+            if action['mode'] != '0' and is_dir:
+                files = helper.parse_filter_rule(action['rule'], ',')
+                if files:
+                    if action['mode'] == '1':
+                        contain = ' '.join(f'{sd_dst}/{x}' for x in files)
+                    else:
+                        excludes = []
+                        for x in files:
+                            if x.startswith('/'):
+                                excludes.append(f'--exclude={sd_dst}{x}')
+                            else:
+                                excludes.append(f'--exclude={x}')
+                        exclude = ' '.join(excludes)
+            tar_gz_file = f'{env.SPUG_VERSION}.tar.gz'
+            helper.local(f'cd {sp_dir} && tar zcf {tar_gz_file} {exclude} {contain}')
+            helper.send_info('local', '完成\r\n')
+            tmp_transfer_file = os.path.join(sp_dir, tar_gz_file)
+            break
     if host_actions:
+        threads, latest_exception = [], None
         with futures.ThreadPoolExecutor(max_workers=min(10, os.cpu_count() + 5)) as executor:
-            threads = []
             for h_id in json.loads(req.host_ids):
-                threads.append(executor.submit(_deploy_ext2_host, helper, h_id, host_actions, env))
+                env = AttrDict(env.items())
+                t = executor.submit(_deploy_ext2_host, helper, h_id, host_actions, env)
+                t.h_id = h_id
+                threads.append(t)
             for t in futures.as_completed(threads):
                 exception = t.exception()
                 if exception:
-                    helper.send_error(h_id, f'Exception: {exception}')
-                    raise exception
+                    latest_exception = exception
+                    if not isinstance(exception, SpugError):
+                        helper.send_error(t.h_id, f'Exception: {exception}', False)
+            if tmp_transfer_file:
+                os.remove(tmp_transfer_file)
+        if latest_exception:
+            raise latest_exception
     else:
         helper.send_step('local', 100, f'\r\n{human_time()} ** 发布成功 **')
 
@@ -187,7 +243,27 @@ def _deploy_ext2_host(helper, h_id, actions, env):
     helper.send_step(h_id, 2, '完成\r\n')
     for index, action in enumerate(actions):
         helper.send_step(h_id, 2 + index, f'{human_time()} {action["title"]}...\r\n')
-        helper.remote(host.id, ssh, f'cd /tmp && {action["data"]}', env)
+        if action.get('type') == 'transfer':
+            if action.get('src_mode') == '1':
+                try:
+                    ssh.put_file(os.path.join(REPOS_DIR, env.SPUG_DEPLOY_ID, env.SPUG_VERSION), action['dst'])
+                except Exception as e:
+                    helper.send_error(host.id, f'exception: {e}')
+                helper.send_info(host.id, 'transfer completed\r\n')
+                continue
+            else:
+                sp_dir, sd_dst = os.path.split(action['src'])
+                tar_gz_file = f'{env.SPUG_VERSION}.tar.gz'
+                try:
+                    ssh.put_file(os.path.join(sp_dir, tar_gz_file), f'/tmp/{tar_gz_file}')
+                except Exception as e:
+                    helper.send_error(host.id, f'exception: {e}')
+
+                command = f'cd /tmp && tar xf {tar_gz_file} && rm -f {tar_gz_file} '
+                command += f'&& rm -rf {action["dst"]} && mv /tmp/{sd_dst} {action["dst"]} && echo "transfer completed"'
+        else:
+            command = f'cd /tmp && {action["data"]}'
+        helper.remote(host.id, ssh, command, env)
 
     helper.send_step(h_id, 100, f'\r\n{human_time()} ** 发布成功 **')
 
@@ -199,8 +275,98 @@ class Helper:
         self.log_key = f'{settings.REQUEST_KEY}:{r_id}'
         self.rds.delete(self.log_key)
 
-    @staticmethod
-    def send_deploy_notify(req):
+    @classmethod
+    def _make_dd_notify(cls, action, req, version, host_str):
+        texts = [
+            f'**申请标题：** {req.name}',
+            f'**应用名称：** {req.deploy.app.name}',
+            f'**应用版本：** {version}',
+            f'**发布环境：** {req.deploy.env.name}',
+            f'**发布主机：** {host_str}',
+        ]
+        if action == 'approve_req':
+            texts.insert(0, '## %s ## ' % '发布审核申请')
+            texts.extend([
+                f'**申请人员：** {req.created_by.nickname}',
+                f'**申请时间：** {human_datetime()}',
+                '> 来自 Spug运维平台'
+            ])
+        elif action == 'approve_rst':
+            color, text = ('#008000', '通过') if req.status == '1' else ('#f90202', '驳回')
+            texts.insert(0, '## %s ## ' % '发布审核结果')
+            texts.extend([
+                f'**审核人员：** {req.approve_by.nickname}',
+                f'**审核结果：** <font color="{color}">{text}</font>',
+                f'**审核意见：** {req.reason or ""}',
+                f'**审核时间：** {human_datetime()}',
+                '> 来自 Spug运维平台'
+            ])
+        else:
+            color, text = ('#008000', '成功') if req.status == '3' else ('#f90202', '失败')
+            texts.insert(0, '## %s ## ' % '发布结果通知')
+            if req.approve_at:
+                texts.append(f'**审核人员：** {req.approve_by.nickname}')
+            texts.extend([
+                f'**执行人员：** {req.do_by.nickname}',
+                f'**发布结果：** <font color="{color}">{text}</font>',
+                f'**发布时间：** {human_datetime()}',
+                '> 来自 Spug运维平台'
+            ])
+        return {
+            'msgtype': 'markdown',
+            'markdown': {
+                'title': 'Spug 发布消息通知',
+                'text': '\n\n'.join(texts)
+            }
+        }
+
+    @classmethod
+    def _make_wx_notify(cls, action, req, version, host_str):
+        texts = [
+            f'申请标题： {req.name}',
+            f'应用名称： {req.deploy.app.name}',
+            f'应用版本： {version}',
+            f'发布环境： {req.deploy.env.name}',
+            f'发布主机： {host_str}',
+        ]
+
+        if action == 'approve_req':
+            texts.insert(0, '## %s' % '发布审核申请')
+            texts.extend([
+                f'申请人员： {req.created_by.nickname}',
+                f'申请时间： {human_datetime()}',
+                '> 来自 Spug运维平台'
+            ])
+        elif action == 'approve_rst':
+            color, text = ('info', '通过') if req.status == '1' else ('warning', '驳回')
+            texts.insert(0, '## %s' % '发布审核结果')
+            texts.extend([
+                f'审核人员： {req.approve_by.nickname}',
+                f'审核结果： <font color="{color}">{text}</font>',
+                f'审核意见： {req.reason or ""}',
+                f'审核时间： {human_datetime()}',
+                '> 来自 Spug运维平台'
+            ])
+        else:
+            color, text = ('info', '成功') if req.status == '3' else ('warning', '失败')
+            texts.insert(0, '## %s' % '发布结果通知')
+            if req.approve_at:
+                texts.append(f'审核人员： {req.approve_by.nickname}')
+            texts.extend([
+                f'执行人员： {req.do_by.nickname}',
+                f'发布结果： <font color="{color}">{text}</font>',
+                f'发布时间： {human_datetime()}',
+                '> 来自 Spug运维平台'
+            ])
+        return {
+            'msgtype': 'markdown',
+            'markdown': {
+                'content': '\n'.join(texts)
+            }
+        }
+
+    @classmethod
+    def send_deploy_notify(cls, req, action=None):
         rst_notify = json.loads(req.deploy.rst_notify)
         host_ids = json.loads(req.host_ids)
         if rst_notify['mode'] != '0' and rst_notify.get('value'):
@@ -212,71 +378,45 @@ class Helper:
                 else:
                     version = extra1
             else:
-                version = extra[0]
+                version = extra[0] or ''
             hosts = [{'id': x.id, 'name': x.name} for x in Host.objects.filter(id__in=host_ids)]
             host_str = ', '.join(x['name'] for x in hosts[:2])
             if len(hosts) > 2:
                 host_str += f'等{len(hosts)}台主机'
             if rst_notify['mode'] == '1':
-                color, text = ('#8ece60', '成功') if req.status == '3' else ('#f90202', '失败')
-                texts = [
-                    '## %s ## ' % '发布结果通知',
-                    f'**申请标题：** {req.name} ',
-                    f'**应用名称：** {req.deploy.app.name} ',
-                    f'**应用版本：** {version} ',
-                    f'**发布环境：** {req.deploy.env.name} ',
-                    f'**发布主机：** {host_str} ',
-                    f'**发布结果：** <font color="{color}">{text}</font>',
-                    f'**发布时间：** {human_datetime()} ',
-                    '> 来自 Spug运维平台'
-                ]
-                data = {
-                    'msgtype': 'markdown',
-                    'markdown': {
-                        'title': '发布结果通知',
-                        'text': '\n\n'.join(texts)
-                    }
-                }
-                requests.post(rst_notify['value'], json=data)
+                data = cls._make_dd_notify(action, req, version, host_str)
             elif rst_notify['mode'] == '2':
                 data = {
+                    'action': action,
                     'req_id': req.id,
                     'req_name': req.name,
                     'app_id': req.deploy.app_id,
                     'app_name': req.deploy.app.name,
                     'env_id': req.deploy.env_id,
                     'env_name': req.deploy.env.name,
+                    'status': req.status,
+                    'reason': req.reason,
                     'version': version,
                     'targets': hosts,
                     'is_success': req.status == '3',
-                    'deploy_at': human_datetime()
+                    'created_at': human_datetime()
                 }
-                requests.post(rst_notify['value'], json=data)
             elif rst_notify['mode'] == '3':
-                color, text = ('info', '成功') if req.status == '3' else ('warning', '失败')
-                texts = [
-                    '## %s' % '发布结果通知',
-                    f'**申请标题：** {req.name} ',
-                    f'**应用名称：** {req.deploy.app.name} ',
-                    f'**应用版本：** {version} ',
-                    f'**发布环境：** {req.deploy.env.name} ',
-                    f'**发布主机：** {host_str} ',
-                    f'**发布结果：** <font color="{color}">{text}</font>',
-                    f'**发布时间：** {human_datetime()} ',
-                    '> 来自 Spug运维平台'
-                ]
-                data = {
-                    'msgtype': 'markdown',
-                    'markdown': {
-                        'content': '\n'.join(texts)
-                    }
-                }
-                requests.post(rst_notify['value'], json=data)
+                data = cls._make_wx_notify(action, req, version, host_str)
+            else:
+                raise NotImplementedError
+            res = requests.post(rst_notify['value'], json=data)
+            if res.status_code != 200:
+                Notify.make_notify('flag', '1', '发布通知发送失败', f'返回状态码：{res.status_code}, 请求URL：{res.url}')
+            if rst_notify['mode'] in ['1', '3']:
+                res = res.json()
+                if res.get('errcode') != 0:
+                    Notify.make_notify('flag', '1', '发布通知发送失败', f'返回数据：{res}')
 
-    def parse_filter_rule(self, data: str):
+    def parse_filter_rule(self, data: str, sep='\n'):
         data, files = data.strip(), []
         if data:
-            for line in data.split('\n'):
+            for line in data.split(sep):
                 line = line.strip()
                 if line and not line.startswith('#'):
                     files.append(line)
@@ -289,10 +429,11 @@ class Helper:
     def send_info(self, key, message):
         self._send({'key': key, 'status': 'info', 'data': message})
 
-    def send_error(self, key, message):
+    def send_error(self, key, message, with_break=True):
         message = '\r\n' + message
         self._send({'key': key, 'status': 'error', 'data': message})
-        raise Exception(message)
+        if with_break:
+            raise SpugError
 
     def send_step(self, key, step, data):
         self._send({'key': key, 'step': step, 'data': data})
@@ -313,10 +454,7 @@ class Helper:
 
     def remote(self, key, ssh, command, env=None):
         code = -1
-        try:
-            for code, out in ssh.exec_command_with_stream(command, environment=env):
-                self.send_info(key, out)
-            if code != 0:
-                self.send_error(key, f'exit code: {code}')
-        except socket.timeout:
-            self.send_error(key, 'time out')
+        for code, out in ssh.exec_command_with_stream(command, environment=env):
+            self.send_info(key, out)
+        if code != 0:
+            self.send_error(key, f'exit code: {code}')

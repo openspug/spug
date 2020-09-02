@@ -15,7 +15,6 @@ export default function (props) {
     <Editor
       wrapEnabled
       theme="tomorrow"
-      enableLiveAutocompletion={true}
       enableBasicAutocompletion={true}
       enableSnippets={true}
       {...props}

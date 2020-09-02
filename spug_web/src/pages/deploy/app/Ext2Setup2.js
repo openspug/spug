@@ -28,6 +28,7 @@ class Ext2Setup2 extends React.Component {
               <Select
                 value={id}
                 showSearch
+                disabled={store.isReadOnly}
                 placeholder="请选择"
                 optionFilterProp="children"
                 style={{width: '80%', marginRight: 10}}
@@ -39,14 +40,14 @@ class Ext2Setup2 extends React.Component {
                   </Select.Option>
                 ))}
               </Select>
-              {info['host_ids'].length > 1 && (
+              {!store.isReadOnly && info['host_ids'].length > 1 && (
                 <Icon className={styles.delIcon} type="minus-circle-o" onClick={() => store.delHost(index)}/>
               )}
             </React.Fragment>
           ))}
         </Form.Item>
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <Button type="dashed" style={{width: '80%'}} onClick={store.addHost}>
+          <Button disabled={store.isReadOnly} type="dashed" style={{width: '80%'}} onClick={store.addHost}>
             <Icon type="plus"/>添加目标主机
           </Button>
         </Form.Item>

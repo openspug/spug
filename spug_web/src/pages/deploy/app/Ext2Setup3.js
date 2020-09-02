@@ -5,18 +5,24 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Form, Input, Button, message, Divider, Alert, Icon } from 'antd';
+import { Form, Input, Button, message, Divider, Alert, Icon, Select } from 'antd';
 import Editor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-sh';
 import 'ace-builds/src-noconflict/theme-tomorrow';
 import styles from './index.module.css';
 import { http, cleanCommand } from 'libs';
 import store from './store';
+import lds from 'lodash';
 
 @observer
 class Ext2Setup3 extends React.Component {
   constructor(props) {
     super(props);
+    this.helpMap = {
+      '0': null,
+      '1': '相对于输入的本地路径的文件路径，仅将匹配到文件传输至要发布的目标主机。',
+      '2': '支持模糊匹配，如果路径以 / 开头则基于输入的本地路径匹配，匹配到文件将不会被传输。'
+    }
     this.state = {
       loading: false,
     }
@@ -27,7 +33,7 @@ class Ext2Setup3 extends React.Component {
     const info = store.deploy;
     info['app_id'] = store.app_id;
     info['extend'] = '2';
-    info['host_actions'] = info['host_actions'].filter(x => x.title && x.data);
+    info['host_actions'] = info['host_actions'].filter(x => (x.title && x.data) || (x.title && (x.src || x.src_mode === '1') && x.dst));
     info['server_actions'] = info['server_actions'].filter(x => x.title && x.data);
     http.post('/api/app/deploy/', info)
       .then(res => {
@@ -58,11 +64,13 @@ class Ext2Setup3 extends React.Component {
         {server_actions.map((item, index) => (
           <div key={index} style={{marginBottom: 30, position: 'relative'}}>
             <Form.Item required label={`本地动作${index + 1}`}>
-              <Input value={item['title']} onChange={e => item['title'] = e.target.value} placeholder="请输入"/>
+              <Input disabled={store.isReadOnly} value={item['title']} onChange={e => item['title'] = e.target.value}
+                     placeholder="请输入"/>
             </Form.Item>
 
             <Form.Item required label="执行内容">
               <Editor
+                readOnly={store.isReadOnly}
                 mode="sh"
                 theme="tomorrow"
                 width="100%"
@@ -71,47 +79,109 @@ class Ext2Setup3 extends React.Component {
                 onChange={v => item['data'] = cleanCommand(v)}
                 placeholder="请输入要执行的动作"/>
             </Form.Item>
-            <div className={styles.delAction} onClick={() => server_actions.splice(index, 1)}>
-              <Icon type="minus-circle"/>移除
-            </div>
+            {!store.isReadOnly && (
+              <div className={styles.delAction} onClick={() => server_actions.splice(index, 1)}>
+                <Icon type="minus-circle"/>移除
+              </div>
+            )}
           </div>
         ))}
-        <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <Button type="dashed" block onClick={() => server_actions.push({})}>
-            <Icon type="plus"/>添加本地执行动作（在服务端本地执行）
-          </Button>
-        </Form.Item>
+        {!store.isReadOnly && (
+          <Form.Item wrapperCol={{span: 14, offset: 6}}>
+            <Button type="dashed" block onClick={() => server_actions.push({})}>
+              <Icon type="plus"/>添加本地执行动作（在服务端本地执行）
+            </Button>
+          </Form.Item>
+        )}
         <Divider/>
         {host_actions.map((item, index) => (
           <div key={index} style={{marginBottom: 30, position: 'relative'}}>
             <Form.Item required label={`目标主机动作${index + 1}`}>
-              <Input value={item['title']} onChange={e => item['title'] = e.target.value} placeholder="请输入"/>
+              <Input disabled={store.isReadOnly} value={item['title']} onChange={e => item['title'] = e.target.value}
+                     placeholder="请输入"/>
             </Form.Item>
-
-            <Form.Item required label="执行内容">
-              <Editor
-                mode="sh"
-                theme="tomorrow"
-                width="100%"
-                height="100px"
-                value={item['data']}
-                onChange={v => item['data'] = cleanCommand(v)}
-                placeholder="请输入要执行的动作"/>
-            </Form.Item>
-            <div className={styles.delAction} onClick={() => host_actions.splice(index, 1)}>
-              <Icon type="minus-circle"/>移除
-            </div>
+            {item['type'] === 'transfer' ? ([
+              <Form.Item key={0} required label="数据来源">
+                <Input
+                  spellCheck={false}
+                  disabled={store.isReadOnly || item['src_mode'] === '1'}
+                  placeholder="请输入本地（部署spug的容器或主机）路径"
+                  value={item['src']}
+                  onChange={e => item['src'] = e.target.value}
+                  addonBefore={(
+                    <Select disabled={store.isReadOnly} style={{width: 120}} value={item['src_mode'] || '0'}
+                            onChange={v => item['src_mode'] = v}>
+                      <Select.Option value="0">本地路径</Select.Option>
+                      <Select.Option value="1">发布时上传</Select.Option>
+                    </Select>
+                  )}/>
+              </Form.Item>,
+              [undefined, '0'].includes(item['src_mode']) ? (
+                <Form.Item key={1} label="过滤规则" help={this.helpMap[item['mode']]}>
+                  <Input
+                    spellCheck={false}
+                    placeholder="请输入逗号分割的过滤规则"
+                    value={item['rule']}
+                    onChange={e => item['rule'] = e.target.value.replace('，', ',')}
+                    disabled={store.isReadOnly || item['mode'] === '0'}
+                    addonBefore={(
+                      <Select disabled={store.isReadOnly} style={{width: 120}} value={item['mode']}
+                              onChange={v => item['mode'] = v}>
+                        <Select.Option value="0">关闭</Select.Option>
+                        <Select.Option value="1">包含</Select.Option>
+                        <Select.Option value="2">排除</Select.Option>
+                      </Select>
+                    )}/>
+                </Form.Item>
+              ) : null,
+              <Form.Item key={2} required label="目标路径" extra={<a
+                target="_blank" rel="noopener noreferrer"
+                href="https://spug.dev/docs/deploy-config#%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93">使用前请务必阅读官方文档。</a>}>
+                <Input
+                  disabled={store.isReadOnly}
+                  spellCheck={false}
+                  value={item['dst']}
+                  placeholder="请输入目标主机路径"
+                  onChange={e => item['dst'] = e.target.value}/>
+              </Form.Item>
+            ]) : (
+              <Form.Item required label="执行内容">
+                <Editor
+                  readOnly={store.isReadOnly}
+                  mode="sh"
+                  theme="tomorrow"
+                  width="100%"
+                  height="100px"
+                  value={item['data']}
+                  onChange={v => item['data'] = cleanCommand(v)}
+                  placeholder="请输入要执行的动作"/>
+              </Form.Item>
+            )}
+            {!store.isReadOnly && (
+              <div className={styles.delAction} onClick={() => host_actions.splice(index, 1)}>
+                <Icon type="minus-circle"/>移除
+              </div>
+            )}
           </div>
         ))}
-        <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <Button type="dashed" block onClick={() => host_actions.push({})}>
-            <Icon type="plus"/>添加目标主机执行动作（在部署目标主机执行）
-          </Button>
-        </Form.Item>
+        {!store.isReadOnly && (
+          <Form.Item wrapperCol={{span: 14, offset: 6}}>
+            <Button disabled={store.isReadOnly} type="dashed" block onClick={() => host_actions.push({})}>
+              <Icon type="plus"/>添加目标主机执行动作（在部署目标主机执行）
+            </Button>
+            <Button
+              block
+              type="dashed"
+              disabled={store.isReadOnly || lds.findIndex(host_actions, x => x.type === 'transfer') !== -1}
+              onClick={() => host_actions.push({type: 'transfer', title: '数据传输', mode: '0', src_mode: '0'})}>
+              <Icon type="plus"/>添加数据传输动作（仅能添加一个）
+            </Button>
+          </Form.Item>
+        )}
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
           <Button
             type="primary"
-            disabled={[...host_actions, ...server_actions].filter(x => x.title && x.data).length === 0}
+            disabled={store.isReadOnly || [...host_actions, ...server_actions].filter(x => x.title && x.data).length === 0}
             loading={this.state.loading}
             onClick={this.handleSubmit}>提交</Button>
           <Button style={{marginLeft: 20}} onClick={() => store.page -= 1}>上一步</Button>

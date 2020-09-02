@@ -11,12 +11,13 @@ import json
 
 def get_configs(request):
     data = {}
-    app, env_id = _parse_params(request)
+    app, env_id, no_prefix = _parse_params(request)
     if not app or not env_id:
         return HttpResponse('Invalid params', status=400)
     # app own configs
     for item in Config.objects.filter(type='app', o_id=app.id, env_id=env_id).only('key', 'value'):
-        data[f'{app.key}_{item.key}'] = item.value
+        key = item.key if no_prefix else f'{app.key}_{item.key}'
+        data[key] = item.value
 
     # relation app public configs
     if app.rel_apps:
@@ -25,7 +26,7 @@ def get_configs(request):
             id_key_map = {x.id: x.key for x in App.objects.filter(id__in=app_ids)}
             for item in Config.objects.filter(type='app', o_id__in=app_ids, env_id=env_id, is_public=True) \
                     .only('key', 'value'):
-                key = f'{id_key_map[item.o_id]}_{item.key}'
+                key = item.key if no_prefix else f'{id_key_map[item.o_id]}_{item.key}'
                 data[key] = item.value
 
     # relation service configs
@@ -34,13 +35,15 @@ def get_configs(request):
         if src_ids:
             id_key_map = {x.id: x.key for x in Service.objects.filter(id__in=src_ids)}
             for item in Config.objects.filter(type='src', o_id__in=src_ids, env_id=env_id).only('key', 'value'):
-                key = f'{id_key_map[item.o_id]}_{item.key}'
+                key = item.key if no_prefix else f'{id_key_map[item.o_id]}_{item.key}'
                 data[key] = item.value
 
     # format
     fmt = request.GET.get('format', 'kv')
     if fmt == 'kv':
         return _kv_response(data)
+    elif fmt == 'env':
+        return _env_response(data)
     elif fmt == 'json':
         return _json_response(data)
     else:
@@ -51,6 +54,13 @@ def _kv_response(data):
     output = ''
     for k, v in sorted(data.items()):
         output += f'{k} = {v}\r\n'
+    return HttpResponse(output, content_type='text/plain; charset=utf-8')
+
+
+def _env_response(data):
+    output = ''
+    for k, v in sorted(data.items()):
+        output += f'{k}={v}\n'
     return HttpResponse(output, content_type='text/plain; charset=utf-8')
 
 
@@ -78,4 +88,4 @@ def _parse_params(request):
                 env = Environment.objects.filter(key=env_key).first()
                 if env:
                     env_id = env.id
-    return app, env_id
+    return app, env_id, request.GET.get('noPrefix')

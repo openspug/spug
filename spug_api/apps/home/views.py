@@ -8,7 +8,8 @@ from apps.schedule.models import Task
 from apps.monitor.models import Detection
 from apps.alarm.models import Alarm
 from apps.deploy.models import Deploy, DeployRequest
-from libs.utils import json_response, human_date
+from libs.utils import json_response, human_date, parse_time
+from libs.parser import JsonParser, Argument
 from datetime import datetime, timedelta
 import json
 
@@ -35,11 +36,18 @@ def get_alarm(request):
 
 
 def get_request(request):
-    data = {x.id: {'name': x.name, 'count': 0} for x in App.objects.all()}
-    for req in DeployRequest.objects.filter(created_at__gt=human_date()):
-        data[req.deploy.app_id]['count'] += 1
-    data = sorted(data.values(), key=lambda x: x['count'], reverse=True)[:5]
-    return json_response(data)
+    form, error = JsonParser(
+        Argument('duration', type=list, help='参数错误')
+    ).parse(request.body)
+    if error is None:
+        s_date = form.duration[0]
+        e_date = (parse_time(form.duration[1]) + timedelta(days=1)).strftime('%Y-%m-%d')
+        data = {x.id: {'name': x.name, 'count': 0} for x in App.objects.all()}
+        for req in DeployRequest.objects.filter(created_at__gt=s_date, created_at__lt=e_date):
+            data[req.deploy.app_id]['count'] += 1
+        data = sorted(data.values(), key=lambda x: x['count'], reverse=True)[:10]
+        return json_response(data)
+    return json_response(error=error)
 
 
 def get_deploy(request):

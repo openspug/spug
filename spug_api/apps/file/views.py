@@ -65,7 +65,7 @@ class ObjectView(View):
             cli = host.get_ssh()
             rds_cli = get_redis_connection()
             callback = partial(self._compute_progress, rds_cli, form.token, file.size)
-            cli.put_file_by_fl(file, os.path.join(form.path, file.name), callback=callback)
+            cli.put_file_by_fl(file, f'{form.path}/{file.name}', callback=callback)
         return json_response(error=error)
 
     def delete(self, request):

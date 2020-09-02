@@ -25,7 +25,7 @@ export default class extends React.Component {
 
   componentDidMount() {
     this.fetch();
-    this.interval = setInterval(this.fetch, 30000)
+    this.interval = setInterval(this.fetch, 60000)
   }
 
   componentWillUnmount() {

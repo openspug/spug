@@ -56,7 +56,8 @@ def do_task(request):
                 hostname=host.hostname,
                 port=host.port,
                 username=host.username,
-                command=form.command
+                command=form.command,
+                pkey=host.private_key,
             )
         return json_response(token)
     return json_response(error=error)

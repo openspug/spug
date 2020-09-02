@@ -4,17 +4,20 @@
 from django.views.generic import View
 from django.db.models import F
 from django.conf import settings
+from django.http.response import HttpResponseBadRequest
 from django_redis import get_redis_connection
 from libs import json_response, JsonParser, Argument, human_datetime, human_time
 from apps.deploy.models import DeployRequest
-from apps.app.models import Deploy
-from apps.deploy.utils import deploy_dispatch
+from apps.app.models import Deploy, DeployExtend2
+from apps.deploy.utils import deploy_dispatch, Helper
 from apps.host.models import Host
 from collections import defaultdict
 from threading import Thread
 from datetime import datetime
+import subprocess
 import json
 import uuid
+import os
 
 
 class RequestView(View):
@@ -63,17 +66,30 @@ class RequestView(View):
                 return json_response(error='请选择要发布的Tag')
             if form.extra[0] == 'branch' and not form.extra[2]:
                 return json_response(error='请选择要发布的分支及Commit ID')
+            if deploy.extend == '2':
+                if form.extra[0]:
+                    form.extra[0] = form.extra[0].replace("'", '')
+                if DeployExtend2.objects.filter(deploy=deploy, host_actions__contains='"src_mode": "1"').exists():
+                    if len(form.extra) < 2:
+                        return json_response(error='该应用的发布配置中使用了数据传输动作且设置为发布时上传，请上传要传输的数据')
+                    form.version = form.extra[1].get('path')
+            form.name = form.name.replace("'", '')
             form.status = '0' if deploy.is_audit else '1'
             form.extra = json.dumps(form.extra)
             form.host_ids = json.dumps(form.host_ids)
             if form.id:
+                req = DeployRequest.objects.get(pk=form.id)
+                is_required_notify = deploy.is_audit and req.status == '-1'
                 DeployRequest.objects.filter(pk=form.id).update(
                     created_by=request.user,
                     reason=None,
                     **form
                 )
             else:
-                DeployRequest.objects.create(created_by=request.user, **form)
+                req = DeployRequest.objects.create(created_by=request.user, **form)
+                is_required_notify = deploy.is_audit
+            if is_required_notify:
+                Thread(target=Helper.send_deploy_notify, args=(req, 'approve_req')).start()
         return json_response(error=error)
 
     def put(self, request):
@@ -182,6 +198,8 @@ class RequestDetailView(View):
         outputs = {str(x.id): {'data': []} for x in hosts}
         outputs.update(local={'data': [f'{human_time()} 建立接连...        ']})
         req.status = '2'
+        req.do_at = human_datetime()
+        req.do_by = request.user
         if not req.version:
             req.version = f'{req.deploy_id}_{req.id}_{datetime.now().strftime("%Y%m%d%H%M%S")}'
         req.save()
@@ -206,4 +224,24 @@ class RequestDetailView(View):
             req.status = '1' if form.is_pass else '-1'
             req.reason = form.reason
             req.save()
+            Thread(target=Helper.send_deploy_notify, args=(req, 'approve_rst')).start()
         return json_response(error=error)
+
+
+def do_upload(request):
+    repos_dir = settings.REPOS_DIR
+    file = request.FILES['file']
+    deploy_id = request.POST.get('deploy_id')
+    if file and deploy_id:
+        dir_name = os.path.join(repos_dir, deploy_id)
+        file_name = datetime.now().strftime("%Y%m%d%H%M%S")
+        command = f'mkdir -p {dir_name} && cd {dir_name} && ls | sort  -rn | tail -n +11 | xargs rm -rf'
+        code, outputs = subprocess.getstatusoutput(command)
+        if code != 0:
+            return json_response(error=outputs)
+        with open(os.path.join(dir_name, file_name), 'wb') as f:
+            for chunk in file.chunks():
+                f.write(chunk)
+        return json_response(file_name)
+    else:
+        return HttpResponseBadRequest()

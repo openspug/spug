@@ -15,6 +15,7 @@ class Notify(models.Model, ModelMixin):
     SOURCES = (
         ('monitor', '监控中心'),
         ('schedule', '任务计划'),
+        ('flag', '应用发布'),
     )
     title = models.CharField(max_length=255)
     source = models.CharField(max_length=10, choices=SOURCES)

@@ -9,6 +9,7 @@ class Store {
   @observable outputs = {};
   @observable hosts = [];
   @observable token = null;
+  @observable isFullscreen = false;
   @observable showHost = false;
   @observable showConsole = false;
   @observable showTemplate = false;

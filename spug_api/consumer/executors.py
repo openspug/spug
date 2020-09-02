@@ -2,7 +2,6 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from channels.consumer import SyncConsumer
-from apps.setting.utils import AppSetting
 from django_redis import get_redis_connection
 from libs.ssh import SSH
 import threading
@@ -12,8 +11,7 @@ import json
 
 class SSHExecutor(SyncConsumer):
     def exec(self, job):
-        pkey = AppSetting.get('private_key')
-        job = Job(pkey=pkey, **job)
+        job = Job(**job)
         threading.Thread(target=job.run).start()
 
 

@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Form, Row, Col, Button, Radio, Icon, message } from "antd";
+import { Form, Row, Col, Button, Radio, Icon, Tooltip, message } from "antd";
 import { LinkButton } from 'components';
 import Editor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-text';
@@ -20,6 +20,17 @@ import { cleanCommand } from "../../../libs";
 class Ext1Setup3 extends React.Component {
   constructor(props) {
     super(props);
+    this.helpMap = {
+      '2': <span>
+        Spug 内置了一些全局变量，这些变量可以直接使用，请参考官方文档：
+        <a target="_blank" rel="noopener noreferrer"
+           href="https://spug.dev/docs/deploy-config/#%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F">全局变量</a>
+      </span>,
+      '3': '在部署 Spug 的服务器上运行，可以执行任意自定义命令。',
+      '4': '在部署 Spug 的服务器上运行，当前目录为检出后待发布的源代码目录，可执行任意自定义命令。',
+      '5': '在发布的目标主机上运行，当前目录为目标主机上待发布的源代码目录，可执行任意自定义命令。',
+      '6': '在发布的目标主机上运行，当前目录为已发布的应用目录，可执行任意自定义命令。'
+    };
     this.state = {
       loading: false,
       full: ''
@@ -41,14 +52,23 @@ class Ext1Setup3 extends React.Component {
   };
 
   FilterLabel = (props) => (
-    <div style={{display: 'inline-block', height: 39, width: 344}}>
+    <div style={{display: 'inline-block', height: 39, width: 390}}>
       <span style={{float: 'left'}}>文件过滤<span style={{margin: '0 8px 0 2px'}}>:</span></span>
       <Radio.Group
+        disabled={store.isReadOnly}
         style={{marginLeft: 20, float: 'left'}}
         value={props.type}
         onChange={e => store.deploy['filter_rule']['type'] = e.target.value}>
-        <Radio value="contain">包含</Radio>
-        <Radio value="exclude">排除</Radio>
+        <Radio value="contain">包含
+          <Tooltip title="请输入相对于项目根目录的文件路径，仅将匹配到文件传输至要发布的目标主机。">
+            <Icon type="info-circle" style={{color: '#515151', marginLeft: 8}}/>
+          </Tooltip>
+        </Radio>
+        <Radio value="exclude">排除
+          <Tooltip title="支持模糊匹配，如果路径以 / 开头则基于项目根目录匹配，匹配到文件将不会被传输。">
+            <Icon type="info-circle" style={{color: '#515151', marginLeft: 8}}/>
+          </Tooltip>
+        </Radio>
       </Radio.Group>
       {this.state.full === '1' ? (
         <LinkButton onClick={() => this.setState({full: ''})}>退出全屏</LinkButton>
@@ -59,12 +79,17 @@ class Ext1Setup3 extends React.Component {
   );
 
   NormalLabel = (props) => (
-    <div style={{display: 'inline-block', height: 39, width: 344}}>
-      <span style={{float: 'left'}}>{props.title}<span style={{margin: '0 8px 0 2px'}}>:</span></span>
+    <div style={{display: 'inline-block', height: 39, width: 390}}>
+      <span style={{float: 'left'}}>
+        {props.title}<span style={{margin: '0 8px 0 2px'}}>:</span>
+        <Tooltip title={this.helpMap[props.id]}>
+          <Icon type="info-circle" style={{color: '#515151'}}/>
+        </Tooltip>
+      </span>
       {this.state.full ? (
-        <LinkButton onClick={() => this.setState({full: ''})}>退出全屏</LinkButton>
+        <span style={{color: '#1890ff', cursor: 'pointer'}} onClick={() => this.setState({full: ''})}>退出全屏</span>
       ) : (
-        <LinkButton type="link" onClick={() => this.setState({full: props.id})}>全屏</LinkButton>
+        <span style={{color: '#1890ff', cursor: 'pointer'}} onClick={() => this.setState({full: props.id})}>全屏</span>
       )}
     </div>
   );
@@ -81,6 +106,7 @@ class Ext1Setup3 extends React.Component {
               className={full === '1' ? styles.fullScreen : null}
               label={<this.FilterLabel type={info['filter_rule']['type']}/>}>
               <Editor
+                readOnly={store.isReadOnly}
                 mode="text"
                 theme="tomorrow"
                 width="100%"
@@ -95,6 +121,7 @@ class Ext1Setup3 extends React.Component {
               className={full === '3' ? styles.fullScreen : null}
               label={<this.NormalLabel title="代码检出前执行" id="3"/>}>
               <Editor
+                readOnly={store.isReadOnly}
                 mode="sh"
                 theme="tomorrow"
                 width="100%"
@@ -109,6 +136,7 @@ class Ext1Setup3 extends React.Component {
               className={full === '5' ? styles.fullScreen : null}
               label={<this.NormalLabel title="应用发布前执行" id="5"/>}>
               <Editor
+                readOnly={store.isReadOnly}
                 mode="sh"
                 theme="tomorrow"
                 width="100%"
@@ -139,6 +167,7 @@ class Ext1Setup3 extends React.Component {
               className={full === '2' ? styles.fullScreen : null}
               label={<this.NormalLabel title="自定义全局变量" id="2"/>}>
               <Editor
+                readOnly={store.isReadOnly}
                 mode="text"
                 theme="tomorrow"
                 width="100%"
@@ -153,6 +182,7 @@ class Ext1Setup3 extends React.Component {
               className={full === '4' ? styles.fullScreen : null}
               label={<this.NormalLabel title="代码检出后执行" id="4"/>}>
               <Editor
+                readOnly={store.isReadOnly}
                 mode="sh"
                 theme="tomorrow"
                 width="100%"
@@ -167,6 +197,7 @@ class Ext1Setup3 extends React.Component {
               className={full === '6' ? styles.fullScreen : null}
               label={<this.NormalLabel title="应用发布后执行" id="6"/>}>
               <Editor
+                readOnly={store.isReadOnly}
                 mode="sh"
                 theme="tomorrow"
                 width="100%"
@@ -179,7 +210,7 @@ class Ext1Setup3 extends React.Component {
           </Col>
         </Row>
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <Button type="primary" onClick={this.handleSubmit}>提交</Button>
+          <Button disabled={store.isReadOnly} type="primary" onClick={this.handleSubmit}>提交</Button>
           <Button style={{marginLeft: 20}} onClick={() => store.page -= 1}>上一步</Button>
         </Form.Item>
       </React.Fragment>

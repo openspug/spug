@@ -7,11 +7,11 @@ import React, { useState } from 'react';
 import { Button, Form, Input, message } from 'antd';
 import styles from './index.module.css';
 import { http } from 'libs';
-import store from './store';
 import history from 'libs/history';
 
 
 export default function Reset(props) {
+  const [loading, setLoading] = useState(false);
   const [old_password, setOldPassword] = useState();
   const [new_password, setNewPassword] = useState();
   const [new2_password, setNew2Password] = useState();
@@ -24,14 +24,14 @@ export default function Reset(props) {
     } else if (new_password !== new2_password) {
       return message.error('两次输入密码不一致')
     }
-    store.loading = true;
+    setLoading(true);
     http.patch('/api/account/self/', {old_password, new_password})
       .then(() => {
         message.success('密码修改成功');
         history.push('/');
         http.get('/api/account/logout/')
       })
-      .finally(() => store.loading = false)
+      .finally(() => setLoading(false))
   }
 
   return (
@@ -48,7 +48,7 @@ export default function Reset(props) {
           <Input.Password value={new2_password} placeholder="请输入" onChange={e => setNew2Password(e.target.value)}/>
         </Form.Item>
         <Form.Item>
-          <Button type="primary" loading={store.loading} onClick={handleSubmit}>保存设置</Button>
+          <Button type="primary" loading={loading} onClick={handleSubmit}>保存设置</Button>
         </Form.Item>
       </Form>
     </React.Fragment>

@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, Select, Col, Button, message } from 'antd';
+import { Modal, Form, Input, Select, Col, Button, Upload, message } from 'antd';
 import http from 'libs/http';
 import store from './store';
 
@@ -13,11 +13,22 @@ import store from './store';
 class ComForm extends React.Component {
   constructor(props) {
     super(props);
+    this.token = localStorage.getItem('token');
     this.state = {
       loading: false,
+      uploading: false,
       password: null,
       addZone: null,
+      fileList: [],
       editZone: store.record.zone,
+    }
+  }
+
+  componentDidMount() {
+    if (store.record.pkey) {
+      this.setState({
+        fileList: [{uid: '0', name: '独立密钥', data: store.record.pkey}]
+      })
     }
   }
 
@@ -25,16 +36,22 @@ class ComForm extends React.Component {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
     formData['id'] = store.record.id;
+    const file = this.state.fileList[0];
+    if (file && file.data) formData['pkey'] = file.data;
     http.post('/api/host/', formData)
       .then(res => {
         if (res === 'auth fail') {
-          this.setState({loading: false});
-          Modal.confirm({
-            icon: 'exclamation-circle',
-            title: '首次验证请输入密码',
-            content: this.confirmForm(formData.username),
-            onOk: () => this.handleConfirm(formData),
-          })
+          if (formData.pkey) {
+            message.error('独立密钥认证失败')
+          } else {
+            this.setState({loading: false});
+            Modal.confirm({
+              icon: 'exclamation-circle',
+              title: '首次验证请输入密码',
+              content: this.confirmForm(formData.username),
+              onOk: () => this.handleConfirm(formData),
+            })
+          }
         } else {
           message.success('操作成功');
           store.formVisible = false;
@@ -109,8 +126,28 @@ class ComForm extends React.Component {
     });
   };
 
+  handleUploadChange = (v) => {
+    if (v.fileList.length === 0) {
+      this.setState({fileList: []})
+    }
+  };
+
+  handleUpload = (file, fileList) => {
+    this.setState({uploading: true});
+    const formData = new FormData();
+    formData.append('file', file);
+    http.post('/api/host/parse/', formData)
+      .then(res => {
+        file.data = res;
+        this.setState({fileList: [file]})
+      })
+      .finally(() => this.setState({uploading: false}))
+    return false
+  };
+
   render() {
     const info = store.record;
+    const {fileList, loading, uploading} = this.state;
     const {getFieldDecorator} = this.props.form;
     return (
       <Modal
@@ -120,7 +157,7 @@ class ComForm extends React.Component {
         title={store.record.id ? '编辑主机' : '新建主机'}
         okText="验证"
         onCancel={() => store.formVisible = false}
-        confirmLoading={this.state.loading}
+        confirmLoading={loading}
         onOk={this.handleSubmit}>
         <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
           <Form.Item required label="主机类别">
@@ -161,6 +198,12 @@ class ComForm extends React.Component {
                 <Input addonBefore="-p" placeholder="端口"/>
               )}
             </Form.Item>
+          </Form.Item>
+          <Form.Item label="独立密钥" extra="默认使用全局密钥，如果上传了独立密钥则优先使用该密钥。">
+            <Upload name="file" fileList={fileList} headers={{'X-Token': this.token}} beforeUpload={this.handleUpload}
+                    onChange={this.handleUploadChange}>
+              {fileList.length === 0 ? <Button loading={uploading} icon="upload">点击上传</Button> : null}
+            </Upload>
           </Form.Item>
           <Form.Item label="备注信息">
             {getFieldDecorator('desc', {initialValue: info['desc']})(

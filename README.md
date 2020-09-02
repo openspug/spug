@@ -8,7 +8,7 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
 
 - 官网地址：https://www.spug.dev
 - 使用文档：https://www.spug.dev/docs/about-spug/
-- 更新日志: https://www.spug.dev/docs/change-log/
+- 更新日志：https://www.spug.dev/docs/change-log/
 - 常见问题：https://www.spug.dev/docs/faq/
 
 ## 演示环境
@@ -105,6 +105,13 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
           <img src="http://image.qbangmang.com/ecs_223.jpg" width="115px"><br>
           <sub>阿里云</sub><br>
           <sub>74元/年云主机</sub>
+        </a>
+      </th>
+      <th align="center" style="width: 125px;">
+        <a href="http://www.magedu.com">
+          <img src="http://image.qbangmang.com/magedu-logo.jpeg" width="115px"><br>
+          <sub>马哥教育</sub><br>
+          <sub>IT人高薪职业学院</sub>
         </a>
       </th>
     </tr>

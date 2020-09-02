@@ -7,20 +7,20 @@ import React, { useState } from 'react';
 import { Button, Form, Input, message } from 'antd';
 import styles from './index.module.css';
 import { http } from 'libs';
-import store from './store';
 
 
 export default function Basic(props) {
   const [nickname, setNickname] = useState(localStorage.getItem('nickname'));
+  const [loading, setLoading] = useState(false);
 
   function handleSubmit() {
-    store.loading = true;
+    setLoading(true);
     http.patch('/api/account/self/', {nickname})
       .then(() => {
         message.success('设置成功，重新登录或刷新页面后生效');
         localStorage.setItem('nickname', nickname)
       })
-      .finally(() => store.loading = false)
+      .finally(() =>setLoading(false))
   }
 
   return (
@@ -31,7 +31,7 @@ export default function Basic(props) {
           <Input value={nickname} placeholder="请输入" onChange={e => setNickname(e.target.value)}/>
         </Form.Item>
         <Form.Item>
-          <Button type="primary" loading={store.loading} onClick={handleSubmit}>保存设置</Button>
+          <Button type="primary" loading={loading} onClick={handleSubmit}>保存设置</Button>
         </Form.Item>
       </Form>
     </React.Fragment>

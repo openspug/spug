@@ -44,10 +44,10 @@ class Git:
 
     def _fetch(self):
         try:
-            self.repo.remotes.origin.fetch()
+            self.repo.remotes.origin.fetch(p=True, P=True)
         except GitCommandError as e:
             if self.env:
-                self.repo.remotes.origin.fetch(env=self.env)
+                self.repo.remotes.origin.fetch(env=self.env, p=True, P=True)
             else:
                 raise e
 

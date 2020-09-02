@@ -13,12 +13,19 @@ import store from './store';
 import styles from './index.module.css';
 
 export default observer(function Ext1From() {
+  const appName = store.records[store.app_id].name;
+  let title = `常规发布 - ${appName}`;
+  if (store.deploy.id) {
+    store.isReadOnly ? title = '查看' + title : title = '编辑' + title;
+  } else {
+    title = '新建' + title
+  }
   return (
     <Modal
       visible
       width={900}
       maskClosable={false}
-      title={store.deploy.id ? '编辑常规发布' : '新建常规发布'}
+      title={title}
       onCancel={() => store.ext1Visible = false}
       footer={null}>
       <Steps current={store.page} className={styles.steps}>

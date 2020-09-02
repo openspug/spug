@@ -35,7 +35,7 @@ class SSH:
         chmod 600 ~/.ssh/authorized_keys'
         code, out = self.exec_command(command)
         if code != 0:
-            raise Exception(out)
+            raise Exception(f'add public key error: {out}')
 
     def ping(self):
         with self:
@@ -65,8 +65,8 @@ class SSH:
                 str_env = ' '.join(f"{k}='{v}'" for k, v in environment.items())
                 command = f'export {str_env} && {command}'
             chan.exec_command(command)
-            out = chan.makefile("r", -1)
-            return chan.recv_exit_status(), out.read()
+            stdout = chan.makefile("rb", -1)
+            return chan.recv_exit_status(), self._decode(stdout.read())
 
     def exec_command_with_stream(self, command, timeout=1800, environment=None):
         command = 'set -e\n' + command
@@ -78,12 +78,12 @@ class SSH:
                 str_env = ' '.join(f"{k}='{v}'" for k, v in environment.items())
                 command = f'export {str_env} && {command}'
             chan.exec_command(command)
-            stdout = chan.makefile("r", -1)
+            stdout = chan.makefile("rb", -1)
             out = stdout.readline()
             while out:
-                yield chan.exit_status, out
+                yield chan.exit_status, self._decode(out)
                 out = stdout.readline()
-            yield chan.recv_exit_status(), out
+            yield chan.recv_exit_status(), self._decode(out)
 
     def put_file_by_fl(self, fl, remote_path, callback=None):
         with self as cli:
@@ -99,6 +99,12 @@ class SSH:
         with self as cli:
             sftp = cli.open_sftp()
             sftp.remove(path)
+
+    def _decode(self, out: bytes):
+        try:
+            return out.decode()
+        except UnicodeDecodeError:
+            return out.decode('GBK')
 
     def __enter__(self):
         if self.client is not None:
