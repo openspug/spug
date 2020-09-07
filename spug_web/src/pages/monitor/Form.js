@@ -252,7 +252,7 @@ class ComForm extends React.Component {
           </Form.Item>
         </Form>
         {showTmp && <TemplateSelector
-          onOk={command => this.handleExtra('4', command)}
+          onOk={v => this.handleExtra('4', extra['4'] + v)}
           onCancel={() => this.setState({showTmp: false})}/>}
       </Modal>
     )
