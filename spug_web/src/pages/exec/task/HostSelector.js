@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Table, Input, Button, Select, Checkbox } from 'antd';
+import { Modal, Table, Input, Button, Select } from 'antd';
 import { SearchForm } from 'components';
 import store from '../../host/store';
 
@@ -33,21 +33,6 @@ class HostSelector extends React.Component {
       selectedRows.push(record)
     }
     this.setState({selectedRows});
-  };
-
-  handleCheck = (e) => {
-    if (e.target.checked) {
-      let data = store.records;
-      if (store.f_name) {
-        data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
-      }
-      if (store.f_zone) {
-        data = data.filter(item => item['zone'].toLowerCase().includes(store.f_zone.toLowerCase()))
-      }
-      this.setState({selectedRows: data})
-    } else {
-      this.setState({selectedRows: []})
-    }
   };
 
   handleSubmit = () => {
@@ -83,6 +68,7 @@ class HostSelector extends React.Component {
     if (store.f_zone) {
       data = data.filter(item => item['zone'].toLowerCase().includes(store.f_zone.toLowerCase()))
     }
+    const dataIds = data.map(x => x.id);
     return (
       <Modal
         visible
@@ -102,8 +88,8 @@ class HostSelector extends React.Component {
           <SearchForm.Item span={8} title="主机别名">
             <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
           </SearchForm.Item>
-          <SearchForm.Item span={4} title="全选">
-            <Checkbox onChange={this.handleCheck}/>
+          <SearchForm.Item span={4} title="已选">
+            {selectedRows.length} 台
           </SearchForm.Item>
           <SearchForm.Item span={4}>
             <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
@@ -113,7 +99,10 @@ class HostSelector extends React.Component {
           rowKey="id"
           rowSelection={{
             selectedRowKeys: selectedRows.map(item => item.id),
-            onChange: (_, selectedRows) => this.setState({selectedRows})
+            onChange: (_, rows) => {
+              let tmp = selectedRows.filter(x => !dataIds.includes(x.id))
+              this.setState({selectedRows: tmp.concat(rows)})
+            }
           }}
           dataSource={data}
           loading={store.isFetching}
@@ -122,6 +111,8 @@ class HostSelector extends React.Component {
               onClick: () => this.handleClick(record)
             }
           }}
+          pagination={false}
+          scroll={{y: 480}}
           columns={this.columns}/>
       </Modal>
     )
