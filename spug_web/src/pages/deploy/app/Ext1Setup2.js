@@ -6,6 +6,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Form, Input, Select, Button, Icon, message } from "antd";
+import { hasHostPermission } from 'libs';
 import store from './store';
 import hostStore from 'pages/host/store';
 import styles from './index.module.css';
@@ -58,7 +59,7 @@ class Ext1Setup2 extends React.Component {
                 optionFilterProp="children"
                 filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                 onChange={v => store.editHost(index, v)}>
-                {hostStore.records.map(item => (
+                {hostStore.records.filter(x => hasHostPermission(x.id)).map(item => (
                   <Select.Option key={item.id} value={item.id} disabled={info['host_ids'].includes(item.id)}>
                     {`${item.name}(${item['hostname']}:${item['port']})`}
                   </Select.Option>
