@@ -44,7 +44,7 @@ export default class AlarmTrend extends React.Component {
     };
     return (
       <Card loading={loading} title="应用部署">
-        <Chart height={300} data={dv} scale={cols} padding={[0, 0, -40, 50]} forceFit>
+        <Chart height={300} data={dv} scale={cols} padding={[-30, 0, -30, 50]} forceFit>
           <Coord type={"theta"} radius={0.75} innerRadius={0.6}/>
           <Axis name="percent"/>
           <Tooltip showTitle={false}/>

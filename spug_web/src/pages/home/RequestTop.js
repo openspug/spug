@@ -58,7 +58,7 @@ export default function () {
               onClick={() => handleClick('week')}>本周</span>
         <span className={range === 'month' ? styles.spanButtonActive : styles.spanButton}
               onClick={() => handleClick('month')}>本月</span>
-        <DatePicker.RangePicker value={duration} onChange={handleClick}/>
+        <DatePicker.RangePicker style={{width: 230}} value={duration} onChange={handleClick}/>
       </div>
     )}>
       <Chart height={300} data={res} padding={[10, 0, 30, 35]} scale={{count: {alias: '发布申请数量'}}} forceFit>
