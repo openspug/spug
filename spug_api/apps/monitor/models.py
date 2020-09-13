@@ -13,6 +13,7 @@ class Detection(models.Model, ModelMixin):
         ('2', '端口检测'),
         ('3', '进程检测'),
         ('4', '自定义脚本'),
+        ('5', 'Ping检测'),
     )
     STATUS = (
         (0, '成功'),
