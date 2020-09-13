@@ -56,7 +56,7 @@ class ComForm extends React.Component {
     switch (type) {
       case '1':
         if (addr.startsWith('http://')) {
-           this.setState({sitePrefix: 'http://', domain: addr.replace('http://', '')})
+          this.setState({sitePrefix: 'http://', domain: addr.replace('http://', '')})
         } else {
           this.setState({sitePrefix: 'https://', domain: addr.replace('https://', '')})
         }
@@ -77,34 +77,30 @@ class ComForm extends React.Component {
     }
   }
 
-  handleSubmit = () => {
-    this.setState({loading: true});
+  _getFieldsValue = (type) => {
     const {sitePrefix, domain, addr, host, port, command, process} = this.state;
-    const formData = this.props.form.getFieldsValue();
-    const type = formData['type'];
-    formData['id'] = store.record.id;
     switch (type) {
       case '1':
-        formData['addr'] = sitePrefix + domain;
-        break;
+        return {addr: sitePrefix + domain}
       case '2':
-        formData['addr'] = addr;
-        formData['extra'] = port;
-        break;
+        return {addr, extra: port}
       case '3':
-        formData['addr'] = host;
-        formData['extra'] = process
-        break;
+        return {addr: host, extra: process}
       case '4':
-        formData['addr'] = host;
-        formData['extra'] = command;
-        break;
+        return {addr: host, extra: command}
       case '5':
-        formData['addr'] = addr;
-        break;
+        return {addr}
       default:
         throw Error('unknown type')
     }
+  }
+
+  handleSubmit = () => {
+    this.setState({loading: true});
+    const formData = this.props.form.getFieldsValue();
+    const type = formData['type'];
+    formData['id'] = store.record.id;
+    Object.assign(formData, this._getFieldsValue(type))
     http.post('/api/monitor/', formData)
       .then(() => {
         message.success('操作成功');
@@ -112,6 +108,22 @@ class ComForm extends React.Component {
         store.fetchRecords()
       }, () => this.setState({loading: false}))
   };
+
+  handleTest = () => {
+    this.setState({loading: true});
+    const type = this.props.form.getFieldValue('type');
+    const formData = this._getFieldsValue(type);
+    formData['type'] = type;
+    http.post('/api/monitor/test/', formData)
+      .then(res => {
+        if (res.is_success) {
+          Modal.success({content: res.message})
+        } else {
+          Modal.warning({content: res.message})
+        }
+      })
+      .finally(() => this.setState({loading: false}))
+  }
 
   getStyle = (t) => {
     const type = this.props.form.getFieldValue('type');
@@ -278,8 +290,12 @@ class ComForm extends React.Component {
           <Form.Item wrapperCol={{span: 14, offset: 6}}>
             {page === 1 &&
             <Button disabled={!b2} type="primary" onClick={this.handleSubmit} loading={loading}>提交</Button>}
-            {page === 0 &&
-            <Button disabled={!b1} type="primary" onClick={() => this.setState({page: page + 1})}>下一步</Button>}
+            {page === 0 && (
+              <div>
+                <Button disabled={!b1} type="primary" onClick={() => this.setState({page: page + 1})}>下一步</Button>
+                <Button disabled={!b1} type="link" loading={loading} style={{marginLeft: 20}} onClick={this.handleTest}>执行测试</Button>
+              </div>
+            )}
             {page !== 0 &&
             <Button style={{marginLeft: 20}} onClick={() => this.setState({page: page - 1})}>上一步</Button>}
           </Form.Item>
