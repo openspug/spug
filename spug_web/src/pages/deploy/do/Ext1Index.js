@@ -21,7 +21,7 @@ class Ext1Index extends React.Component {
     this.id = props.match.params.id;
     this.log = props.match.params.log;
     this.state = {
-      fetching: true,
+      fetching: false,
       loading: false,
     }
   }
@@ -32,11 +32,13 @@ class Ext1Index extends React.Component {
 
   componentWillUnmount() {
     if (this.socket) this.socket.close();
+    if (this.interval) clearInterval(this.interval);
     store.request = {targets: [], host_actions: [], server_actions: []};
     store.outputs = {};
   }
 
   fetch = () => {
+    if (this.state.fetching) return ;
     this.setState({fetching: true});
     http.get(`/api/deploy/request/${this.id}/`, {params: {log: this.log}})
       .then(res => {
@@ -50,7 +52,14 @@ class Ext1Index extends React.Component {
           }
           this._parse_message(msg, outputs)
         }
-        store.outputs = outputs
+        store.outputs = outputs;
+        if (this.interval) {
+          if (['3', '-3'].includes(store.request.status)) {
+            clearInterval(this.interval)
+          }
+        } else if (store.request.status === '2') {
+          this.interval = setInterval(this.fetch, 2000)
+        }
       })
       .finally(() => this.setState({fetching: false}))
   };
