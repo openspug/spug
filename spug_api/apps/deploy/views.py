@@ -130,6 +130,7 @@ class RequestView(View):
             Argument('count', type=int, required=False, help='请输入数字')
         ).parse(request.GET)
         if error is None:
+            rds = get_redis_connection()
             if form.id:
                 DeployRequest.objects.filter(pk=form.id, status__in=('0', '1', '-1')).delete()
                 return json_response()
@@ -143,9 +144,15 @@ class RequestView(View):
                     else:
                         counter[item.deploy_id] += 1
                 count, _ = DeployRequest.objects.filter(id__in=ids).delete()
+                if ids:
+                    rds.delete(*(f'{settings.REQUEST_KEY}:{x}' for x in ids))
                 return json_response(count)
             elif form.expire:
-                count, _ = DeployRequest.objects.filter(created_at__lt=form.expire).delete()
+                requests = DeployRequest.objects.filter(created_at__lt=form.expire)
+                ids = [x.id for x in requests]
+                count, _ = requests.delete()
+                if ids:
+                    rds.delete(*(f'{settings.REQUEST_KEY}:{x}' for x in ids))
                 return json_response(count)
             else:
                 return json_response(error='请至少使用一个删除条件')
