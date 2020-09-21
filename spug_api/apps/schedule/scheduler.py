@@ -16,6 +16,7 @@ from apps.notify.models import Notify
 from apps.schedule.executors import dispatch
 from apps.schedule.utils import auto_clean_schedule_history
 from apps.alarm.utils import auto_clean_records
+from apps.deploy.utils import auto_update_status
 from django.conf import settings
 from libs import AttrDict, human_datetime
 import logging
@@ -39,7 +40,7 @@ class Scheduler:
     }
 
     def __init__(self):
-        self.scheduler = BackgroundScheduler(timezone=self.timezone, executors={'default': ThreadPoolExecutor(20)})
+        self.scheduler = BackgroundScheduler(timezone=self.timezone, executors={'default': ThreadPoolExecutor(30)})
         self.scheduler.add_listener(
             self._handle_event,
             EVENT_SCHEDULER_SHUTDOWN | EVENT_JOB_ERROR | EVENT_JOB_MAX_INSTANCES | EVENT_JOB_EXECUTED)
@@ -89,6 +90,7 @@ class Scheduler:
     def _init_builtin_jobs(self):
         self.scheduler.add_job(auto_clean_records, 'cron', hour=0, minute=0)
         self.scheduler.add_job(auto_clean_schedule_history, 'cron', hour=0, minute=0)
+        self.scheduler.add_job(auto_update_status, 'interval', minutes=5)
 
     def _init(self):
         self.scheduler.start()

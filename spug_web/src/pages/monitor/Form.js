@@ -13,46 +13,85 @@ import store from './store';
 import hostStore from '../host/store';
 import groupStore from '../alarm/group/store';
 import styles from './index.module.css';
+import lds from 'lodash';
 
 @observer
 class ComForm extends React.Component {
   constructor(props) {
     super(props);
+    this.fieldMap = {
+      '1': ['domain'],
+      '2': ['addr', 'port'],
+      '3': ['host', 'process'],
+      '4': ['host', 'command'],
+      '5': ['addr'],
+    }
+    this.modeOptions = [
+      {label: '微信', 'value': '1'},
+      {label: '短信', 'value': '2', disabled: true},
+      {label: '钉钉', 'value': '3'},
+      {label: '邮件', 'value': '4'},
+      {label: '企业微信', 'value': '5'},
+    ]
+    this.helpMap = {
+      '1': '返回HTTP状态码200-399则判定为正常，其他为异常。',
+      '4': '脚本执行退出状态码为 0 则判定为正常，其他为异常。'
+    }
     this.state = {
       loading: false,
       sitePrefix: 'http://',
-      extra: {[store.record.type]: store.record.extra},
-      addr: {},
+      domain: undefined,
+      addr: undefined,
+      port: undefined,
+      host: undefined,
+      process: undefined,
+      command: undefined,
       showTmp: false,
       page: 0,
-      modeOptions: [
-        {label: '微信', 'value': '1'},
-        {label: '短信', 'value': '2', disabled: true},
-        {label: '钉钉', 'value': '3'},
-        {label: '邮件', 'value': '4'},
-        {label: '企业微信', 'value': '5'},
-      ],
-      helpMap: {
-        '1': '返回HTTP状态码200-399则判定为正常，其他为异常。',
-        '4': '脚本执行退出状态码为 0 则判定为正常，其他为异常。'
-      }
     }
   }
 
   componentDidMount() {
-    let [sitePrefix, value] = ['http://', ''];
-    if (store.record.type === '1') {
-      if (store.record.addr.includes('http://')) {
-        value = store.record.addr.replace('http://', '')
-      } else {
-        sitePrefix = 'https://';
-        value = store.record.addr.replace('https://', '')
-      }
-      this.setState({sitePrefix, addr: {'1': value}})
-    } else if ('34'.includes(store.record.type)) {
-      this.setState({addr: {'3': store.record.addr, '4': store.record.addr}})
-    } else {
-      this.setState({addr: {[store.record.type]: store.record.addr}})
+    const {type, addr, extra} = store.record;
+    switch (type) {
+      case '1':
+        if (addr.startsWith('http://')) {
+          this.setState({sitePrefix: 'http://', domain: addr.replace('http://', '')})
+        } else {
+          this.setState({sitePrefix: 'https://', domain: addr.replace('https://', '')})
+        }
+        break;
+      case '2':
+        this.setState({addr, port: extra});
+        break;
+      case '3':
+        this.setState({host: addr, process: extra});
+        break;
+      case '4':
+        this.setState({host: addr, command: extra});
+        break;
+      case '5':
+        this.setState({addr});
+        break;
+      default:
+    }
+  }
+
+  _getFieldsValue = (type) => {
+    const {sitePrefix, domain, addr, host, port, command, process} = this.state;
+    switch (type) {
+      case '1':
+        return {addr: sitePrefix + domain}
+      case '2':
+        return {addr, extra: port}
+      case '3':
+        return {addr: host, extra: process}
+      case '4':
+        return {addr: host, extra: command}
+      case '5':
+        return {addr}
+      default:
+        throw Error('unknown type')
     }
   }
 
@@ -61,8 +100,7 @@ class ComForm extends React.Component {
     const formData = this.props.form.getFieldsValue();
     const type = formData['type'];
     formData['id'] = store.record.id;
-    formData['extra'] = this.state.extra[type];
-    formData['addr'] = type === '1' ? this.state.sitePrefix + this.state.addr[type] : this.state.addr[type];
+    Object.assign(formData, this._getFieldsValue(type))
     http.post('/api/monitor/', formData)
       .then(() => {
         message.success('操作成功');
@@ -71,23 +109,30 @@ class ComForm extends React.Component {
       }, () => this.setState({loading: false}))
   };
 
+  handleTest = () => {
+    this.setState({loading: true});
+    const type = this.props.form.getFieldValue('type');
+    const formData = this._getFieldsValue(type);
+    formData['type'] = type;
+    http.post('/api/monitor/test/', formData)
+      .then(res => {
+        if (res.is_success) {
+          Modal.success({content: res.message})
+        } else {
+          Modal.warning({content: res.message})
+        }
+      })
+      .finally(() => this.setState({loading: false}))
+  }
+
   getStyle = (t) => {
     const type = this.props.form.getFieldValue('type');
-    return t.indexOf(type) !== -1 ? {display: 'block'} : {display: 'none'}
+    return this.fieldMap[type].includes(t) ? {display: 'block'} : {display: 'none'}
   };
 
-  handleExtra = (t, e) => {
-    const value = t === '4' ? e : e.target.value;
-    this.setState({extra: Object.assign({}, this.state.extra, {[t]: value})})
-  };
-
-  handleAddr = (t, e) => {
-    if (t === '3') {
-      this.setState({addr: Object.assign({}, this.state.addr, {'3': e, '4': e})})
-    } else {
-      this.setState({addr: Object.assign({}, this.state.addr, {[t]: e.target.value})})
-    }
-  };
+  handleInput = (key, value) => {
+    this.setState({[key]: value})
+  }
 
   siteBefore = () => (
     <Select style={{width: 90}} value={this.state.sitePrefix} onChange={v => this.setState({sitePrefix: v})}>
@@ -99,17 +144,15 @@ class ComForm extends React.Component {
   verifyButtonStatus = () => {
     const data = this.props.form.getFieldsValue();
     const {notify_grp, notify_mode, type, name} = data;
-    let b1 = this.state.addr[type] && name;
-    if (type !== '1') {
-      b1 = b1 && this.state.extra[type]
-    }
+    const fields = Object.values(lds.pick(this.state, this.fieldMap[type])).filter(x => x)
+    const b1 = name && fields.length === this.fieldMap[type].length
     const b2 = notify_grp && notify_grp.length && notify_mode && notify_mode.length;
     return [b1, b2];
   };
 
   render() {
     const info = store.record;
-    const {loading, extra, addr, showTmp, page, modeOptions, helpMap} = this.state;
+    const {loading, domain, host, port, process, command, addr, showTmp, page} = this.state;
     const {getFieldDecorator, getFieldValue} = this.props.form;
     const [b1, b2] = this.verifyButtonStatus();
     return (
@@ -126,11 +169,12 @@ class ComForm extends React.Component {
         </Steps>
         <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
           <div style={{display: page === 0 ? 'block' : 'none'}}>
-            <Form.Item label="监控类型" help={helpMap[getFieldValue('type')]}>
+            <Form.Item label="监控类型" help={this.helpMap[getFieldValue('type') || '1']}>
               {getFieldDecorator('type', {initialValue: info['type'] || '1'})(
                 <Select placeholder="请选择监控类型">
                   <Select.Option value="1">站点检测</Select.Option>
                   <Select.Option value="2">端口检测</Select.Option>
+                  <Select.Option value="5">Ping检测</Select.Option>
                   <Select.Option value="3">进程检测</Select.Option>
                   <Select.Option value="4">自定义脚本</Select.Option>
                 </Select>
@@ -141,45 +185,46 @@ class ComForm extends React.Component {
                 <Input placeholder="请输入任务名称"/>
               )}
             </Form.Item>
-            <Form.Item required label="监控地址" style={this.getStyle('1')}>
-              <Input value={addr['1']} addonBefore={this.siteBefore()} placeholder="请输入监控地址"
-                     onChange={e => this.handleAddr('1', e)}/>
+            <Form.Item required label="监控地址" style={this.getStyle('domain')}>
+              <Input value={domain} addonBefore={this.siteBefore()} placeholder="请输入监控地址"
+                     onChange={e => this.handleInput('domain', e.target.value)}/>
             </Form.Item>
-            <Form.Item required label="监控地址" style={this.getStyle('2')}>
-              <Input value={addr['2']} placeholder="请输入监控地址（IP/域名）" onChange={e => this.handleAddr('2', e)}/>
+            <Form.Item required label="监控地址" style={this.getStyle('addr')}>
+              <Input value={addr} placeholder="请输入监控地址（IP/域名）"
+                     onChange={e => this.handleInput('addr', e.target.value)}/>
             </Form.Item>
-            <Form.Item required label="监控主机" style={this.getStyle('34')}>
+            <Form.Item required label="监控主机" style={this.getStyle('host')}>
               <Select
                 showSearch
-                value={addr['3']}
+                value={host}
                 placeholder="请选择主机"
                 optionFilterProp="children"
                 filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
-                onChange={v => this.handleAddr('3', v)}>
-                {hostStore.records.filter(x => x.id === Number(addr['3']) || hasHostPermission(x.id)).map(item => (
+                onChange={v => this.handleInput('host', v)}>
+                {hostStore.records.filter(x => x.id === Number(host) || hasHostPermission(x.id)).map(item => (
                   <Select.Option value={String(item.id)} key={item.id}>
                     {`${item.name}(${item.hostname}:${item.port})`}
                   </Select.Option>
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item required label="检测端口" style={this.getStyle('2')}>
-              <Input value={extra['2']} placeholder="请输入端口号" onChange={e => this.handleExtra('2', e)}/>
+            <Form.Item required label="检测端口" style={this.getStyle('port')}>
+              <Input value={port} placeholder="请输入端口号" onChange={e => this.handleInput('port', e.target.value)}/>
             </Form.Item>
-            <Form.Item required label="进程名称" style={this.getStyle('3')} help="执行 ps -ef 看到的进程名称。">
-              <Input value={extra['3']} placeholder="请输入进程名称" onChange={e => this.handleExtra('3', e)}/>
+            <Form.Item required label="进程名称" style={this.getStyle('process')} help="执行 ps -ef 看到的进程名称。">
+              <Input value={process} placeholder="请输入进程名称" onChange={e => this.handleInput('process', e.target.value)}/>
             </Form.Item>
             <Form.Item
               required
               label="脚本内容"
-              style={this.getStyle('4')}
+              style={this.getStyle('command')}
               extra={<LinkButton onClick={() => this.setState({showTmp: true})}>从模板添加</LinkButton>}>
               <ACEditor
                 mode="sh"
-                value={extra['4']}
+                value={command}
                 width="100%"
                 height="200px"
-                onChange={e => this.handleExtra('4', cleanCommand(e))}/>
+                onChange={e => this.handleInput('command', cleanCommand(e))}/>
             </Form.Item>
             <Form.Item label="备注信息">
               {getFieldDecorator('desc', {initialValue: info['desc']})(
@@ -223,7 +268,7 @@ class ComForm extends React.Component {
             </Form.Item>
             <Form.Item required label="报警方式">
               {getFieldDecorator('notify_mode', {initialValue: info['notify_mode']})(
-                <Checkbox.Group options={modeOptions}/>
+                <Checkbox.Group options={this.modeOptions}/>
               )}
             </Form.Item>
             <Form.Item label="通道沉默" help="相同的告警信息，沉默期内只发送一次。">
@@ -245,14 +290,18 @@ class ComForm extends React.Component {
           <Form.Item wrapperCol={{span: 14, offset: 6}}>
             {page === 1 &&
             <Button disabled={!b2} type="primary" onClick={this.handleSubmit} loading={loading}>提交</Button>}
-            {page === 0 &&
-            <Button disabled={!b1} type="primary" onClick={() => this.setState({page: page + 1})}>下一步</Button>}
+            {page === 0 && (
+              <div>
+                <Button disabled={!b1} type="primary" onClick={() => this.setState({page: page + 1})}>下一步</Button>
+                <Button disabled={!b1} type="link" loading={loading} style={{marginLeft: 20}} onClick={this.handleTest}>执行测试</Button>
+              </div>
+            )}
             {page !== 0 &&
             <Button style={{marginLeft: 20}} onClick={() => this.setState({page: page - 1})}>上一步</Button>}
           </Form.Item>
         </Form>
         {showTmp && <TemplateSelector
-          onOk={command => this.handleExtra('4', command)}
+          onOk={v => this.handleInput('command', command + v)}
           onCancel={() => this.setState({showTmp: false})}/>}
       </Modal>
     )

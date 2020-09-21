@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Collapse, Icon } from 'antd';
+import { Modal, Collapse, Tooltip, Icon } from 'antd';
 import OutView from './OutView';
 import styles from './index.module.css';
 import store from './store';
@@ -59,7 +59,9 @@ class ExecConsole extends React.Component {
       icon = <Icon type="check-circle" style={{fontSize: 20}} theme="twoTone" twoToneColor="#52c41a"/>
     } else {
       latest = outputs['error'][outputs['error'].length - 1]
-      icon = <Icon type="warning" style={{fontSize: 20}} theme="twoTone" twoToneColor="red"/>
+      icon = <Tooltip title={`退出状态码：${outputs['status']}`}>
+        <Icon type="warning" style={{fontSize: 20}} theme="twoTone" twoToneColor="red"/>
+      </Tooltip>
     }
     return (
       <div style={{display: 'flex', alignItems: 'center'}}>

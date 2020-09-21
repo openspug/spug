@@ -223,11 +223,12 @@ def parse_text(request):
         data = {}
         for line in form.pop('data').split('\n'):
             line = line.strip()
-            if line:
-                fields = line.split('=', 1)
-                if len(fields) != 2 or fields[0].strip() == '':
-                    return json_response(error=f'解析配置{line!r}失败，确认其遵循 key = value 格式')
-                data[fields[0].strip()] = fields[1].strip()
+            if not line or line[0] in ('#', ';'):
+                continue
+            fields = line.split('=', 1)
+            if len(fields) != 2 or fields[0].strip() == '':
+                return json_response(error=f'解析配置{line!r}失败，确认其遵循 key = value 格式')
+            data[fields[0].strip()] = fields[1].strip()
         _parse(request, form, data)
     return json_response(error=error)
 

@@ -86,6 +86,8 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [("127.0.0.1", 6379)],
+            "capacity": 1000,
+            "expiry": 120,
         },
     },
 }
@@ -121,7 +123,7 @@ AUTHENTICATION_EXCLUDES = (
     re.compile('/apis/.*'),
 )
 
-SPUG_VERSION = 'v2.3.9'
+SPUG_VERSION = 'v2.3.10'
 
 # override default config
 try:

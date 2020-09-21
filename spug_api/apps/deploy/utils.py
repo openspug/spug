@@ -3,10 +3,12 @@
 # Released under the AGPL-3.0 License.
 from django_redis import get_redis_connection
 from django.conf import settings
-from libs.utils import AttrDict, human_time, human_datetime
+from libs.utils import AttrDict, human_time, human_datetime, parse_time
 from apps.host.models import Host
 from apps.notify.models import Notify
+from apps.deploy.models import DeployRequest
 from concurrent import futures
+from datetime import datetime
 import requests
 import subprocess
 import json
@@ -458,3 +460,11 @@ class Helper:
             self.send_info(key, out)
         if code != 0:
             self.send_error(key, f'exit code: {code}')
+
+
+def auto_update_status():
+    now = datetime.now()
+    for req in DeployRequest.objects.filter(status='2'):
+        if (now - parse_time(req.do_at)).seconds > 3600:
+            req.status = '-3'
+            req.save()

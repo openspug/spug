@@ -27,7 +27,7 @@ class Scheduler:
     timezone = settings.TIME_ZONE
 
     def __init__(self):
-        self.scheduler = BackgroundScheduler(timezone=self.timezone, executors={'default': ThreadPoolExecutor(20)})
+        self.scheduler = BackgroundScheduler(timezone=self.timezone, executors={'default': ThreadPoolExecutor(30)})
         self.scheduler.add_listener(
             self._handle_event,
             EVENT_SCHEDULER_SHUTDOWN | EVENT_JOB_ERROR | EVENT_JOB_MAX_INSTANCES | EVENT_JOB_EXECUTED)
@@ -61,7 +61,7 @@ class Scheduler:
         if obj.latest_status == 0:
             if is_notified:
                 self._record_alarm(obj, '2')
-                logger.info(f'{human_datetime()} recover job_id: {obj.id}')
+                logger.info(f'{human_datetime()} recover job_id: {obj.id}, job_name: {obj.name}')
                 self._do_notify('2', obj, out)
         else:
             if obj.fault_times >= obj.threshold:
@@ -69,7 +69,7 @@ class Scheduler:
                     obj.latest_notify_time = int(time.time())
                     obj.save()
                     self._record_alarm(obj, '1')
-                    logger.info(f'{human_datetime()} notify job_id: {obj.id}')
+                    logger.info(f'{human_datetime()} notify job_id: {obj.id}, job_name: {obj.name}')
                     self._do_notify('1', obj, out)
 
     def _handle_event(self, event):

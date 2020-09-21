@@ -56,7 +56,7 @@ class TaskIndex extends React.Component {
           <Button icon="thunderbolt" type="primary" onClick={this.handleSubmit}>开始执行</Button>
         </Form>
         {store.showHost && <HostSelector onCancel={store.switchHost} onOk={hosts => store.hosts = hosts}/>}
-        {store.showTemplate && <TemplateSelector onCancel={store.switchTemplate} onOk={body => this.setState({body})}/>}
+        {store.showTemplate && <TemplateSelector onCancel={store.switchTemplate} onOk={v => this.setState({body: body + v})}/>}
         {store.showConsole && <ExecConsole token={token} onCancel={store.switchConsole}/>}
       </AuthCard>
     )

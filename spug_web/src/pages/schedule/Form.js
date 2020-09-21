@@ -149,7 +149,7 @@ class ComForm extends React.Component {
   render() {
     const info = store.record;
     const {getFieldDecorator, getFieldValue} = this.props.form;
-    const {page, args, loading, showTmp, nextRunTime} = this.state;
+    const {page, args, command, loading, showTmp, nextRunTime} = this.state;
     const [b1, b2, b3] = this.verifyButtonStatus();
     return (
       <Modal
@@ -192,7 +192,7 @@ class ComForm extends React.Component {
               extra={<LinkButton onClick={() => this.setState({showTmp: true})}>从模板添加</LinkButton>}>
               <ACEditor
                 mode="sh"
-                value={this.state.command}
+                value={command}
                 width="100%"
                 height="150px"
                 onChange={val => this.setState({command: val})}/>
@@ -321,7 +321,7 @@ class ComForm extends React.Component {
           </Form.Item>
         </Form>
         {showTmp && <TemplateSelector
-          onOk={command => this.setState({command})}
+          onOk={v => this.setState({command: command + v})}
           onCancel={() => this.setState({showTmp: false})}/>}
       </Modal>
     )

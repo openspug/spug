@@ -6,6 +6,7 @@ from libs import json_response, JsonParser, Argument, human_datetime
 from apps.monitor.models import Detection
 from django_redis import get_redis_connection
 from django.conf import settings
+from apps.monitor.executors import dispatch
 import json
 
 
@@ -78,3 +79,15 @@ class DetectionView(View):
                     return json_response(error='该监控项正在运行中，请先停止后再尝试删除')
                 task.delete()
         return json_response(error=error)
+
+
+def run_test(request):
+    form, error = JsonParser(
+        Argument('type', help='请选择监控类型'),
+        Argument('addr', help='请输入监控地址'),
+        Argument('extra', required=False)
+    ).parse(request.body)
+    if error is None:
+        is_success, message = dispatch(form.type, form.addr, form.extra)
+        return json_response({'is_success': is_success, 'message': message})
+    return json_response(error=error)
