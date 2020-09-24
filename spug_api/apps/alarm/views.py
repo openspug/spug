@@ -40,7 +40,7 @@ class GroupView(View):
             Argument('id', type=int, help='请指定操作对象')
         ).parse(request.GET)
         if error is None:
-            detection = Detection.objects.filter(notify_grp__regex=fr'\D{form.id}\D').first()
+            detection = Detection.objects.filter(notify_grp__regex=fr'[^0-9]{form.id}[^0-9]').first()
             if detection:
                 return json_response(error=f'监控任务【{detection.name}】正在使用该报警组，请解除关联后再尝试删除该联系组')
             Group.objects.filter(pk=form.id).delete()
