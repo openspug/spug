@@ -26,13 +26,15 @@ class About extends React.Component {
       .finally(() => this.setState({fetching: false}))
     http.get('https://gitee.com/api/v5/repos/openspug/spug/releases/latest')
       .then(res => {
-        if (res.tag_name && res.tag_name !== VERSION) {
+        if (res.tag_name && res.tag_name === VERSION) {
           const logs = res.body.replace(/- */g, '');
           notification.open({
+            key: 'new_version',
             duration: 0,
             top: 88,
-            icon: <Icon type="smile" theme="twoTone"/>,
             message: `发现新版本 ${res.tag_name}`,
+            icon: <Icon type="smile" theme="twoTone"/>,
+            btn: <a target="_blank" rel="noopener noreferrer" href="https://spug.dev/docs/update-version/">如何升级？</a>,
             description: <pre style={{lineHeight: '30px'}}>{logs}</pre>
           })
         }
