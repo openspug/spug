@@ -26,7 +26,7 @@ class About extends React.Component {
       .finally(() => this.setState({fetching: false}))
     http.get('https://gitee.com/api/v5/repos/openspug/spug/releases/latest')
       .then(res => {
-        if (res.tag_name && res.tag_name === VERSION) {
+        if (res.tag_name && res.tag_name !== VERSION) {
           const logs = res.body.replace(/- */g, '');
           notification.open({
             key: 'new_version',
