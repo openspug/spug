@@ -5,10 +5,10 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, message } from 'antd';
-import http from 'libs/http';
+import { Table, Modal, message } from 'antd';
+import { http, hasPermission } from 'libs';
 import store from './store';
-import { LinkButton, AuthLink } from 'components';
+import { Action } from 'components';
 
 @observer
 class ComTable extends React.Component {
@@ -33,16 +33,14 @@ class ComTable extends React.Component {
     ellipsis: true
   }, {
     title: '操作',
+    className: hasPermission('config.app.edit|config.app.del|config.app.view_config') ? null : 'none',
     render: info => (
-      <span>
-        <LinkButton auth="config.app.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="config.app.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="config.app.view_config" onClick={() => store.showRel(info)}>依赖</LinkButton>
-        <Divider type="vertical"/>
-        <AuthLink auth="config.app.view_config" to={`/config/setting/app/${info.id}`}>配置</AuthLink>
-      </span>
+      <Action>
+        <Action.Button auth="config.app.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
+        <Action.Button auth="config.app.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+        <Action.Button auth="config.app.view_config" onClick={() => store.showRel(info)}>依赖</Action.Button>
+        <Action.Link auth="config.app.view_config" to={`/config/setting/app/${info.id}`}>配置</Action.Link>
+      </Action>
     )
   }];
 

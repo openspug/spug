@@ -5,11 +5,11 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, message } from 'antd';
+import { Table, Modal, message } from 'antd';
 import ComForm from './Form';
-import http from 'libs/http';
+import { http, hasPermission } from 'libs';
 import store from './store';
-import { LinkButton, AuthLink } from "components";
+import { Action } from "components";
 
 @observer
 class ComTable extends React.Component {
@@ -34,14 +34,13 @@ class ComTable extends React.Component {
     ellipsis: true
   }, {
     title: '操作',
+    className: hasPermission('config.src.edit|config.src.del|config.src.view_config') ? null : 'none',
     render: info => (
-      <span>
-        <LinkButton auth="config.src.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="config.src.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
-        <Divider type="vertical"/>
-        <AuthLink auth="config.src.view_config" to={`/config/setting/src/${info.id}`}>配置</AuthLink>
-      </span>
+      <Action>
+        <Action.Button auth="config.src.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
+        <Action.Button auth="config.src.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+        <Action.Link auth="config.src.view_config" to={`/config/setting/src/${info.id}`}>配置</Action.Link>
+      </Action>
     )
   }];
 

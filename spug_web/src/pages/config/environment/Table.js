@@ -5,11 +5,11 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, message } from 'antd';
+import { Table, Modal, message } from 'antd';
 import ComForm from './Form';
-import http from 'libs/http';
+import {http, hasPermission} from 'libs';
 import store from './store';
-import { LinkButton } from "components";
+import { Action } from "components";
 
 @observer
 class ComTable extends React.Component {
@@ -34,12 +34,12 @@ class ComTable extends React.Component {
     ellipsis: true
   }, {
     title: '操作',
+    className: hasPermission('config.env.edit|config.env.del') ? null : 'none',
     render: info => (
-      <span>
-        <LinkButton auth="config.env.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="config.env.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
-      </span>
+      <Action>
+        <Action.Button auth="config.env.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
+        <Action.Button auth="config.env.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+      </Action>
     )
   }];
 

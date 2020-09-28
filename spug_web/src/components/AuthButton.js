@@ -13,5 +13,5 @@ export default function AuthButton(props) {
   if (props.auth && !hasPermission(props.auth)) {
     disabled = true;
   }
-  return <Button {...props} disabled={disabled}>{props.children}</Button>
+  return disabled ? null : <Button {...props}>{props.children}</Button>
 }

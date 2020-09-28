@@ -6,10 +6,10 @@
 import React from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, Tag, Icon, message } from 'antd';
-import http from 'libs/http';
+import { Table, Modal, Tag, Icon, message } from 'antd';
+import { http, hasPermission } from 'libs';
 import store from './store';
-import { LinkButton } from "components";
+import { Action } from "components";
 import CloneConfirm from './CloneConfirm';
 import envStore from 'pages/config/environment/store';
 import lds from 'lodash';
@@ -45,16 +45,14 @@ class ComTable extends React.Component {
     ellipsis: true
   }, {
     title: '操作',
+    className: hasPermission('deploy.app.edit|deploy.app.del') ? null : 'none',
     render: info => (
-      <span>
-        <LinkButton auth="deploy.app.edit" onClick={e => store.showExtForm(e, info.id)}>新建发布</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="deploy.app.edit" onClick={e => this.handleClone(e, info.id)}>克隆发布</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="deploy.app.edit" onClick={e => store.showForm(e, info)}>编辑</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="deploy.app.del" onClick={e => this.handleDelete(e, info)}>删除</LinkButton>
-      </span>
+      <Action>
+        <Action.Button auth="deploy.app.edit" onClick={e => store.showExtForm(e, info.id)}>新建发布</Action.Button>
+        <Action.Button auth="deploy.app.edit" onClick={e => this.handleClone(e, info.id)}>克隆发布</Action.Button>
+        <Action.Button auth="deploy.app.edit" onClick={e => store.showForm(e, info)}>编辑</Action.Button>
+        <Action.Button auth="deploy.app.del" onClick={e => this.handleDelete(e, info)}>删除</Action.Button>
+      </Action>
     )
   }];
 
@@ -127,15 +125,15 @@ class ComTable extends React.Component {
       render: value => value ? <Tag color="green">开启</Tag> : <Tag color="red">关闭</Tag>
     }, {
       title: '操作',
+      className: hasPermission('deploy.app.config|deploy.app.edit') ? null : 'none',
       render: info => (
-        <span>
-          <LinkButton auth="deploy.app.config"
-                      onClick={e => store.showExtForm(e, record.id, info, false, true)}>查看</LinkButton>
-          <Divider type="vertical"/>
-          <LinkButton auth="deploy.app.edit" onClick={e => store.showExtForm(e, record.id, info)}>编辑</LinkButton>
-          <Divider type="vertical"/>
-          <LinkButton auth="deploy.app.edit" onClick={() => this.handleDeployDelete(info)}>删除</LinkButton>
-        </span>
+        <Action>
+          <Action.Button
+            auth="deploy.app.config"
+            onClick={e => store.showExtForm(e, record.id, info, false, true)}>查看</Action.Button>
+          <Action.Button auth="deploy.app.edit" onClick={e => store.showExtForm(e, record.id, info)}>编辑</Action.Button>
+          <Action.Button auth="deploy.app.edit" onClick={() => this.handleDeployDelete(info)}>删除</Action.Button>
+        </Action>
       )
     }];
 

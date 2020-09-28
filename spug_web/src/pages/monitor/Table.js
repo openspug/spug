@@ -5,10 +5,10 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, Tag, message } from 'antd';
-import { LinkButton } from 'components';
+import { Table, Modal, Tag, message } from 'antd';
+import { Action } from 'components';
 import ComForm from './Form';
-import http from 'libs/http';
+import {http, hasPermission} from 'libs';
 import store from './store';
 import hostStore from '../host/store';
 import lds from 'lodash';
@@ -82,14 +82,13 @@ class ComTable extends React.Component {
     sorter: (a, b) => a.latest_run_time.localeCompare(b.latest_run_time)
   }, {
     title: '操作',
+    className: hasPermission('monitor.monitor.edit|monitor.monitor.del') ? null : 'none',
     render: info => (
-      <span>
-        <LinkButton auth="monitor.monitor.edit" onClick={() => this.handleActive(info)}>{info['is_active'] ? '禁用' : '启用'}</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="monitor.monitor.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="monitor.monitor.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
-      </span>
+      <Action>
+        <Action.Button auth="monitor.monitor.edit" onClick={() => this.handleActive(info)}>{info['is_active'] ? '禁用' : '启用'}</Action.Button>
+        <Action.Button auth="monitor.monitor.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
+        <Action.Button auth="monitor.monitor.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+      </Action>
     ),
     width: 180
   }];

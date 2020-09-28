@@ -5,11 +5,11 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, message } from 'antd';
-import { LinkButton } from 'components';
+import { Table, Modal, message } from 'antd';
+import { Action } from 'components';
 import ComForm from './Form';
 import ComImport from './Import';
-import http from 'libs/http';
+import { http, hasPermission} from 'libs';
 import store from './store';
 
 @observer
@@ -19,11 +19,6 @@ class ComTable extends React.Component {
   }
 
   columns = [{
-    title: '序号',
-    key: 'series',
-    render: (_, __, index) => index + 1,
-    width: 80
-  }, {
     title: '类别',
     dataIndex: 'zone',
   }, {
@@ -36,7 +31,8 @@ class ComTable extends React.Component {
     sorter: (a, b) => a.name.localeCompare(b.name)
   }, {
     title: '端口',
-    dataIndex: 'port'
+    dataIndex: 'port',
+    width: 100,
   }, {
     title: '备注',
     dataIndex: 'desc',
@@ -44,14 +40,13 @@ class ComTable extends React.Component {
   }, {
     title: '操作',
     width: 200,
+    className: hasPermission('host.host.edit|host.host.del|host.host.console') ? null : 'none',
     render: info => (
-      <span>
-        <LinkButton auth="host.host.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="host.host.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="host.host.console" onClick={() => this.handleConsole(info)}>Console</LinkButton>
-      </span>
+      <Action>
+        <Action.Button auth="host.host.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
+        <Action.Button auth="host.host.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+        <Action.Button auth="host.host.console" onClick={() => this.handleConsole(info)}>Console</Action.Button>
+      </Action>
     )
   }];
 
