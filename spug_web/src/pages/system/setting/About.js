@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import styles from './index.module.css';
-import { Descriptions, Spin } from "antd";
+import { Descriptions, Spin, Icon, notification } from "antd";
 import { observer } from 'mobx-react'
 import { http, VERSION } from 'libs';
 
@@ -24,6 +24,19 @@ class About extends React.Component {
     http.get('/api/setting/about/')
       .then(res => this.setState({info: res}))
       .finally(() => this.setState({fetching: false}))
+    http.get('https://gitee.com/api/v5/repos/openspug/spug/releases/latest')
+      .then(res => {
+        if (res.tag_name && res.tag_name !== VERSION) {
+          const logs = res.body.replace(/- */g, '');
+          notification.open({
+            duration: 0,
+            top: 88,
+            icon: <Icon type="smile" theme="twoTone"/>,
+            message: `发现新版本 ${res.tag_name}`,
+            description: <pre style={{lineHeight: '30px'}}>{logs}</pre>
+          })
+        }
+      })
   }
 
 
@@ -42,7 +55,8 @@ class About extends React.Component {
             <a href="https://spug.dev" target="_blank" rel="noopener noreferrer">https://spug.dev</a>
           </Descriptions.Item>
           <Descriptions.Item label="更新日志">
-            <a href="https://spug.dev/docs/change-log/" target="_blank" rel="noopener noreferrer">https://spug.dev/docs/change-log/</a>
+            <a href="https://spug.dev/docs/change-log/" target="_blank"
+               rel="noopener noreferrer">https://spug.dev/docs/change-log/</a>
           </Descriptions.Item>
         </Descriptions>
       </Spin>
