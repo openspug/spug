@@ -21,14 +21,21 @@ class Action extends React.Component {
     return <Button type="link" {...props} style={{padding: 0}}/>
   }
 
+  _handle = (data, el) => {
+    const length = data.length;
+    if (canVisible(el.props.auth)) {
+      if (length !== 0) data.push(<Divider key={length} type="vertical"/>)
+      data.push(el)
+    }
+  }
+
   render() {
     const children = [];
-    this.props.children.forEach((el, index) => {
-      if (canVisible(el.props.auth)) {
-        if (children.length !== 0) children.push(<Divider key={index} type="vertical"/>);
-        children.push(el)
-      }
-    })
+    if (Array.isArray(this.props.children)) {
+      this.props.children.forEach(el => this._handle(children, el))
+    } else {
+      this._handle(children, this.props.children)
+    }
 
     return <span>
       {children}
