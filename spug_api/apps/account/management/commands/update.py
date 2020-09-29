@@ -17,9 +17,11 @@ class Command(BaseCommand):
         if not version:
             return self.stderr.write(self.style.ERROR('获取新版本失败，排除网络问题后请附带输出内容至官方论坛反馈'))
         if version == settings.SPUG_VERSION:
-            return self.stdout.write(self.style.SUCCESS('当前已是最新版本'))
-        self.stdout.write(f'{version} 更新日志：\r\n' + res.get('body', ''))
-        answer = input(f'发现新版本 {version} 是否更新[y|n]？')
+            self.stdout.write(self.style.SUCCESS(''))
+            answer = input(f'当前已是最新版本，是否要进行修复性更新[y|n]？')
+        else:
+            self.stdout.write(f'{version} 更新日志：\r\n' + res.get('body', ''))
+            answer = input(f'发现新版本 {version} 是否更新[y|n]？')
         if answer.lower() != 'y':
             return
 

@@ -4,8 +4,8 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Divider, Button } from 'antd';
+import { Link as ALink } from 'react-router-dom';
+import { Divider, Button as AButton } from 'antd';
 import { hasPermission } from 'libs';
 
 function canVisible(auth) {
@@ -14,11 +14,11 @@ function canVisible(auth) {
 
 class Action extends React.Component {
   static Link(props) {
-    return <Link {...props}/>
+    return <ALink {...props}/>
   }
 
   static Button(props) {
-    return <Button type="link" {...props} style={{padding: 0}}/>
+    return <AButton type="link" {...props} style={{padding: 0}}/>
   }
 
   _handle = (data, el) => {
