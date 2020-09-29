@@ -45,7 +45,7 @@ class ComForm extends React.Component {
       port: undefined,
       host: undefined,
       process: undefined,
-      command: undefined,
+      command: '',
       showTmp: false,
       page: 0,
     }

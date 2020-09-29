@@ -28,7 +28,7 @@ class ComForm extends React.Component {
       page: 0,
       nextRunTime: null,
       args: {[store.record['trigger']]: store.record['trigger_args']},
-      command: store.record['command'],
+      command: store.record['command'] || '',
     }
   }
 
