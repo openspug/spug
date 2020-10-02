@@ -81,7 +81,7 @@ class LoginIndex extends React.Component {
           <div className={styles.desc}>灵活、强大、功能全面的开源运维平台</div>
         </div>
         <div className={styles.formContainer}>
-          <Tabs classNam={styles.tabs} onTabClick={e => this.setState({loginType: e})}>
+          <Tabs className={styles.tabs} onTabClick={e => this.setState({loginType: e})}>
             <Tabs.TabPane tab="普通登录" key="default"/>
             <Tabs.TabPane tab="LDAP登录" key="ldap"/>
           </Tabs>
