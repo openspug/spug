@@ -5,9 +5,11 @@ from django.core.cache import cache
 from django.views.generic import View
 from django.db.models import F
 from libs import JsonParser, Argument, human_datetime, json_response
+from libs.utils import get_request_real_ip
 from apps.account.models import User, Role
 from apps.setting.models import Setting
 from libs.ldap import LDAP
+import ipaddress
 import time
 import uuid
 import json
@@ -155,7 +157,7 @@ def login(request):
         Argument('type', required=False)
     ).parse(request.body)
     if error is None:
-        x_real_ip = request.headers.get('x-real-ip', '')
+        x_real_ip = get_request_real_ip(request.headers)
         user = User.objects.filter(username=form.username, type=form.type).first()
         if user and not user.is_active:
             return json_response(error="账户已被系统禁用")
@@ -198,7 +200,7 @@ def handle_user_info(user, x_real_ip):
         'access_token': user.access_token,
         'nickname': user.nickname,
         'is_supper': user.is_supper,
-        'has_real_ip': True if x_real_ip else False,
+        'has_real_ip': x_real_ip and ipaddress.ip_address(x_real_ip).is_global,
         'host_perms': [] if user.is_supper else user.host_perms,
         'permissions': [] if user.is_supper else user.page_perms
     })
