@@ -5,7 +5,8 @@
  */
 import http from 'axios'
 import history from './history'
-import {message} from 'antd';
+import { X_TOKEN } from './functools';
+import { message } from 'antd';
 
 // response处理
 function handleResponse(response) {
@@ -40,7 +41,7 @@ function handleResponse(response) {
 http.interceptors.request.use(request => {
   request.isInternal = request.url.startsWith('/api/');
   if (request.isInternal) {
-    request.headers['X-Token'] = localStorage.getItem('token')
+    request.headers['X-Token'] = X_TOKEN
   }
   request.timeout = request.timeout || 30000;
   return request;

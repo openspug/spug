@@ -9,7 +9,7 @@ import { AuthDiv } from 'components';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 import FileManager from './FileManager';
-import { http } from 'libs';
+import { http, X_TOKEN } from 'libs';
 import 'xterm/css/xterm.css';
 import styles from './index.module.css';
 
@@ -18,7 +18,6 @@ class WebSSH extends React.Component {
   constructor(props) {
     super(props);
     this.id = props.match.params.id;
-    this.token = localStorage.getItem('token');
     this.socket = null;
     this.term = new Terminal();
     this.container = null;
@@ -37,7 +36,7 @@ class WebSSH extends React.Component {
     const fitPlugin = new FitAddon();
     this.term.loadAddon(fitPlugin);
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/ssh/${this.token}/${this.id}/`);
+    this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/ssh/${this.id}/?x-token=${X_TOKEN}`);
     this.socket.onmessage = e => this._read_as_text(e.data);
     this.socket.onopen = () => {
       this.term.open(this.container);

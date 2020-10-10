@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { Drawer, Breadcrumb, Table, Icon, Divider, Switch, Button, Progress, Modal, message } from 'antd';
-import { http, uniqueId } from 'libs';
+import { http, uniqueId, X_TOKEN } from 'libs';
 import lds from 'lodash';
 import styles from './index.module.css'
 
@@ -129,7 +129,7 @@ class FileManager extends React.Component {
 
   _updatePercent = token => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${token}/`);
+    this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${token}/?x-token=${X_TOKEN}`);
     this.socket.onopen = () => this.socket.send('ok');
     this.socket.onmessage = e => {
       if (e.data === 'pong') {
@@ -145,9 +145,8 @@ class FileManager extends React.Component {
 
   handleDownload = (name) => {
     const file = `/${this.state.pwd.join('/')}/${name}`;
-    const token = localStorage.getItem('token');
     const link = document.createElement('a');
-    link.href = `/api/file/object/?id=${this.id}&file=${file}&x-token=${token}`;
+    link.href = `/api/file/object/?id=${this.id}&file=${file}&x-token=${X_TOKEN}`;
     document.body.appendChild(link);
     const evt = document.createEvent("MouseEvents");
     evt.initEvent("click", false, false);

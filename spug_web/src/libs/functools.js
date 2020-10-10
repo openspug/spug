@@ -9,7 +9,10 @@ let Permission = {
   permissions: []
 };
 
+export let X_TOKEN;
+
 export function updatePermissions() {
+  X_TOKEN = localStorage.getItem('token');
   Permission.isSuper = localStorage.getItem('is_supper') === 'true';
   Permission.hostPerms = JSON.parse(localStorage.getItem('host_perms') || '[]');
   Permission.permissions = JSON.parse(localStorage.getItem('permissions') || '[]');

@@ -6,10 +6,9 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Steps, Collapse, PageHeader, Spin, Tag, Button, Icon } from 'antd';
-import http from 'libs/http';
+import { http, history, X_TOKEN } from 'libs';
 import { AuthDiv } from 'components';
 import OutView from './OutView';
-import history from 'libs/history';
 import styles from './index.module.css';
 import store from './store';
 import lds from 'lodash';
@@ -80,7 +79,7 @@ class Ext1Index extends React.Component {
         store.request.status = '2';
         store.outputs = outputs;
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${token}/`);
+        this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${token}/?x-token=${X_TOKEN}`);
         this.socket.onopen = () => {
           this.socket.send('ok');
         };

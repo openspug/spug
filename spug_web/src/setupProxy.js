@@ -10,7 +10,7 @@ module.exports = function (app) {
     target: 'http://127.0.0.1:8000',
     changeOrigin: true,
     ws: true,
-    headers: {'X-Real-IP': '127.0.0.1'},
+    headers: {'X-Real-IP': '1.1.1.1'},
     pathRewrite: {
       '^/api': ''
     }
