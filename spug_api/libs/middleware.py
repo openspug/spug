@@ -35,7 +35,8 @@ class AuthenticationMiddleware(MiddlewareMixin):
             user = User.objects.filter(access_token=access_token).first()
             if user and x_real_ip == user.last_ip and user.token_expired >= time.time() and user.is_active:
                 request.user = user
-                user.token_expired = time.time() + 8 * 60 * 60
+                if request.path != '/notify/':
+                    user.token_expired = time.time() + 8 * 60 * 60
                 user.save()
                 return None
         response = json_response(error="验证失败，请重新登录")
