@@ -35,7 +35,7 @@ def ping_check(addr):
         if platform.system().lower() == 'windows':
             command = f'ping -n 1 -w 3000 {addr}'
         else:
-            command = f'ping -c 1 -t 3 {addr}'
+            command = f'ping -c 1 -W 3 {addr}'
         task = subprocess.run(command, shell=True, stdout=subprocess.PIPE)
         if task.returncode == 0:
             return True, 'Ping检测正常'
