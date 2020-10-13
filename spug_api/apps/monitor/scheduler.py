@@ -86,7 +86,6 @@ class Scheduler:
             Notify.make_notify('monitor', '1', f'{obj.name} - 执行异常', f'{event.exception}')
         elif event.code == EVENT_JOB_EXECUTED:
             is_ok, out = event.retval
-            obj = Detection.objects.filter(pk=event.job_id).first()
             is_notified = True if obj.latest_notify_time else False
             if obj.latest_status in [0, None] and is_ok is False:
                 obj.latest_fault_time = int(time.time())
