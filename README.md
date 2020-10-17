@@ -102,9 +102,9 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
       </th>
         <th align="center" style="width: 115px;">
         <a href="https://www.aliyun.com/minisite/goods?userCode=8vdj3myc">
-          <img src="http://image.qbangmang.com/ecs_223.jpg" width="115px"><br>
-          <sub>阿里云</sub><br>
-          <sub>74元/年云主机</sub>
+          <img src="http://image.qbangmang.com/aliyun_quan.png" width="115px"><br>
+          <sub>阿里云通用券</sub><br>
+          <sub>300元限量免费领</sub>
         </a>
       </th>
       <th align="center" style="width: 125px;">
