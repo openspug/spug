@@ -136,6 +136,8 @@ class SelfView(View):
         ).parse(request.body, True)
         if error is None:
             if form.get('old_password') and form.get('new_password'):
+                if request.user.type == 'ldap':
+                    return json_response(error='LDAP账户无法修改密码')
                 if len(form.new_password) < 6:
                     return json_response(error='请设置至少6位的新密码')
                 if request.user.verify_password(form.old_password):
