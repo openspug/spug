@@ -84,6 +84,7 @@ class SSHConsumer(WebsocketConsumer):
         except Exception as e:
             self.send(bytes_data=f'Exception: {e}\r\n'.encode())
             self.close()
+            return
         self.chan = self.ssh.invoke_shell(term='xterm')
         self.chan.transport.set_keepalive(30)
         Thread(target=self.loop_read).start()
