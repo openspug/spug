@@ -1,6 +1,7 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
+from django.db import close_old_connections
 from channels.security.websocket import WebsocketDenier
 from apps.account.models import User
 from libs.utils import get_request_real_ip
@@ -32,6 +33,7 @@ class AuthMiddleware:
         return get_request_real_ip(decode_headers)
 
     def verify_user(self, scope, headers):
+        close_old_connections()
         query_string = scope['query_string'].decode()
         x_real_ip = self.get_real_ip(headers)
         token = parse_qs(query_string).get('x-token', [''])[0]
