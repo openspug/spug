@@ -8,7 +8,7 @@ import { observer } from 'mobx-react';
 import { Table, Modal, Tag, message } from 'antd';
 import { Action } from 'components';
 import ComForm from './Form';
-import {http, hasPermission} from 'libs';
+import { http, hasPermission } from 'libs';
 import store from './store';
 import hostStore from '../host/store';
 import lds from 'lodash';
@@ -40,58 +40,6 @@ class ComTable extends React.Component {
     }
     this.setState({hosts: tmp})
   };
-
-  columns = [{
-    title: '任务名称',
-    dataIndex: 'name',
-  }, {
-    title: '类型',
-    dataIndex: 'type_alias',
-  }, {
-    title: '地址',
-    render: info => {
-      if ('34'.includes(info.type)) {
-        return lds.get(this.state.hosts, `${info.addr}.name`)
-      } else {
-        return info.addr
-      }
-    },
-    ellipsis: true
-  }, {
-    title: '频率',
-    dataIndex: 'rate',
-    render: value => `${value}分钟`
-  }, {
-    title: '状态',
-    render: info => {
-      if (info.is_active) {
-        if (info['latest_status'] === 0) {
-          return <Tag color="green">正常</Tag>
-        } else if (info['latest_status'] === 1) {
-          return <Tag color="red">异常</Tag>
-        } else {
-          return <Tag color="orange">待检测</Tag>
-        }
-      } else {
-        return <Tag>未启用</Tag>
-      }
-    }
-  }, {
-    title: '更新于',
-    dataIndex: 'latest_run_time_alias',
-    sorter: (a, b) => a.latest_run_time.localeCompare(b.latest_run_time)
-  }, {
-    title: '操作',
-    className: hasPermission('monitor.monitor.edit|monitor.monitor.del') ? null : 'none',
-    render: info => (
-      <Action>
-        <Action.Button auth="monitor.monitor.edit" onClick={() => this.handleActive(info)}>{info['is_active'] ? '禁用' : '启用'}</Action.Button>
-        <Action.Button auth="monitor.monitor.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-        <Action.Button auth="monitor.monitor.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
-      </Action>
-    ),
-    width: 180
-  }];
 
   handleActive = (text) => {
     Modal.confirm({
@@ -152,8 +100,43 @@ class ComTable extends React.Component {
             hideOnSinglePage: true,
             showTotal: total => `共 ${total} 条`,
             pageSizeOptions: ['10', '20', '50', '100']
-          }}
-          columns={this.columns}/>
+          }}>
+          <Table.Column title="任务名称" dataIndex="name"/>
+          <Table.Column title="类型" dataIndex="type_alias"/>
+          <Table.Column ellipsis title="地址" render={info => {
+            if ('34'.includes(info.type)) {
+              return lds.get(this.state.hosts, `${info.addr}.name`)
+            } else {
+              return info.addr
+            }
+          }}/>
+          <Table.Column title="频率" dataIndex="rate" render={value => `${value}分钟`}/>
+          <Table.Column title="状态" render={info => {
+            if (info.is_active) {
+              if (info['latest_status'] === 0) {
+                return <Tag color="green">正常</Tag>
+              } else if (info['latest_status'] === 1) {
+                return <Tag color="red">异常</Tag>
+              } else {
+                return <Tag color="orange">待检测</Tag>
+              }
+            } else {
+              return <Tag>未启用</Tag>
+            }
+          }}/>
+          <Table.Column title="更新于" dataIndex="latest_run_time_alias"
+                        sorter={(a, b) => a.latest_run_time.localeCompare(b.latest_run_time)}/>
+          {hasPermission('monitor.monitor.edit|monitor.monitor.del') && (
+            <Table.Column width={180} title="操作" render={info => (
+              <Action>
+                <Action.Button auth="monitor.monitor.edit"
+                               onClick={() => this.handleActive(info)}>{info['is_active'] ? '禁用' : '启用'}</Action.Button>
+                <Action.Button auth="monitor.monitor.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
+                <Action.Button auth="monitor.monitor.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+              </Action>
+            )}/>
+          )}
+        </Table>
         {store.formVisible && <ComForm/>}
       </React.Fragment>
     )

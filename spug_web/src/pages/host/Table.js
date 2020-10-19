@@ -9,7 +9,7 @@ import { Table, Modal, message } from 'antd';
 import { Action } from 'components';
 import ComForm from './Form';
 import ComImport from './Import';
-import { http, hasPermission} from 'libs';
+import { http, hasPermission } from 'libs';
 import store from './store';
 
 @observer
@@ -17,38 +17,6 @@ class ComTable extends React.Component {
   componentDidMount() {
     store.fetchRecords()
   }
-
-  columns = [{
-    title: '类别',
-    dataIndex: 'zone',
-  }, {
-    title: '主机名称',
-    dataIndex: 'name',
-    sorter: (a, b) => a.name.localeCompare(b.name)
-  }, {
-    title: '连接地址',
-    dataIndex: 'hostname',
-    sorter: (a, b) => a.name.localeCompare(b.name)
-  }, {
-    title: '端口',
-    dataIndex: 'port',
-    width: 100,
-  }, {
-    title: '备注',
-    dataIndex: 'desc',
-    ellipsis: true
-  }, {
-    title: '操作',
-    width: 200,
-    className: hasPermission('host.host.edit|host.host.del|host.host.console') ? null : 'none',
-    render: info => (
-      <Action>
-        <Action.Button auth="host.host.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-        <Action.Button auth="host.host.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
-        <Action.Button auth="host.host.console" onClick={() => this.handleConsole(info)}>Console</Action.Button>
-      </Action>
-    )
-  }];
 
   handleConsole = (info) => {
     window.open(`/ssh/${info.id}`)
@@ -91,8 +59,22 @@ class ComTable extends React.Component {
             hideOnSinglePage: true,
             showTotal: total => `共 ${total} 条`,
             pageSizeOptions: ['10', '20', '50', '100']
-          }}
-          columns={this.columns}/>
+          }}>
+          <Table.Column title="类别" dataIndex="zone"/>
+          <Table.Column title="主机名称" dataIndex="name" sorter={(a, b) => a.name.localeCompare(b.name)}/>
+          <Table.Column title="连接地址" dataIndex="hostname" sorter={(a, b) => a.name.localeCompare(b.name)}/>
+          <Table.Column width={100} title="端口" dataIndex="port"/>
+          <Table.Column ellipsis title="备注信息" dataIndex="desc"/>
+          {hasPermission('host.host.edit|host.host.del|host.host.console') && (
+            <Table.Column width={200} title="操作" render={info => (
+              <Action>
+                <Action.Button auth="host.host.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
+                <Action.Button auth="host.host.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+                <Action.Button auth="host.host.console" onClick={() => this.handleConsole(info)}>Console</Action.Button>
+              </Action>
+            )}/>
+          )}
+        </Table>
         {store.formVisible && <ComForm/>}
         {store.importVisible && <ComImport/>}
       </React.Fragment>

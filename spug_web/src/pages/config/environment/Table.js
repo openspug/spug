@@ -7,7 +7,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { Table, Modal, message } from 'antd';
 import ComForm from './Form';
-import {http, hasPermission} from 'libs';
+import { http, hasPermission } from 'libs';
 import store from './store';
 import { Action } from "components";
 
@@ -16,32 +16,6 @@ class ComTable extends React.Component {
   componentDidMount() {
     store.fetchRecords()
   }
-
-  columns = [{
-    title: '序号',
-    key: 'series',
-    render: (_, __, index) => index + 1,
-    width: 80,
-  }, {
-    title: '环境名称',
-    dataIndex: 'name',
-  }, {
-    title: '标识符',
-    dataIndex: 'key',
-  }, {
-    title: '描述信息',
-    dataIndex: 'desc',
-    ellipsis: true
-  }, {
-    title: '操作',
-    className: hasPermission('config.env.edit|config.env.del') ? null : 'none',
-    render: info => (
-      <Action>
-        <Action.Button auth="config.env.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-        <Action.Button auth="config.env.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
-      </Action>
-    )
-  }];
 
   handleDelete = (text) => {
     Modal.confirm({
@@ -74,8 +48,20 @@ class ComTable extends React.Component {
             hideOnSinglePage: true,
             showTotal: total => `共 ${total} 条`,
             pageSizeOptions: ['10', '20', '50', '100']
-          }}
-          columns={this.columns}/>
+          }}>
+          <Table.Column title="序号" key="series" render={(_, __, index) => index + 1}/>
+          <Table.Column title="环境名称" dataIndex="name"/>
+          <Table.Column title="标识符" dataIndex="key"/>
+          <Table.Column ellipsis title="描述信息" dataIndex="desc"/>
+          {hasPermission('config.env.edit|config.env.del') && (
+            <Table.Column title="操作" render={info => (
+              <Action>
+                <Action.Button auth="config.env.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
+                <Action.Button auth="config.env.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+              </Action>
+            )}/>
+          )}
+        </Table>
         {store.formVisible && <ComForm/>}
       </React.Fragment>
     )
