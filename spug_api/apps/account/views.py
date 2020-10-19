@@ -6,7 +6,7 @@ from django.views.generic import View
 from django.db.models import F
 from libs import JsonParser, Argument, human_datetime, json_response
 from libs.utils import get_request_real_ip
-from apps.account.models import User, Role
+from apps.account.models import User, Role, History
 from apps.setting.models import Setting
 from libs.ldap import LDAP
 import ipaddress
@@ -198,6 +198,7 @@ def handle_user_info(user, x_real_ip):
     user.last_login = human_datetime()
     user.last_ip = x_real_ip
     user.save()
+    History.objects.create(user=user, ip=x_real_ip)
     return json_response({
         'access_token': user.access_token,
         'nickname': user.nickname,

@@ -15,7 +15,8 @@ from apps.schedule.utils import send_fail_notify
 from apps.notify.models import Notify
 from apps.schedule.executors import dispatch
 from apps.schedule.utils import auto_clean_schedule_history
-from apps.alarm.utils import auto_clean_records
+from apps.alarm.utils import auto_clean_alarm_records
+from apps.account.utils import auto_clean_login_history
 from apps.deploy.utils import auto_update_status
 from django.conf import settings
 from libs import AttrDict, human_datetime
@@ -88,8 +89,9 @@ class Scheduler:
                     send_fail_notify(obj)
 
     def _init_builtin_jobs(self):
-        self.scheduler.add_job(auto_clean_records, 'cron', hour=0, minute=0)
-        self.scheduler.add_job(auto_clean_schedule_history, 'cron', hour=0, minute=0)
+        self.scheduler.add_job(auto_clean_alarm_records, 'cron', hour=0, minute=1)
+        self.scheduler.add_job(auto_clean_login_history, 'cron', hour=0, minute=2)
+        self.scheduler.add_job(auto_clean_schedule_history, 'cron', hour=0, minute=3)
         self.scheduler.add_job(auto_update_status, 'interval', minutes=5)
 
     def _init(self):

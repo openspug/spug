@@ -45,6 +45,7 @@ class ComTable extends React.Component {
     ellipsis: true
   }, {
     title: '操作',
+    width: 260,
     className: hasPermission('deploy.app.edit|deploy.app.del') ? null : 'none',
     render: info => (
       <Action>
