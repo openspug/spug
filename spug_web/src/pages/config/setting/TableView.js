@@ -82,6 +82,7 @@ class TableView extends React.Component {
             showSizeChanger: true,
             showLessItems: true,
             hideOnSinglePage: true,
+            showTotal: total => `共 ${total} 条`,
             pageSizeOptions: ['10', '20', '50', '100']
           }}
           columns={this.columns}/>
