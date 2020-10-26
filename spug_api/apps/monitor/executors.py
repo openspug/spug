@@ -1,6 +1,7 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
+from django.db import close_old_connections
 from apps.host.models import Host
 from socket import socket
 import subprocess
@@ -70,5 +71,6 @@ def dispatch(tp, addr, extra):
         command = extra
     else:
         raise TypeError(f'invalid monitor type: {tp!r}')
+    close_old_connections()
     host = Host.objects.filter(pk=addr).first()
     return host_executor(host, command)

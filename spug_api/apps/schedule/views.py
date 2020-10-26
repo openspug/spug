@@ -110,7 +110,7 @@ class HistoryView(View):
         task = Task.objects.filter(pk=t_id).first()
         if not task:
             return json_response(error='未找到指定任务')
-        data = dispatch(task.command, json.loads(task.targets), True)
+        data = dispatch(task.command, json.loads(task.targets))
         score = 0
         for item in data:
             score += 1 if item[1] else 0
