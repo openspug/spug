@@ -35,13 +35,14 @@ def host_executor(q, host, command):
         q.put((host.id, exit_code, round(time.time() - now, 3), out))
 
 
-def dispatch(command, targets):
+def dispatch(command, targets, in_view=False):
+    if not in_view:
+        close_old_connections()
     threads, q = [], Queue()
     for t in targets:
         if t == 'local':
             threads.append(Thread(target=local_executor, args=(q, command)))
         elif isinstance(t, int):
-            close_old_connections()
             host = Host.objects.filter(pk=t).first()
             if not host:
                 raise ValueError(f'unknown host id: {t!r}')

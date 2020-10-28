@@ -58,7 +58,9 @@ def host_executor(host, command):
         return False, f'异常信息：{e}'
 
 
-def dispatch(tp, addr, extra):
+def dispatch(tp, addr, extra, in_view=False):
+    if not in_view:
+        close_old_connections()
     if tp == '1':
         return site_check(addr)
     elif tp == '2':
@@ -71,6 +73,5 @@ def dispatch(tp, addr, extra):
         command = extra
     else:
         raise TypeError(f'invalid monitor type: {tp!r}')
-    close_old_connections()
     host = Host.objects.filter(pk=addr).first()
     return host_executor(host, command)
