@@ -23,8 +23,6 @@ from libs import AttrDict, human_datetime
 import logging
 import json
 
-logger = logging.getLogger("django.apps.scheduler")
-
 
 class Scheduler:
     timezone = settings.TIME_ZONE
@@ -65,13 +63,13 @@ class Scheduler:
         close_old_connections()
         obj = SimpleLazyObject(lambda: Task.objects.filter(pk=event.job_id).first())
         if event.code == EVENT_SCHEDULER_SHUTDOWN:
-            logger.info(f'EVENT_SCHEDULER_SHUTDOWN: {event}')
+            logging.warning(f'EVENT_SCHEDULER_SHUTDOWN: {event}')
             Notify.make_notify('schedule', '1', '调度器已关闭', '调度器意外关闭，你可以在github上提交issue')
         elif event.code == EVENT_JOB_MAX_INSTANCES:
-            logger.info(f'EVENT_JOB_MAX_INSTANCES: {event}')
+            logging.warning(f'EVENT_JOB_MAX_INSTANCES: {event}')
             send_fail_notify(obj, '达到调度实例上限，一般为上个周期的执行任务还未结束，请增加调度间隔或减少任务执行耗时')
         elif event.code == EVENT_JOB_ERROR:
-            logger.info(f'EVENT_JOB_ERROR: job_id {event.job_id} exception: {event.exception}')
+            logging.warning(f'EVENT_JOB_ERROR: job_id {event.job_id} exception: {event.exception}')
             send_fail_notify(obj, f'执行异常：{event.exception}')
         elif event.code == EVENT_JOB_EXECUTED:
             if event.retval:
@@ -110,7 +108,7 @@ class Scheduler:
         rds_cli = get_redis_connection()
         self._init()
         rds_cli.delete(settings.SCHEDULE_KEY)
-        logger.info('Running scheduler')
+        logging.warning('Running scheduler')
         while True:
             _, data = rds_cli.brpop(settings.SCHEDULE_KEY)
             task = AttrDict(json.loads(data))
