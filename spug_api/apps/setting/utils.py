@@ -6,7 +6,7 @@ from apps.setting.models import Setting
 
 
 class AppSetting:
-    keys = ('public_key', 'private_key', 'mail_service', 'api_key', 'spug_key', 'ldap_service')
+    keys = ('public_key', 'private_key', 'mail_service', 'api_key', 'spug_key', 'ldap_service', 'verify_ip')
 
     @classmethod
     @lru_cache(maxsize=64)

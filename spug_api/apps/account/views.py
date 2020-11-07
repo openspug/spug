@@ -7,7 +7,7 @@ from django.db.models import F
 from libs import JsonParser, Argument, human_datetime, json_response
 from libs.utils import get_request_real_ip
 from apps.account.models import User, Role, History
-from apps.setting.models import Setting
+from apps.setting.utils import AppSetting
 from libs.ldap import LDAP
 import ipaddress
 import time
@@ -164,7 +164,7 @@ def login(request):
         if user and not user.is_active:
             return json_response(error="账户已被系统禁用")
         if form.type == 'ldap':
-            if not Setting.objects.filter(key='ldap_service').exists():
+            if not AppSetting.get_default('ldap_service'):
                 return json_response(error='请在系统设置中配置LDAP后再尝试通过该方式登录')
             ldap = LDAP()
             is_success, message = ldap.valid_user(form.username, form.password)
@@ -199,11 +199,12 @@ def handle_user_info(user, x_real_ip):
     user.last_ip = x_real_ip
     user.save()
     History.objects.create(user=user, ip=x_real_ip)
+    verify_ip = AppSetting.get_default('verify_ip', 'True') == 'True'
     return json_response({
         'access_token': user.access_token,
         'nickname': user.nickname,
         'is_supper': user.is_supper,
-        'has_real_ip': x_real_ip and ipaddress.ip_address(x_real_ip).is_global,
+        'has_real_ip': x_real_ip and ipaddress.ip_address(x_real_ip).is_global if verify_ip else True,
         'host_perms': [] if user.is_supper else user.host_perms,
         'permissions': [] if user.is_supper else user.page_perms
     })
