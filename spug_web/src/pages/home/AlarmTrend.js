@@ -33,7 +33,7 @@ export default function () {
         }
         setOptions(Object.values(data))
       })
-  })
+  }, [])
 
   function handleChange(v) {
     switch (v.length) {
