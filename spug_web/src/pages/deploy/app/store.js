@@ -3,7 +3,7 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import { observable } from "mobx";
+import { observable, computed } from "mobx";
 import http from 'libs/http';
 
 class Store {
@@ -22,13 +22,17 @@ class Store {
   @observable f_name;
   @observable f_desc;
 
+  @computed get currentRecord() {
+    return this.records[`a${this.app_id}`]
+  }
+
   fetchRecords = () => {
     this.isFetching = true;
     http.get('/api/app/')
       .then(res => {
         const tmp = {};
         for (let item of res) {
-          tmp[item.id] = item
+          tmp[`a${item.id}`] = item
         }
         this.records = tmp
       })
@@ -37,7 +41,7 @@ class Store {
 
   loadDeploys = (app_id) => {
     return http.get('/api/app/deploy/', {params: {app_id}})
-      .then(res => this.records[app_id]['deploys'] = res)
+      .then(res => this.records[`a${app_id}`]['deploys'] = res)
   };
 
   showForm = (e, info) => {

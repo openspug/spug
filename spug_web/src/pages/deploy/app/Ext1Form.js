@@ -13,7 +13,7 @@ import store from './store';
 import styles from './index.module.css';
 
 export default observer(function Ext1From() {
-  const appName = store.records[store.app_id].name;
+  const appName = store.currentRecord.name;
   let title = `常规发布 - ${appName}`;
   if (store.deploy.id) {
     store.isReadOnly ? title = '查看' + title : title = '编辑' + title;
