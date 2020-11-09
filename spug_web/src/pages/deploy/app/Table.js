@@ -6,7 +6,7 @@
 import React from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { Table, Modal, Tag, Icon, message } from 'antd';
+import { Table, Modal, Tag, Icon, Divider, message } from 'antd';
 import { http, hasPermission } from 'libs';
 import store from './store';
 import { Action } from "components";
@@ -76,6 +76,13 @@ class ComTable extends React.Component {
     })
   };
 
+  handleSort = (e, info, sort) => {
+    e.stopPropagation();
+    store.fetching = true;
+    http.patch('/api/app/', {id: info.id, sort})
+      .then(store.fetchRecords, () => store.fetching = false)
+  };
+
   expandedRowRender = (record) => {
     if (record['deploys'] === undefined) {
       store.loadDeploys(record.id)
@@ -131,7 +138,15 @@ class ComTable extends React.Component {
           showTotal: total => `共 ${total} 条`,
           pageSizeOptions: ['10', '20', '50', '100']
         }}>
-        <Table.Column width={80} title="序号" key="series" render={(_, __, index) => index + 1}/>
+        <Table.Column width={80} title="排序" key="series" render={(info) => (
+          <div>
+            <Icon onClick={e => this.handleSort(e, info, 'up')} type="up-square"
+                  style={{cursor: 'pointer', color: '#1890ff'}}/>
+            <Divider type="vertical"/>
+            <Icon onClick={e => this.handleSort(e, info, 'down')} type="down-square"
+                  style={{cursor: 'pointer', color: '#1890ff'}}/>
+          </div>
+        )}/>
         <Table.Column title="应用名称" dataIndex="name"/>
         <Table.Column title="标识符" dataIndex="key"/>
         <Table.Column ellipsis title="描述信息" dataIndex="desc"/>

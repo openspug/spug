@@ -14,6 +14,7 @@ class App(models.Model, ModelMixin):
     desc = models.CharField(max_length=255, null=True)
     rel_apps = models.TextField(null=True)
     rel_services = models.TextField(null=True)
+    sort_id = models.IntegerField(default=0, db_index=True)
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, on_delete=models.PROTECT)
 
@@ -28,7 +29,7 @@ class App(models.Model, ModelMixin):
 
     class Meta:
         db_table = 'apps'
-        ordering = ('-id',)
+        ordering = ('-sort_id',)
 
 
 class Deploy(models.Model, ModelMixin):
