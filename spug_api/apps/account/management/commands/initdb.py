@@ -15,4 +15,4 @@ class Command(BaseCommand):
         execute_from_command_line(args + apps)
         execute_from_command_line(['manage.py', 'migrate'])
         self.stdout.write(self.style.SUCCESS('初始化成功'))
-        self.stdout.write(self.style.WARNING('废弃警告，v2.4.0之后将会移除该命令，请使用 python manage.py updatedb 来代替！'))
+        self.stdout.write(self.style.WARNING('废弃警告，v3.0.0之后将会移除该命令，请使用 python manage.py updatedb 来代替！'))
