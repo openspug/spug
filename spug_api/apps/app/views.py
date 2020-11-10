@@ -12,13 +12,6 @@ import subprocess
 import json
 import os
 
-# v2.3.14 临时数据初始化
-ap = App.objects.first()
-if ap and hasattr(ap, 'sort_id') and ap.sort_id == 0:
-    for ap in App.objects.all():
-        ap.sort_id = ap.id
-        ap.save()
-
 
 class AppView(View):
     def get(self, request):

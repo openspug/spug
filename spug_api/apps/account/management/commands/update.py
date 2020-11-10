@@ -60,7 +60,8 @@ class Command(BaseCommand):
         commands = [
             f'cd {settings.BASE_DIR}',
             f'python3 ./manage.py makemigrations ' + ' '.join(apps),
-            f'python3 ./manage.py migrate'
+            f'python3 ./manage.py migrate',
+            f'python3 ./tools/migrate.py {version}'
         ]
         task = subprocess.Popen(' && '.join(commands), shell=True)
         if task.wait() != 0:
