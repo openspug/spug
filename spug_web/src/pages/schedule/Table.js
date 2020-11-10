@@ -114,7 +114,7 @@ class ComTable extends React.Component {
     Modal.confirm({
       title: '操作确认',
       content: '立即执行该任务（不影响调度规则，且不会触发失败通知）？',
-      onOk: () => http.post(`/api/schedule/${text.id}/`)
+      onOk: () => http.post(`/api/schedule/${text.id}/`, null, {timeout: 120000})
         .then(res => store.showInfo(text, res))
     })
   };

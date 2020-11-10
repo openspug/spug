@@ -114,7 +114,7 @@ class ComForm extends React.Component {
     const type = this.props.form.getFieldValue('type');
     const formData = this._getFieldsValue(type);
     formData['type'] = type;
-    http.post('/api/monitor/test/', formData)
+    http.post('/api/monitor/test/', formData, {timeout: 120000})
       .then(res => {
         if (res.is_success) {
           Modal.success({content: res.message})
