@@ -15,6 +15,12 @@ import os
 
 class AppView(View):
     def get(self, request):
+        # v2.3.14 临时数据初始化
+        app = App.objects.first()
+        if app and hasattr(app, 'sort_id') and app.sort_id == 0:
+            for app in App.objects.all():
+                app.sort_id = app.id
+                app.save()
         query = {}
         if not request.user.is_supper:
             query['id__in'] = request.user.deploy_perms['apps']
