@@ -13,11 +13,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         res = requests.get('https://gitee.com/api/v5/repos/openspug/spug/releases/latest').json()
-        version = res.get('tag_name')
+        version, is_repair = res.get('tag_name'), False
         if not version:
             return self.stderr.write(self.style.ERROR('获取新版本失败，排除网络问题后请附带输出内容至官方论坛反馈'))
         if version == settings.SPUG_VERSION:
             self.stdout.write(self.style.SUCCESS(''))
+            is_repair = True
             answer = input(f'当前已是最新版本，是否要进行修复性更新[y|n]？')
         else:
             self.stdout.write(f'{version} 更新日志：\r\n' + res.get('body', ''))
@@ -42,6 +43,8 @@ class Command(BaseCommand):
             f'git fetch origin refs/tags/{version}:refs/tags/{version} --no-tags',
             f'git checkout {version}'
         ]
+        if is_repair:
+            commands.insert(1, f'git tag -d {version}')
         task = subprocess.Popen(' && '.join(commands), shell=True)
         if task.wait() != 0:
             return self.stderr.write(self.style.ERROR('获取更新失败，排除网络问题后请附带输出内容至官方论坛反馈。'))
