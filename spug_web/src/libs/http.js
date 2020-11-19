@@ -5,7 +5,8 @@
  */
 import http from 'axios'
 import history from './history'
-import {message} from 'antd';
+import { X_TOKEN } from './functools';
+import { message } from 'antd';
 
 // response处理
 function handleResponse(response) {
@@ -24,6 +25,8 @@ function handleResponse(response) {
       return Promise.resolve(response.data.data)
     } else if (response.headers['content-type'] === 'application/octet-stream') {
       return Promise.resolve(response)
+    } else if (!response.config.isInternal) {
+      return Promise.resolve(response.data)
     } else {
       result = '无效的数据格式'
     }
@@ -36,8 +39,9 @@ function handleResponse(response) {
 
 // 请求拦截器
 http.interceptors.request.use(request => {
-  if (request.url.startsWith('/api/')) {
-    request.headers['X-Token'] = localStorage.getItem('token')
+  request.isInternal = request.url.startsWith('/api/');
+  if (request.isInternal) {
+    request.headers['X-Token'] = X_TOKEN
   }
   request.timeout = request.timeout || 30000;
   return request;

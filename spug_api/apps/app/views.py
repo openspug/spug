@@ -15,6 +15,12 @@ import os
 
 class AppView(View):
     def get(self, request):
+        # v2.3.14 临时数据初始化
+        app = App.objects.first()
+        if app and hasattr(app, 'sort_id') and app.sort_id == 0:
+            for app in App.objects.all():
+                app.sort_id = app.id
+                app.save()
         query = {}
         if not request.user.is_supper:
             query['id__in'] = request.user.deploy_perms['apps']
@@ -37,6 +43,8 @@ class AppView(View):
                 App.objects.filter(pk=form.id).update(**form)
             else:
                 app = App.objects.create(created_by=request.user, **form)
+                app.sort_id = app.id
+                app.save()
                 if request.user.role:
                     request.user.role.add_deploy_perm('apps', app.id)
         return json_response(error=error)
@@ -45,14 +53,25 @@ class AppView(View):
         form, error = JsonParser(
             Argument('id', type=int, help='参数错误'),
             Argument('rel_apps', type=list, required=False),
-            Argument('rel_services', type=list, required=False)
+            Argument('rel_services', type=list, required=False),
+            Argument('sort', filter=lambda x: x in ('up', 'down'), required=False)
         ).parse(request.body)
         if error is None:
             app = App.objects.filter(pk=form.id).first()
             if not app:
                 return json_response(error='未找到指定应用')
-            app.rel_apps = json.dumps(form.rel_apps)
-            app.rel_services = json.dumps(form.rel_services)
+            if form.rel_apps is not None:
+                app.rel_apps = json.dumps(form.rel_apps)
+            if form.rel_services is not None:
+                app.rel_services = json.dumps(form.rel_services)
+            if form.sort:
+                if form.sort == 'up':
+                    tmp = App.objects.filter(sort_id__gt=app.sort_id).last()
+                else:
+                    tmp = App.objects.filter(sort_id__lt=app.sort_id).first()
+                if tmp:
+                    tmp.sort_id, app.sort_id = app.sort_id, tmp.sort_id
+                    tmp.save()
             app.save()
         return json_response(error=error)
 
@@ -78,7 +97,7 @@ class DeployView(View):
             perms = request.user.deploy_perms
             form.app_id__in = perms['apps']
             form.env_id__in = perms['envs']
-        deploys = Deploy.objects.filter(**form).annotate(app_name=F('app__name'))
+        deploys = Deploy.objects.filter(**form).annotate(app_name=F('app__name')).order_by('-app__sort_id')
         return json_response(deploys)
 
     def post(self, request):

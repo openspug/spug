@@ -9,7 +9,7 @@ import { AuthDiv } from 'components';
 import StatisticsCard from './StatisticCard';
 import AlarmTrend from './AlarmTrend';
 import RequestTop from './RequestTop';
-import DeployPie from './DeployPie';
+import LoginActive from './LoginActive';
 
 class HomeIndex extends React.Component {
   render() {
@@ -22,7 +22,7 @@ class HomeIndex extends React.Component {
             <RequestTop/>
           </Col>
           <Col span={10} offset={1}>
-            <DeployPie/>
+            <LoginActive/>
           </Col>
         </Row>
       </AuthDiv>

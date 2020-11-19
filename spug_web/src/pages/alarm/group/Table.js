@@ -5,12 +5,12 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, message } from 'antd';
+import { Table, Modal, message } from 'antd';
 import ComForm from './Form';
-import http from 'libs/http';
+import { http, hasPermission } from 'libs';
 import store from './store';
 import contactStore from '../contact/store';
-import { LinkButton } from "components";
+import { Action } from "components";
 import lds from 'lodash';
 
 @observer
@@ -38,34 +38,6 @@ class ComTable extends React.Component {
     }
     this.setState({contactMap: tmp})
   };
-
-  columns = [{
-    title: '序号',
-    key: 'series',
-    render: (_, __, index) => index + 1,
-    width: 80,
-  }, {
-    title: '组名称',
-    dataIndex: 'name',
-  }, {
-    title: '成员',
-    dataIndex: 'contacts',
-    render: value => value.map(x => lds.get(this.state.contactMap, `${x}.name`)).join(','),
-    ellipsis: true
-  }, {
-    title: '描述信息',
-    dataIndex: 'desc',
-    ellipsis: true
-  }, {
-    title: '操作',
-    render: info => (
-      <span>
-        <LinkButton auth="alarm.group.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="alarm.group.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
-      </span>
-    )
-  }];
 
   handleDelete = (text) => {
     Modal.confirm({
@@ -99,9 +71,23 @@ class ComTable extends React.Component {
             showSizeChanger: true,
             showLessItems: true,
             hideOnSinglePage: true,
+            showTotal: total => `共 ${total} 条`,
             pageSizeOptions: ['10', '20', '50', '100']
-          }}
-          columns={this.columns}/>
+          }}>
+          <Table.Column title="序号" key="series" render={(_, __, index) => index + 1}/>
+          <Table.Column title="组名称" dataIndex="name"/>
+          <Table.Column ellipsis title="成员" dataIndex="contacts"
+                        render={value => value.map(x => lds.get(this.state.contactMap, `${x}.name`)).join(',')}/>
+          <Table.Column ellipsis title="描述信息" dataIndex="desc"/>
+          {hasPermission('alarm.group.edit|alarm.group.del') && (
+            <Table.Column title="操作" render={info => (
+              <Action>
+                <Action.Button auth="alarm.group.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
+                <Action.Button auth="alarm.group.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+              </Action>
+            )}/>
+          )}
+        </Table>
         {store.formVisible && <ComForm/>}
       </React.Fragment>
     )

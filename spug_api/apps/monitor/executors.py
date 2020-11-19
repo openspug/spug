@@ -1,6 +1,7 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
+from django.db import close_old_connections
 from apps.host.models import Host
 from socket import socket
 import subprocess
@@ -35,7 +36,7 @@ def ping_check(addr):
         if platform.system().lower() == 'windows':
             command = f'ping -n 1 -w 3000 {addr}'
         else:
-            command = f'ping -c 1 -t 3 {addr}'
+            command = f'ping -c 1 -W 3 {addr}'
         task = subprocess.run(command, shell=True, stdout=subprocess.PIPE)
         if task.returncode == 0:
             return True, 'Ping检测正常'
@@ -57,7 +58,9 @@ def host_executor(host, command):
         return False, f'异常信息：{e}'
 
 
-def dispatch(tp, addr, extra):
+def dispatch(tp, addr, extra, in_view=False):
+    if not in_view:
+        close_old_connections()
     if tp == '1':
         return site_check(addr)
     elif tp == '2':

@@ -5,9 +5,11 @@ from django.core.cache import cache
 from django.views.generic import View
 from django.db.models import F
 from libs import JsonParser, Argument, human_datetime, json_response
-from apps.account.models import User, Role
-from apps.setting.models import Setting
+from libs.utils import get_request_real_ip
+from apps.account.models import User, Role, History
+from apps.setting.utils import AppSetting
 from libs.ldap import LDAP
+import ipaddress
 import time
 import uuid
 import json
@@ -134,6 +136,8 @@ class SelfView(View):
         ).parse(request.body, True)
         if error is None:
             if form.get('old_password') and form.get('new_password'):
+                if request.user.type == 'ldap':
+                    return json_response(error='LDAP账户无法修改密码')
                 if len(form.new_password) < 6:
                     return json_response(error='请设置至少6位的新密码')
                 if request.user.verify_password(form.old_password):
@@ -155,12 +159,12 @@ def login(request):
         Argument('type', required=False)
     ).parse(request.body)
     if error is None:
-        x_real_ip = request.headers.get('x-real-ip', '')
+        x_real_ip = get_request_real_ip(request.headers)
         user = User.objects.filter(username=form.username, type=form.type).first()
         if user and not user.is_active:
             return json_response(error="账户已被系统禁用")
         if form.type == 'ldap':
-            if not Setting.objects.filter(key='ldap_service').exists():
+            if not AppSetting.get_default('ldap_service'):
                 return json_response(error='请在系统设置中配置LDAP后再尝试通过该方式登录')
             ldap = LDAP()
             is_success, message = ldap.valid_user(form.username, form.password)
@@ -194,11 +198,13 @@ def handle_user_info(user, x_real_ip):
     user.last_login = human_datetime()
     user.last_ip = x_real_ip
     user.save()
+    History.objects.create(user=user, ip=x_real_ip)
+    verify_ip = AppSetting.get_default('verify_ip', 'True') == 'True'
     return json_response({
         'access_token': user.access_token,
         'nickname': user.nickname,
         'is_supper': user.is_supper,
-        'has_real_ip': True if x_real_ip else False,
+        'has_real_ip': x_real_ip and ipaddress.ip_address(x_real_ip).is_global if verify_ip else True,
         'host_perms': [] if user.is_supper else user.host_perms,
         'permissions': [] if user.is_supper else user.page_perms
     })

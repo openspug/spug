@@ -5,11 +5,11 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, Tag, Dropdown, Icon, Menu, message } from 'antd';
+import { Table, Modal, Tag, Dropdown, Icon, Menu, message } from 'antd';
 import ComForm from './Form';
-import http from 'libs/http';
+import {http} from 'libs';
 import store from './store';
-import { LinkButton } from "components";
+import { LinkButton, Action } from "components";
 import Info from './Info';
 import Record from './Record';
 
@@ -40,11 +40,6 @@ class ComTable extends React.Component {
   );
 
   columns = [{
-    title: '序号',
-    key: 'series',
-    render: (_, __, index) => index + 1,
-    width: 80,
-  }, {
     title: '任务名称',
     dataIndex: 'name',
   }, {
@@ -75,23 +70,21 @@ class ComTable extends React.Component {
     title: '操作',
     width: 180,
     render: info => (
-      <span>
-        <LinkButton disabled={!info['latest_run_time']} onClick={() => store.showInfo(info)}>详情</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="schedule.schedule.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
-        <Divider type="vertical"/>
+      <Action>
+        <Action.Button disabled={!info['latest_run_time']} onClick={() => store.showInfo(info)}>详情</Action.Button>
+        <Action.Button auth="schedule.schedule.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
         <Dropdown overlay={() => this.moreMenus(info)} trigger={['click']}>
           <LinkButton>
             更多 <Icon type="down"/>
           </LinkButton>
         </Dropdown>
-      </span>
+      </Action>
     )
   }];
 
   handleActive = (text) => {
     Modal.confirm({
-      title: '删除确认',
+      title: '操作确认',
       content: `确定要${text.is_active ? '禁用' : '激活'}任务【${text['name']}】?`,
       onOk: () => {
         return http.patch('/api/schedule/', {id: text.id, is_active: !text.is_active})
@@ -121,7 +114,7 @@ class ComTable extends React.Component {
     Modal.confirm({
       title: '操作确认',
       content: '立即执行该任务（不影响调度规则，且不会触发失败通知）？',
-      onOk: () => http.post(`/api/schedule/${text.id}/`)
+      onOk: () => http.post(`/api/schedule/${text.id}/`, null, {timeout: 120000})
         .then(res => store.showInfo(text, res))
     })
   };
@@ -156,6 +149,7 @@ class ComTable extends React.Component {
             showSizeChanger: true,
             showLessItems: true,
             hideOnSinglePage: true,
+            showTotal: total => `共 ${total} 条`,
             pageSizeOptions: ['10', '20', '50', '100']
           }}
           columns={this.columns}/>

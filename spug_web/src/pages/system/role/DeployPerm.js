@@ -4,8 +4,8 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
-import {observer} from 'mobx-react';
-import {Modal, Form, Transfer, message, Tabs, Alert} from 'antd';
+import { observer } from 'mobx-react';
+import { Modal, Form, Transfer, message, Tabs, Alert } from 'antd';
 import http from 'libs/http';
 import envStore from 'pages/config/environment/store';
 import appStore from 'pages/config/app/store';
@@ -48,10 +48,12 @@ class DeployPerm extends React.Component {
   };
 
   handleSubmit = () => {
-    this.setState({loading: true});
     if (lds.get(store.deployRel, 'envs', []).length === 0) {
-      message.error('请至少设置一个环境权限')
+      return message.error('请至少设置一个环境权限')
+    } else if (lds.get(store.deployRel, 'apps', []).length === 0) {
+      return message.error('请至少设置一个应用权限')
     }
+    this.setState({loading: true});
     http.patch('/api/account/role/', {id: store.record.id, deploy_perms: store.deployRel})
       .then(res => {
         message.success('操作成功');
@@ -59,6 +61,11 @@ class DeployPerm extends React.Component {
         store.fetchRecords()
       }, () => this.setState({loading: false}))
   };
+
+  handleFilter = (inputValue, option) => {
+    const keywords = inputValue.toLowerCase();
+    return `${option.name} - ${option._key}`.toLowerCase().includes(keywords)
+  }
 
   render() {
     return (
@@ -82,10 +89,12 @@ class DeployPerm extends React.Component {
           <Tabs.TabPane tab="环境权限" key="env">
             <Form.Item label="设置可发布至哪个环境">
               <Transfer
+                showSearch
                 listStyle={{width: 280, minHeight: 300}}
                 titles={['所有环境', '已选环境']}
                 dataSource={this.state.envs}
                 targetKeys={store.deployRel.envs}
+                filterOption={this.handleFilter}
                 onChange={keys => store.deployRel.envs = keys}
                 render={item => `${item.name} - ${item._key}`}/>
             </Form.Item>
@@ -93,10 +102,12 @@ class DeployPerm extends React.Component {
           <Tabs.TabPane tab="应用权限" key="app">
             <Form.Item label="设置可发布的应用">
               <Transfer
+                showSearch
                 listStyle={{width: 280, minHeight: 300}}
                 titles={['所有应用', '已选应用']}
                 dataSource={this.state.apps}
                 targetKeys={store.deployRel.apps}
+                filterOption={this.handleFilter}
                 onChange={keys => store.deployRel.apps = keys}
                 render={item => `${item.name} - ${item._key}`}/>
             </Form.Item>

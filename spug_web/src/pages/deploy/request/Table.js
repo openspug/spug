@@ -5,10 +5,10 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, Icon, Popover, Tag, message } from 'antd';
-import http from 'libs/http';
+import { Table, Modal, Icon, Popover, Tag, message } from 'antd';
+import { http, hasPermission } from 'libs';
+import { Action } from "components";
 import store from './store';
-import { LinkButton, AuthLink } from "components";
 
 @observer
 class ComTable extends React.Component {
@@ -82,54 +82,54 @@ class ComTable extends React.Component {
     sorter: (a, b) => a['created_at'].localeCompare(b['created_at'])
   }, {
     title: '操作',
+    className: hasPermission('deploy.request.do|deploy.request.edit|deploy.request.approve|deploy.request.del') ? null : 'none',
     render: info => {
       switch (info.status) {
         case '-3':
-          return <React.Fragment>
-            <AuthLink auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</AuthLink>
-            <Divider type="vertical"/>
-            <AuthLink auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>发布</AuthLink>
-            <Divider type="vertical"/>
-            <LinkButton
+          return <Action>
+            <Action.Link
+              auth="deploy.request.do"
+              to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</Action.Link>
+            <Action.Link auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>发布</Action.Link>
+            <Action.Button
               auth="deploy.request.do"
               disabled={info.type === '2'}
               loading={this.state.loading}
-              onClick={() => this.handleRollback(info)}>回滚</LinkButton>
-          </React.Fragment>;
+              onClick={() => this.handleRollback(info)}>回滚</Action.Button>
+          </Action>;
         case '3':
-          return <React.Fragment>
-            <AuthLink auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</AuthLink>
-            <Divider type="vertical"/>
-            <LinkButton
+          return <Action>
+            <Action.Link
+              auth="deploy.request.do"
+              to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</Action.Link>
+            <Action.Button
               auth="deploy.request.do"
               disabled={info.type === '2'}
               loading={this.state.loading}
-              onClick={() => this.handleRollback(info)}>回滚</LinkButton>
-          </React.Fragment>;
+              onClick={() => this.handleRollback(info)}>回滚</Action.Button>
+          </Action>;
         case '-1':
-          return <React.Fragment>
-            <LinkButton auth="deploy.request.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
-            <Divider type="vertical"/>
-            <LinkButton auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
-          </React.Fragment>;
+          return <Action>
+            <Action.Button auth="deploy.request.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
+            <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+          </Action>;
         case '0':
-          return <React.Fragment>
-            <LinkButton auth="deploy.request.approve" onClick={() => store.showApprove(info)}>审核</LinkButton>
-            <Divider type="vertical"/>
-            <LinkButton auth="deploy.request.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
-            <Divider type="vertical"/>
-            <LinkButton auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
-          </React.Fragment>;
+          return <Action>
+            <Action.Button auth="deploy.request.approve" onClick={() => store.showApprove(info)}>审核</Action.Button>
+            <Action.Button auth="deploy.request.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
+            <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+          </Action>;
         case '1':
-          return <React.Fragment>
-            <AuthLink auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>发布</AuthLink>
-            <Divider type="vertical"/>
-            <LinkButton auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
-          </React.Fragment>;
+          return <Action>
+            <Action.Link auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>发布</Action.Link>
+            <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+          </Action>;
         case '2':
-          return (
-            <AuthLink auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</AuthLink>
-          );
+          return <Action>
+            <Action.Link
+              auth="deploy.request.do"
+              to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</Action.Link>
+          </Action>;
         default:
           return null
       }
@@ -199,6 +199,7 @@ class ComTable extends React.Component {
           showSizeChanger: true,
           showLessItems: true,
           hideOnSinglePage: true,
+          showTotal: total => `共 ${total} 条`,
           pageSizeOptions: ['10', '20', '50', '100']
         }}
         columns={this.columns}/>

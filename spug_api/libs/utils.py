@@ -102,3 +102,10 @@ class DateTimeEncoder(json.JSONEncoder):
 def generate_random_str(length: int = 4, is_digits: bool = True) -> str:
     words = string.digits if is_digits else string.ascii_letters + string.digits
     return ''.join(random.sample(words, length))
+
+
+def get_request_real_ip(headers: dict):
+    x_real_ip = headers.get('x-forwarded-for')
+    if not x_real_ip:
+        x_real_ip = headers.get('x-real-ip', '')
+    return x_real_ip.split(',')[0]

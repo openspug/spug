@@ -17,7 +17,7 @@ export default observer(function () {
         <SearchForm.Item span={6} title="任务名称">
           <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
         </SearchForm.Item>
-        <SearchForm.Item span={6} title="任务类型">
+        <SearchForm.Item span={6} title="检测类型">
           <Select allowClear value={store.f_type} onChange={v => store.f_type = v} placeholder="请选择">
             {store.types.map(item => <Select.Option key={item} value={item}>{item}</Select.Option>)}
           </Select>

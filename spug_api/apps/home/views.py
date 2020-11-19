@@ -15,9 +15,16 @@ import json
 
 
 def get_statistic(request):
+    if request.user.is_supper:
+        app = App.objects.count()
+        host = Host.objects.filter(deleted_at__isnull=True).count()
+    else:
+        deploy_perms, host_perms = request.user.deploy_perms, request.user.host_perms
+        app = App.objects.filter(id__in=deploy_perms['apps']).count()
+        host = Host.objects.filter(id__in=host_perms, deleted_at__isnull=True).count()
     data = {
-        'app': App.objects.count(),
-        'host': Host.objects.filter(deleted_at__isnull=True).count(),
+        'app': app,
+        'host': host,
         'task': Task.objects.count(),
         'detection': Detection.objects.count()
     }
@@ -25,14 +32,20 @@ def get_statistic(request):
 
 
 def get_alarm(request):
-    now = datetime.now()
-    data = {human_date(now - timedelta(days=x + 1)): 0 for x in range(14)}
-    for alarm in Alarm.objects.filter(status='1', created_at__gt=human_date(now - timedelta(days=14))):
-        date = alarm.created_at[:10]
-        if date in data:
-            data[date] += 1
-    data = [{'date': k, 'value': v} for k, v in data.items()]
-    return json_response(data)
+    form, error = JsonParser(
+        Argument('type', required=False),
+        Argument('name', required=False)
+    ).parse(request.GET, True)
+    if error is None:
+        now = datetime.now()
+        data = {human_date(now - timedelta(days=x + 1)): 0 for x in range(14)}
+        for alarm in Alarm.objects.filter(status='1', created_at__gt=human_date(now - timedelta(days=14)), **form):
+            date = alarm.created_at[:10]
+            if date in data:
+                data[date] += 1
+        data = [{'date': k, 'value': v} for k, v in data.items()]
+        return json_response(data)
+    return json_response(error=error)
 
 
 def get_request(request):

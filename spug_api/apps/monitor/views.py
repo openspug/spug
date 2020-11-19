@@ -88,6 +88,6 @@ def run_test(request):
         Argument('extra', required=False)
     ).parse(request.body)
     if error is None:
-        is_success, message = dispatch(form.type, form.addr, form.extra)
+        is_success, message = dispatch(form.type, form.addr, form.extra, True)
         return json_response({'is_success': is_success, 'message': message})
     return json_response(error=error)

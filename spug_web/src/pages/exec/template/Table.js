@@ -5,42 +5,17 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, message } from 'antd';
+import { Table, Modal, message } from 'antd';
 import ComForm from './Form';
-import http from 'libs/http';
+import { http, hasPermission } from 'libs';
+import { Action } from "components";
 import store from './store';
-import { LinkButton } from "components";
 
 @observer
 class ComTable extends React.Component {
   componentDidMount() {
     store.fetchRecords()
   }
-
-  columns = [{
-    title: '模版名称',
-    dataIndex: 'name',
-  }, {
-    title: '模版类型',
-    dataIndex: 'type',
-  }, {
-    title: '模版内容',
-    render: text => text.body,
-    ellipsis: true
-  }, {
-    title: '描述信息',
-    dataIndex: 'desc',
-    ellipsis: true
-  }, {
-    title: '操作',
-    render: info => (
-      <span>
-        <LinkButton auth="exec.template.edit" onClick={() => store.showForm(info)}>编辑</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="exec.template.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
-      </span>
-    )
-  }];
 
   handleDelete = (text) => {
     Modal.confirm({
@@ -74,9 +49,22 @@ class ComTable extends React.Component {
             showSizeChanger: true,
             showLessItems: true,
             hideOnSinglePage: true,
+            showTotal: total => `共 ${total} 条`,
             pageSizeOptions: ['10', '20', '50', '100']
-          }}
-          columns={this.columns}/>
+          }}>
+          <Table.Column title="模版名称" dataIndex="name"/>
+          <Table.Column title="模版类型" dataIndex="type"/>
+          <Table.Column ellipsis title="模版内容" dataIndex="body"/>
+          <Table.Column ellipsis title="描述信息" dataIndex="desc"/>
+          {hasPermission('exec.template.edit|exec.template.del') && (
+            <Table.Column title="操作" render={info => (
+              <Action>
+                <Action.Button auth="exec.template.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
+                <Action.Button auth="exec.template.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+              </Action>
+            )}/>
+          )}
+        </Table>
         {store.formVisible && <ComForm/>}
       </React.Fragment>
     )

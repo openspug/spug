@@ -218,7 +218,7 @@ def _deploy_ext1_host(helper, h_id, extend, env):
     repo_dir = os.path.join(extend.dst_repo, env.SPUG_VERSION)
     if extend.hook_pre_host:
         helper.send_step(h_id, 2, f'{human_time()} 发布前任务...       \r\n')
-        command = f'cd {repo_dir} && {extend.hook_pre_host}'
+        command = f'cd {repo_dir} ; {extend.hook_pre_host}'
         helper.remote(host.id, ssh, command, env)
 
     # do deploy
@@ -229,7 +229,7 @@ def _deploy_ext1_host(helper, h_id, extend, env):
     # post host
     if extend.hook_post_host:
         helper.send_step(h_id, 4, f'{human_time()} 发布后任务...       \r\n')
-        command = f'cd {extend.dst_dir} && {extend.hook_post_host}'
+        command = f'cd {extend.dst_dir} ; {extend.hook_post_host}'
         helper.remote(host.id, ssh, command, env)
 
     helper.send_step(h_id, 5, f'\r\n{human_time()} ** 发布成功 **')
@@ -264,7 +264,7 @@ def _deploy_ext2_host(helper, h_id, actions, env):
                 command = f'cd /tmp && tar xf {tar_gz_file} && rm -f {tar_gz_file} '
                 command += f'&& rm -rf {action["dst"]} && mv /tmp/{sd_dst} {action["dst"]} && echo "transfer completed"'
         else:
-            command = f'cd /tmp && {action["data"]}'
+            command = f'cd /tmp ; {action["data"]}'
         helper.remote(host.id, ssh, command, env)
 
     helper.send_step(h_id, 100, f'\r\n{human_time()} ** 发布成功 **')

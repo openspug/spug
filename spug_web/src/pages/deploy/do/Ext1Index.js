@@ -6,10 +6,9 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Steps, Collapse, PageHeader, Spin, Tag, Button, Icon } from 'antd';
-import http from 'libs/http';
+import { http, history, X_TOKEN } from 'libs';
 import { AuthDiv } from 'components';
 import OutView from './OutView';
-import history from 'libs/history';
 import styles from './index.module.css';
 import store from './store';
 import lds from 'lodash';
@@ -18,10 +17,11 @@ import lds from 'lodash';
 class Ext1Index extends React.Component {
   constructor(props) {
     super(props);
+    this.timer = null;
     this.id = props.match.params.id;
     this.log = props.match.params.log;
     this.state = {
-      fetching: false,
+      fetching: true,
       loading: false,
     }
   }
@@ -32,14 +32,13 @@ class Ext1Index extends React.Component {
 
   componentWillUnmount() {
     if (this.socket) this.socket.close();
-    if (this.interval) clearInterval(this.interval);
+    if (this.timer) clearTimeout(this.timer);
     store.request = {targets: [], host_actions: [], server_actions: []};
     store.outputs = {};
   }
 
   fetch = () => {
-    if (this.state.fetching) return ;
-    this.setState({fetching: true});
+    if (!this.timer) this.setState({fetching: true});
     http.get(`/api/deploy/request/${this.id}/`, {params: {log: this.log}})
       .then(res => {
         store.request = res;
@@ -53,12 +52,10 @@ class Ext1Index extends React.Component {
           this._parse_message(msg, outputs)
         }
         store.outputs = outputs;
-        if (this.interval) {
-          if (['3', '-3'].includes(store.request.status)) {
-            clearInterval(this.interval)
-          }
-        } else if (store.request.status === '2') {
-          this.interval = setInterval(this.fetch, 2000)
+        if (store.request.status === '2') {
+          this.timer = setTimeout(this.fetch, 2000)
+        } else {
+          this.timer = null
         }
       })
       .finally(() => this.setState({fetching: false}))
@@ -81,7 +78,7 @@ class Ext1Index extends React.Component {
         store.request.status = '2';
         store.outputs = outputs;
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${token}/`);
+        this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${token}/?x-token=${X_TOKEN}`);
         this.socket.onopen = () => {
           this.socket.send('ok');
         };

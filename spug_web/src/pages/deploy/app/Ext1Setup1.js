@@ -14,12 +14,12 @@ export default observer(function Ext1Setup1() {
   const [envs, setEnvs] = useState([]);
 
   function updateEnvs() {
-    const ids = store.records[store.app_id]['deploys'].map(x => x.env_id);
+    const ids = store.currentRecord['deploys'].map(x => x.env_id);
     setEnvs(ids.filter(x => x !== store.deploy.env_id))
   }
 
   useEffect(() => {
-    if (store.records[store.app_id]['deploys'] === undefined) {
+    if (store.currentRecord['deploys'] === undefined) {
       store.loadDeploys(store.app_id).then(updateEnvs)
     } else {
       updateEnvs()

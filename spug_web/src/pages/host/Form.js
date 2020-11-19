@@ -6,14 +6,13 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, Col, Button, Upload, message } from 'antd';
-import http from 'libs/http';
+import { http, X_TOKEN } from 'libs';
 import store from './store';
 
 @observer
 class ComForm extends React.Component {
   constructor(props) {
     super(props);
-    this.token = localStorage.getItem('token');
     this.state = {
       loading: false,
       uploading: false,
@@ -200,7 +199,7 @@ class ComForm extends React.Component {
             </Form.Item>
           </Form.Item>
           <Form.Item label="独立密钥" extra="默认使用全局密钥，如果上传了独立密钥则优先使用该密钥。">
-            <Upload name="file" fileList={fileList} headers={{'X-Token': this.token}} beforeUpload={this.handleUpload}
+            <Upload name="file" fileList={fileList} headers={{'X-Token': X_TOKEN}} beforeUpload={this.handleUpload}
                     onChange={this.handleUploadChange}>
               {fileList.length === 0 ? <Button loading={uploading} icon="upload">点击上传</Button> : null}
             </Upload>

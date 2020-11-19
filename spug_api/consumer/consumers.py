@@ -3,11 +3,9 @@
 # Released under the AGPL-3.0 License.
 from channels.generic.websocket import WebsocketConsumer
 from django_redis import get_redis_connection
-from apps.account.models import User
 from apps.host.models import Host
 from threading import Thread
 import json
-import time
 
 
 class ExecConsumer(WebsocketConsumer):
@@ -38,9 +36,8 @@ class ExecConsumer(WebsocketConsumer):
 class SSHConsumer(WebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        kwargs = self.scope['url_route']['kwargs']
-        self.token = kwargs['token']
-        self.id = kwargs['id']
+        self.user = self.scope['user']
+        self.id = self.scope['url_route']['kwargs']['id']
         self.chan = None
         self.ssh = None
 
@@ -70,8 +67,7 @@ class SSHConsumer(WebsocketConsumer):
         # print('Connection close')
 
     def connect(self):
-        user = User.objects.filter(access_token=self.token).first()
-        if user and user.token_expired >= time.time() and user.is_active and user.has_host_perm(self.id):
+        if self.user.has_host_perm(self.id):
             self.accept()
             self._init()
         else:
@@ -88,6 +84,7 @@ class SSHConsumer(WebsocketConsumer):
         except Exception as e:
             self.send(bytes_data=f'Exception: {e}\r\n'.encode())
             self.close()
+            return
         self.chan = self.ssh.invoke_shell(term='xterm')
         self.chan.transport.set_keepalive(30)
         Thread(target=self.loop_read).start()

@@ -13,7 +13,7 @@ import Setup3 from './Ext2Setup3';
 import store from './store';
 
 export default observer(function Ext2From() {
-  const appName = store.records[store.app_id].name;
+  const appName = store.currentRecord.name;
   let title = `自定义发布 - ${appName}`;
   if (store.deploy.id) {
     store.isReadOnly ? title = '查看' + title : title = '编辑' + title;

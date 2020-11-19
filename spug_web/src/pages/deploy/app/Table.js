@@ -6,10 +6,10 @@
 import React from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, Tag, Icon, message } from 'antd';
-import http from 'libs/http';
+import { Table, Modal, Tag, Icon, Divider, message } from 'antd';
+import { http, hasPermission } from 'libs';
 import store from './store';
-import { LinkButton } from "components";
+import { Action } from "components";
 import CloneConfirm from './CloneConfirm';
 import envStore from 'pages/config/environment/store';
 import lds from 'lodash';
@@ -27,36 +27,6 @@ class ComTable extends React.Component {
       envStore.fetchRecords()
     }
   }
-
-  columns = [{
-    title: '序号',
-    key: 'series',
-    render: (_, __, index) => index + 1,
-    width: 80,
-  }, {
-    title: '应用名称',
-    dataIndex: 'name',
-  }, {
-    title: '标识符',
-    dataIndex: 'key'
-  }, {
-    title: '描述信息',
-    dataIndex: 'desc',
-    ellipsis: true
-  }, {
-    title: '操作',
-    render: info => (
-      <span>
-        <LinkButton auth="deploy.app.edit" onClick={e => store.showExtForm(e, info.id)}>新建发布</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="deploy.app.edit" onClick={e => this.handleClone(e, info.id)}>克隆发布</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="deploy.app.edit" onClick={e => store.showForm(e, info)}>编辑</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth="deploy.app.del" onClick={e => this.handleDelete(e, info)}>删除</LinkButton>
-      </span>
-    )
-  }];
 
   handleClone = (e, id) => {
     e.stopPropagation();
@@ -106,39 +76,14 @@ class ComTable extends React.Component {
     })
   };
 
-  expandedRowRender = (record) => {
-    const columns = [{
-      title: '模式',
-      dataIndex: 'extend',
-      render: value => value === '1' ? <Icon style={{fontSize: 20, color: '#1890ff'}} type="ordered-list"/> :
-        <Icon style={{fontSize: 20, color: '#1890ff'}} type="build"/>,
-      width: 80
-    }, {
-      title: '发布环境',
-      dataIndex: 'env_id',
-      render: value => lds.get(envStore.idMap, `${value}.name`)
-    }, {
-      title: '关联主机',
-      dataIndex: 'host_ids',
-      render: value => `${value.length} 台`
-    }, {
-      title: '发布审核',
-      dataIndex: 'is_audit',
-      render: value => value ? <Tag color="green">开启</Tag> : <Tag color="red">关闭</Tag>
-    }, {
-      title: '操作',
-      render: info => (
-        <span>
-          <LinkButton auth="deploy.app.config"
-                      onClick={e => store.showExtForm(e, record.id, info, false, true)}>查看</LinkButton>
-          <Divider type="vertical"/>
-          <LinkButton auth="deploy.app.edit" onClick={e => store.showExtForm(e, record.id, info)}>编辑</LinkButton>
-          <Divider type="vertical"/>
-          <LinkButton auth="deploy.app.edit" onClick={() => this.handleDeployDelete(info)}>删除</LinkButton>
-        </span>
-      )
-    }];
+  handleSort = (e, info, sort) => {
+    e.stopPropagation();
+    store.fetching = true;
+    http.patch('/api/app/', {id: info.id, sort})
+      .then(store.fetchRecords, () => store.fetching = false)
+  };
 
+  expandedRowRender = (record) => {
     if (record['deploys'] === undefined) {
       store.loadDeploys(record.id)
     }
@@ -146,9 +91,28 @@ class ComTable extends React.Component {
     return <Table
       rowKey="id"
       loading={record['deploys'] === undefined}
-      columns={columns}
       dataSource={record['deploys']}
-      pagination={false}/>
+      pagination={false}>
+      <Table.Column width={80} title="模式" dataIndex="extend" render={value => value === '1' ?
+        <Icon style={{fontSize: 20, color: '#1890ff'}} type="ordered-list"/> :
+        <Icon style={{fontSize: 20, color: '#1890ff'}} type="build"/>}/>
+      <Table.Column title="发布环境" dataIndex="env_id" render={value => lds.get(envStore.idMap, `${value}.name`)}/>
+      <Table.Column title="关联主机" dataIndex="host_ids" render={value => `${value.length} 台`}/>
+      <Table.Column title="发布审核" dataIndex="is_audit"
+                    render={value => value ? <Tag color="green">开启</Tag> : <Tag color="red">关闭</Tag>}/>
+      {hasPermission('deploy.app.config|deploy.app.edit') && (
+        <Table.Column title="操作" render={info => (
+          <Action>
+            <Action.Button
+              auth="deploy.app.config"
+              onClick={e => store.showExtForm(e, record.id, info, false, true)}>查看</Action.Button>
+            <Action.Button auth="deploy.app.edit"
+                           onClick={e => store.showExtForm(e, record.id, info)}>编辑</Action.Button>
+            <Action.Button auth="deploy.app.edit" onClick={() => this.handleDeployDelete(info)}>删除</Action.Button>
+          </Action>
+        )}/>
+      )}
+    </Table>
   };
 
   render() {
@@ -171,9 +135,32 @@ class ComTable extends React.Component {
           showSizeChanger: true,
           showLessItems: true,
           hideOnSinglePage: true,
+          showTotal: total => `共 ${total} 条`,
           pageSizeOptions: ['10', '20', '50', '100']
-        }}
-        columns={this.columns}/>
+        }}>
+        <Table.Column width={80} title="排序" key="series" render={(info) => (
+          <div>
+            <Icon onClick={e => this.handleSort(e, info, 'up')} type="up-square"
+                  style={{cursor: 'pointer', color: '#1890ff'}}/>
+            <Divider type="vertical"/>
+            <Icon onClick={e => this.handleSort(e, info, 'down')} type="down-square"
+                  style={{cursor: 'pointer', color: '#1890ff'}}/>
+          </div>
+        )}/>
+        <Table.Column title="应用名称" dataIndex="name"/>
+        <Table.Column title="标识符" dataIndex="key"/>
+        <Table.Column ellipsis title="描述信息" dataIndex="desc"/>
+        {hasPermission('deploy.app.edit|deploy.app.del') && (
+          <Table.Column width={260} title="操作" render={info => (
+            <Action>
+              <Action.Button auth="deploy.app.edit" onClick={e => store.showExtForm(e, info.id)}>新建发布</Action.Button>
+              <Action.Button auth="deploy.app.edit" onClick={e => this.handleClone(e, info.id)}>克隆发布</Action.Button>
+              <Action.Button auth="deploy.app.edit" onClick={e => store.showForm(e, info)}>编辑</Action.Button>
+              <Action.Button auth="deploy.app.del" onClick={e => this.handleDelete(e, info)}>删除</Action.Button>
+            </Action>
+          )}/>
+        )}
+      </Table>
     )
   }
 }

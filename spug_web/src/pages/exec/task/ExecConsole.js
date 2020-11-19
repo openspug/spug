@@ -6,6 +6,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Collapse, Tooltip, Icon } from 'antd';
+import { X_TOKEN } from 'libs';
 import OutView from './OutView';
 import styles from './index.module.css';
 import store from './store';
@@ -24,7 +25,7 @@ class ExecConsole extends React.Component {
 
   componentDidMount() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${store.token}/`);
+    this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${store.token}/?x-token=${X_TOKEN}`);
     this.socket.onopen = () => {
       this.socket.send('ok');
       for (let item of Object.values(store.outputs)) {

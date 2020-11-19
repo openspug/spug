@@ -5,10 +5,10 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, Tooltip, Icon, message } from 'antd';
-import { LinkButton } from 'components';
+import { Table, Modal, Tooltip, Icon, message } from 'antd';
+import { Action } from 'components';
 import ComForm from './Form';
-import http from 'libs/http';
+import { http, hasPermission } from 'libs';
 import store from './store';
 
 @observer
@@ -31,7 +31,6 @@ class TableView extends React.Component {
   }, {
     title: 'Value',
     dataIndex: 'value',
-    ellipsis: true
   }, {
     title: '修改人',
     width: 120,
@@ -43,12 +42,13 @@ class TableView extends React.Component {
   }, {
     title: '操作',
     width: 120,
+    className: hasPermission(`config.${store.type}.edit_config`) ? null : 'none',
     render: info => (
-      <span>
-        <LinkButton auth={`config.${store.type}.edit_config`} onClick={() => store.showForm(info)}>编辑</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton auth={`config.${store.type}.edit_config`} onClick={() => this.handleDelete(info)}>删除</LinkButton>
-      </span>
+      <Action>
+        <Action.Button auth={`config.${store.type}.edit_config`} onClick={() => store.showForm(info)}>编辑</Action.Button>
+        <Action.Button auth={`config.${store.type}.edit_config`}
+                       onClick={() => this.handleDelete(info)}>删除</Action.Button>
+      </Action>
     )
   }];
 
@@ -82,6 +82,7 @@ class TableView extends React.Component {
             showSizeChanger: true,
             showLessItems: true,
             hideOnSinglePage: true,
+            showTotal: total => `共 ${total} 条`,
             pageSizeOptions: ['10', '20', '50', '100']
           }}
           columns={this.columns}/>

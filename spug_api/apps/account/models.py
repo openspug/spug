@@ -110,3 +110,13 @@ class Role(models.Model, ModelMixin):
     class Meta:
         db_table = 'roles'
         ordering = ('-id',)
+
+
+class History(models.Model, ModelMixin):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    ip = models.CharField(max_length=50)
+    created_at = models.CharField(max_length=20, default=human_datetime)
+
+    class Meta:
+        db_table = 'login_histories'
+        ordering = ('-id',)

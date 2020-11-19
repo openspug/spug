@@ -16,11 +16,11 @@ export default observer(function () {
   function handleSubmit() {
     Modal.confirm({
       title: '密钥修改确认',
-      content: <span style={{color: '#f5222d'}}>请谨慎修改密钥对，修改密钥对会让现有的主机都无法进行验证，影响与主机相关的各项功能！</span>,
+      content: <span style={{color: '#f5222d'}}>请谨慎修改密钥对，修改密钥对可能会让现有的主机都无法进行验证，影响与主机相关的各项功能！</span>,
       onOk: () => {
         Modal.confirm({
           title: '小提示',
-          content: <div>修改密钥对需要<span style={{color: '#f5222d'}}>重启服务后生效</span>，已添加的主机需要重新进行编辑验证后才可以正常连接。</div>,
+          content: <div>修改密钥对需要<span style={{color: '#f5222d'}}>重启服务后生效</span>，已添加的主机可能需要重新进行编辑验证后才可以正常连接。</div>,
           onOk: doModify
         })
       }
@@ -47,7 +47,7 @@ export default observer(function () {
         type="info"
         style={{width: 650}}
         message="小提示"
-        description="在你没有上传密钥的情况下，Spug会在首次添加主机时自动生成密钥对。"
+        description="在这里你可以上传并使用已有的密钥对，没有上传密钥的情况下，Spug会在首次添加主机时自动生成密钥对。"
       />
       <Form style={{maxWidth: 650}}>
         <Form.Item label="公钥" help="一般位于 ~/.ssh/id_rsa.pub">

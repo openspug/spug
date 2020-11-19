@@ -50,14 +50,13 @@ class ComTable extends React.Component {
     title: '操作',
     render: info => (
       <span>
-        <LinkButton className="span-button"
-                    onClick={() => this.handleActive(info)}>{info['is_active'] ? '禁用' : '启用'}</LinkButton>
+        <LinkButton onClick={() => this.handleActive(info)}>{info['is_active'] ? '禁用' : '启用'}</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton className="span-button" onClick={() => store.showForm(info)}>编辑</LinkButton>
+        <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton disabled={info['type'] === 'ldap'} className="span-button" onClick={() => this.handleReset(info)}>重置密码</LinkButton>
+        <LinkButton disabled={info['type'] === 'ldap'} onClick={() => this.handleReset(info)}>重置密码</LinkButton>
         <Divider type="vertical"/>
-        <LinkButton className="span-button" onClick={() => this.handleDelete(info)}>删除</LinkButton>
+        <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
       </span>
     )
   }];
@@ -124,6 +123,7 @@ class ComTable extends React.Component {
             showSizeChanger: true,
             showLessItems: true,
             hideOnSinglePage: true,
+            showTotal: total => `共 ${total} 条`,
             pageSizeOptions: ['10', '20', '50', '100']
           }}
           columns={this.columns}/>

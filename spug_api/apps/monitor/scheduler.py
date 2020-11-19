@@ -20,8 +20,6 @@ import logging
 import json
 import time
 
-logger = logging.getLogger("django.apps.monitor")
-
 
 class Scheduler:
     timezone = settings.TIME_ZONE
@@ -61,7 +59,7 @@ class Scheduler:
         if obj.latest_status == 0:
             if is_notified:
                 self._record_alarm(obj, '2')
-                logger.info(f'{human_datetime()} recover job_id: {obj.id}, job_name: {obj.name}')
+                logging.warning(f'{human_datetime()} recover job_id: {obj.id}, job_name: {obj.name}')
                 self._do_notify('2', obj, out)
         else:
             if obj.fault_times >= obj.threshold:
@@ -69,24 +67,23 @@ class Scheduler:
                     obj.latest_notify_time = int(time.time())
                     obj.save()
                     self._record_alarm(obj, '1')
-                    logger.info(f'{human_datetime()} notify job_id: {obj.id}, job_name: {obj.name}')
+                    logging.warning(f'{human_datetime()} notify job_id: {obj.id}, job_name: {obj.name}')
                     self._do_notify('1', obj, out)
 
     def _handle_event(self, event):
         close_old_connections()
         obj = SimpleLazyObject(lambda: Detection.objects.filter(pk=event.job_id).first())
         if event.code == EVENT_SCHEDULER_SHUTDOWN:
-            logger.info(f'EVENT_SCHEDULER_SHUTDOWN: {event}')
+            logging.warning(f'EVENT_SCHEDULER_SHUTDOWN: {event}')
             Notify.make_notify('monitor', '1', '调度器已关闭', '调度器意外关闭，你可以在github上提交issue', False)
         elif event.code == EVENT_JOB_MAX_INSTANCES:
-            logger.info(f'EVENT_JOB_MAX_INSTANCES: {event}')
+            logging.warning(f'EVENT_JOB_MAX_INSTANCES: {event}')
             Notify.make_notify('monitor', '1', f'{obj.name} - 达到调度实例上限', '一般为上个周期的执行任务还未结束，请增加调度间隔或减少任务执行耗时')
         elif event.code == EVENT_JOB_ERROR:
-            logger.info(f'EVENT_JOB_ERROR: job_id {event.job_id} exception: {event.exception}')
+            logging.warning(f'EVENT_JOB_ERROR: job_id {event.job_id} exception: {event.exception}')
             Notify.make_notify('monitor', '1', f'{obj.name} - 执行异常', f'{event.exception}')
         elif event.code == EVENT_JOB_EXECUTED:
             is_ok, out = event.retval
-            obj = Detection.objects.filter(pk=event.job_id).first()
             is_notified = True if obj.latest_notify_time else False
             if obj.latest_status in [0, None] and is_ok is False:
                 obj.latest_fault_time = int(time.time())
@@ -115,7 +112,7 @@ class Scheduler:
         rds_cli = get_redis_connection()
         self._init()
         rds_cli.delete(settings.MONITOR_KEY)
-        logger.info('Running monitor')
+        logging.warning('Running monitor')
         while True:
             _, data = rds_cli.brpop(settings.MONITOR_KEY)
             task = AttrDict(json.loads(data))

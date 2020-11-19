@@ -7,7 +7,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input, Tag, Upload, message, Button } from 'antd';
 import hostStore from 'pages/host/store';
-import http from 'libs/http';
+import { http, X_TOKEN } from 'libs';
 import store from './store';
 import lds from 'lodash';
 
@@ -15,7 +15,6 @@ import lds from 'lodash';
 class Ext2Form extends React.Component {
   constructor(props) {
     super(props);
-    this.token = localStorage.getItem('token');
     this.state = {
       loading: false,
       uploading: false,
@@ -112,7 +111,7 @@ class Ext2Form extends React.Component {
             )}
           </Form.Item>
           <Form.Item label="上传数据" help="通过数据传输动作来使用上传的文件。">
-            <Upload name="file" fileList={fileList} headers={{'X-Token': this.token}} beforeUpload={this.handleUpload}
+            <Upload name="file" fileList={fileList} headers={{'X-Token': X_TOKEN}} beforeUpload={this.handleUpload}
                     data={{deploy_id: info.deploy_id}} onChange={this.handleUploadChange}>
               {fileList.length === 0 ? <Button loading={uploading} icon="upload">点击上传</Button> : null}
             </Upload>

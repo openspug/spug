@@ -4,10 +4,10 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
-import {Form, Input, Icon, Button, Tabs, Modal} from 'antd';
+import { Form, Input, Icon, Button, Tabs, Modal } from 'antd';
 import styles from './login.module.css';
 import history from 'libs/history';
-import {http, updatePermissions} from 'libs';
+import { http, updatePermissions } from 'libs';
 import logo from 'layout/logo-spug-txt.png';
 import envStore from 'pages/config/environment/store';
 import appStore from 'pages/config/app/store';
@@ -45,8 +45,10 @@ class LoginIndex extends React.Component {
                 title: '安全警告',
                 className: styles.tips,
                 content: <div>
-                  未能获取到客户端的真实IP，无法提供基于请求来源IP的合法性验证，详细信息请参考
-                  <a target="_blank" href="https://spug.dev" rel="noopener noreferrer">官方文档</a>。
+                  未能获取到访问者的真实IP，无法提供基于请求来源IP的合法性验证，详细信息请参考
+                  <a target="_blank"
+                     href="https://spug.dev/docs/practice/#%E5%AE%89%E5%85%A8%E6%80%A7%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97"
+                     rel="noopener noreferrer">官方文档</a>。
                 </div>,
                 onOk: () => this.doLogin(data)
               })
@@ -81,7 +83,7 @@ class LoginIndex extends React.Component {
           <div className={styles.desc}>灵活、强大、功能全面的开源运维平台</div>
         </div>
         <div className={styles.formContainer}>
-          <Tabs classNam={styles.tabs} onTabClick={e => this.setState({loginType: e})}>
+          <Tabs className={styles.tabs} onTabClick={e => this.setState({loginType: e})}>
             <Tabs.TabPane tab="普通登录" key="default"/>
             <Tabs.TabPane tab="LDAP登录" key="ldap"/>
           </Tabs>
@@ -119,14 +121,14 @@ class LoginIndex extends React.Component {
 
         <div className={styles.footerZone}>
           <div className={styles.linksZone}>
-            <a className={styles.links} title="官网" href="https://www.spug.dev"  target="_blank"
+            <a className={styles.links} title="官网" href="https://www.spug.dev" target="_blank"
                rel="noopener noreferrer">官网</a>
-            <a className={styles.links} title="Github" href="https://github.com/openspug/spug"  target="_blank"
-               rel="noopener noreferrer"><Icon type="github" /></a>
-            <a title="文档" href="https://www.spug.dev/docs/about-spug/"  target="_blank"
+            <a className={styles.links} title="Github" href="https://github.com/openspug/spug" target="_blank"
+               rel="noopener noreferrer"><Icon type="github"/></a>
+            <a title="文档" href="https://www.spug.dev/docs/about-spug/" target="_blank"
                rel="noopener noreferrer">文档</a>
           </div>
-          <div style={{color: 'rgba(0, 0, 0, .45)'}}>Copyright <Icon type="copyright" /> 2020 By OpenSpug</div>
+          <div style={{color: 'rgba(0, 0, 0, .45)'}}>Copyright <Icon type="copyright"/> 2020 By OpenSpug</div>
         </div>
       </div>
     )

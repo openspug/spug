@@ -17,3 +17,9 @@
 .spanButton:hover {
     color: #1890ff;
 }
+
+.spanText {
+    cursor: pointer;
+    color: #1890ff;
+    padding: 0 4px;
+}
