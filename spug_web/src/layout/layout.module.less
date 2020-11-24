@@ -10,19 +10,6 @@
 
   .left {
     flex: 1;
-
-    .trigger {
-      font-size: 20px;
-      line-height: 48px;
-      cursor: pointer;
-      transition: all 0.3s, padding 0s;
-      padding: 0 24px;
-      float: left;
-    }
-
-    .trigger:hover {
-      background: rgba(0, 0, 0, 0.025);
-    }
   }
 
   .right {
@@ -38,9 +25,51 @@
       background: rgba(0, 0, 0, 0.025);
     }
   }
+
+  .trigger {
+    font-size: 20px;
+    line-height: 48px;
+    cursor: pointer;
+    transition: all 0.3s, padding 0s;
+    padding: 0 24px;
+    float: left;
+  }
+
+  .trigger:hover {
+    background: rgba(0, 0, 0, 0.025);
+  }
+}
+
+.notify {
+  width: 350px;
+  padding: 0;
+
+  .item {
+    align-items: center;
+    cursor: pointer;
+    padding: 12px 24px;
+  }
+
+  .item:hover {
+    background-color: rgb(233, 247, 254);
+  }
+
+  .footer {
+    line-height: 46px;
+    text-align: center;
+    cursor: pointer;
+    border-top: 1px solid #e8e8e8;
+  }
+}
+
+.notify :global(.ant-dropdown-menu-item:hover) {
+  background-color: #fff;
 }
 
 .content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   padding: 24px 24px 0;
   overflow-y: scroll;
 }
@@ -60,30 +89,13 @@
   .logo {
     height: 64px;
     line-height: 64px;
-    padding-left: 24px;
-    background-color: #002140;
+    padding-left: 15px;
     overflow: hidden;
   }
 
-  .logo h1 {
-    display: inline-block;
-    vertical-align: middle;
-    color: #ffffff;
-    font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
-    font-size: 20px;
-    margin: 0 0 0 12px;
-    font-weight: 600;
-  }
-
   .logo img {
-    height: 32px;
+    width: 50px;
   }
-}
-
-.footer {
-  margin: 48px 0 24px;
-  text-align: center;
-  color: rgba(0, 0, 0, .45);
 }
 
 .router {
@@ -120,5 +132,22 @@
     font-size: 20px;
     line-height: 28px;
     margin-bottom: 16px;
+  }
+}
+
+.footer {
+  width: 100%;
+  padding: 20px;
+  font-size: 14px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+
+  .links {
+    margin-bottom: 7px;
+
+    .item {
+      margin-right: 40px;
+    }
   }
 }

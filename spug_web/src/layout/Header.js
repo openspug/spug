@@ -5,68 +5,22 @@
  */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Layout, Dropdown, Menu, List, Badge, Avatar } from 'antd';
-import {
-  CheckOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  UserOutlined,
-  LogoutOutlined,
-  NotificationOutlined
-} from '@ant-design/icons';
+import { Layout, Dropdown, Menu, Avatar } from 'antd';
+import { MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
+import Notification from './Notification';
 import styles from './layout.module.less';
 import http from '../libs/http';
 import history from '../libs/history';
 import avatar from './avatar.png';
-import moment from 'moment';
 
-export default class extends React.Component {
-  constructor(props) {
-    super(props);
-    this.inerval = null;
-    this.state = {
-      loading: true,
-      notifies: [],
-      read: []
-    }
-  }
+export default function (props) {
 
-  componentDidMount() {
-    this.fetch();
-    this.interval = setInterval(this.fetch, 60000)
-  }
-
-  componentWillUnmount() {
-    this.interval && clearInterval(this.interval)
-  }
-
-  fetch = () => {
-    this.setState({loading: true});
-    http.get('/api/notify/')
-      .then(res => this.setState({notifies: res, read: []}))
-      .finally(() => this.setState({loading: false}))
-  };
-
-  handleLogout = () => {
+  function handleLogout() {
     history.push('/');
     http.get('/api/account/logout/')
-  };
+  }
 
-  handleRead = (e, item) => {
-    e.stopPropagation();
-    if (this.state.read.indexOf(item.id) === -1) {
-      this.state.read.push(item.id);
-      this.setState({read: this.state.read});
-      http.patch('/api/notify/', {ids: [item.id]})
-    }
-  };
-
-  handleReadAll = () => {
-    const ids = this.state.notifies.map(x => x.id);
-    this.setState({read: ids});
-    http.patch('/api/notify/', {ids})
-  };
-  menu = (
+  const UserMenu = (
     <Menu>
       <Menu.Item>
         <Link to="/welcome/info">
@@ -74,66 +28,28 @@ export default class extends React.Component {
         </Link>
       </Menu.Item>
       <Menu.Divider/>
-      <Menu.Item onClick={this.handleLogout}>
+      <Menu.Item onClick={handleLogout}>
         <LogoutOutlined style={{marginRight: 10}}/>退出登录
       </Menu.Item>
     </Menu>
   );
 
-  notify = () => (
-    <Menu className={styles.notify}>
-      <Menu.Item style={{padding: 0, whiteSpace: 'unset'}}>
-        <List
-          loading={this.state.loading}
-          style={{maxHeight: 500, overflow: 'scroll'}}
-          itemLayout="horizontal"
-          dataSource={this.state.notifies}
-          renderItem={item => (
-            <List.Item className={styles.notifyItem} onClick={e => this.handleRead(e, item)}>
-              <List.Item.Meta
-                style={{opacity: this.state.read.includes(item.id) ? 0.4 : 1}}
-                avatar={<CheckOutlined type={item.source} style={{fontSize: 24, color: '#1890ff'}}/>}
-                title={<span style={{fontWeight: 400, color: '#404040'}}>{item.title}</span>}
-                description={[
-                  <div key="1" style={{fontSize: 12}}>{item.content}</div>,
-                  <div key="2" style={{fontSize: 12}}>{moment(item['created_at']).fromNow()}</div>
-                ]}/>
-            </List.Item>
-          )}/>
-        {this.state.notifies.length !== 0 && (
-          <div className={styles.notifyFooter} onClick={() => this.handleReadAll()}>全部 已读</div>
-        )}
-      </Menu.Item>
-    </Menu>
-  );
-
-  render() {
-    const {notifies, read} = this.state;
-    return (
-      <Layout.Header style={{padding: 0}}>
-        <div className={styles.header}>
-          <div className={styles.trigger} onClick={this.props.toggle}>
-            {this.props.collapsed ? <MenuUnfoldOutlined/> : <MenuFoldOutlined/>}
-          </div>
-          <div className={styles.right}>
-            <Dropdown overlay={this.menu}>
-              <span className={styles.action}>
-                <Avatar size="small" src={avatar} style={{marginRight: 8}}/>
-                {localStorage.getItem('nickname')}
-              </span>
-            </Dropdown>
-          </div>
-          <div className={styles.right}>
-            <Dropdown overlay={this.notify} trigger={['click']}>
-              <span className={styles.trigger}>
-                <Badge count={notifies.length - read.length}>
-                  <NotificationOutlined style={{fontSize: 16}}/>
-                </Badge>
-              </span>
-            </Dropdown>
-          </div>
+  return (
+    <Layout.Header className={styles.header}>
+      <div className={styles.left}>
+        <div className={styles.trigger} onClick={props.toggle}>
+          {props.collapsed ? <MenuUnfoldOutlined/> : <MenuFoldOutlined/>}
         </div>
-      </Layout.Header>
-    )
-  }
+      </div>
+      <Notification/>
+      <div className={styles.right}>
+        <Dropdown overlay={UserMenu} style={{background: '#000'}}>
+          <span className={styles.action}>
+            <Avatar size="small" src={avatar} style={{marginRight: 8}}/>
+            {localStorage.getItem('nickname')}
+          </span>
+        </Dropdown>
+      </div>
+    </Layout.Header>
+  )
 }

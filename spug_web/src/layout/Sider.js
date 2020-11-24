@@ -1,7 +1,7 @@
 import React from 'react';
 import { Layout, Menu } from 'antd';
 import { hasPermission, history } from 'libs';
-import styles from './layout.module.css';
+import styles from './layout.module.less';
 import menus from '../routes';
 import logo from './logo-spug.png';
 import logoText from './logo-text.png';
