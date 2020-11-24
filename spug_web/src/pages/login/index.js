@@ -4,7 +4,8 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
-import { Form, Input, Icon, Button, Tabs, Modal } from 'antd';
+import { Form, Input, Button, Tabs, Modal } from 'antd';
+import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import styles from './login.module.css';
 import history from 'libs/history';
 import { http, updatePermissions } from 'libs';
@@ -94,7 +95,7 @@ class LoginIndex extends React.Component {
                   size="large"
                   autoComplete="off"
                   placeholder="请输入账户"
-                  prefix={<Icon type="user" className={styles.icon}/>}/>
+                  prefix={<UserOutlined className={styles.icon}/>}/>
               )}
             </Form.Item>
             <Form.Item className={styles.formItem}>
@@ -105,7 +106,7 @@ class LoginIndex extends React.Component {
                   autoComplete="off"
                   placeholder="请输入密码"
                   onPressEnter={this.handleSubmit}
-                  prefix={<Icon type="lock" className={styles.icon}/>}/>
+                  prefix={<LockOutlined className={styles.icon}/>}/>
               )}
             </Form.Item>
           </Form>

@@ -4,7 +4,8 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
-import { Drawer, Breadcrumb, Table, Icon, Divider, Switch, Button, Progress, Modal, message } from 'antd';
+import { Drawer, Breadcrumb, Table, Divider, Switch, Button, Progress, Modal, message } from 'antd';
+import { DownloadOutlined, FileOutlined, FolderOutlined, DeleteOutlined, HomeOutlined } from '@ant-design/icons';
 import { http, uniqueId, X_TOKEN } from 'libs';
 import lds from 'lodash';
 import styles from './index.module.css'
@@ -31,12 +32,12 @@ class FileManager extends React.Component {
     key: 'name',
     render: info => info.kind === 'd' ? (
       <div onClick={() => this.handleChdir(info.name, '1')} style={{cursor: 'pointer'}}>
-        <Icon type="folder" style={{color: '#1890ff'}}/>
+        <FolderOutlined style={{color: '#1890ff'}}/>
         <span style={{color: '#1890ff', paddingLeft: 5}}>{info.name}</span>
       </div>
     ) : (
       <React.Fragment>
-        <Icon type="file"/>
+        <FileOutlined/>
         <span style={{paddingLeft: 5}}>{info.name}</span>
       </React.Fragment>
     ),
@@ -63,9 +64,9 @@ class FileManager extends React.Component {
     key: 'action',
     render: info => info.kind === '-' ? (
       <React.Fragment>
-        <Icon style={{color: '#1890ff'}} type="download" onClick={() => this.handleDownload(info.name)}/>
+        <DownloadOutlined style={{color: '#1890ff'}} onClick={() => this.handleDownload(info.name)}/>
         <Divider type="vertical"/>
-        <Icon style={{color: 'red'}} type="delete" onClick={() => this.handleDelete(info.name)}/>
+        <DeleteOutlined style={{color: 'red'}} onClick={() => this.handleDelete(info.name)}/>
       </React.Fragment>
     ) : null
   }];
@@ -188,7 +189,7 @@ class FileManager extends React.Component {
         <div className={styles.drawerHeader}>
           <Breadcrumb>
             <Breadcrumb.Item href="#" onClick={() => this.handleChdir('', '0')}>
-              <Icon type="home"/>
+              <HomeOutlined/>
             </Breadcrumb.Item>
             {this.state.pwd.map(item => (
               <Breadcrumb.Item key={item} href="#" onClick={() => this.handleChdir(item, '2')}>

@@ -5,7 +5,8 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Menu, Input, Button, Select, PageHeader, Icon, Modal } from 'antd';
+import { Menu, Input, Button, Select, PageHeader, Modal } from 'antd';
+import { TableOutlined, UnorderedListOutlined, NumberOutlined } from '@ant-design/icons';
 import envStore from '../environment/store';
 import styles from './index.module.css';
 import history from 'libs/history';
@@ -84,9 +85,9 @@ class Index extends React.Component {
           <SearchForm>
             <SearchForm.Item span={6} title="视图">
               <Select value={view} style={{width: '100%'}} onChange={v => this.setState({view: v})}>
-                <Select.Option value="1"><Icon type="table" style={{marginRight: 10}}/>表格</Select.Option>
-                <Select.Option value="2"><Icon type="unordered-list" style={{marginRight: 10}}/>文本</Select.Option>
-                <Select.Option value="3"><Icon type="number" style={{marginRight: 10}}/>JSON</Select.Option>
+                <Select.Option value="1"><TableOutlined style={{marginRight: 10}}/>表格</Select.Option>
+                <Select.Option value="2"><UnorderedListOutlined style={{marginRight: 10}}/>文本</Select.Option>
+                <Select.Option value="3"><NumberOutlined style={{marginRight: 10}}/>JSON</Select.Option>
               </Select>
             </SearchForm.Item>
             <SearchForm.Item span={7} title="Key">
