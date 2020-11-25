@@ -12,6 +12,8 @@ import AuthCard from './AuthCard';
 import AuthDiv from './AuthDiv';
 import ACEditor from './ACEditor';
 import Action from './Action';
+import TableCard from './TableCard';
+import Breadcrumb from './Breadcrumb';
 
 export {
   StatisticsCard,
@@ -23,4 +25,6 @@ export {
   AuthDiv,
   ACEditor,
   Action,
+  TableCard,
+  Breadcrumb,
 }

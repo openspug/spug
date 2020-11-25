@@ -5,32 +5,28 @@
  */
 import React from 'react';
 import { Row, Col, Form } from 'antd';
-import styles from './index.module.css';
-import lodash from "lodash";
-
+import styles from './index.module.less';
 
 export default class extends React.Component {
   static Item(props) {
     return (
-      <Form.Item {...props} label={props.title}>
-        {props.children}
-      </Form.Item>
+      <Col span={props.span} offset={props.offset}>
+        <Form.Item label={props.title}>
+          {props.children}
+        </Form.Item>
+      </Col>
     )
   }
 
   render() {
-    let items = lodash.get(this.props, 'children', []);
-    if (!lodash.isArray(items)) items = [items];
     return (
-      <Form className={styles.searchForm} style={this.props.style}>
-        <Row gutter={{md: 8, lg: 24, xl: 48}}>
-          {items.filter(item => item).map((item, index) => (
-            <Col key={index} md={lodash.get(item.props, 'span')} sm={24}>
-              {item}
-            </Col>
-          ))}
-        </Row>
-      </Form>
+      <div className={styles.searchForm} style={this.props.style}>
+        <Form style={this.props.style}>
+          <Row gutter={{md: 8, lg: 24, xl: 48}}>
+            {this.props.children}
+          </Row>
+        </Form>
+      </div>
     )
   }
 }

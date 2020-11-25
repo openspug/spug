@@ -4,7 +4,7 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
-import { hasPermission } from "../libs";
+import { hasPermission } from 'libs';
 
 
 export default function AuthFragment(props) {

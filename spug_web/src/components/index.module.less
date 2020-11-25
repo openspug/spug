@@ -1,0 +1,144 @@
+.searchForm {
+  padding: 24px 24px 0 24px;
+  background-color: #fff;
+  border-radius: 2px;
+}
+
+.searchForm :global(.ant-form-item) {
+  display: flex;
+}
+
+.searchForm :global(.ant-form-item-control-wrapper) {
+  flex: 1;
+}
+
+.searchForm :global(.ant-form-item-label) {
+  padding-right: 8px;
+}
+
+.statisticsCard {
+  position: relative;
+  text-align: center;
+}
+
+.statisticsCard span {
+  color: rgba(0, 0, 0, .45);
+  display: inline-block;
+  line-height: 22px;
+  margin-bottom: 4px;
+}
+
+.statisticsCard p {
+  font-size: 32px;
+  line-height: 32px;
+  margin: 0;
+}
+
+.statisticsCard em {
+  background-color: #e8e8e8;
+  position: absolute;
+  height: 56px;
+  width: 1px;
+  top: 0;
+  right: 0;
+}
+
+.tableCard {
+  border: 1px solid #f0f0f0;
+  background: #fff;
+  border-radius: 2px;
+
+  :global(.ant-pagination) {
+    padding: 0 24px;
+  }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    padding: 0 24px;
+
+    .title {
+      flex: 1;
+      font-weight: 500;
+      font-size: 16px;
+      opacity: 0.8;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+
+      :global(.anticon) {
+        font-size: 16px;
+        margin-left: 8px;
+      }
+    }
+  }
+}
+
+.tableFields {
+  :global(.ant-popover-title) {
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  :global(.ant-popover-inner-content) {
+    padding: 8px 0;
+
+    :global(.ant-checkbox-group) {
+      display: block;
+    }
+
+
+    :global(.ant-checkbox-wrapper) {
+      display: block;
+      height: 30px;
+      line-height: 30px;
+      margin: 0;
+      padding: 0 16px;
+    }
+
+    :global(.ant-checkbox-wrapper):hover {
+      background: rgba(0, 0, 0, 0.025)
+    }
+  }
+}
+
+.tableFooter {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  height: 48px;
+  width: calc(100% - 208px);
+  padding: 0 24px;
+  background: #fff;
+
+  .left {
+    flex: 1;
+
+    span {
+      color: #1890ff;
+      font-weight: 600;
+    }
+  }
+}
+
+.breadcrumb {
+  margin: -24px -24px 24px -24px;
+  padding: 16px 24px 0 24px;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+
+  .title {
+    margin-bottom: 9px;
+    font-size: 20px;
+    line-height: 50px;
+  }
+}

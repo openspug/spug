@@ -4,9 +4,9 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
-import { Card, Col, Row } from "antd";
+import { Card, Col, Row } from 'antd';
 import lodash from 'lodash';
-import styles from './index.module.css';
+import styles from './index.module.less';
 
 
 class StatisticsCard extends React.Component {

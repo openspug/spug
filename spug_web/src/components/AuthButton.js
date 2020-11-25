@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { Button } from 'antd';
-import { hasPermission } from "../libs";
+import { hasPermission } from 'libs';
 
 
 export default function AuthButton(props) {

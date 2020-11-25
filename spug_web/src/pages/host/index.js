@@ -5,15 +5,21 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Input, Button, Select } from 'antd';
-import { SearchForm, AuthDiv, AuthCard } from 'components';
+import { Input, Select } from 'antd';
+import { SearchForm, AuthDiv, Breadcrumb } from 'components';
 import ComTable from './Table';
+import ComForm from './Form';
+import ComImport from './Import';
 import store from './store';
 
 export default observer(function () {
   return (
-    <AuthCard auth="host.host.view">
-      <SearchForm>
+    <AuthDiv auth="host.host.view">
+      <Breadcrumb>
+        <Breadcrumb.Item>首页</Breadcrumb.Item>
+        <Breadcrumb.Item>主机管理</Breadcrumb.Item>
+      </Breadcrumb>
+      <SearchForm style={{marginBottom: 16}}>
         <SearchForm.Item span={6} title="主机类别">
           <Select allowClear placeholder="请选择" value={store.f_zone} onChange={v => store.f_zone = v}>
             {store.zones.map(item => (
@@ -27,16 +33,10 @@ export default observer(function () {
         <SearchForm.Item span={6} title="连接地址">
           <Input allowClear value={store.f_host} onChange={e => store.f_host = e.target.value} placeholder="请输入"/>
         </SearchForm.Item>
-        <SearchForm.Item span={6}>
-          <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
-        </SearchForm.Item>
       </SearchForm>
-      <AuthDiv auth="host.host.add" style={{marginBottom: 16}}>
-        <Button type="primary" icon="plus" onClick={() => store.showForm()}>新建</Button>
-        <Button style={{marginLeft: 20}} type="primary" icon="import"
-                onClick={() => store.importVisible = true}>批量导入</Button>
-      </AuthDiv>
       <ComTable/>
-    </AuthCard>
-  )
+      {store.formVisible && <ComForm/>}
+      {store.importVisible && <ComImport/>}
+    </AuthDiv>
+  );
 })
