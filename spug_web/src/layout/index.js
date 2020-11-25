@@ -27,8 +27,8 @@ function initRoutes(routes) {
   }
 }
 
-initRoutes(routes)
 updatePermissions()
+initRoutes(routes)
 
 // 404
 function NotFound() {
