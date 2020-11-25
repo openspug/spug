@@ -3,107 +3,90 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, Select, Col, Button, message } from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { Modal, Form, Input, Select, Button, message } from 'antd';
 import { ACEditor } from 'components';
 import { http, cleanCommand } from 'libs';
 import store from './store';
 
-@observer
-class ComForm extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      loading: false,
-      type: null,
-      body: store.record['body'],
-    }
-  }
+export default observer(function () {
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const [body, setBody] = useState(store.record.body);
 
-  handleSubmit = () => {
-    this.setState({loading: true});
-    const formData = this.props.form.getFieldsValue();
+  function handleSubmit() {
+    setLoading(true);
+    const formData = form.getFieldsValue();
     formData['id'] = store.record.id;
-    formData['body'] = cleanCommand(this.state.body);
+    formData['body'] = cleanCommand(body);
     http.post('/api/exec/template/', formData)
       .then(res => {
         message.success('操作成功');
         store.formVisible = false;
         store.fetchRecords()
-      }, () => this.setState({loading: false}))
-  };
+      }, () => setLoading(false))
+  }
 
-  handleAddZone = () => {
+  function handleAddZone() {
+    let type;
     Modal.confirm({
-      icon: 'exclamation-circle',
+      icon: <ExclamationCircleOutlined/>,
       title: '添加模板类型',
-      content: this.addZoneForm,
+      content: (
+        <Form layout="vertical" style={{marginTop: 24}}>
+          <Form.Item required label="模板类型">
+            <Input onChange={e => type = e.target.value}/>
+          </Form.Item>
+        </Form>
+      ),
       onOk: () => {
-        if (this.state.type) {
-          store.types.push(this.state.type);
-          this.props.form.setFieldsValue({'type': this.state.type})
+        if (type) {
+          store.types.push(type);
+          form.setFieldsValue({type})
         }
       },
     })
-  };
-
-  addZoneForm = (
-    <Form>
-      <Form.Item required label="模板类型">
-        <Input onChange={val => this.setState({type: val.target.value})}/>
-      </Form.Item>
-    </Form>
-  );
-
-  render() {
-    const info = store.record;
-    const {getFieldDecorator} = this.props.form;
-    return (
-      <Modal
-        visible
-        width={800}
-        maskClosable={false}
-        title={store.record.id ? '编辑模板' : '新建模板'}
-        onCancel={() => store.formVisible = false}
-        confirmLoading={this.state.loading}
-        onOk={this.handleSubmit}>
-        <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
-          <Form.Item required label="模板类型">
-            <Col span={16}>
-              {getFieldDecorator('type', {initialValue: info['type']})(
-                <Select placeholder="请选择模板类型">
-                  {store.types.map(item => (
-                    <Select.Option value={item} key={item}>{item}</Select.Option>
-                  ))}
-                </Select>
-              )}
-            </Col>
-            <Col span={6} offset={2}>
-              <Button type="link" onClick={this.handleAddZone}>添加类型</Button>
-            </Col>
-          </Form.Item>
-          <Form.Item required label="模板名称">
-            {getFieldDecorator('name', {initialValue: info['name']})(
-              <Input placeholder="请输入模板名称"/>
-            )}
-          </Form.Item>
-          <Form.Item required label="模板内容">
-            <ACEditor
-              mode="sh"
-              value={this.state.body}
-              onChange={val => this.setState({body: val})}
-              height="300px"/>
-          </Form.Item>
-          <Form.Item label="备注信息">
-            {getFieldDecorator('desc', {initialValue: info['desc']})(
-              <Input.TextArea placeholder="请输入模板备注信息"/>
-            )}
-          </Form.Item>
-        </Form>
-      </Modal>
-    )
   }
-}
 
-export default Form.create()(ComForm)
+  const info = store.record;
+  return (
+    <Modal
+      visible
+      width={800}
+      maskClosable={false}
+      title={store.record.id ? '编辑模板' : '新建模板'}
+      onCancel={() => store.formVisible = false}
+      confirmLoading={loading}
+      onOk={handleSubmit}>
+      <Form form={form} initialValues={info} labelCol={{span: 6}} wrapperCol={{span: 14}}>
+        <Form.Item required label="模板类型" style={{marginBottom: 0}}>
+          <Form.Item name="type" style={{display: 'inline-block', width: 'calc(75%)', marginRight: 8}}>
+            <Select placeholder="请选择模板类型">
+              {store.types.map(item => (
+                <Select.Option value={item} key={item}>{item}</Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item style={{display: 'inline-block', width: 'calc(25%-8px)'}}>
+            <Button type="link" onClick={handleAddZone}>添加类型</Button>
+          </Form.Item>
+        </Form.Item>
+        <Form.Item required name="name" label="模板名称">
+          <Input placeholder="请输入模板名称"/>
+        </Form.Item>
+        <Form.Item required label="模板内容">
+          <ACEditor
+            mode="sh"
+            value={body}
+            onChange={val => setBody(val)}
+            height="300px"/>
+        </Form.Item>
+        <Form.Item name="desc" label="备注信息">
+          <Input.TextArea placeholder="请输入模板备注信息"/>
+        </Form.Item>
+      </Form>
+    </Modal>
+  )
+})
