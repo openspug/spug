@@ -5,8 +5,9 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Form, Button, Tag } from 'antd';
-import { ACEditor, AuthCard } from 'components';
+import { PlusOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { Form, Button, Card, Tag } from 'antd';
+import { ACEditor, AuthDiv, Breadcrumb } from 'components';
 import HostSelector from './HostSelector';
 import TemplateSelector from './TemplateSelector';
 import ExecConsole from './ExecConsole';
@@ -34,32 +35,40 @@ class TaskIndex extends React.Component {
   render() {
     const {body, token} = this.state;
     return (
-      <AuthCard auth="exec.task.do">
-        <Form>
-          <Form.Item label="执行主机">
-            {store.hosts.map(item => (
-              <Tag
-                closable
-                color="#108ee9"
-                key={item.id}
-                onClose={() => store.hosts = store.hosts.filter(x => x.id !== item.id)}>
-                {item.name}({item.hostname}:{item.port})</Tag>
-            ))}
-          </Form.Item>
-          <Button icon="plus" onClick={store.switchHost}>从主机列表中选择</Button>
-          <Form.Item label="执行命令">
-            <ACEditor mode="sh" value={body} height="300px" onChange={body => this.setState({body})}/>
-          </Form.Item>
-          <Form.Item>
-            <Button icon="plus" onClick={store.switchTemplate}>从执行模版中选择</Button>
-          </Form.Item>
-          <Button icon="thunderbolt" type="primary" onClick={this.handleSubmit}>开始执行</Button>
-        </Form>
+      <AuthDiv auth="exec.task.do">
+        <Breadcrumb>
+          <Breadcrumb.Item>首页</Breadcrumb.Item>
+          <Breadcrumb.Item>批量执行</Breadcrumb.Item>
+          <Breadcrumb.Item>执行任务</Breadcrumb.Item>
+        </Breadcrumb>
+        <Card>
+          <Form layout="vertical">
+            <Form.Item label="执行主机" style={{marginBottom: 12}}>
+              {store.hosts.map(item => (
+                <Tag
+                  closable
+                  color="#108ee9"
+                  key={item.id}
+                  onClose={() => store.hosts = store.hosts.filter(x => x.id !== item.id)}>
+                  {item.name}({item.hostname}:{item.port})</Tag>
+              ))}
+            </Form.Item>
+            <Button style={{marginBottom: 24}} icon={<PlusOutlined/>} onClick={store.switchHost}>从主机列表中选择</Button>
+            <Form.Item label="执行命令">
+              <ACEditor mode="sh" value={body} height="300px" onChange={body => this.setState({body})}/>
+            </Form.Item>
+            <Form.Item>
+              <Button icon={<PlusOutlined/>} onClick={store.switchTemplate}>从执行模版中选择</Button>
+            </Form.Item>
+            <Button icon={<ThunderboltOutlined/>} type="primary" onClick={this.handleSubmit}>开始执行</Button>
+          </Form>
+        </Card>
         {store.showHost && <HostSelector onCancel={store.switchHost} onOk={hosts => store.hosts = hosts}/>}
-        {store.showTemplate && <TemplateSelector onCancel={store.switchTemplate} onOk={v => this.setState({body: body + v})}/>}
+        {store.showTemplate &&
+        <TemplateSelector onCancel={store.switchTemplate} onOk={v => this.setState({body: body + v})}/>}
         {store.showConsole && <ExecConsole token={token} onCancel={store.switchConsole}/>}
-      </AuthCard>
-    )
+      </AuthDiv>
+    );
   }
 }
 
