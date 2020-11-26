@@ -5,7 +5,14 @@
  */
 import React from 'react';
 import { Drawer, Breadcrumb, Table, Divider, Switch, Button, Progress, Modal, message } from 'antd';
-import { DownloadOutlined, FileOutlined, FolderOutlined, DeleteOutlined, HomeOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  DownloadOutlined,
+  FileOutlined,
+  FolderOutlined,
+  HomeOutlined,
+  UploadOutlined
+} from '@ant-design/icons';
 import { http, uniqueId, X_TOKEN } from 'libs';
 import lds from 'lodash';
 import styles from './index.module.css'
@@ -204,7 +211,7 @@ class FileManager extends React.Component {
               checkedChildren="开启"
               unCheckedChildren="关闭"
               onChange={v => this.setState({showDot: v})}/>
-            <Button style={{marginLeft: 10}} size="small" type="primary" icon="upload"
+            <Button style={{marginLeft: 10}} size="small" type="primary" icon={<UploadOutlined/>}
                     onClick={this.handleUpload}>上传文件</Button>
           </div>
         </div>

@@ -4,6 +4,7 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
+import { FolderOpenOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { AuthDiv } from 'components';
 import { Terminal } from 'xterm';
@@ -83,7 +84,7 @@ class WebSSH extends React.Component {
         <div className={styles.header}>
           <div>{host.name} | {host.username}@{host.hostname}:{host.port}</div>
           <AuthDiv auth="host.console.manager">
-            <Button disabled={managerDisabled} type="primary" icon="folder-open"
+            <Button disabled={managerDisabled} type="primary" icon={<FolderOpenOutlined />}
                     onClick={this.handleShow}>文件管理器</Button>
           </AuthDiv>
         </div>
