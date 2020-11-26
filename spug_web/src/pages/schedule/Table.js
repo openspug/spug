@@ -5,13 +5,11 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Modal, Tag, Dropdown, Icon, Menu, message } from 'antd';
-import ComForm from './Form';
-import {http} from 'libs';
+import { DownOutlined, PlusOutlined } from '@ant-design/icons';
+import { Modal, Tag, Dropdown, Menu, Radio, message } from 'antd';
+import { LinkButton, Action, TableCard, AuthButton } from 'components';
+import { http } from 'libs';
 import store from './store';
-import { LinkButton, Action } from "components";
-import Info from './Info';
-import Record from './Record';
 
 @observer
 class ComTable extends React.Component {
@@ -27,7 +25,8 @@ class ComTable extends React.Component {
         <LinkButton onClick={() => this.handleTest(info)}>执行测试</LinkButton>
       </Menu.Item>
       <Menu.Item>
-        <LinkButton auth="schedule.schedule.edit" onClick={() => this.handleActive(info)}>{info.is_active ? '禁用任务' : '激活任务'}</LinkButton>
+        <LinkButton auth="schedule.schedule.edit"
+                    onClick={() => this.handleActive(info)}>{info.is_active ? '禁用任务' : '激活任务'}</LinkButton>
       </Menu.Item>
       <Menu.Item>
         <LinkButton onClick={() => store.showRecord(info)}>历史记录</LinkButton>
@@ -71,11 +70,12 @@ class ComTable extends React.Component {
     width: 180,
     render: info => (
       <Action>
-        <Action.Button disabled={!info['latest_run_time']} onClick={() => store.showInfo(info)}>详情</Action.Button>
+        <Action.Button disabled={info['latest_run_time'] === '1970-01-01'}
+                       onClick={() => store.showInfo(info)}>详情</Action.Button>
         <Action.Button auth="schedule.schedule.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
         <Dropdown overlay={() => this.moreMenus(info)} trigger={['click']}>
           <LinkButton>
-            更多 <Icon type="down"/>
+            更多 <DownOutlined/>
           </LinkButton>
         </Dropdown>
       </Action>
@@ -120,43 +120,33 @@ class ComTable extends React.Component {
   };
 
   render() {
-    let data = store.records;
-    if (store.f_status !== undefined) {
-      if (store.f_status === -3) {
-        data = data.filter(item => !item['is_active'])
-      } else if (store.f_status === -2) {
-        data = data.filter(item => item['is_active'])
-      } else if (store.f_status === -1) {
-        data = data.filter(item => item['is_active'] && !item['latest_status_alias'])
-      } else {
-        data = data.filter(item => item['latest_status'] === store.f_status)
-      }
-    }
-    if (store.f_status === 0) data = data.filter(item => item['is_active']);
-    if (store.f_name) {
-      data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
-    }
-    if (store.f_type) {
-      data = data.filter(item => item['type'].toLowerCase().includes(store.f_type.toLowerCase()))
-    }
     return (
-      <React.Fragment>
-        <Table
-          rowKey="id"
-          loading={store.isFetching}
-          dataSource={data}
-          pagination={{
-            showSizeChanger: true,
-            showLessItems: true,
-            hideOnSinglePage: true,
-            showTotal: total => `共 ${total} 条`,
-            pageSizeOptions: ['10', '20', '50', '100']
-          }}
-          columns={this.columns}/>
-        {store.formVisible && <ComForm/>}
-        {store.infoVisible && <Info/>}
-        {store.recordVisible && <Record/>}
-      </React.Fragment>
+      <TableCard
+        rowKey="id"
+        title="任务列表"
+        loading={store.isFetching}
+        dataSource={store.dataSource}
+        onReload={store.fetchRecords}
+        actions={[
+          <AuthButton
+            auth="schedule.schedule.add"
+            type="primary"
+            icon={<PlusOutlined/>}
+            onClick={() => store.showForm()}>新建</AuthButton>,
+          <Radio.Group value={store.f_active} onChange={e => store.f_active = e.target.value}>
+            <Radio.Button value="">全部</Radio.Button>
+            <Radio.Button value="1">已激活</Radio.Button>
+            <Radio.Button value="0">未激活</Radio.Button>
+          </Radio.Group>
+        ]}
+        pagination={{
+          showSizeChanger: true,
+          showLessItems: true,
+          hideOnSinglePage: true,
+          showTotal: total => `共 ${total} 条`,
+          pageSizeOptions: ['10', '20', '50', '100']
+        }}
+        columns={this.columns}/>
     )
   }
 }

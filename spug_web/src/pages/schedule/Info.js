@@ -4,7 +4,7 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
-import { Modal, Form, Tabs, Spin } from 'antd';
+import { Modal, Tabs, Spin } from 'antd';
 import { StatisticsCard } from 'components';
 import http from 'libs/http';
 import store from './store';
@@ -68,4 +68,4 @@ class ComForm extends React.Component {
   }
 }
 
-export default Form.create()(ComForm)
+export default ComForm
