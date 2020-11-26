@@ -69,11 +69,11 @@ class ComTable extends React.Component {
     render: info => {
       if (info.status === '-1' && info.reason) {
         return <Popover title="驳回原因:" content={info.reason}>
-          <span style={{color: '#1890ff'}}>{info['status_alias']}</span>
+          <Tag color="#f50">{info['status_alias']}</Tag>
         </Popover>
       } else if (info.status === '1' && info.reason) {
         return <Popover title="审核意见:" content={info.reason}>
-          <span style={{color: '#1890ff'}}>{info['status_alias']}</span>
+          <Tag color="#87d068">{info['status_alias']}</Tag>
         </Popover>
       } else if (info.status === '2') {
         return <Tag color="orange">{info['status_alias']}</Tag>

@@ -105,8 +105,9 @@ export default observer(function () {
     if (index === -1) {
       setHostIds([id, ...host_ids])
     } else {
-      host_ids.splice(index, 1);
-      setHostIds(host_ids)
+      const tmp = lds.clone(host_ids);
+      tmp.splice(index, 1);
+      setHostIds(tmp)
     }
   }
 
