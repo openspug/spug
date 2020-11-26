@@ -55,7 +55,7 @@ class Store {
   };
 
   updateDate = (data) => {
-    if (data.length === 2) {
+    if (data && data.length === 2) {
       this.f_s_date = data[0].format('YYYY-MM-DD');
       this.f_e_date = data[1].format('YYYY-MM-DD')
     } else {

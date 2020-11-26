@@ -16,19 +16,29 @@ import {
   SettingOutlined
 } from '@ant-design/icons';
 import HomeIndex from './pages/home';
+
 import HostIndex from './pages/host';
+
 import ExecTask from './pages/exec/task';
 import ExecTemplate from './pages/exec/template';
+
 import DeployApp from './pages/deploy/app';
 import DeployRequest from './pages/deploy/request';
+import DoExt1Index from './pages/deploy/do/Ext1Index';
+import DoExt2Index from './pages/deploy/do/Ext2Index';
+
 import ScheduleIndex from './pages/schedule';
+
 import ConfigEnvironment from './pages/config/environment';
 import ConfigService from './pages/config/service';
 import ConfigApp from './pages/config/app';
+
 import MonitorIndex from './pages/monitor';
+
 import AlarmIndex from './pages/alarm/alarm';
 import AlarmGroup from './pages/alarm/group';
 import AlarmContact from './pages/alarm/contact';
+
 import SystemAccount from './pages/system/account';
 import SystemRole from './pages/system/role';
 import SystemSetting from './pages/system/setting';
@@ -49,6 +59,10 @@ export default [
     icon: <FlagOutlined/>, title: '应用发布', auth: 'deploy.app.view|deploy.request.view', child: [
       {title: '应用管理', auth: 'deploy.app.view', path: '/deploy/app', component: DeployApp},
       {title: '发布申请', auth: 'deploy.request.view', path: '/deploy/request', component: DeployRequest},
+      {path: '/deploy/do/ext1/:id', component: DoExt1Index},
+      {path: '/deploy/do/ext2/:id', component: DoExt2Index},
+      {path: '/deploy/do/ext1/:id/:log', component: DoExt1Index},
+      {path: '/deploy/do/ext2/:id/:log', component: DoExt2Index},
     ]
   },
   {

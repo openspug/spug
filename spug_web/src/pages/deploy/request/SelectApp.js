@@ -6,7 +6,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react';
-import { Modal, Button, Menu, Spin, Icon, Input, Tooltip } from 'antd';
+import { Modal, Button, Menu, Spin, Input, Tooltip } from 'antd';
+import { OrderedListOutlined, BuildOutlined } from '@ant-design/icons';
 import store from './store';
 import styles from './index.module.css';
 import envStore from 'pages/config/environment/store';
@@ -100,8 +101,8 @@ class SelectApp extends React.Component {
                   <Button type="primary" className={styles.appBlock} onClick={() => this.handleClick(item)}>
                     <div ref={el => this.handleRef(el, item.id)}
                          style={{width: 135, overflow: 'hidden', textOverflow: 'ellipsis'}}>
-                      <Icon type={item.extend === '1' ? 'ordered-list' : 'build'}
-                            style={{marginRight: 10}}/>{item['app_name']}
+                      {item.extend === '1' ? <OrderedListOutlined/> : <BuildOutlined/>}
+                      <span style={{marginLeft: 8}}>{item.app_name}</span>
                     </div>
                   </Button>
                 </Tooltip>

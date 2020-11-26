@@ -5,8 +5,9 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Button, Select, DatePicker, Radio, Row, Col, Modal, Form, Input, message } from 'antd';
-import { SearchForm, AuthFragment, AuthCard } from 'components';
+import { ExclamationCircleOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Form, Select, DatePicker, Modal, Input, message } from 'antd';
+import { SearchForm, AuthDiv, AuthButton, Breadcrumb } from 'components';
 import SelectApp from './SelectApp';
 import Ext1Form from './Ext1Form';
 import Ext2Form from './Ext2Form';
@@ -39,15 +40,15 @@ class Index extends React.Component {
 
   handleBatchDel = () => {
     Modal.confirm({
-      icon: 'exclamation-circle',
+      icon: <ExclamationCircleOutlined/>,
       title: '批量删除发布申请',
       content: (
-        <Form>
-          <Form.Item label="截止日期" help={<div>将删除截止日期<span style={{color: 'red'}}>之前</span>的所有发布申请记录。</div>}>
+        <Form layout="vertical" style={{marginTop: 24}}>
+          <Form.Item label="截止日期 :" help={<div>将删除截止日期<span style={{color: 'red'}}>之前</span>的所有发布申请记录。</div>}>
             <DatePicker style={{width: 200}} placeholder="请输入"
                         onChange={val => this.setState({expire: val.format('YYYY-MM-DD')})}/>
           </Form.Item>
-          <Form.Item label="保留记录" help="每个应用每个环境仅保留最新的N条发布申请，优先级高于截止日期">
+          <Form.Item label="保留记录 :" help="每个应用每个环境仅保留最新的N条发布申请，优先级高于截止日期">
             <Input allowClear style={{width: 200}} placeholder="请输入保留个数"
                    onChange={e => this.setState({count: e.target.value})}/>
           </Form.Item>
@@ -66,7 +67,12 @@ class Index extends React.Component {
 
   render() {
     return (
-      <AuthCard auth="deploy.request.view">
+      <AuthDiv auth="deploy.request.view">
+        <Breadcrumb>
+          <Breadcrumb.Item>首页</Breadcrumb.Item>
+          <Breadcrumb.Item>应用发布</Breadcrumb.Item>
+          <Breadcrumb.Item>发布申请</Breadcrumb.Item>
+        </Breadcrumb>
         <SearchForm>
           <SearchForm.Item span={6} title="发布环境">
             <Select allowClear value={store.f_env_id} onChange={v => store.f_env_id = v} placeholder="请选择">
@@ -88,39 +94,19 @@ class Index extends React.Component {
               onChange={store.updateDate}/>
           </SearchForm.Item>
           <SearchForm.Item span={4} style={{textAlign: 'right'}}>
-            <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
+            <AuthButton
+              auth="deploy.request.del"
+              type="danger"
+              icon={<DeleteOutlined/>}
+              onClick={this.handleBatchDel}>批量删除</AuthButton>
           </SearchForm.Item>
         </SearchForm>
-        <Row style={{marginBottom: 16}}>
-          <Col span={16}>
-            <Radio.Group value={store.f_status} onChange={e => store.f_status = e.target.value}>
-              <Radio.Button value="all">全部({store.counter['all'] || 0})</Radio.Button>
-              <Radio.Button value="0">待审核({store.counter['0'] || 0})</Radio.Button>
-              <Radio.Button value="1">待发布({store.counter['1'] || 0})</Radio.Button>
-              <Radio.Button value="3">发布成功({store.counter['3'] || 0})</Radio.Button>
-              <Radio.Button value="-3">发布异常({store.counter['-3'] || 0})</Radio.Button>
-              <Radio.Button value="99">其他({store.counter['99'] || 0})</Radio.Button>
-            </Radio.Group>
-          </Col>
-          <Col span={8} style={{textAlign: 'right'}}>
-            <AuthFragment auth="deploy.request.del">
-              <Button type="primary" icon="delete" onClick={this.handleBatchDel}>批量删除</Button>
-            </AuthFragment>
-            <AuthFragment auth="deploy.request.add">
-              <Button
-                type="primary"
-                icon="plus"
-                onClick={() => store.addVisible = true}
-                style={{marginLeft: 20}}>新建发布申请</Button>
-            </AuthFragment>
-          </Col>
-        </Row>
         <ComTable/>
         {store.addVisible && <SelectApp/>}
         {store.ext1Visible && <Ext1Form/>}
         {store.ext2Visible && <Ext2Form/>}
         {store.approveVisible && <Approve/>}
-      </AuthCard>
+      </AuthDiv>
     )
   }
 }

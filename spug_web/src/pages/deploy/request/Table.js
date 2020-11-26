@@ -5,9 +5,10 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Modal, Icon, Popover, Tag, message } from 'antd';
+import { BranchesOutlined, BuildOutlined, TagOutlined, PlusOutlined } from '@ant-design/icons';
+import { Radio, Modal, Popover, Tag, message } from 'antd';
 import { http, hasPermission } from 'libs';
-import { Action } from "components";
+import { Action, AuthButton, TableCard } from 'components';
 import store from './store';
 
 @observer
@@ -25,7 +26,12 @@ class ComTable extends React.Component {
 
   columns = [{
     title: '申请标题',
-    dataIndex: 'name',
+    render: info => (
+      <div>
+        {info.type === '2' && <Tag color="#f50">R</Tag>}
+        {info.name}
+      </div>
+    )
   }, {
     title: '应用',
     dataIndex: 'app_name',
@@ -38,18 +44,24 @@ class ComTable extends React.Component {
       if (info['app_extend'] === '1') {
         const [type, ext1, ext2] = info.extra;
         if (type === 'branch') {
-          return <React.Fragment>
-            <Icon type="branches"/> {ext1}#{ext2.substr(0, 6)}
-          </React.Fragment>
+          return (
+            <React.Fragment>
+              <BranchesOutlined/> {ext1}#{ext2.substr(0, 6)}
+            </React.Fragment>
+          )
         } else {
-          return <React.Fragment>
-            <Icon type="tag"/> {ext1}
-          </React.Fragment>
+          return (
+            <React.Fragment>
+              <TagOutlined/> {ext1}
+            </React.Fragment>
+          )
         }
       } else {
-        return <React.Fragment>
-          <Icon type="build"/> {info.extra[0]}
-        </React.Fragment>
+        return (
+          <React.Fragment>
+            <BuildOutlined/> {info.extra[0]}
+          </React.Fragment>
+        )
       }
     }
   }, {
@@ -64,13 +76,13 @@ class ComTable extends React.Component {
           <span style={{color: '#1890ff'}}>{info['status_alias']}</span>
         </Popover>
       } else if (info.status === '2') {
-        return <Tag color="blue">{info['status_alias']}</Tag>
+        return <Tag color="orange">{info['status_alias']}</Tag>
       } else if (info.status === '3') {
         return <Tag color="green">{info['status_alias']}</Tag>
       } else if (info.status === '-3') {
         return <Tag color="red">{info['status_alias']}</Tag>
       } else {
-        return <Tag>{info['status_alias']}</Tag>
+        return <Tag color="blue">{info['status_alias']}</Tag>
       }
     }
   }, {
@@ -80,6 +92,11 @@ class ComTable extends React.Component {
     title: '申请时间',
     dataIndex: 'created_at',
     sorter: (a, b) => a['created_at'].localeCompare(b['created_at'])
+  }, {
+    title: '备注',
+    dataIndex: 'desc',
+    ellipsis: true,
+    hide: true
   }, {
     title: '操作',
     className: hasPermission('deploy.request.do|deploy.request.edit|deploy.request.approve|deploy.request.del') ? null : 'none',
@@ -191,10 +208,27 @@ class ComTable extends React.Component {
       }
     }
     return (
-      <Table
+      <TableCard
         rowKey="id"
+        title="申请列表"
         loading={store.isFetching}
         dataSource={data}
+        onReload={store.fetchRecords}
+        actions={[
+          <AuthButton
+            auth="deploy.request.add"
+            type="primary"
+            icon={<PlusOutlined/>}
+            onClick={() => store.addVisible = true}>新建申请</AuthButton>,
+          <Radio.Group value={store.f_status} onChange={e => store.f_status = e.target.value}>
+            <Radio.Button value="all">全部({store.counter['all'] || 0})</Radio.Button>
+            <Radio.Button value="0">待审核({store.counter['0'] || 0})</Radio.Button>
+            <Radio.Button value="1">待发布({store.counter['1'] || 0})</Radio.Button>
+            <Radio.Button value="3">发布成功({store.counter['3'] || 0})</Radio.Button>
+            <Radio.Button value="-3">发布异常({store.counter['-3'] || 0})</Radio.Button>
+            <Radio.Button value="99">其他({store.counter['99'] || 0})</Radio.Button>
+          </Radio.Group>
+        ]}
         pagination={{
           showSizeChanger: true,
           showLessItems: true,

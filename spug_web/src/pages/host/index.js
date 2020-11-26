@@ -19,7 +19,7 @@ export default observer(function () {
         <Breadcrumb.Item>首页</Breadcrumb.Item>
         <Breadcrumb.Item>主机管理</Breadcrumb.Item>
       </Breadcrumb>
-      <SearchForm style={{marginBottom: 16}}>
+      <SearchForm>
         <SearchForm.Item span={6} title="主机类别">
           <Select allowClear placeholder="请选择" value={store.f_zone} onChange={v => store.f_zone = v}>
             {store.zones.map(item => (

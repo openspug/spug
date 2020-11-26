@@ -18,10 +18,10 @@ export default observer(function () {
   return (
     <AuthDiv auth="deploy.app.view">
       <Breadcrumb>
-          <Breadcrumb.Item>首页</Breadcrumb.Item>
-          <Breadcrumb.Item>应用发布</Breadcrumb.Item>
-          <Breadcrumb.Item>应用管理</Breadcrumb.Item>
-        </Breadcrumb>
+        <Breadcrumb.Item>首页</Breadcrumb.Item>
+        <Breadcrumb.Item>应用发布</Breadcrumb.Item>
+        <Breadcrumb.Item>应用管理</Breadcrumb.Item>
+      </Breadcrumb>
       <SearchForm>
         <SearchForm.Item span={7} title="应用名称">
           <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
@@ -31,10 +31,10 @@ export default observer(function () {
         </SearchForm.Item>
       </SearchForm>
       <ComTable/>
-      {store.formVisible && <ComForm />}
-      {store.addVisible && <AddSelect />}
-      {store.ext1Visible &&  <Ext1Form />}
-      {store.ext2Visible &&  <Ext2Form />}
+      {store.formVisible && <ComForm/>}
+      {store.addVisible && <AddSelect/>}
+      {store.ext1Visible && <Ext1Form/>}
+      {store.ext2Visible && <Ext2Form/>}
     </AuthDiv>
   );
 })
