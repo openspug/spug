@@ -4,12 +4,19 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
-import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { Table, Modal, Tag, Icon, Divider, message } from 'antd';
+import {
+  BuildOutlined,
+  DownSquareOutlined,
+  ExclamationCircleOutlined,
+  OrderedListOutlined,
+  UpSquareOutlined,
+  PlusOutlined
+} from '@ant-design/icons';
+import { Table, Modal, Tag, Divider, message } from 'antd';
 import { http, hasPermission } from 'libs';
 import store from './store';
-import { Action } from "components";
+import { Action, TableCard, AuthButton } from "components";
 import CloneConfirm from './CloneConfirm';
 import envStore from 'pages/config/environment/store';
 import lds from 'lodash';
@@ -32,7 +39,7 @@ class ComTable extends React.Component {
     e.stopPropagation();
     this.cloneObj = null;
     Modal.confirm({
-      icon: 'exclamation-circle',
+      icon: <ExclamationCircleOutlined/>,
       title: '选择克隆对象',
       content: <CloneConfirm onChange={v => this.cloneObj = v[1]}/>,
       onOk: () => {
@@ -88,49 +95,51 @@ class ComTable extends React.Component {
       store.loadDeploys(record.id)
     }
 
-    return <Table
-      rowKey="id"
-      loading={record['deploys'] === undefined}
-      dataSource={record['deploys']}
-      pagination={false}>
-      <Table.Column width={80} title="模式" dataIndex="extend" render={value => value === '1' ?
-        <Icon style={{fontSize: 20, color: '#1890ff'}} type="ordered-list"/> :
-        <Icon style={{fontSize: 20, color: '#1890ff'}} type="build"/>}/>
-      <Table.Column title="发布环境" dataIndex="env_id" render={value => lds.get(envStore.idMap, `${value}.name`)}/>
-      <Table.Column title="关联主机" dataIndex="host_ids" render={value => `${value.length} 台`}/>
-      <Table.Column title="发布审核" dataIndex="is_audit"
-                    render={value => value ? <Tag color="green">开启</Tag> : <Tag color="red">关闭</Tag>}/>
-      {hasPermission('deploy.app.config|deploy.app.edit') && (
-        <Table.Column title="操作" render={info => (
-          <Action>
-            <Action.Button
-              auth="deploy.app.config"
-              onClick={e => store.showExtForm(e, record.id, info, false, true)}>查看</Action.Button>
-            <Action.Button auth="deploy.app.edit"
-                           onClick={e => store.showExtForm(e, record.id, info)}>编辑</Action.Button>
-            <Action.Button auth="deploy.app.edit" onClick={() => this.handleDeployDelete(info)}>删除</Action.Button>
-          </Action>
-        )}/>
-      )}
-    </Table>
-  };
-
-  render() {
-    let data = Object.values(toJS(store.records));
-    if (store.f_name) {
-      data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
-    }
-    if (store.f_desc) {
-      data = data.filter(item => item['desc'] && item['desc'].toLowerCase().includes(store.f_desc.toLowerCase()))
-    }
-
     return (
       <Table
         rowKey="id"
-        expandRowByClick
+        loading={record['deploys'] === undefined}
+        dataSource={record['deploys']}
+        pagination={false}>
+        <Table.Column width={80} title="模式" dataIndex="extend" render={value => value === '1' ?
+          <OrderedListOutlined style={{fontSize: 20, color: '#1890ff'}}/> :
+          <BuildOutlined style={{fontSize: 20, color: '#1890ff'}}/>}/>
+        <Table.Column title="发布环境" dataIndex="env_id" render={value => lds.get(envStore.idMap, `${value}.name`)}/>
+        <Table.Column title="关联主机" dataIndex="host_ids" render={value => `${value.length} 台`}/>
+        <Table.Column title="发布审核" dataIndex="is_audit"
+                      render={value => value ? <Tag color="green">开启</Tag> : <Tag color="red">关闭</Tag>}/>
+        {hasPermission('deploy.app.config|deploy.app.edit') && (
+          <Table.Column title="操作" render={info => (
+            <Action>
+              <Action.Button
+                auth="deploy.app.config"
+                onClick={e => store.showExtForm(e, record.id, info, false, true)}>查看</Action.Button>
+              <Action.Button auth="deploy.app.edit"
+                             onClick={e => store.showExtForm(e, record.id, info)}>编辑</Action.Button>
+              <Action.Button auth="deploy.app.edit" onClick={() => this.handleDeployDelete(info)}>删除</Action.Button>
+            </Action>
+          )}/>
+        )}
+      </Table>
+    )
+  };
+
+  render() {
+    return (
+      <TableCard
+        title="应用列表"
+        rowKey="id"
         loading={store.isFetching}
-        dataSource={data}
-        expandedRowRender={this.expandedRowRender}
+        dataSource={store.dataSource}
+        expandable={{expandRowByClick: true, expandedRowRender: this.expandedRowRender}}
+        onReload={store.fetchRecords}
+        actions={[
+          <AuthButton
+            auth="deploy.app.add"
+            type="primary"
+            icon={<PlusOutlined/>}
+            onClick={() => store.showForm()}>新建</AuthButton>
+        ]}
         pagination={{
           showSizeChanger: true,
           showLessItems: true,
@@ -140,11 +149,13 @@ class ComTable extends React.Component {
         }}>
         <Table.Column width={80} title="排序" key="series" render={(info) => (
           <div>
-            <Icon onClick={e => this.handleSort(e, info, 'up')} type="up-square"
-                  style={{cursor: 'pointer', color: '#1890ff'}}/>
+            <UpSquareOutlined
+              onClick={e => this.handleSort(e, info, 'up')}
+              style={{cursor: 'pointer', color: '#1890ff'}}/>
             <Divider type="vertical"/>
-            <Icon onClick={e => this.handleSort(e, info, 'down')} type="down-square"
-                  style={{cursor: 'pointer', color: '#1890ff'}}/>
+            <DownSquareOutlined
+              onClick={e => this.handleSort(e, info, 'down')}
+              style={{cursor: 'pointer', color: '#1890ff'}}/>
           </div>
         )}/>
         <Table.Column title="应用名称" dataIndex="name"/>
@@ -160,7 +171,7 @@ class ComTable extends React.Component {
             </Action>
           )}/>
         )}
-      </Table>
+      </TableCard>
     )
   }
 }

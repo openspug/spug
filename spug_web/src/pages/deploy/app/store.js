@@ -3,7 +3,7 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import { observable, computed } from "mobx";
+import { observable, computed, toJS } from 'mobx';
 import http from 'libs/http';
 
 class Store {
@@ -21,6 +21,13 @@ class Store {
 
   @observable f_name;
   @observable f_desc;
+
+  @computed get dataSource() {
+    let records = Object.values(toJS(this.records));
+    if (this.f_name) records = records.filter(x => x.name.toLowerCase().includes(this.f_name.toLowerCase()));
+    if (this.f_desc) records = records.filter(x => x.desc && x.desc.toLowerCase().includes(this.f_desc.toLowerCase()));
+    return records
+  }
 
   @computed get currentRecord() {
     return this.records[`a${this.app_id}`]

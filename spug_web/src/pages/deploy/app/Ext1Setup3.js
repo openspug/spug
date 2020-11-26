@@ -5,7 +5,8 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Form, Row, Col, Button, Radio, Icon, Tooltip, message } from "antd";
+import { GitlabOutlined, InfoCircleOutlined, SettingOutlined, SwapOutlined } from '@ant-design/icons';
+import { Form, Row, Col, Button, Radio, Tooltip, message } from 'antd';
 import { LinkButton } from 'components';
 import Editor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-text';
@@ -51,9 +52,17 @@ class Ext1Setup3 extends React.Component {
       }, () => this.setState({loading: false}))
   };
 
+  handleFullscreen = (id) => {
+    if (this.state.full) {
+      this.setState({full: ''})
+    } else {
+      this.setState({full: id})
+    }
+  }
+
   FilterLabel = (props) => (
-    <div style={{display: 'inline-block', height: 39, width: 390}}>
-      <span style={{float: 'left'}}>文件过滤<span style={{margin: '0 8px 0 2px'}}>:</span></span>
+    <div style={{display: 'flex', alignItems: 'center', height: 40}}>
+      <div>文件过滤 :</div>
       <Radio.Group
         disabled={store.isReadOnly}
         style={{marginLeft: 20, float: 'left'}}
@@ -61,36 +70,30 @@ class Ext1Setup3 extends React.Component {
         onChange={e => store.deploy['filter_rule']['type'] = e.target.value}>
         <Radio value="contain">包含
           <Tooltip title="请输入相对于项目根目录的文件路径，仅将匹配到文件传输至要发布的目标主机。">
-            <Icon type="info-circle" style={{color: '#515151', marginLeft: 8}}/>
+            <InfoCircleOutlined style={{color: '#515151', marginLeft: 8}}/>
           </Tooltip>
         </Radio>
         <Radio value="exclude">排除
           <Tooltip title="支持模糊匹配，如果路径以 / 开头则基于项目根目录匹配，匹配到文件将不会被传输。">
-            <Icon type="info-circle" style={{color: '#515151', marginLeft: 8}}/>
+            <InfoCircleOutlined style={{color: '#515151', marginLeft: 8}}/>
           </Tooltip>
         </Radio>
       </Radio.Group>
-      {this.state.full === '1' ? (
-        <LinkButton onClick={() => this.setState({full: ''})}>退出全屏</LinkButton>
-      ) : (
-        <LinkButton onClick={() => this.setState({full: '1'})}>全屏</LinkButton>
-      )}
+      <div style={{flex: 1, textAlign: 'right'}}>
+        <LinkButton onClick={() => this.handleFullscreen('1')}>{this.state.full ? '退出全屏' : '全屏'}</LinkButton>
+      </div>
     </div>
   );
 
   NormalLabel = (props) => (
-    <div style={{display: 'inline-block', height: 39, width: 390}}>
-      <span style={{float: 'left'}}>
-        {props.title}<span style={{margin: '0 8px 0 2px'}}>:</span>
-        <Tooltip title={this.helpMap[props.id]}>
-          <Icon type="info-circle" style={{color: '#515151'}}/>
-        </Tooltip>
-      </span>
-      {this.state.full ? (
-        <span style={{color: '#1890ff', cursor: 'pointer'}} onClick={() => this.setState({full: ''})}>退出全屏</span>
-      ) : (
-        <span style={{color: '#1890ff', cursor: 'pointer'}} onClick={() => this.setState({full: props.id})}>全屏</span>
-      )}
+    <div style={{display: 'flex', alignItems: 'center', height: 40}}>
+      <div style={{marginRight: 8}}>{props.title} :</div>
+      <Tooltip title={this.helpMap[props.id]}>
+        <InfoCircleOutlined style={{color: '#515151'}}/>
+      </Tooltip>
+      <div style={{flex: 1, textAlign: 'right'}}>
+        <LinkButton onClick={() => this.handleFullscreen(props.id)}>{this.state.full ? '退出全屏' : '全屏'}</LinkButton>
+      </div>
     </div>
   );
 
@@ -101,10 +104,8 @@ class Ext1Setup3 extends React.Component {
       <React.Fragment>
         <Row>
           <Col span={11}>
-            <Form.Item
-              colon={false}
-              className={full === '1' ? styles.fullScreen : null}
-              label={<this.FilterLabel type={info['filter_rule']['type']}/>}>
+            <div className={full === '1' ? styles.fullScreen : null} style={{marginBottom: 24}}>
+              <this.FilterLabel type={info['filter_rule']['type']}/>
               <Editor
                 readOnly={store.isReadOnly}
                 mode="text"
@@ -115,11 +116,9 @@ class Ext1Setup3 extends React.Component {
                 value={info['filter_rule']['data']}
                 onChange={v => info['filter_rule']['data'] = cleanCommand(v)}
                 style={{border: '1px solid #e8e8e8'}}/>
-            </Form.Item>
-            <Form.Item
-              colon={false}
-              className={full === '3' ? styles.fullScreen : null}
-              label={<this.NormalLabel title="代码检出前执行" id="3"/>}>
+            </div>
+            <div className={full === '3' ? styles.fullScreen : null} style={{marginBottom: 24}}>
+              <this.NormalLabel title="代码检出前执行" id="3"/>
               <Editor
                 readOnly={store.isReadOnly}
                 mode="sh"
@@ -130,11 +129,9 @@ class Ext1Setup3 extends React.Component {
                 value={info['hook_pre_server']}
                 onChange={v => info['hook_pre_server'] = cleanCommand(v)}
                 style={{border: '1px solid #e8e8e8'}}/>
-            </Form.Item>
-            <Form.Item
-              colon={false}
-              className={full === '5' ? styles.fullScreen : null}
-              label={<this.NormalLabel title="应用发布前执行" id="5"/>}>
+            </div>
+            <div className={full === '5' ? styles.fullScreen : null} style={{marginBottom: 24}}>
+              <this.NormalLabel title="应用发布前执行" id="5"/>
               <Editor
                 readOnly={store.isReadOnly}
                 mode="sh"
@@ -145,27 +142,25 @@ class Ext1Setup3 extends React.Component {
                 value={info['hook_pre_host']}
                 onChange={v => info['hook_pre_host'] = cleanCommand(v)}
                 style={{border: '1px solid #e8e8e8'}}/>
-            </Form.Item>
+            </div>
           </Col>
           <Col span={2}>
             <div className={styles.deployBlock} style={{marginTop: 39}}>
-              <Icon type="setting" style={{fontSize: 32}}/>
+              <SettingOutlined style={{fontSize: 32}}/>
               <span style={{fontSize: 12, marginTop: 5}}>基础设置</span>
             </div>
             <div className={styles.deployBlock}>
-              <Icon type="gitlab" style={{fontSize: 32}}/>
+              <GitlabOutlined style={{fontSize: 32}}/>
               <span style={{fontSize: 12, marginTop: 5}}>检出代码</span>
             </div>
             <div className={styles.deployBlock}>
-              <Icon type="swap" style={{fontSize: 32}}/>
+              <SwapOutlined style={{fontSize: 32}}/>
               <span style={{fontSize: 12, marginTop: 5}}>版本切换</span>
             </div>
           </Col>
           <Col span={11}>
-            <Form.Item
-              colon={false}
-              className={full === '2' ? styles.fullScreen : null}
-              label={<this.NormalLabel title="自定义全局变量" id="2"/>}>
+            <div className={full === '2' ? styles.fullScreen : null} style={{marginBottom: 24}}>
+              <this.NormalLabel title="自定义全局变量" id="2"/>
               <Editor
                 readOnly={store.isReadOnly}
                 mode="text"
@@ -176,11 +171,9 @@ class Ext1Setup3 extends React.Component {
                 value={info['custom_envs']}
                 onChange={v => info['custom_envs'] = cleanCommand(v)}
                 style={{border: '1px solid #e8e8e8'}}/>
-            </Form.Item>
-            <Form.Item
-              colon={false}
-              className={full === '4' ? styles.fullScreen : null}
-              label={<this.NormalLabel title="代码检出后执行" id="4"/>}>
+            </div>
+            <div className={full === '4' ? styles.fullScreen : null} style={{marginBottom: 24}}>
+              <this.NormalLabel title="代码检出后执行" id="4"/>
               <Editor
                 readOnly={store.isReadOnly}
                 mode="sh"
@@ -191,11 +184,9 @@ class Ext1Setup3 extends React.Component {
                 value={info['hook_post_server']}
                 onChange={v => info['hook_post_server'] = cleanCommand(v)}
                 style={{border: '1px solid #e8e8e8'}}/>
-            </Form.Item>
-            <Form.Item
-              colon={false}
-              className={full === '6' ? styles.fullScreen : null}
-              label={<this.NormalLabel title="应用发布后执行" id="6"/>}>
+            </div>
+            <div className={full === '6' ? styles.fullScreen : null} style={{marginBottom: 24}}>
+              <this.NormalLabel title="应用发布后执行" id="6"/>
               <Editor
                 readOnly={store.isReadOnly}
                 mode="sh"
@@ -206,7 +197,7 @@ class Ext1Setup3 extends React.Component {
                 value={info['hook_post_host']}
                 onChange={v => info['hook_post_host'] = cleanCommand(v)}
                 style={{border: '1px solid #e8e8e8'}}/>
-            </Form.Item>
+            </div>
           </Col>
         </Row>
         <Form.Item wrapperCol={{span: 14, offset: 6}}>

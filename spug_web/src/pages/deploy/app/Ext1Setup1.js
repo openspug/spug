@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
-import { Switch, Col, Form, Input, Select, Button } from "antd";
+import { Switch, Form, Input, Select, Button } from 'antd';
 import envStore from 'pages/config/environment/store';
 import store from './store';
 
@@ -29,17 +29,17 @@ export default observer(function Ext1Setup1() {
   const info = store.deploy;
   return (
     <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
-      <Form.Item required label="发布环境">
-        <Col span={16}>
+      <Form.Item required label="发布环境" style={{marginBottom: 0}}>
+        <Form.Item style={{display: 'inline-block', width: '80%'}}>
           <Select disabled={store.isReadOnly} value={info.env_id} onChange={v => info.env_id = v} placeholder="请选择发布环境">
             {envStore.records.map(item => (
               <Select.Option disabled={envs.includes(item.id)} value={item.id} key={item.id}>{item.name}</Select.Option>
             ))}
           </Select>
-        </Col>
-        <Col span={6} offset={2}>
+        </Form.Item>
+        <Form.Item style={{display: 'inline-block', width: '20%', textAlign: 'right'}}>
           <Link disabled={store.isReadOnly} to="/config/environment">新建环境</Link>
-        </Col>
+        </Form.Item>
       </Form.Item>
       <Form.Item required label="Git仓库地址">
         <Input disabled={store.isReadOnly} value={info['git_repo']} onChange={e => info['git_repo'] = e.target.value}
@@ -58,20 +58,21 @@ export default observer(function Ext1Setup1() {
         <a target="_blank" rel="noopener noreferrer"
            href="https://spug.dev/docs/install-error/#%E9%92%89%E9%92%89%E6%94%B6%E4%B8%8D%E5%88%B0%E9%80%9A%E7%9F%A5%EF%BC%9F">钉钉收不到通知？</a>
       </span>}>
-        <Input addonBefore={(
-          <Select disabled={store.isReadOnly}
-                  value={info['rst_notify']['mode']} style={{width: 100}}
-                  onChange={v => info['rst_notify']['mode'] = v}>
-            <Select.Option value="0">关闭</Select.Option>
-            <Select.Option value="1">钉钉</Select.Option>
-            <Select.Option value="3">企业微信</Select.Option>
-            <Select.Option value="2">Webhook</Select.Option>
-          </Select>
-        )}
-               disabled={store.isReadOnly || info['rst_notify']['mode'] === '0'}
-               value={info['rst_notify']['value']}
-               onChange={e => info['rst_notify']['value'] = e.target.value}
-               placeholder="请输入"/>
+        <Input
+          addonBefore={(
+            <Select disabled={store.isReadOnly}
+                    value={info['rst_notify']['mode']} style={{width: 100}}
+                    onChange={v => info['rst_notify']['mode'] = v}>
+              <Select.Option value="0">关闭</Select.Option>
+              <Select.Option value="1">钉钉</Select.Option>
+              <Select.Option value="3">企业微信</Select.Option>
+              <Select.Option value="2">Webhook</Select.Option>
+            </Select>
+          )}
+          disabled={store.isReadOnly || info['rst_notify']['mode'] === '0'}
+          value={info['rst_notify']['value']}
+          onChange={e => info['rst_notify']['value'] = e.target.value}
+          placeholder="请输入"/>
       </Form.Item>
       <Form.Item wrapperCol={{span: 14, offset: 6}}>
         <Button

@@ -5,7 +5,8 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Card, Icon } from 'antd';
+import { BuildOutlined, OrderedListOutlined } from '@ant-design/icons';
+import { Modal, Card } from 'antd';
 import store from './store';
 import styles from './index.module.css';
 
@@ -58,7 +59,7 @@ class AddSelect extends React.Component {
           bodyStyle={{display: 'flex'}}
           onClick={this.switchExt1}>
           <div style={{marginRight: 16}}>
-            <Icon type="ordered-list" style={{fontSize: 36, color: '#1890ff'}}/>
+            <OrderedListOutlined style={{fontSize: 36, color: '#1890ff'}} />
           </div>
           <div>
             <div className={styles.cardTitle}>常规发布</div>
@@ -72,7 +73,7 @@ class AddSelect extends React.Component {
           bodyStyle={{display: 'flex'}}
           onClick={this.switchExt2}>
           <div style={{marginRight: 16}}>
-            <Icon type="build" style={{fontSize: 36, color: '#1890ff'}}/>
+            <BuildOutlined style={{fontSize: 36, color: '#1890ff'}} />
           </div>
           <div>
             <div className={styles.cardTitle}>自定义发布</div>

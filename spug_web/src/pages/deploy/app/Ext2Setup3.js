@@ -5,7 +5,8 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Form, Input, Button, message, Divider, Alert, Icon, Select } from 'antd';
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { Form, Input, Button, message, Divider, Alert, Select } from 'antd';
 import Editor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-sh';
 import 'ace-builds/src-noconflict/theme-tomorrow';
@@ -81,7 +82,7 @@ class Ext2Setup3 extends React.Component {
             </Form.Item>
             {!store.isReadOnly && (
               <div className={styles.delAction} onClick={() => server_actions.splice(index, 1)}>
-                <Icon type="minus-circle"/>移除
+                <MinusCircleOutlined />移除
               </div>
             )}
           </div>
@@ -89,7 +90,7 @@ class Ext2Setup3 extends React.Component {
         {!store.isReadOnly && (
           <Form.Item wrapperCol={{span: 14, offset: 6}}>
             <Button type="dashed" block onClick={() => server_actions.push({})}>
-              <Icon type="plus"/>添加本地执行动作（在服务端本地执行）
+              <PlusOutlined />添加本地执行动作（在服务端本地执行）
             </Button>
           </Form.Item>
         )}
@@ -159,7 +160,7 @@ class Ext2Setup3 extends React.Component {
             )}
             {!store.isReadOnly && (
               <div className={styles.delAction} onClick={() => host_actions.splice(index, 1)}>
-                <Icon type="minus-circle"/>移除
+                <MinusCircleOutlined />移除
               </div>
             )}
           </div>
@@ -167,14 +168,15 @@ class Ext2Setup3 extends React.Component {
         {!store.isReadOnly && (
           <Form.Item wrapperCol={{span: 14, offset: 6}}>
             <Button disabled={store.isReadOnly} type="dashed" block onClick={() => host_actions.push({})}>
-              <Icon type="plus"/>添加目标主机执行动作（在部署目标主机执行）
+              <PlusOutlined />添加目标主机执行动作（在部署目标主机执行）
             </Button>
             <Button
               block
               type="dashed"
+              style={{marginTop: 8}}
               disabled={store.isReadOnly || lds.findIndex(host_actions, x => x.type === 'transfer') !== -1}
               onClick={() => host_actions.push({type: 'transfer', title: '数据传输', mode: '0', src_mode: '0'})}>
-              <Icon type="plus"/>添加数据传输动作（仅能添加一个）
+              <PlusOutlined />添加数据传输动作（仅能添加一个）
             </Button>
           </Form.Item>
         )}

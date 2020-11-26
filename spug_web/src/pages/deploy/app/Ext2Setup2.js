@@ -5,7 +5,8 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Form, Select, Button, Icon } from "antd";
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { Form, Select, Button } from 'antd';
 import { hasHostPermission } from 'libs';
 import store from './store';
 import hostStore from 'pages/host/store';
@@ -32,7 +33,7 @@ class Ext2Setup2 extends React.Component {
                 disabled={store.isReadOnly}
                 placeholder="请选择"
                 optionFilterProp="children"
-                style={{width: '80%', marginRight: 10}}
+                style={{width: '80%', marginRight: 10, marginBottom: 12}}
                 filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                 onChange={v => store.editHost(index, v)}>
                 {hostStore.records.filter(x => hasHostPermission(x.id)).map(item => (
@@ -42,14 +43,14 @@ class Ext2Setup2 extends React.Component {
                 ))}
               </Select>
               {!store.isReadOnly && info['host_ids'].length > 1 && (
-                <Icon className={styles.delIcon} type="minus-circle-o" onClick={() => store.delHost(index)}/>
+                <MinusCircleOutlined className={styles.delIcon} onClick={() => store.delHost(index)} />
               )}
             </React.Fragment>
           ))}
         </Form.Item>
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
           <Button disabled={store.isReadOnly} type="dashed" style={{width: '80%'}} onClick={store.addHost}>
-            <Icon type="plus"/>添加目标主机
+            <PlusOutlined />添加目标主机
           </Button>
         </Form.Item>
         <Form.Item wrapperCol={{span: 14, offset: 6}}>

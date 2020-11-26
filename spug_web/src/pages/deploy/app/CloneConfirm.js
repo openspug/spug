@@ -49,7 +49,7 @@ class CloneConfirm extends React.Component {
   render() {
     const options = this.handleData(Object.values(toJS(store.records)));
     return (
-      <Form>
+      <Form layout="vertical" style={{marginTop: 24}}>
         <Form.Item
           required
           label="应用及环境"
