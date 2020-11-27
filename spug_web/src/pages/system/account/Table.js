@@ -4,10 +4,10 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
-import {observer} from 'mobx-react';
-import {Table, Divider, Modal, Badge, message, Form, Input} from 'antd';
-import {LinkButton} from 'components';
-import ComForm from './Form';
+import { observer } from 'mobx-react';
+import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { Divider, Form, Radio, Modal, Button, Badge, message, Input } from 'antd';
+import { LinkButton, TableCard } from 'components';
 import http from 'libs/http';
 import store from './store';
 
@@ -19,16 +19,12 @@ class ComTable extends React.Component {
       password: ''
     }
   }
+
   componentDidMount() {
     store.fetchRecords()
   }
 
   columns = [{
-    title: '序号',
-    key: 'series',
-    render: (_, __, index) => index + 1,
-    width: 80
-  }, {
     title: '登录名',
     dataIndex: 'username',
   }, {
@@ -77,9 +73,9 @@ class ComTable extends React.Component {
 
   handleReset = (info) => {
     Modal.confirm({
-      icon: 'exclamation-circle',
+      icon: <ExclamationCircleOutlined/>,
       title: '重置登录密码',
-      content: <Form>
+      content: <Form layout="vertical" style={{marginTop: 24}}>
         <Form.Item required label="重置后的新密码">
           <Input.Password onChange={val => this.setState({password: val.target.value})}/>
         </Form.Item>
@@ -106,29 +102,29 @@ class ComTable extends React.Component {
   };
 
   render() {
-    let data = store.records;
-    if (store.f_name) {
-      data = data.filter(item => item['username'].toLowerCase().includes(store.f_name.toLowerCase()))
-    }
-    if (store.f_status) {
-      data = data.filter(item => String(item['is_active']) === store.f_status)
-    }
     return (
-      <React.Fragment>
-        <Table
-          rowKey="id"
-          loading={store.isFetching}
-          dataSource={data}
-          pagination={{
-            showSizeChanger: true,
-            showLessItems: true,
-            hideOnSinglePage: true,
-            showTotal: total => `共 ${total} 条`,
-            pageSizeOptions: ['10', '20', '50', '100']
-          }}
-          columns={this.columns}/>
-        {store.formVisible && <ComForm/>}
-      </React.Fragment>
+      <TableCard
+        rowKey="id"
+        title="账户列表"
+        loading={store.isFetching}
+        dataSource={store.dataSource}
+        onReload={store.fetchRecords}
+        actions={[
+          <Button type="primary" icon={<PlusOutlined/>} onClick={() => store.showForm()}>新建</Button>,
+          <Radio.Group value={store.f_status} onChange={e => store.f_status = e.target.value}>
+            <Radio.Button value="">全部</Radio.Button>
+            <Radio.Button value="true">正常</Radio.Button>
+            <Radio.Button value="false">禁用</Radio.Button>
+          </Radio.Group>
+        ]}
+        pagination={{
+          showSizeChanger: true,
+          showLessItems: true,
+          hideOnSinglePage: true,
+          showTotal: total => `共 ${total} 条`,
+          pageSizeOptions: ['10', '20', '50', '100']
+        }}
+        columns={this.columns}/>
     )
   }
 }

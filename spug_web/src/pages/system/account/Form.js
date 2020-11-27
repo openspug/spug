@@ -3,32 +3,27 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Select, Input, message, Col } from 'antd';
+import { Modal, Form, Select, Input, message } from 'antd';
 import http from 'libs/http';
 import store from './store';
 import roleStore from '../role/store';
 import { Link } from "react-router-dom";
 
-@observer
-class ComForm extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      loading: false
-    }
-  }
+export default observer(function () {
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
 
-  componentDidMount() {
+  useEffect(() => {
     if (roleStore.records.length === 0) {
       roleStore.fetchRecords()
     }
-  }
+  }, [])
 
-  handleSubmit = () => {
-    this.setState({loading: true});
-    const formData = this.props.form.getFieldsValue();
+  function handleSubmit() {
+    setLoading(true);
+    const formData = form.getFieldsValue();
     let request;
     if (store.record.id) {
       formData['id'] = store.record.id;
@@ -40,57 +35,43 @@ class ComForm extends React.Component {
       message.success('操作成功');
       store.formVisible = false;
       store.fetchRecords()
-    }, () => this.setState({loading: false}))
-  };
-
-  render() {
-    const info = store.record;
-    const {getFieldDecorator} = this.props.form;
-    return (
-      <Modal
-        visible
-        width={800}
-        maskClosable={false}
-        title={store.record.id ? '编辑账户' : '新建账户'}
-        onCancel={() => store.formVisible = false}
-        confirmLoading={this.state.loading}
-        onOk={this.handleSubmit}>
-        <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
-          <Form.Item required label="登录名">
-            {getFieldDecorator('username', {initialValue: info['username']})(
-              <Input placeholder="请输入登录名"/>
-            )}
-          </Form.Item>
-          <Form.Item required label="姓名">
-            {getFieldDecorator('nickname', {initialValue: info['nickname']})(
-              <Input placeholder="请输入姓名"/>
-            )}
-          </Form.Item>
-          {info.id === undefined && (
-            <Form.Item required label="密码">
-              {getFieldDecorator('password')(
-                <Input type="password" placeholder="请输入密码"/>
-              )}
-            </Form.Item>
-          )}
-          <Form.Item required label="角色">
-            <Col span={18}>
-              {getFieldDecorator('role_id', {initialValue: info['role_id']})(
-                <Select placeholder="请选择">
-                  {roleStore.records.map(item => (
-                    <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
-                  ))}
-                </Select>
-              )}
-            </Col>
-            <Col span={4} offset={2}>
-              <Link to="/system/role">新建角色</Link>
-            </Col>
-          </Form.Item>
-        </Form>
-      </Modal>
-    )
+    }, () => setLoading(false))
   }
-}
 
-export default Form.create()(ComForm)
+  return (
+    <Modal
+      visible
+      width={800}
+      maskClosable={false}
+      title={store.record.id ? '编辑账户' : '新建账户'}
+      onCancel={() => store.formVisible = false}
+      confirmLoading={loading}
+      onOk={handleSubmit}>
+      <Form form={form} initialValues={store.record} labelCol={{span: 6}} wrapperCol={{span: 14}}>
+        <Form.Item required name="username" label="登录名">
+          <Input placeholder="请输入登录名"/>
+        </Form.Item>
+        <Form.Item required name="nickname" label="姓名">
+          <Input placeholder="请输入姓名"/>
+        </Form.Item>
+        {store.record.id === undefined && (
+          <Form.Item required name="password" label="密码">
+            <Input type="password" placeholder="请输入密码"/>
+          </Form.Item>
+        )}
+        <Form.Item required label="角色" style={{marginBottom: 0}}>
+          <Form.Item name="role_id" style={{display: 'inline-block', width: '80%'}}>
+            <Select placeholder="请选择">
+              {roleStore.records.map(item => (
+                <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item style={{display: 'inline-block', width: '20%', textAlign: 'right'}}>
+            <Link to="/system/role">新建角色</Link>
+          </Form.Item>
+        </Form.Item>
+      </Form>
+    </Modal>
+  )
+})
