@@ -5,10 +5,11 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Divider, Modal, message } from 'antd';
+import { Divider, Modal, message } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import http from 'libs/http';
 import store from './store';
-import { LinkButton } from "components";
+import { LinkButton, TableCard, AuthButton } from "components";
 
 @observer
 class ComTable extends React.Component {
@@ -59,15 +60,16 @@ class ComTable extends React.Component {
   };
 
   render() {
-    let data = store.records;
-    if (store.f_name) {
-      data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
-    }
     return (
-      <Table
+      <TableCard
         rowKey="id"
+        title="角色列表"
         loading={store.isFetching}
-        dataSource={data}
+        dataSource={store.dataSource}
+        onReload={store.fetchRecords}
+        actions={[
+          <AuthButton type="primary" icon={<PlusOutlined/>} onClick={() => store.showForm()}>新建</AuthButton>
+        ]}
         pagination={{
           showSizeChanger: true,
           showLessItems: true,

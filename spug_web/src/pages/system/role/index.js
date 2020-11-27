@@ -5,8 +5,8 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Input, Button } from 'antd';
-import { SearchForm, AuthCard } from 'components';
+import { Input } from 'antd';
+import { SearchForm, AuthDiv, Breadcrumb } from 'components';
 import ComTable from './Table';
 import ComForm from './Form';
 import PagePerm from './PagePerm';
@@ -16,23 +16,22 @@ import store from './store';
 
 export default observer(function () {
   return (
-    <AuthCard auth="system.role.view">
+    <AuthDiv auth="system.role.view">
+      <Breadcrumb>
+        <Breadcrumb.Item>首页</Breadcrumb.Item>
+        <Breadcrumb.Item>系统管理</Breadcrumb.Item>
+        <Breadcrumb.Item>角色管理</Breadcrumb.Item>
+      </Breadcrumb>
       <SearchForm>
         <SearchForm.Item span={8} title="角色名称">
           <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
         </SearchForm.Item>
-        <SearchForm.Item span={8}>
-          <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
-        </SearchForm.Item>
       </SearchForm>
-      <div style={{marginBottom: 16}}>
-        <Button type="primary" icon="plus" onClick={() => store.showForm()}>新建</Button>
-      </div>
       <ComTable/>
       {store.formVisible && <ComForm/>}
       {store.pagePermVisible && <PagePerm/>}
       {store.deployPermVisible && <DeployPerm/>}
       {store.hostPermVisible && <HostPerm/>}
-    </AuthCard>
-  )
+    </AuthDiv>
+  );
 })
