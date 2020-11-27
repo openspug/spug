@@ -5,7 +5,8 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Table, Row, Col, Checkbox, Form, Button, Alert } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Modal, Form, Table, Row, Col, Checkbox, Button, Alert } from 'antd';
 import http from 'libs/http';
 import envStore from '../environment/store';
 import styles from './index.module.css';
@@ -67,7 +68,8 @@ class Record extends React.Component {
         <div style={{display: page === 0 ? 'block' : 'none'}}>
           <Alert style={{width: 500, margin: '10px auto 20px', color: '#31708f !important'}} type="info"
                  message="Tips: 通过对比配置功能，可以查看多个环境间的配置差异"/>
-          <Form.Item labelCol={{span: 6}} wrapperCol={{span: 14, offset: 1}} label="要对比的环境">
+          <Form.Item labelCol={{span: 6}} wrapperCol={{span: 14, offset: 1}} label="要对比的环境"
+                     style={{lineHeight: '40px'}}>
             {envStore.records.map((item, index) => (
               <Row
                 key={item.id}
@@ -85,13 +87,13 @@ class Record extends React.Component {
           </Form.Item>
         </div>
         <div style={{display: page === 1 ? 'block' : 'none'}}>
-          <Button type="link" icon="arrow-left" style={{marginRight: 20}}
+          <Button type="link" icon={<ArrowLeftOutlined/>} style={{marginRight: 20}}
                   onClick={() => this.setState({page: page - 1})}>上一步</Button>
           <Checkbox checked={hideSame} onChange={() => this.setState({hideSame: !hideSame})}>隐藏相同配置</Checkbox>
           <Table pagination={false} dataSource={records} loading={loading} columns={this.getColumns()}/>
         </div>
       </Modal>
-    )
+    );
   }
 }
 

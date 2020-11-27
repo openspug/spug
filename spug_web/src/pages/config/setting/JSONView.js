@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
+import { SaveOutlined, EditOutlined } from '@ant-design/icons';
 import { Button, message } from 'antd';
 import Editor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-json';
@@ -67,14 +68,14 @@ class JSONView extends React.Component {
           value={body}
           onChange={v => this.setState({body: v})}/>
         {readOnly && <AuthButton
-          icon="edit"
+          icon={<EditOutlined/>}
           type="link"
           size="large"
           auth={`config.${store.type}.edit_config`}
           style={{position: 'absolute', top: 0, right: 0}}
           onClick={() => this.setState({readOnly: false})}>编辑</AuthButton>}
         {readOnly || <Button
-          icon="save"
+          icon={<SaveOutlined />}
           type="link"
           size="large"
           loading={loading}

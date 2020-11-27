@@ -8,7 +8,7 @@ import { observer } from 'mobx-react';
 import { Table, Modal, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { Action, TableCard, AuthButton } from 'components';
-import { http, hasPermission } from 'libs';
+import { http, hasPermission, history } from 'libs';
 import store from './store';
 
 @observer
@@ -30,6 +30,11 @@ class ComTable extends React.Component {
       }
     })
   };
+
+  toConfig = (info) => {
+    store.record = info;
+    history.push(`/config/setting/app/${info.id}`)
+  }
 
   render() {
     let data = store.records;
@@ -67,7 +72,7 @@ class ComTable extends React.Component {
               <Action.Button auth="config.app.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
               <Action.Button auth="config.app.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
               <Action.Button auth="config.app.view_config" onClick={() => store.showRel(info)}>依赖</Action.Button>
-              <Action.Link auth="config.app.view_config" to={`/config/setting/app/${info.id}`}>配置</Action.Link>
+              <Action.Button auth="config.app.view_config" onClick={() => this.toConfig(info)}>配置</Action.Button>
             </Action>
           )}/>
         )}

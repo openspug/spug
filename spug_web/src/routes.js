@@ -32,6 +32,7 @@ import ScheduleIndex from './pages/schedule';
 import ConfigEnvironment from './pages/config/environment';
 import ConfigService from './pages/config/service';
 import ConfigApp from './pages/config/app';
+import ConfigSetting from './pages/config/setting';
 
 import MonitorIndex from './pages/monitor';
 
@@ -77,6 +78,7 @@ export default [
       {title: '环境管理', auth: 'config.env.view', path: '/config/environment', component: ConfigEnvironment},
       {title: '服务配置', auth: 'config.src.view', path: '/config/service', component: ConfigService},
       {title: '应用配置', auth: 'config.app.view', path: '/config/app', component: ConfigApp},
+      {path: '/config/setting/:type/:id', component: ConfigSetting},
     ]
   },
   {icon: <MonitorOutlined/>, title: '监控中心', auth: 'monitor.monitor.view', path: '/monitor', component: MonitorIndex},
