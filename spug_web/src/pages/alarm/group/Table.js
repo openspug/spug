@@ -6,11 +6,11 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Table, Modal, message } from 'antd';
-import ComForm from './Form';
+import { PlusOutlined } from '@ant-design/icons';
+import { Action, TableCard, AuthButton } from 'components';
 import { http, hasPermission } from 'libs';
 import store from './store';
 import contactStore from '../contact/store';
-import { Action } from "components";
 import lds from 'lodash';
 
 @observer
@@ -54,42 +54,40 @@ class ComTable extends React.Component {
   };
 
   render() {
-    let data = store.records;
-    if (store.f_name) {
-      data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
-    }
-    if (store.f_type) {
-      data = data.filter(item => item['type'].toLowerCase().includes(store.f_type.toLowerCase()))
-    }
     return (
-      <React.Fragment>
-        <Table
-          rowKey="id"
-          loading={store.isFetching}
-          dataSource={data}
-          pagination={{
-            showSizeChanger: true,
-            showLessItems: true,
-            hideOnSinglePage: true,
-            showTotal: total => `共 ${total} 条`,
-            pageSizeOptions: ['10', '20', '50', '100']
-          }}>
-          <Table.Column title="序号" key="series" render={(_, __, index) => index + 1}/>
-          <Table.Column title="组名称" dataIndex="name"/>
-          <Table.Column ellipsis title="成员" dataIndex="contacts"
-                        render={value => value.map(x => lds.get(this.state.contactMap, `${x}.name`)).join(',')}/>
-          <Table.Column ellipsis title="描述信息" dataIndex="desc"/>
-          {hasPermission('alarm.group.edit|alarm.group.del') && (
-            <Table.Column title="操作" render={info => (
-              <Action>
-                <Action.Button auth="alarm.group.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-                <Action.Button auth="alarm.group.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
-              </Action>
-            )}/>
-          )}
-        </Table>
-        {store.formVisible && <ComForm/>}
-      </React.Fragment>
+      <TableCard
+        rowKey="id"
+        title="报警联系组"
+        loading={store.isFetching}
+        dataSource={store.dataSource}
+        onReload={store.fetchRecords}
+        actions={[
+          <AuthButton
+            auth="alarm.group.add"
+            type="primary"
+            icon={<PlusOutlined/>}
+            onClick={() => store.showForm()}>新建</AuthButton>
+        ]}
+        pagination={{
+          showSizeChanger: true,
+          showLessItems: true,
+          hideOnSinglePage: true,
+          showTotal: total => `共 ${total} 条`,
+          pageSizeOptions: ['10', '20', '50', '100']
+        }}>
+        <Table.Column title="组名称" dataIndex="name"/>
+        <Table.Column ellipsis title="成员" dataIndex="contacts"
+                      render={value => value.map(x => lds.get(this.state.contactMap, `${x}.name`)).join(',')}/>
+        <Table.Column ellipsis title="描述信息" dataIndex="desc"/>
+        {hasPermission('alarm.group.edit|alarm.group.del') && (
+          <Table.Column title="操作" render={info => (
+            <Action>
+              <Action.Button auth="alarm.group.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
+              <Action.Button auth="alarm.group.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+            </Action>
+          )}/>
+        )}
+      </TableCard>
     )
   }
 }
