@@ -74,7 +74,7 @@ class Sider extends React.Component {
 
   render() {
     return (
-      <Layout.Sider collapsed={this.props.collapsed} style={{height: '100vh', overflow: 'scroll'}}>
+      <Layout.Sider collapsed={this.props.collapsed} style={{height: '100vh', overflow: 'auto'}}>
         <div className={styles.logo}>
           <img src={logo} alt="Logo"/>
           <img src={logoText} alt="logo-text" style={{marginLeft: 25, width: 70}} />
