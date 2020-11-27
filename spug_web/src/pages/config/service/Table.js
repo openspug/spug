@@ -6,10 +6,10 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Table, Modal, message } from 'antd';
-import ComForm from './Form';
+import { PlusOutlined } from '@ant-design/icons';
+import { Action, TableCard, AuthButton } from 'components';
 import { http, hasPermission } from 'libs';
 import store from './store';
-import { Action } from "components";
 
 @observer
 class ComTable extends React.Component {
@@ -32,39 +32,41 @@ class ComTable extends React.Component {
   };
 
   render() {
-    let data = store.records;
-    if (store.f_name) {
-      data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
-    }
     return (
-      <React.Fragment>
-        <Table
-          rowKey="id"
-          loading={store.isFetching}
-          dataSource={data}
-          pagination={{
-            showSizeChanger: true,
-            showLessItems: true,
-            hideOnSinglePage: true,
-            showTotal: total => `共 ${total} 条`,
-            pageSizeOptions: ['10', '20', '50', '100']
-          }}>
-          <Table.Column title="序号" key="series" render={(_, __, index) => index + 1}/>
-          <Table.Column title="服务名称" dataIndex="name"/>
-          <Table.Column title="标识符" dataIndex="key"/>
-          <Table.Column ellipsis title="描述信息" dataIndex="desc"/>
-          {hasPermission('config.src.edit|config.src.del|config.src.view_config') && (
-            <Table.Column title="操作" render={info => (
-              <Action>
-                <Action.Button auth="config.src.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-                <Action.Button auth="config.src.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
-                <Action.Link auth="config.src.view_config" to={`/config/setting/src/${info.id}`}>配置</Action.Link>
-              </Action>
-            )}/>
-          )}
-        </Table>
-        {store.formVisible && <ComForm/>}
-      </React.Fragment>
+      <TableCard
+        rowKey="id"
+        title="服务列表"
+        loading={store.isFetching}
+        dataSource={store.dataSource}
+        onReload={store.fetchRecords}
+        actions={[
+          <AuthButton
+            auth="config.src.add"
+            type="primary"
+            icon={<PlusOutlined/>}
+            onClick={() => store.showForm()}>新建</AuthButton>
+        ]}
+        pagination={{
+          showSizeChanger: true,
+          showLessItems: true,
+          hideOnSinglePage: true,
+          showTotal: total => `共 ${total} 条`,
+          pageSizeOptions: ['10', '20', '50', '100']
+        }}>
+        <Table.Column title="序号" key="series" render={(_, __, index) => index + 1}/>
+        <Table.Column title="服务名称" dataIndex="name"/>
+        <Table.Column title="标识符" dataIndex="key"/>
+        <Table.Column ellipsis title="描述信息" dataIndex="desc"/>
+        {hasPermission('config.src.edit|config.src.del|config.src.view_config') && (
+          <Table.Column title="操作" render={info => (
+            <Action>
+              <Action.Button auth="config.src.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
+              <Action.Button auth="config.src.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+              <Action.Link auth="config.src.view_config" to={`/config/setting/src/${info.id}`}>配置</Action.Link>
+            </Action>
+          )}/>
+        )}
+      </TableCard>
     )
   }
 }
