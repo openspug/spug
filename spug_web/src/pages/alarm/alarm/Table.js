@@ -5,7 +5,8 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Tag } from 'antd';
+import { Radio, Tag } from 'antd';
+import { TableCard } from 'components';
 import store from './store';
 import groupStore from '../group/store';
 
@@ -61,15 +62,20 @@ class ComTable extends React.Component {
   }];
 
   render() {
-    let data = store.records;
-    if (store.f_name) {
-      data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
-    }
     return (
-      <Table
+      <TableCard
         rowKey="id"
+        title="报警历史记录"
         loading={store.isFetching}
-        dataSource={data}
+        dataSource={store.dataSource}
+        onReload={store.fetchRecords}
+        actions={[
+          <Radio.Group value={store.f_status} onChange={e => store.f_status = e.target.value}>
+            <Radio.Button value="">全部</Radio.Button>
+            <Radio.Button value="1">报警发生</Radio.Button>
+            <Radio.Button value="2">报警恢复</Radio.Button>
+          </Radio.Group>
+        ]}
         pagination={{
           showSizeChanger: true,
           showLessItems: true,
