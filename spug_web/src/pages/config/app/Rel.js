@@ -4,8 +4,8 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
-import {observer} from 'mobx-react';
-import {Modal, Form, Transfer, message, Tabs, Alert} from 'antd';
+import { observer } from 'mobx-react';
+import { Modal, Form, Transfer, message, Tabs, Alert } from 'antd';
 import { http, hasPermission } from 'libs';
 import serviceStore from '../service/store';
 import store from './store';

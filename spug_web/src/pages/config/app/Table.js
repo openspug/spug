@@ -6,9 +6,10 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Table, Modal, message } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import { Action, TableCard, AuthButton } from 'components';
 import { http, hasPermission } from 'libs';
 import store from './store';
-import { Action } from 'components';
 
 @observer
 class ComTable extends React.Component {
@@ -36,10 +37,19 @@ class ComTable extends React.Component {
       data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
     }
     return (
-      <Table
+      <TableCard
         rowKey="id"
+        title="应用列表"
         loading={store.isFetching}
         dataSource={data}
+        onReload={store.fetchRecords}
+        actions={[
+          <AuthButton
+            auth="config.app.add"
+            type="primary"
+            icon={<PlusOutlined/>}
+            onClick={() => store.showForm()}>新建</AuthButton>
+        ]}
         pagination={{
           showSizeChanger: true,
           showLessItems: true,
@@ -52,7 +62,7 @@ class ComTable extends React.Component {
         <Table.Column title="标识符" dataIndex="key"/>
         <Table.Column ellipsis title="描述信息" dataIndex="desc"/>
         {hasPermission('config.app.edit|config.app.del|config.app.view_config') && (
-          <Table.Column title="操作" render={info => (
+          <Table.Column width={210} title="操作" render={info => (
             <Action>
               <Action.Button auth="config.app.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
               <Action.Button auth="config.app.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
@@ -61,7 +71,7 @@ class ComTable extends React.Component {
             </Action>
           )}/>
         )}
-      </Table>
+      </TableCard>
     )
   }
 }
