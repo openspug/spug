@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Alert, Button, Form, Input, Modal, message } from 'antd';
+import { Form, Alert, Button, Input, Modal, message } from 'antd';
 import styles from './index.module.css';
 import http from 'libs/http';
 import store from './store';
@@ -30,7 +30,12 @@ export default observer(function () {
   function doModify() {
     const public_key = lds.get(store.settings, 'public_key.value');
     const private_key = lds.get(store.settings, 'private_key.value');
-    return http.post('/api/setting/', {data: [{key: 'public_key', value: public_key}, {key: 'private_key', value: private_key}]})
+    return http.post('/api/setting/', {
+      data: [{key: 'public_key', value: public_key}, {
+        key: 'private_key',
+        value: private_key
+      }]
+    })
       .then(() => {
         message.success('保存成功');
         store.fetchSettings()
@@ -49,7 +54,7 @@ export default observer(function () {
         message="小提示"
         description="在这里你可以上传并使用已有的密钥对，没有上传密钥的情况下，Spug会在首次添加主机时自动生成密钥对。"
       />
-      <Form style={{maxWidth: 650}}>
+      <Form layout="vertical" style={{maxWidth: 650, marginTop: 12}}>
         <Form.Item label="公钥" help="一般位于 ~/.ssh/id_rsa.pub">
           <Input.TextArea
             rows={7}
@@ -58,7 +63,7 @@ export default observer(function () {
             onChange={e => lds.set(store.settings, 'public_key.value', e.target.value)}
             placeholder="请输入公钥"/>
         </Form.Item>
-        <Form.Item label="私钥" help="一般位于 ~/.ssh/id_rsa">
+        <Form.Item label="私钥" help="一般位于 ~/.ssh/id_rsa" style={{marginTop: 12}}>
           <Input.TextArea
             rows={14}
             spellCheck={false}
@@ -66,7 +71,7 @@ export default observer(function () {
             onChange={e => lds.set(store.settings, 'private_key.value', e.target.value)}
             placeholder="请输入私钥"/>
         </Form.Item>
-        <Form.Item>
+        <Form.Item style={{marginTop: 12}}>
           <Button type="primary" loading={store.loading} onClick={handleSubmit}>保存设置</Button>
         </Form.Item>
       </Form>

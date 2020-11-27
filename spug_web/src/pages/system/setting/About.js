@@ -5,7 +5,8 @@
  */
 import React from 'react';
 import styles from './index.module.css';
-import { Descriptions, Spin, Icon, notification } from "antd";
+import { SmileTwoTone } from '@ant-design/icons';
+import { Descriptions, Spin, notification } from "antd";
 import { observer } from 'mobx-react'
 import { http, VERSION } from 'libs';
 
@@ -33,7 +34,7 @@ class About extends React.Component {
             duration: 0,
             top: 88,
             message: `发现新版本 ${res.tag_name}`,
-            icon: <Icon type="smile" theme="twoTone"/>,
+            icon: <SmileTwoTone />,
             btn: <a target="_blank" rel="noopener noreferrer" href="https://spug.dev/docs/update-version/">如何升级？</a>,
             description: <pre style={{lineHeight: '30px'}}>{logs}</pre>
           })

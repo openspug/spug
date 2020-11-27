@@ -5,7 +5,8 @@
  */
 import React from 'react';
 import styles from './index.module.css';
-import { Form} from "antd";
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
 import { observer } from 'mobx-react'
 
 
