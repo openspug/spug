@@ -5,14 +5,14 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Modal, Tag, message } from 'antd';
-import { Action } from 'components';
-import ComForm from './Form';
+import { Table, Modal, Radio, Tag, message } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import { Action, AuthButton, TableCard } from 'components';
 import { http, hasPermission } from 'libs';
-import store from './store';
+import groupStore from '../alarm/group/store';
 import hostStore from '../host/store';
+import store from './store';
 import lds from 'lodash';
-import groupStore from "pages/alarm/group/store";
 
 @observer
 class ComTable extends React.Component {
@@ -70,75 +70,69 @@ class ComTable extends React.Component {
   };
 
   render() {
-    let data = store.records;
-    if (store.f_name) {
-      data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
-    }
-    if (store.f_type) {
-      data = data.filter(item => item['type_alias'] === store.f_type)
-    }
-    if (store.f_status !== undefined) {
-      if (store.f_status === -3) {
-        data = data.filter(item => !item['is_active'])
-      } else if (store.f_status === -2) {
-        data = data.filter(item => item['is_active'])
-      } else if (store.f_status === -1) {
-        data = data.filter(item => item['is_active'] && !item['latest_status_alias'])
-      } else {
-        data = data.filter(item => item['latest_status'] === store.f_status)
-      }
-    }
     return (
-      <React.Fragment>
-        <Table
-          rowKey="id"
-          loading={store.isFetching}
-          dataSource={data}
-          pagination={{
-            showSizeChanger: true,
-            showLessItems: true,
-            hideOnSinglePage: true,
-            showTotal: total => `共 ${total} 条`,
-            pageSizeOptions: ['10', '20', '50', '100']
-          }}>
-          <Table.Column title="任务名称" dataIndex="name"/>
-          <Table.Column title="类型" dataIndex="type_alias"/>
-          <Table.Column ellipsis title="地址" render={info => {
-            if ('34'.includes(info.type)) {
-              return lds.get(this.state.hosts, `${info.addr}.name`)
+      <TableCard
+        rowKey="id"
+        title="监控任务"
+        loading={store.isFetching}
+        dataSource={store.dataSource}
+        onReload={store.fetchRecords}
+        actions={[
+          <AuthButton
+            auth="monitor.monitor.add"
+            type="primary"
+            icon={<PlusOutlined/>}
+            onClick={() => store.showForm()}>新建</AuthButton>,
+          <Radio.Group value={store.f_active} onChange={e => store.f_active = e.target.value}>
+            <Radio.Button value="">全部</Radio.Button>
+            <Radio.Button value="1">已激活</Radio.Button>
+            <Radio.Button value="0">未激活</Radio.Button>
+          </Radio.Group>
+        ]}
+        pagination={{
+          showSizeChanger: true,
+          showLessItems: true,
+          hideOnSinglePage: true,
+          showTotal: total => `共 ${total} 条`,
+          pageSizeOptions: ['10', '20', '50', '100']
+        }}>
+        <Table.Column title="任务名称" dataIndex="name"/>
+        <Table.Column title="类型" dataIndex="type_alias"/>
+        <Table.Column ellipsis title="地址" render={info => {
+          if ('34'.includes(info.type)) {
+            return lds.get(this.state.hosts, `${info.addr}.name`)
+          } else {
+            return info.addr
+          }
+        }}/>
+        <Table.Column title="频率" dataIndex="rate" render={value => `${value}分钟`}/>
+        <Table.Column title="状态" render={info => {
+          if (info.is_active) {
+            if (info['latest_status'] === 0) {
+              return <Tag color="green">正常</Tag>
+            } else if (info['latest_status'] === 1) {
+              return <Tag color="red">异常</Tag>
             } else {
-              return info.addr
+              return <Tag color="orange">待检测</Tag>
             }
-          }}/>
-          <Table.Column title="频率" dataIndex="rate" render={value => `${value}分钟`}/>
-          <Table.Column title="状态" render={info => {
-            if (info.is_active) {
-              if (info['latest_status'] === 0) {
-                return <Tag color="green">正常</Tag>
-              } else if (info['latest_status'] === 1) {
-                return <Tag color="red">异常</Tag>
-              } else {
-                return <Tag color="orange">待检测</Tag>
-              }
-            } else {
-              return <Tag>未启用</Tag>
-            }
-          }}/>
-          <Table.Column title="更新于" dataIndex="latest_run_time_alias"
-                        sorter={(a, b) => a.latest_run_time.localeCompare(b.latest_run_time)}/>
-          {hasPermission('monitor.monitor.edit|monitor.monitor.del') && (
-            <Table.Column width={180} title="操作" render={info => (
-              <Action>
-                <Action.Button auth="monitor.monitor.edit"
-                               onClick={() => this.handleActive(info)}>{info['is_active'] ? '禁用' : '启用'}</Action.Button>
-                <Action.Button auth="monitor.monitor.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-                <Action.Button auth="monitor.monitor.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
-              </Action>
-            )}/>
-          )}
-        </Table>
-        {store.formVisible && <ComForm/>}
-      </React.Fragment>
+          } else {
+            return <Tag>未启用</Tag>
+          }
+        }}/>
+        <Table.Column title="更新于" dataIndex="latest_run_time_alias"
+                      sorter={(a, b) => a.latest_run_time.localeCompare(b.latest_run_time)}/>
+        <Table.Column hide title="描述" dataIndex="desc"/>
+        {hasPermission('monitor.monitor.edit|monitor.monitor.del') && (
+          <Table.Column width={180} title="操作" render={info => (
+            <Action>
+              <Action.Button auth="monitor.monitor.edit"
+                             onClick={() => this.handleActive(info)}>{info['is_active'] ? '禁用' : '启用'}</Action.Button>
+              <Action.Button auth="monitor.monitor.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
+              <Action.Button auth="monitor.monitor.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+            </Action>
+          )}/>
+        )}
+      </TableCard>
     )
   }
 }
