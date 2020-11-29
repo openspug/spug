@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Layout, Menu } from 'antd';
 import { hasPermission, history } from 'libs';
 import styles from './layout.module.less';
@@ -6,19 +6,21 @@ import menus from '../routes';
 import logo from './logo-spug.png';
 import logoText from './logo-text.png';
 
-const initPath = window.location.pathname;
-let openKeys = [];
-loop:
-  for (let item of menus.filter(x => x.child)) {
+let selectedKey = window.location.pathname;
+const OpenKeysMap = {};
+for (let item of menus) {
+  if (item.child) {
     for (let sub of item.child) {
-      if (sub.path === initPath) {
-        openKeys = [item.title]
-        break loop
-      }
+      if (sub.title) OpenKeysMap[sub.path] = item.title
     }
+  } else if (item.title) {
+    OpenKeysMap[item.path] = 1
   }
+}
 
 export default function Sider(props) {
+  const [openKeys, setOpenKeys] = useState([]);
+
   function makeMenu(menu) {
     if (menu.auth && !hasPermission(menu.auth)) return null;
     if (!menu.title) return null;
@@ -42,6 +44,14 @@ export default function Sider(props) {
     )
   }
 
+  const tmp = window.location.pathname;
+  const openKey = OpenKeysMap[tmp];
+  if (openKey) {
+    selectedKey = tmp;
+    if (openKey !== 1 && !openKeys.includes(openKey)) {
+      setOpenKeys([...openKeys, openKey])
+    }
+  }
   return (
     <Layout.Sider width={208} collapsed={props.collapsed} className={styles.sider}>
       <div className={styles.logo}>
@@ -53,8 +63,9 @@ export default function Sider(props) {
           theme="dark"
           mode="inline"
           className={styles.menus}
-          defaultSelectedKeys={[initPath]}
-          defaultOpenKeys={openKeys}
+          selectedKeys={[selectedKey]}
+          openKeys={openKeys}
+          onOpenChange={setOpenKeys}
           onSelect={menu => history.push(menu.key)}>
           {menus.map(menu => makeMenu(menu))}
         </Menu>
