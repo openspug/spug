@@ -12,6 +12,7 @@ class Store {
   @observable records = [];
   @observable record = {};
   @observable types = [];
+  @observable groups = [];
   @observable page = 0;
   @observable isFetching = false;
   @observable formVisible = false;
@@ -20,12 +21,14 @@ class Store {
   @observable f_type;
   @observable f_status;
   @observable f_active = '';
+  @observable f_group;
 
   @computed get dataSource() {
     let records = this.records;
     if (this.f_active) records = records.filter(x => x.is_active === (this.f_active === '1'));
     if (this.f_name) records = records.filter(x => x.name.toLowerCase().includes(this.f_name.toLowerCase()));
     if (this.f_type) records = records.filter(x => x.type_alias === this.f_type);
+    if (this.f_group) records = records.filter(x => x.group === this.f_group);
     if (this.f_status !== undefined) {
       if (this.f_status === -1) {
         records = records.filter(x => x.is_active && !x.latest_status_alias);
@@ -39,16 +42,17 @@ class Store {
   fetchRecords = () => {
     this.isFetching = true;
     http.get('/api/monitor/')
-      .then(res => {
+      .then(({groups, detections}) => {
         const tmp = new Set();
-        res.map(item => {
+        detections.map(item => {
           tmp.add(item['type_alias']);
           const value = item['latest_run_time'];
           item['latest_run_time_alias'] = value ? moment(value).fromNow() : null;
           return null
         });
         this.types = Array.from(tmp);
-        this.records = res
+        this.records = detections;
+        this.groups = groups;
       })
       .finally(() => this.isFetching = false)
   };

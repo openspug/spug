@@ -21,6 +21,7 @@ class Detection(models.Model, ModelMixin):
     )
     name = models.CharField(max_length=50)
     type = models.CharField(max_length=2, choices=TYPES)
+    group = models.CharField(max_length=255, null=True)
     addr = models.CharField(max_length=255)
     extra = models.TextField(null=True)
     desc = models.CharField(max_length=255, null=True)

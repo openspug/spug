@@ -34,7 +34,7 @@ export default observer(function () {
   function handleSubmit() {
     setLoading(true)
     const formData = form.getFieldsValue();
-    Object.assign(formData, lds.pick(store.record, ['id', 'name', 'desc', 'addr', 'extra', 'type']))
+    Object.assign(formData, lds.pick(store.record, ['id', 'name', 'desc', 'addr', 'extra', 'type', 'group']))
     formData['id'] = store.record.id;
     http.post('/api/monitor/', formData)
       .then(() => {

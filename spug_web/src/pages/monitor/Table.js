@@ -96,7 +96,8 @@ class ComTable extends React.Component {
           showTotal: total => `共 ${total} 条`,
           pageSizeOptions: ['10', '20', '50', '100']
         }}>
-        <Table.Column title="任务名称" dataIndex="name"/>
+        <Table.Column title="监控分组" dataIndex="group" />
+        <Table.Column title="监控名称" dataIndex="name"/>
         <Table.Column title="类型" dataIndex="type_alias"/>
         <Table.Column ellipsis title="地址" render={info => {
           if ('34'.includes(info.type)) {

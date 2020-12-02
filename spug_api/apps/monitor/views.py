@@ -13,12 +13,14 @@ import json
 class DetectionView(View):
     def get(self, request):
         detections = Detection.objects.all()
-        return json_response(detections)
+        groups = [x['group'] for x in detections.order_by('group').values('group').distinct()]
+        return json_response({'groups': groups, 'detections': [x.to_dict() for x in detections]})
 
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
             Argument('name', help='请输入任务名称'),
+            Argument('group', help='请选择任务分组'),
             Argument('addr', help='请输入监控地址'),
             Argument('type', filter=lambda x: x in dict(Detection.TYPES), help='请选择监控类型'),
             Argument('extra', required=False),
