@@ -4,7 +4,7 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: openspug/spug@master
+      - uses: zyupo/spug@master
         env:
           SSH_PRIVATE_KEY: ${{ secrets.GITEE_PRIVATE_KEY }}
         with:
