@@ -4,7 +4,7 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: zyupo/spug@master
+      - uses: openspug/spug@master
         with:
           src: github/openspug
           dst: gitee/openspug
