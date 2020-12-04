@@ -1,22 +1,14 @@
-name: github repos to gitee job
-on:
-# 如果需要PR触发把push前的#去掉
-# push:
-  schedule:
-    # 每天北京时间1点跑
-    - cron:  '0 1 * * *'
+name: Sync-GitHub-to-Gitee
+on: push
 jobs:
-  build:
+  sync:
     runs-on: ubuntu-latest
     steps:
-    - name: Mirror the Github organization repos to Gitee.
-      uses: Yikun/gitee-mirror-action@v0.01
-      with:
-        src: github/openspug
-        dst: gitee/openspug
-        # Gitee对应的秘钥
-        private_key: ${{ secrets.mac_pro_videojj }}
-        # 需要同步的Github组织名（源）
-        github_org: openspug
-        # 需要同步到的Gitee的组织名（目的）
-        gitee_org: openspug
+      - uses: openspug/spug@master
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.GITEE_PRIVATE_KEY }}
+        with:
+          source-repo: "git@github.com:openspug/spug.git"
+          destination-repo: "git@gitee.com:openspug/spug.git"
+          dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
+          dst_token: ${{ secrets.GITEE_TOKEN }}
