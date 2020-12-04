@@ -1,0 +1,4 @@
+.dragBox :global(.ant-tree-node-content-wrapper) {
+    border-top: 2px transparent solid;
+    border-bottom: 2px transparent solid;
+}

@@ -4,9 +4,30 @@
  * Released under the AGPL-3.0 License.
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { Table, Space, Divider, Popover, Checkbox, Button } from 'antd';
-import { ReloadOutlined, SettingOutlined, FullscreenOutlined } from '@ant-design/icons';
+import { Table, Space, Divider, Popover, Checkbox, Button, Input, Select } from 'antd';
+import { ReloadOutlined, SettingOutlined, FullscreenOutlined, SearchOutlined } from '@ant-design/icons';
 import styles from './index.module.less';
+
+function Search(props) {
+  let keys = props.keys || [''];
+  keys = keys.map(x => x.split('/'));
+  const [key, setKey] = useState(keys[0][0]);
+  return (
+    <Input
+      allowClear
+      style={{width: '280px'}}
+      placeholder="输入检索"
+      prefix={<SearchOutlined style={{color: '#c0c0c0'}}/>}
+      onChange={e => props.onChange(key, e.target.value)}
+      addonBefore={(
+        <Select value={key} onChange={setKey}>
+          {keys.map(item => (
+            <Select.Option key={item[0]} value={item[0]}>{item[1]}</Select.Option>
+          ))}
+        </Select>
+      )}/>
+  )
+}
 
 function Footer(props) {
   const actions = props.actions || [];
@@ -145,4 +166,5 @@ function TableCard(props) {
   )
 }
 
+TableCard.Search = Search;
 export default TableCard

@@ -36,22 +36,12 @@ class ComTable extends React.Component {
   };
 
   render() {
-    let data = store.permRecords;
-    if (store.f_name) {
-      data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
-    }
-    if (store.f_zone) {
-      data = data.filter(item => item['zone'].toLowerCase().includes(store.f_zone.toLowerCase()))
-    }
-    if (store.f_host) {
-      data = data.filter(item => item['hostname'].toLowerCase().includes(store.f_host.toLowerCase()))
-    }
     return (
       <TableCard
         rowKey="id"
-        title="主机列表"
+        title={<TableCard.Search keys={['f_name/主机名称', 'f_host/连接地址']} onChange={(k, v) => store[k] = v}/>}
         loading={store.isFetching}
-        dataSource={data}
+        dataSource={store.dataSource}
         onReload={store.fetchRecords}
         actions={[
           <AuthButton
@@ -72,11 +62,10 @@ class ComTable extends React.Component {
           showTotal: total => `共 ${total} 条`,
           pageSizeOptions: ['10', '20', '50', '100']
         }}>
-        <Table.Column title="类别" dataIndex="zone"/>
-        <Table.Column title="主机名称" dataIndex="name" sorter={(a, b) => a.name.localeCompare(b.name)}/>
+        <Table.Column showSorterTooltip={false} title="主机名称" dataIndex="name" sorter={(a, b) => a.name.localeCompare(b.name)}/>
         <Table.Column title="连接地址" dataIndex="hostname" sorter={(a, b) => a.name.localeCompare(b.name)}/>
-        <Table.Column width={100} title="端口" dataIndex="port"/>
-        <Table.Column ellipsis title="备注信息" dataIndex="desc"/>
+        <Table.Column hide width={100} title="端口" dataIndex="port"/>
+        <Table.Column hide ellipsis title="备注信息" dataIndex="desc"/>
         {hasPermission('host.host.edit|host.host.del|host.host.console') && (
           <Table.Column width={200} title="操作" render={info => (
             <Action>

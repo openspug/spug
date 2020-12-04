@@ -6,7 +6,7 @@ from django.db.models import F
 from django.http.response import HttpResponseBadRequest
 from libs import json_response, JsonParser, Argument
 from apps.setting.utils import AppSetting
-from apps.host.models import Host
+from apps.host.models import Host, HostGroupRel
 from apps.app.models import Deploy
 from apps.schedule.models import Task
 from apps.monitor.models import Detection
@@ -25,10 +25,10 @@ class HostView(View):
             if not request.user.has_host_perm(host_id):
                 return json_response(error='无权访问该主机，请联系管理员')
             return json_response(Host.objects.get(pk=host_id))
-        hosts = Host.objects.filter(deleted_by_id__isnull=True)
-        zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
-        perms = [x.id for x in hosts] if request.user.is_supper else request.user.host_perms
-        return json_response({'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
+        hosts = {x.id: x.to_view() for x in Host.objects.filter(deleted_by_id__isnull=True)}
+        for rel in HostGroupRel.objects.all():
+            hosts[rel.host_id]['group_ids'].append(rel.group_id)
+        return json_response(list(hosts.values()))
 
     def post(self, request):
         form, error = JsonParser(

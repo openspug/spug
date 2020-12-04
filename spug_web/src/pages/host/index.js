@@ -5,8 +5,9 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Input, Select } from 'antd';
-import { SearchForm, AuthDiv, Breadcrumb } from 'components';
+import { Row, Col } from 'antd';
+import { AuthDiv, Breadcrumb } from 'components';
+import Group from './Group';
 import ComTable from './Table';
 import ComForm from './Form';
 import ComImport from './Import';
@@ -19,22 +20,16 @@ export default observer(function () {
         <Breadcrumb.Item>首页</Breadcrumb.Item>
         <Breadcrumb.Item>主机管理</Breadcrumb.Item>
       </Breadcrumb>
-      <SearchForm>
-        <SearchForm.Item span={6} title="主机类别">
-          <Select allowClear placeholder="请选择" value={store.f_zone} onChange={v => store.f_zone = v}>
-            {store.zones.map(item => (
-              <Select.Option value={item} key={item}>{item}</Select.Option>
-            ))}
-          </Select>
-        </SearchForm.Item>
-        <SearchForm.Item span={6} title="主机别名">
-          <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
-        </SearchForm.Item>
-        <SearchForm.Item span={6} title="连接地址">
-          <Input allowClear value={store.f_host} onChange={e => store.f_host = e.target.value} placeholder="请输入"/>
-        </SearchForm.Item>
-      </SearchForm>
-      <ComTable/>
+
+      <Row gutter={12}>
+        <Col span={6}>
+          <Group/>
+        </Col>
+        <Col span={18}>
+          <ComTable/>
+        </Col>
+      </Row>
+
       {store.formVisible && <ComForm/>}
       {store.importVisible && <ComImport/>}
     </AuthDiv>

@@ -30,9 +30,40 @@ class Host(models.Model, ModelMixin):
         pkey = pkey or self.private_key
         return SSH(self.hostname, self.port, self.username, pkey)
 
+    def to_view(self):
+        tmp = self.to_dict()
+        tmp['group_ids'] = []
+        return tmp
+
     def __repr__(self):
         return '<Host %r>' % self.name
 
     class Meta:
         db_table = 'hosts'
         ordering = ('-id',)
+
+
+class Group(models.Model, ModelMixin):
+    name = models.CharField(max_length=20)
+    parent_id = models.IntegerField(default=0)
+    sort_id = models.IntegerField(default=0)
+    hosts = models.ManyToManyField(Host, through='HostGroupRel', related_name='groups')
+
+    def to_view(self):
+        return {
+            'key': self.id,
+            'title': self.name,
+            'children': []
+        }
+
+    class Meta:
+        db_table = 'host_groups'
+        ordering = ('-sort_id',)
+
+
+class HostGroupRel(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    host = models.ForeignKey(Host, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'host_group_rel'
