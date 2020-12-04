@@ -4,10 +4,13 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: openspug/spug@master
-        with:
-          src: github/openspug
-          dst: gitee/openspug
-          dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
-          dst_token: ${{ secrets.GITEE_TOKEN }}
-          account_type: org
+    - name: Checkout source codes
+      uses: actions/checkout@v1
+    - name: Mirror Github to Gitee
+      uses: ./.
+      with:
+        src: github/openspug
+        dst: gitee/openspug
+        dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
+        dst_token: ${{ secrets.GITEE_TOKEN }}
+        account_type: org
