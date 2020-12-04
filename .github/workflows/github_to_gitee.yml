@@ -10,5 +10,3 @@ jobs:
         with:
           source-repo: "git@github.com:openspug/spug.git"
           destination-repo: "git@gitee.com:openspug/spug.git"
-          dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
-          dst_token: ${{ secrets.GITEE_TOKEN }}
