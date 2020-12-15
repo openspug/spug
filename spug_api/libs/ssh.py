@@ -47,6 +47,8 @@ class SSH:
         self.client = SSHClient()
         self.client.set_missing_host_key_policy(AutoAddPolicy)
         self.client.connect(**self.arguments)
+        self.__sftp_windows_size = 1073741824
+        self.__sftp_max_package_size = 1073741824
         return self.client
 
     def put_file(self, local_path, remote_path):
