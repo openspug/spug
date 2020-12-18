@@ -17,6 +17,7 @@ class Store {
   @observable isFetching = false;
   @observable formVisible = false;
   @observable importVisible = false;
+  @observable detailVisible = false;
 
   @observable f_name;
   @observable f_host;
@@ -59,6 +60,11 @@ class Store {
     this.record = info
   }
 
+  showDetail = (info) => {
+    this.record = info;
+    this.detailVisible = true;
+  }
+
   _updateGroupCount = () => {
     if (this.treeData.length && this.records.length) {
       const counter = {};
@@ -83,6 +89,7 @@ class Store {
       host_ids = host_ids.concat(this._updateCount(counter, child))
     }
     item.host_ids = Array.from(new Set(host_ids));
+    if (item.key === this.group.key) this.group = item;
     return item.host_ids
   }
 }

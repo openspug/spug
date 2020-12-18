@@ -33,7 +33,7 @@ class HostView(View):
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
-            Argument('zone', help='请输入主机类型'),
+            Argument('group_ids', type=list, filter=lambda x: len(x), help='请选择主机分组'),
             Argument('name', help='请输主机名称'),
             Argument('username', handler=str.strip, help='请输入登录用户名'),
             Argument('hostname', handler=str.strip, help='请输入主机名或IP'),
@@ -47,14 +47,16 @@ class HostView(View):
                          pkey=form.pkey) is False:
                 return json_response('auth fail')
 
-            if form.id:
-                Host.objects.filter(pk=form.pop('id')).update(**form)
-            elif Host.objects.filter(name=form.name, deleted_by_id__isnull=True).exists():
+            group_ids = form.pop('group_ids')
+            other = Host.objects.filter(name=form.name, deleted_by_id__isnull=True).first()
+            if other and (not form.id or other.id != form.id):
                 return json_response(error=f'已存在的主机名称【{form.name}】')
+            if form.id:
+                Host.objects.filter(pk=form.id).update(**form)
+                host = Host.objects.get(pk=form.id)
             else:
                 host = Host.objects.create(created_by=request.user, **form)
-                if request.user.role:
-                    request.user.role.add_host_perm(host.id)
+            host.groups.set(group_ids)
         return json_response(error=error)
 
     def patch(self, request):

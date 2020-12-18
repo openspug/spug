@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { ExclamationCircleOutlined, UploadOutlined } from '@ant-design/icons';
-import { Modal, Form, Input, Select, Button, Upload, message } from 'antd';
+import { Modal, Form, Input, TreeSelect, Button, Upload, Alert, message } from 'antd';
 import { http, X_TOKEN } from 'libs';
 import store from './store';
 
@@ -102,12 +102,13 @@ export default observer(function () {
       confirmLoading={loading}
       onOk={handleSubmit}>
       <Form form={form} labelCol={{span: 6}} wrapperCol={{span: 14}} initialValues={info}>
-        <Form.Item required name="zone" label="主机类别">
-          <Select placeholder="请选择主机类别/区域/分组">
-            {store.zones.map(item => (
-              <Select.Option value={item} key={item}>{item}</Select.Option>
-            ))}
-          </Select>
+        <Form.Item required name="group_ids" label="主机分组">
+          <TreeSelect
+            multiple
+            treeNodeLabelProp="name"
+            treeData={store.treeData}
+            showCheckedStrategy={TreeSelect.SHOW_CHILD}
+            placeholder="请选择分组"/>
         </Form.Item>
         <Form.Item required name="name" label="主机名称">
           <Input placeholder="请输入主机名称"/>
@@ -133,7 +134,7 @@ export default observer(function () {
           <Input.TextArea placeholder="请输入主机备注信息"/>
         </Form.Item>
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <span role="img" aria-label="notice">⚠️ 首次验证时需要输入登录用户名对应的密码，但不会存储该密码。</span>
+          <Alert showIcon type="info" message="首次验证时需要输入登录用户名对应的密码，该密码会用于配置密钥连接，不会存储该密码。" />
         </Form.Item>
       </Form>
     </Modal>

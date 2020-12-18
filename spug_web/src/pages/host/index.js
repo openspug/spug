@@ -11,6 +11,7 @@ import Group from './Group';
 import ComTable from './Table';
 import ComForm from './Form';
 import ComImport from './Import';
+import Detail from './Detail';
 import store from './store';
 
 export default observer(function () {
@@ -30,6 +31,7 @@ export default observer(function () {
         </Col>
       </Row>
 
+      <Detail/>
       {store.formVisible && <ComForm/>}
       {store.importVisible && <ComImport/>}
     </AuthDiv>

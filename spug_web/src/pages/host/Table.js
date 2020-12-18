@@ -62,7 +62,11 @@ class ComTable extends React.Component {
           showTotal: total => `共 ${total} 条`,
           pageSizeOptions: ['10', '20', '50', '100']
         }}>
-        <Table.Column showSorterTooltip={false} title="主机名称" dataIndex="name" sorter={(a, b) => a.name.localeCompare(b.name)}/>
+        <Table.Column
+          showSorterTooltip={false}
+          title="主机名称"
+          render={info => <Action.Button onClick={() => store.showDetail(info)}>{info.name}</Action.Button>}
+          sorter={(a, b) => a.name.localeCompare(b.name)}/>
         <Table.Column title="连接地址" dataIndex="hostname" sorter={(a, b) => a.name.localeCompare(b.name)}/>
         <Table.Column hide width={100} title="端口" dataIndex="port"/>
         <Table.Column hide ellipsis title="备注信息" dataIndex="desc"/>

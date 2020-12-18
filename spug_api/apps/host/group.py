@@ -20,6 +20,7 @@ def fetch_children(data):
 def merge_children(data, prefix, childes):
     for item in childes:
         name = f'{prefix}/{item["title"]}'
+        item['name'] = name
         if item['children']:
             merge_children(data, name, item['children'])
         else:
@@ -36,8 +37,9 @@ class GroupView(View):
             grp = Group.objects.create(name='Default', sort_id=1)
             data[grp.id] = grp.to_view()
 
-        merge_children(data2, '', data.values())
-        return json_response({'treeData': list(data.values()), 'groups': data2})
+        data = list(data.values())
+        merge_children(data2, '', data)
+        return json_response({'treeData': data, 'groups': data2})
 
     def post(self, request):
         form, error = JsonParser(

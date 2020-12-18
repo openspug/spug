@@ -10,7 +10,6 @@ from libs.ssh import SSH
 
 class Host(models.Model, ModelMixin):
     name = models.CharField(max_length=50)
-    zone = models.CharField(max_length=50)
     hostname = models.CharField(max_length=50)
     port = models.IntegerField()
     username = models.CharField(max_length=50)
@@ -52,6 +51,7 @@ class Group(models.Model, ModelMixin):
     def to_view(self):
         return {
             'key': self.id,
+            'value': self.id,
             'title': self.name,
             'children': []
         }
