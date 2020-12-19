@@ -12,6 +12,7 @@ import ComTable from './Table';
 import ComForm from './Form';
 import ComImport from './Import';
 import Detail from './Detail';
+import Selector from './Selector';
 import store from './store';
 
 export default observer(function () {
@@ -34,6 +35,7 @@ export default observer(function () {
       <Detail/>
       {store.formVisible && <ComForm/>}
       {store.importVisible && <ComImport/>}
+      {store.selectorVisible && <Selector onCancel={() => store.selectorVisible = false} onOk={store.updateGroup}/>}
     </AuthDiv>
   );
 })

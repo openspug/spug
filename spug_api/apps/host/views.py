@@ -6,7 +6,7 @@ from django.db.models import F
 from django.http.response import HttpResponseBadRequest
 from libs import json_response, JsonParser, Argument
 from apps.setting.utils import AppSetting
-from apps.host.models import Host, HostGroupRel
+from apps.host.models import Host, Group
 from apps.app.models import Deploy
 from apps.schedule.models import Task
 from apps.monitor.models import Detection
@@ -26,7 +26,7 @@ class HostView(View):
                 return json_response(error='无权访问该主机，请联系管理员')
             return json_response(Host.objects.get(pk=host_id))
         hosts = {x.id: x.to_view() for x in Host.objects.filter(deleted_by_id__isnull=True)}
-        for rel in HostGroupRel.objects.all():
+        for rel in Group.hosts.through.objects.all():
             hosts[rel.host_id]['group_ids'].append(rel.group_id)
         return json_response(list(hosts.values()))
 
@@ -61,15 +61,17 @@ class HostView(View):
 
     def patch(self, request):
         form, error = JsonParser(
-            Argument('id', type=int, required=False),
-            Argument('zone', help='请输入主机类别')
+            Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择主机'),
+            Argument('s_group_id', type=int, help='参数错误'),
+            Argument('t_group_id', type=int, help='参数错误'),
+            Argument('is_copy', type=bool, help='参数错误'),
         ).parse(request.body)
         if error is None:
-            host = Host.objects.filter(pk=form.id).first()
-            if not host:
-                return json_response(error='未找到指定主机')
-            count = Host.objects.filter(zone=host.zone, deleted_by_id__isnull=True).update(zone=form.zone)
-            return json_response(count)
+            s_group = Group.objects.get(pk=form.s_group_id)
+            t_group = Group.objects.get(pk=form.t_group_id)
+            t_group.hosts.add(*form.host_ids)
+            if not form.is_copy:
+                s_group.hosts.remove(*form.host_ids)
         return json_response(error=error)
 
     def delete(self, request):

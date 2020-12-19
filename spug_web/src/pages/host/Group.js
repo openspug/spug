@@ -6,6 +6,14 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Input, Card, Tree, Dropdown, Menu, Switch, message } from 'antd';
+import {
+  FolderOutlined,
+  FolderAddOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  CopyOutlined,
+  ScissorOutlined
+} from '@ant-design/icons';
 import { LoadingOutlined } from '@ant-design/icons';
 import styles from './index.module.css';
 import { http } from 'libs';
@@ -27,10 +35,14 @@ export default observer(function () {
 
   const menus = (
     <Menu onClick={() => setVisible(false)}>
-      <Menu.Item key="0" onClick={handleAddRoot}>新建根分组</Menu.Item>
-      <Menu.Item key="1" onClick={handleAdd}>新建子分组</Menu.Item>
-      <Menu.Item key="2" onClick={() => setAction('edit')}>重命名</Menu.Item>
-      <Menu.Item key="3" danger onClick={handleRemove}>删除分组</Menu.Item>
+      <Menu.Item key="0" icon={<FolderOutlined/>} onClick={handleAddRoot}>新建根分组</Menu.Item>
+      <Menu.Item key="1" icon={<FolderAddOutlined/>} onClick={handleAdd}>新建子分组</Menu.Item>
+      <Menu.Item key="2" icon={<EditOutlined/>} onClick={() => setAction('edit')}>重命名</Menu.Item>
+      <Menu.Divider/>
+      <Menu.Item key="3" icon={<CopyOutlined/>} onClick={() => store.showSelector(true)}>添加至分组</Menu.Item>
+      <Menu.Item key="4" icon={<ScissorOutlined/>} onClick={() => store.showSelector(false)}>移动至分组</Menu.Item>
+      <Menu.Divider/>
+      <Menu.Item key="5" icon={<DeleteOutlined/>} danger onClick={handleRemove}>删除此分组</Menu.Item>
     </Menu>
   )
 
@@ -132,7 +144,7 @@ export default observer(function () {
           className={styles.dragBox}
           autoExpandParent
           draggable={draggable}
-          treeData={store.treeData}
+          treeData={store.allTreeData}
           titleRender={treeRender}
           expandedKeys={expands}
           selectedKeys={[store.group.key]}

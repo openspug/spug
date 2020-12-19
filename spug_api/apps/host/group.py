@@ -18,8 +18,9 @@ def fetch_children(data):
 
 
 def merge_children(data, prefix, childes):
+    prefix = f'{prefix}/' if prefix else ''
     for item in childes:
-        name = f'{prefix}/{item["title"]}'
+        name = f'{prefix}{item["title"]}'
         item['name'] = name
         if item['children']:
             merge_children(data, name, item['children'])

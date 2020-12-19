@@ -46,7 +46,7 @@ class Group(models.Model, ModelMixin):
     name = models.CharField(max_length=20)
     parent_id = models.IntegerField(default=0)
     sort_id = models.IntegerField(default=0)
-    hosts = models.ManyToManyField(Host, through='HostGroupRel', related_name='groups')
+    hosts = models.ManyToManyField(Host, related_name='groups')
 
     def to_view(self):
         return {
@@ -59,11 +59,3 @@ class Group(models.Model, ModelMixin):
     class Meta:
         db_table = 'host_groups'
         ordering = ('-sort_id',)
-
-
-class HostGroupRel(models.Model):
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    host = models.ForeignKey(Host, on_delete=models.CASCADE)
-
-    class Meta:
-        db_table = 'host_group_rel'
