@@ -3,10 +3,9 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import { observable, computed } from 'mobx';
+import { observable, computed, autorun } from 'mobx';
 import { message } from 'antd';
 import http from 'libs/http';
-import lds from 'lodash';
 
 class Store {
   @observable records = [];
@@ -26,6 +25,14 @@ class Store {
   @observable f_name;
   @observable f_host;
 
+  constructor() {
+    autorun(() => {
+      for (let item of this.treeData) {
+        this._updateCounter(item)
+      }
+    })
+  }
+
   @computed get counter() {
     const counter = {};
     for (let host of this.records) {
@@ -40,25 +47,9 @@ class Store {
     return counter
   }
 
-  @computed get selfTreeData() {
-    const treeData = lds.cloneDeep(this.treeData);
-    for (let item of treeData) {
-      this._updateCounter(item, true)
-    }
-    return treeData
-  }
-
-  @computed get allTreeData() {
-    const treeData = lds.cloneDeep(this.treeData);
-    for (let item of treeData) {
-      this._updateCounter(item, false)
-    }
-    return treeData
-  }
-
   @computed get dataSource() {
     let records = [];
-    if (this.group.host_ids) records = this.records.filter(x => this.group.host_ids.includes(x.id));
+    if (this.group.all_host_ids) records = this.records.filter(x => this.group.all_host_ids.includes(x.id));
     if (this.f_name) records = records.filter(x => x.name.toLowerCase().includes(this.f_name.toLowerCase()));
     if (this.f_host) records = records.filter(x => x.hostname.toLowerCase().includes(this.f_host.toLowerCase()));
     return records
@@ -111,14 +102,14 @@ class Store {
     this.selectorVisible = true;
   }
 
-  _updateCounter = (item, isSelf) => {
-    let host_ids = this.counter[item.key] || [];
+  _updateCounter = (item) => {
+    item.all_host_ids = item.self_host_ids = this.counter[item.key] || [];
     for (let child of item.children) {
-      const ids = this._updateCounter(child, isSelf)
-      if (!isSelf) host_ids = host_ids.concat(ids)
+      const ids = this._updateCounter(child)
+      item.all_host_ids = item.all_host_ids.concat(ids)
     }
-    item.host_ids = Array.from(new Set(host_ids));
-    return item.host_ids
+    item.all_host_ids = Array.from(new Set(item.all_host_ids));
+    return item.all_host_ids
   }
 }
 

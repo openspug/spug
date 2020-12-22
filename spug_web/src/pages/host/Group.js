@@ -124,7 +124,7 @@ export default observer(function () {
     } else {
       return (
         <span style={{lineHeight: '24px'}}>
-          {nodeData.title}{nodeData.host_ids && nodeData.host_ids.length ? `（${nodeData.host_ids.length}）` : null}
+          {nodeData.title}{nodeData.all_host_ids && nodeData.all_host_ids.length ? `（${nodeData.all_host_ids.length}）` : null}
         </span>
       )
     }
@@ -144,7 +144,7 @@ export default observer(function () {
           className={styles.dragBox}
           autoExpandParent
           draggable={draggable}
-          treeData={store.allTreeData}
+          treeData={store.treeData}
           titleRender={treeRender}
           expandedKeys={expands}
           selectedKeys={[store.group.key]}

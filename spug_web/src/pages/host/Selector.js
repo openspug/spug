@@ -11,18 +11,18 @@ export default observer(function (props) {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
   useEffect(() => {
-    if (!store.selfTreeData.length) {
+    if (!store.treeData.length) {
       store.fetchRecords()
       store.fetchGroups()
-        .then(() => setGroup(store.selfTreeData[0]))
+        .then(() => setGroup(store.treeData[0]))
     } else {
-      setGroup(store.selfTreeData[0])
+      setGroup(store.treeData[0])
     }
   }, [])
 
   useEffect(() => {
     if (group.key) {
-      const records = store.records.filter(x => group.host_ids.includes(x.id));
+      const records = store.records.filter(x => group.self_host_ids.includes(x.id));
       setDataSource(records)
     }
   }, [group])
@@ -30,7 +30,7 @@ export default observer(function (props) {
   function treeRender(nodeData) {
     return (
       <span style={{lineHeight: '24px'}}>
-        {nodeData.title}{nodeData.host_ids && nodeData.host_ids.length ? `（${nodeData.host_ids.length}）` : null}
+        {nodeData.title}{nodeData.self_host_ids && nodeData.self_host_ids.length ? `（${nodeData.self_host_ids.length}）` : null}
       </span>
     )
   }
@@ -66,7 +66,7 @@ export default observer(function (props) {
           <Tree.DirectoryTree
             selectedKeys={[group.key]}
             className={styles.dragBox}
-            treeData={store.selfTreeData}
+            treeData={store.treeData}
             titleRender={treeRender}
             onSelect={(_, {node}) => setGroup(node)}
           />
