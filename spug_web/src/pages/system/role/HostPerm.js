@@ -3,82 +3,88 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Transfer, message, Alert } from 'antd';
-import http from 'libs/http';
+import { Modal, Form, Button, Tooltip, message, TreeSelect } from 'antd';
+import { PlusOutlined, QuestionCircleOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import hostStore from 'pages/host/store';
+import http from 'libs/http';
 import store from './store';
+import styles from './index.module.css';
 
-@observer
-class HostPerm extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      loading: false,
-      hosts: [],
-      apps: []
+export default observer(function () {
+  const [loading, setLoading] = useState(false);
+  const [groups, setGroups] = useState([...store.record.host_perms]);
+
+  useEffect(() => {
+    if (hostStore.treeData.length === 0) {
+      hostStore.fetchGroups()
     }
-  }
+  }, [])
 
-  componentDidMount() {
-    if (hostStore.records.length === 0) {
-      hostStore.fetchRecords().then(
-        () => this._updateRecords(hostStore.records)
-      )
-    } else {
-      this._updateRecords(hostStore.records)
-    }
-  }
-
-  _updateRecords = (records) => {
-    const hosts = records.map(x => {
-      return {...x, key: x.id}
-    });
-    this.setState({hosts})
-  };
-
-  handleSubmit = () => {
-    this.setState({loading: true});
-    http.patch('/api/account/role/', {id: store.record.id, host_perms: store.hostPerms})
+  function handleSubmit() {
+    setLoading(true);
+    http.patch('/api/account/role/', {id: store.record.id, host_perms: groups})
       .then(res => {
         message.success('操作成功');
         store.hostPermVisible = false;
         store.fetchRecords()
-      }, () => this.setState({loading: false}))
-  };
-
-  render() {
-    return (
-      <Modal
-        visible
-        width={800}
-        maskClosable={false}
-        title="主机权限设置"
-        onCancel={() => store.hostPermVisible = false}
-        confirmLoading={this.state.loading}
-        onOk={this.handleSubmit}>
-        <Alert
-          closable
-          showIcon
-          type="info"
-          message="小提示"
-          style={{width: 600, margin: '0 auto 20px', color: '#31708f !important'}}
-          description="主机权限将全局影响属于该角色的用户能够看到的主机。"/>
-        <Form.Item label="设置可访问的主机" style={{padding: '0 20px'}}>
-          <Transfer
-            showSearch
-            listStyle={{width: 325, maxHeight: 500, minHeight: 300}}
-            titles={['所有主机', '已选主机']}
-            dataSource={this.state.hosts}
-            targetKeys={store.hostPerms}
-            onChange={keys => store.hostPerms = keys}
-            filterOption={(inputValue, option) => `${option.zone}${option.name}`.toLowerCase().indexOf(inputValue.toLowerCase()) > -1}
-            render={item => `${item.zone} - ${item.name}(${item.hostname})`}/>
-        </Form.Item>
-      </Modal>
-    )
+      }, () => setLoading(false))
   }
-}
 
-export default HostPerm
+  function handleChange(index, value) {
+    const tmp = [...groups];
+    if (index !== undefined) {
+      if (value) {
+        tmp[index] = value;
+      } else {
+        tmp.splice(index, 1)
+      }
+    } else {
+      tmp.push(undefined)
+    }
+    setGroups(tmp)
+  }
+
+  return (
+    <Modal
+      visible
+      width={400}
+      maskClosable={false}
+      title="主机权限设置"
+      onCancel={() => store.hostPermVisible = false}
+      confirmLoading={loading}
+      onOk={handleSubmit}>
+      <Form layout="vertical">
+        <Form.Item label={
+          <span>
+            授权访问主机组&nbsp;
+            <Tooltip title="主机权限将全局影响属于该角色的用户能够看到的主机。">
+              <QuestionCircleOutlined/>
+            </Tooltip>
+          </span>
+        }>
+          {groups.map((id, index) => (
+            <div className={styles.groupItem} key={index}>
+              <TreeSelect
+                value={id}
+                showSearch={false}
+                treeNodeLabelProp="name"
+                treeData={hostStore.treeData}
+                onChange={value => handleChange(index, value)}
+                placeholder="请选择分组"/>
+              {groups.length > 1 && (
+                <MinusCircleOutlined className={styles.delIcon} onClick={() => handleChange(index)}/>
+              )}
+            </div>
+          ))}
+        </Form.Item>
+        <Form.Item>
+          <Button type="dashed" style={{width: '100%'}} onClick={() => handleChange()}>
+            <PlusOutlined/>添加授权主机组
+          </Button>
+        </Form.Item>
+      </Form>
+    </Modal>
+  )
+})

@@ -22,3 +22,18 @@
 .table td {
     padding: 5px 15px;
 }
+
+.groupItem {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.delIcon {
+    font-size: 24px;
+    margin-left: 10px;
+}
+
+.delIcon:hover {
+    color: #f5222d;
+}
