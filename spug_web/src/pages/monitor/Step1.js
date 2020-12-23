@@ -102,15 +102,6 @@ export default observer(function () {
   const { name, desc, type, addr, extra, domain, group } = store.record;
   return (
     <Form labelCol={{ span: 6 }} wrapperCol={{ span: 14 }}>
-      <Form.Item label="监控类型" help={helpMap[type]}>
-        <Select placeholder="请选择监控类型" value={type} onChange={handleChangeType}>
-          <Select.Option value="1">站点检测</Select.Option>
-          <Select.Option value="2">端口检测</Select.Option>
-          <Select.Option value="5">Ping检测</Select.Option>
-          <Select.Option value="3">进程检测</Select.Option>
-          <Select.Option value="4">自定义脚本</Select.Option>
-        </Select>
-      </Form.Item>
       <Form.Item required label="监控分组" style={{ marginBottom: 0 }}>
         <Form.Item style={{ display: 'inline-block', width: 'calc(75%)', marginRight: 8 }}>
           <Select value={group} placeholder="请选择监控分组" onChange={v => store.record.group = v}>
@@ -122,6 +113,15 @@ export default observer(function () {
         <Form.Item style={{ display: 'inline-block', width: 'calc(25%-8px)' }}>
           <Button type="link" onClick={handleAddGroup}>添加分组</Button>
         </Form.Item>
+      </Form.Item>
+      <Form.Item label="监控类型" help={helpMap[type]}>
+        <Select placeholder="请选择监控类型" value={type} onChange={handleChangeType}>
+          <Select.Option value="1">站点检测</Select.Option>
+          <Select.Option value="2">端口检测</Select.Option>
+          <Select.Option value="5">Ping检测</Select.Option>
+          <Select.Option value="3">进程检测</Select.Option>
+          <Select.Option value="4">自定义脚本</Select.Option>
+        </Select>
       </Form.Item>
       <Form.Item required label="监控名称">
         <Input value={name} onChange={e => store.record.name = e.target.value} placeholder="请输入监控名称" />
