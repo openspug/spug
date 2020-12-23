@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Row, Col, Tree, Table } from 'antd';
-import styles from './index.module.css';
 import store from './store';
 
 export default observer(function (props) {
@@ -65,7 +64,6 @@ export default observer(function (props) {
         <Col span={6}>
           <Tree.DirectoryTree
             selectedKeys={[group.key]}
-            className={styles.dragBox}
             treeData={store.treeData}
             titleRender={treeRender}
             onSelect={(_, {node}) => setGroup(node)}

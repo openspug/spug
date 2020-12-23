@@ -15,7 +15,6 @@ import {
   ScissorOutlined
 } from '@ant-design/icons';
 import { LoadingOutlined } from '@ant-design/icons';
-import styles from './index.module.css';
 import { http } from 'libs';
 import store from './store';
 import lds from 'lodash';
@@ -141,7 +140,6 @@ export default observer(function () {
         trigger={['contextMenu']}
         onVisibleChange={v => v || setVisible(v)}>
         <Tree.DirectoryTree
-          className={styles.dragBox}
           autoExpandParent
           draggable={draggable}
           treeData={store.treeData}

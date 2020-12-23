@@ -68,8 +68,11 @@ class GroupView(View):
             dst = Group.objects.get(pk=form.d_id)
             if form.action == 0:
                 src.parent_id = dst.id
-                src.save()
-                return json_response()
+                dst = Group.objects.filter(parent_id=dst.id).first()
+                if not dst:
+                    src.save()
+                    return json_response()
+                form.action = -1
             src.parent_id = dst.parent_id
             if src.sort_id > dst.sort_id:
                 if form.action == -1:
