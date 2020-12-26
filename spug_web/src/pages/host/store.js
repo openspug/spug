@@ -3,11 +3,12 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import { observable, computed, autorun } from 'mobx';
+import { observable, computed } from 'mobx';
 import { message } from 'antd';
 import http from 'libs/http';
 
 class Store {
+  counter = {};
   @observable records = [];
   @observable treeData = [];
   @observable groups = [];
@@ -25,28 +26,6 @@ class Store {
   @observable f_name;
   @observable f_host;
 
-  constructor() {
-    autorun(() => {
-      for (let item of this.treeData) {
-        this._updateCounter(item)
-      }
-    })
-  }
-
-  @computed get counter() {
-    const counter = {};
-    for (let host of this.records) {
-      for (let id of host.group_ids) {
-        if (counter[id]) {
-          counter[id].push(host.id)
-        } else {
-          counter[id] = [host.id]
-        }
-      }
-    }
-    return counter
-  }
-
   @computed get dataSource() {
     let records = [];
     if (this.group.all_host_ids) records = this.records.filter(x => this.group.all_host_ids.includes(x.id));
@@ -63,6 +42,8 @@ class Store {
         for (let item of this.records) {
           this.idMap[item.id] = item
         }
+        this._makeCounter();
+        this.refreshCounter()
       })
       .finally(() => this.isFetching = false)
   };
@@ -74,6 +55,7 @@ class Store {
         this.treeData = res.treeData;
         this.groups = res.groups;
         if (!this.group.key) this.group = this.treeData[0];
+        this.refreshCounter()
       })
       .finally(() => this.grpFetching = false)
   }
@@ -102,14 +84,37 @@ class Store {
     this.selectorVisible = true;
   }
 
-  _updateCounter = (item) => {
+  refreshCounter = () => {
+    if (this.treeData.length && this.records.length) {
+      for (let item of this.treeData) {
+        this._refreshCounter(item)
+      }
+      this.treeData = [...this.treeData]
+    }
+  }
+
+  _refreshCounter = (item) => {
     item.all_host_ids = item.self_host_ids = this.counter[item.key] || [];
     for (let child of item.children) {
-      const ids = this._updateCounter(child)
+      const ids = this._refreshCounter(child)
       item.all_host_ids = item.all_host_ids.concat(ids)
     }
     item.all_host_ids = Array.from(new Set(item.all_host_ids));
     return item.all_host_ids
+  }
+
+  _makeCounter = () => {
+    const counter = {};
+    for (let host of this.records) {
+      for (let id of host.group_ids) {
+        if (counter[id]) {
+          counter[id].push(host.id)
+        } else {
+          counter[id] = [host.id]
+        }
+      }
+    }
+    this.counter = counter
   }
 }
 
