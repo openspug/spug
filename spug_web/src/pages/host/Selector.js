@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Row, Col, Tree, Table } from 'antd';
+import { Modal, Row, Col, Tree, Table, Button, Alert } from 'antd';
 import store from './store';
 
 export default observer(function (props) {
@@ -70,6 +70,12 @@ export default observer(function (props) {
           />
         </Col>
         <Col span={18}>
+          {selectedRowKeys.length > 0 && (
+            <Alert
+              style={{marginBottom: 12}}
+              message={`已选择 ${selectedRowKeys.length} 个主机`}
+              action={<Button type="link" onClick={() => setSelectedRowKeys([])}>取消选择</Button>}/>
+          )}
           <Table
             rowKey="id"
             dataSource={dataSource}
@@ -80,7 +86,8 @@ export default observer(function (props) {
             }}
             rowSelection={{
               selectedRowKeys,
-              onChange: (keys) => setSelectedRowKeys(keys)
+              onSelect: handleClickRow,
+              onSelectAll: (_, __, changeRows) => changeRows.map(x => handleClickRow(x))
             }}>
             <Table.Column title="主机名称" dataIndex="name" sorter={(a, b) => a.name.localeCompare(b.name)}/>
             <Table.Column title="连接地址" dataIndex="hostname" sorter={(a, b) => a.name.localeCompare(b.name)}/>
