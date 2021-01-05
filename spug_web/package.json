@@ -6,7 +6,7 @@
     "@antv/data-set": "^0.10.2",
     "ace-builds": "^1.4.7",
     "antd": "^3.25.0",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "bizcharts": "^3.5.6",
     "history": "^4.10.1",
     "http-proxy-middleware": "^0.20.0",
