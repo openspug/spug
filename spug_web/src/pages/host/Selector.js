@@ -46,9 +46,14 @@ export default observer(function (props) {
 
   function handleSubmit() {
     if (props.onOk) {
-      setLoading(true)
-      props.onOk(group, selectedRowKeys)
-        .then(props.onCancel, () => setLoading(false))
+      setLoading(true);
+      const res = props.onOk(group, selectedRowKeys);
+      if (res && res.then) {
+        res.then(props.onCancel, () => setLoading(false))
+      } else {
+        props.onCancel();
+        setLoading(false)
+      }
     }
   }
 
