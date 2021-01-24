@@ -23,7 +23,7 @@ class Action extends React.Component {
 
   _handle = (data, el) => {
     const length = data.length;
-    if (canVisible(el.props.auth)) {
+    if (el && canVisible(el.props.auth)) {
       if (length !== 0) data.push(<Divider key={length} type="vertical"/>)
       data.push(el)
     }

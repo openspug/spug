@@ -25,7 +25,7 @@ export default function () {
     const data = {};
     http.get('/api/monitor/')
       .then(res => {
-        for (let item of res) {
+        for (let item of res.detections) {
           if (!data[item.type]) {
             data[item.type] = {value: item.type_alias, label: item.type_alias, children: []}
           }
