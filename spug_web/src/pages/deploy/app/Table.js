@@ -91,7 +91,7 @@ class ComTable extends React.Component {
   };
 
   expandedRowRender = (record) => {
-    if (record['deploys'] === undefined) {
+    if (!record.isLoaded) {
       store.loadDeploys(record.id)
     }
 

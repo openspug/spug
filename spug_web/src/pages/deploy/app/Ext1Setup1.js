@@ -8,6 +8,7 @@ import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
 import { Switch, Form, Input, Select, Button } from 'antd';
 import envStore from 'pages/config/environment/store';
+import Selector from 'pages/host/Selector';
 import store from './store';
 
 export default observer(function Ext1Setup1() {
@@ -41,6 +42,10 @@ export default observer(function Ext1Setup1() {
           <Link disabled={store.isReadOnly} to="/config/environment">新建环境</Link>
         </Form.Item>
       </Form.Item>
+      <Form.Item required label="目标主机">
+        {info.host_ids.length > 0 && `已选择 ${info.host_ids.length} 台`}
+        <Button type="link" onClick={() => store.selectorVisible = true}>选择主机</Button>
+      </Form.Item>
       <Form.Item required label="Git仓库地址">
         <Input disabled={store.isReadOnly} value={info['git_repo']} onChange={e => info['git_repo'] = e.target.value}
                placeholder="请输入Git仓库地址"/>
@@ -60,9 +65,10 @@ export default observer(function Ext1Setup1() {
       </span>}>
         <Input
           addonBefore={(
-            <Select disabled={store.isReadOnly}
-                    value={info['rst_notify']['mode']} style={{width: 100}}
-                    onChange={v => info['rst_notify']['mode'] = v}>
+            <Select
+              disabled={store.isReadOnly}
+              value={info['rst_notify']['mode']} style={{width: 100}}
+              onChange={v => info['rst_notify']['mode'] = v}>
               <Select.Option value="0">关闭</Select.Option>
               <Select.Option value="1">钉钉</Select.Option>
               <Select.Option value="3">企业微信</Select.Option>
@@ -77,9 +83,14 @@ export default observer(function Ext1Setup1() {
       <Form.Item wrapperCol={{span: 14, offset: 6}}>
         <Button
           type="primary"
-          disabled={!(info.env_id && info['git_repo'])}
+          disabled={!(info.env_id && info.git_repo && info.host_ids.length)}
           onClick={() => store.page += 1}>下一步</Button>
       </Form.Item>
+      <Selector
+        visible={store.selectorVisible}
+        selectedRowKeys={[...info.host_ids]}
+        onCancel={() => store.selectorVisible = false}
+        onOk={(_, ids) => info.host_ids = ids}/>
     </Form>
   )
 })

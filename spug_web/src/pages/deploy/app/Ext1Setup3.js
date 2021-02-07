@@ -3,210 +3,79 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React from 'react';
+import React, {useState} from 'react';
 import { observer } from 'mobx-react';
-import { GitlabOutlined, InfoCircleOutlined, SettingOutlined, SwapOutlined } from '@ant-design/icons';
-import { Form, Row, Col, Button, Radio, Tooltip, message } from 'antd';
-import { LinkButton } from 'components';
+import { Form, Button, Input, message } from 'antd';
 import Editor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-text';
 import 'ace-builds/src-noconflict/mode-sh';
 import 'ace-builds/src-noconflict/theme-tomorrow';
+import { http, cleanCommand } from 'libs';
 import store from './store';
-import http from 'libs/http';
-import styles from './index.module.css';
-import { cleanCommand } from "../../../libs";
 
-@observer
-class Ext1Setup3 extends React.Component {
-  constructor(props) {
-    super(props);
-    this.helpMap = {
-      '2': <span>
-        Spug 内置了一些全局变量，这些变量可以直接使用，请参考官方文档：
-        <a target="_blank" rel="noopener noreferrer"
-           href="https://spug.dev/docs/deploy-config/#%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F">全局变量</a>
-      </span>,
-      '3': '在部署 Spug 的服务器上运行，可以执行任意自定义命令。',
-      '4': '在部署 Spug 的服务器上运行，当前目录为检出后待发布的源代码目录，可执行任意自定义命令。',
-      '5': '在发布的目标主机上运行，当前目录为目标主机上待发布的源代码目录，可执行任意自定义命令。',
-      '6': '在发布的目标主机上运行，当前目录为已发布的应用目录，可执行任意自定义命令。'
-    };
-    this.state = {
-      loading: false,
-      full: ''
-    }
-  }
+export default observer(function () {
+  const [loading, setLoading] = useState(false);
+  const Tips = (
+    <a
+      target="_blank"
+      rel="noopener noreferrer"
+      href="https://spug.dev/docs/deploy-config/#%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F">内置全局变量</a>
+  )
 
-  handleSubmit = () => {
-    this.setState({loading: true});
+  function handleSubmit() {
+    setLoading(true);
     const info = store.deploy;
     info['app_id'] = store.app_id;
     info['extend'] = '1';
-    info['host_ids'] = info['host_ids'].filter(x => x);
     http.post('/api/app/deploy/', info)
       .then(() => {
         message.success('保存成功');
         store.loadDeploys(store.app_id);
         store.ext1Visible = false
-      }, () => this.setState({loading: false}))
-  };
-
-  handleFullscreen = (id) => {
-    if (this.state.full) {
-      this.setState({full: ''})
-    } else {
-      this.setState({full: id})
-    }
+      }, () => setLoading(false))
   }
 
-  FilterLabel = (props) => (
-    <div style={{display: 'flex', alignItems: 'center', height: 40}}>
-      <div>文件过滤 :</div>
-      <Radio.Group
-        disabled={store.isReadOnly}
-        style={{marginLeft: 20, float: 'left'}}
-        value={props.type}
-        onChange={e => store.deploy['filter_rule']['type'] = e.target.value}>
-        <Radio value="contain">包含
-          <Tooltip title="请输入相对于项目根目录的文件路径，仅将匹配到文件传输至要发布的目标主机。">
-            <InfoCircleOutlined style={{color: '#515151', marginLeft: 8}}/>
-          </Tooltip>
-        </Radio>
-        <Radio value="exclude">排除
-          <Tooltip title="支持模糊匹配，如果路径以 / 开头则基于项目根目录匹配，匹配到文件将不会被传输。">
-            <InfoCircleOutlined style={{color: '#515151', marginLeft: 8}}/>
-          </Tooltip>
-        </Radio>
-      </Radio.Group>
-      <div style={{flex: 1, textAlign: 'right'}}>
-        <LinkButton onClick={() => this.handleFullscreen('1')}>{this.state.full ? '退出全屏' : '全屏'}</LinkButton>
-      </div>
-    </div>
-  );
-
-  NormalLabel = (props) => (
-    <div style={{display: 'flex', alignItems: 'center', height: 40}}>
-      <div style={{marginRight: 8}}>{props.title} :</div>
-      <Tooltip title={this.helpMap[props.id]}>
-        <InfoCircleOutlined style={{color: '#515151'}}/>
-      </Tooltip>
-      <div style={{flex: 1, textAlign: 'right'}}>
-        <LinkButton onClick={() => this.handleFullscreen(props.id)}>{this.state.full ? '退出全屏' : '全屏'}</LinkButton>
-      </div>
-    </div>
-  );
-
-  render() {
-    const info = store.deploy;
-    const {full} = this.state;
-    return (
-      <React.Fragment>
-        <Row>
-          <Col span={11}>
-            <div className={full === '1' ? styles.fullScreen : null} style={{marginBottom: 24}}>
-              <this.FilterLabel type={info['filter_rule']['type']}/>
-              <Editor
-                readOnly={store.isReadOnly}
-                mode="text"
-                theme="tomorrow"
-                width="100%"
-                height={full === '1' ? '100vh' : '100px'}
-                placeholder="每行一条规则"
-                value={info['filter_rule']['data']}
-                onChange={v => info['filter_rule']['data'] = cleanCommand(v)}
-                style={{border: '1px solid #e8e8e8'}}/>
-            </div>
-            <div className={full === '3' ? styles.fullScreen : null} style={{marginBottom: 24}}>
-              <this.NormalLabel title="代码检出前执行" id="3"/>
-              <Editor
-                readOnly={store.isReadOnly}
-                mode="sh"
-                theme="tomorrow"
-                width="100%"
-                height={full === '3' ? '100vh' : '100px'}
-                placeholder="输入要执行的命令"
-                value={info['hook_pre_server']}
-                onChange={v => info['hook_pre_server'] = cleanCommand(v)}
-                style={{border: '1px solid #e8e8e8'}}/>
-            </div>
-            <div className={full === '5' ? styles.fullScreen : null} style={{marginBottom: 24}}>
-              <this.NormalLabel title="应用发布前执行" id="5"/>
-              <Editor
-                readOnly={store.isReadOnly}
-                mode="sh"
-                theme="tomorrow"
-                width="100%"
-                height={full === '5' ? '100vh' : '100px'}
-                placeholder="输入要执行的命令"
-                value={info['hook_pre_host']}
-                onChange={v => info['hook_pre_host'] = cleanCommand(v)}
-                style={{border: '1px solid #e8e8e8'}}/>
-            </div>
-          </Col>
-          <Col span={2}>
-            <div className={styles.deployBlock} style={{marginTop: 39}}>
-              <SettingOutlined style={{fontSize: 32}}/>
-              <span style={{fontSize: 12, marginTop: 5}}>基础设置</span>
-            </div>
-            <div className={styles.deployBlock}>
-              <GitlabOutlined style={{fontSize: 32}}/>
-              <span style={{fontSize: 12, marginTop: 5}}>检出代码</span>
-            </div>
-            <div className={styles.deployBlock}>
-              <SwapOutlined style={{fontSize: 32}}/>
-              <span style={{fontSize: 12, marginTop: 5}}>版本切换</span>
-            </div>
-          </Col>
-          <Col span={11}>
-            <div className={full === '2' ? styles.fullScreen : null} style={{marginBottom: 24}}>
-              <this.NormalLabel title="自定义全局变量" id="2"/>
-              <Editor
-                readOnly={store.isReadOnly}
-                mode="text"
-                theme="tomorrow"
-                width="100%"
-                height={full === '2' ? '100vh' : '100px'}
-                placeholder="每行一个，例如：HOME=/data/spug"
-                value={info['custom_envs']}
-                onChange={v => info['custom_envs'] = cleanCommand(v)}
-                style={{border: '1px solid #e8e8e8'}}/>
-            </div>
-            <div className={full === '4' ? styles.fullScreen : null} style={{marginBottom: 24}}>
-              <this.NormalLabel title="代码检出后执行" id="4"/>
-              <Editor
-                readOnly={store.isReadOnly}
-                mode="sh"
-                theme="tomorrow"
-                width="100%"
-                height={full === '4' ? '100vh' : '100px'}
-                placeholder="输入要执行的命令"
-                value={info['hook_post_server']}
-                onChange={v => info['hook_post_server'] = cleanCommand(v)}
-                style={{border: '1px solid #e8e8e8'}}/>
-            </div>
-            <div className={full === '6' ? styles.fullScreen : null} style={{marginBottom: 24}}>
-              <this.NormalLabel title="应用发布后执行" id="6"/>
-              <Editor
-                readOnly={store.isReadOnly}
-                mode="sh"
-                theme="tomorrow"
-                width="100%"
-                height={full === '6' ? '100vh' : '100px'}
-                placeholder="输入要执行的命令"
-                value={info['hook_post_host']}
-                onChange={v => info['hook_post_host'] = cleanCommand(v)}
-                style={{border: '1px solid #e8e8e8'}}/>
-            </div>
-          </Col>
-        </Row>
-        <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <Button disabled={store.isReadOnly} type="primary" onClick={this.handleSubmit}>提交</Button>
-          <Button style={{marginLeft: 20}} onClick={() => store.page -= 1}>上一步</Button>
-        </Form.Item>
-      </React.Fragment>
-    )
-  }
-}
-
-export default Ext1Setup3
+  const info = store.deploy;
+  return (
+    <Form layout="vertical" style={{padding: '0 120px'}}>
+      <Form.Item required label="部署目标路径" tooltip="应用最终在主机上部署路径，构建的结果将会放置于该路径下。">
+        <Input value={info['dst_dir']} onChange={e => info['dst_dir'] = e.target.value} placeholder="请输入部署目标路径" />
+      </Form.Item>
+      <Form.Item
+        label="应用发布前执行"
+        tooltip="在发布的目标主机上运行，当前目录为目标主机上待发布的源代码目录，可执行任意自定义命令。"
+        help={<span>可使用 {Tips}，此时还未进行文件变更，可进行一些发布前置操作。</span>}>
+        <Editor
+          readOnly={store.isReadOnly}
+          mode="sh"
+          theme="tomorrow"
+          width="100%"
+          height="150px"
+          placeholder="输入要执行的命令"
+          value={info['hook_pre_host']}
+          onChange={v => info['hook_pre_host'] = cleanCommand(v)}
+          style={{border: '1px solid #e8e8e8'}}/>
+      </Form.Item>
+      <Form.Item
+        label="应用发布后执行"
+        style={{marginTop: 12, marginBottom: 24}}
+        tooltip="在发布的目标主机上运行，当前目录为已发布的应用目录，可执行任意自定义命令。"
+        help={<span>可使用 {Tips}，可以在发布后进行重启服务等操作。</span>}>
+        <Editor
+          readOnly={store.isReadOnly}
+          mode="sh"
+          theme="tomorrow"
+          width="100%"
+          height="150px"
+          placeholder="输入要执行的命令"
+          value={info['hook_post_host']}
+          onChange={v => info['hook_post_host'] = cleanCommand(v)}
+          style={{border: '1px solid #e8e8e8'}}/>
+      </Form.Item>
+      <Form.Item wrapperCol={{span: 14, offset: 6}}>
+        <Button disabled={store.isReadOnly} loading={loading} type="primary" onClick={handleSubmit}>提交</Button>
+        <Button style={{marginLeft: 20}} onClick={() => store.page -= 1}>上一步</Button>
+      </Form.Item>
+    </Form>
+  )
+})

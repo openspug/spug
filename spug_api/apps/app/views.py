@@ -120,10 +120,7 @@ class DeployView(View):
                 extend_form, error = JsonParser(
                     Argument('git_repo', handler=str.strip, help='请输入git仓库地址'),
                     Argument('dst_dir', handler=str.strip, help='请输入发布目标路径'),
-                    Argument('dst_repo', handler=str.strip, help='请输入目标仓库路径'),
-                    Argument('versions', type=int, help='请输入保留历史版本数量'),
                     Argument('filter_rule', type=dict, help='参数错误'),
-                    Argument('custom_envs', handler=str.strip, required=False),
                     Argument('hook_pre_server', handler=str.strip, default=''),
                     Argument('hook_post_server', handler=str.strip, default=''),
                     Argument('hook_pre_host', handler=str.strip, default=''),
@@ -133,7 +130,6 @@ class DeployView(View):
                     return json_response(error=error)
                 extend_form.dst_dir = extend_form.dst_dir.rstrip('/')
                 extend_form.filter_rule = json.dumps(extend_form.filter_rule)
-                extend_form.custom_envs = json.dumps(parse_envs(extend_form.custom_envs))
                 if form.id:
                     extend = DeployExtend1.objects.filter(deploy_id=form.id).first()
                     if extend.git_repo != extend_form.git_repo:

@@ -74,10 +74,7 @@ class DeployExtend1(models.Model, ModelMixin):
     deploy = models.OneToOneField(Deploy, primary_key=True, on_delete=models.CASCADE)
     git_repo = models.CharField(max_length=255)
     dst_dir = models.CharField(max_length=255)
-    dst_repo = models.CharField(max_length=255)
-    versions = models.IntegerField()
     filter_rule = models.TextField()
-    custom_envs = models.TextField()
     hook_pre_server = models.TextField(null=True)
     hook_post_server = models.TextField(null=True)
     hook_pre_host = models.TextField(null=True)
@@ -86,7 +83,6 @@ class DeployExtend1(models.Model, ModelMixin):
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
         tmp['filter_rule'] = json.loads(self.filter_rule)
-        tmp['custom_envs'] = '\n'.join(f'{k}={v}' for k, v in json.loads(self.custom_envs).items())
         return tmp
 
     def __repr__(self):

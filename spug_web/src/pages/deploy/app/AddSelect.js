@@ -19,8 +19,7 @@ class AddSelect extends React.Component {
       git_type: 'branch',
       is_audit: false,
       rst_notify: {mode: '0'},
-      versions: 10,
-      host_ids: [undefined],
+      host_ids: [],
       filter_rule: {type: 'contain', data: ''}
     }
   };

@@ -18,6 +18,7 @@ class Store {
   @observable addVisible = false;
   @observable ext1Visible = false;
   @observable ext2Visible = false;
+  @observable selectorVisible = false;
 
   @observable f_name;
   @observable f_desc;
@@ -47,6 +48,7 @@ class Store {
   };
 
   loadDeploys = (app_id) => {
+    this.records[`a${app_id}`].isLoaded = true;
     return http.get('/api/app/deploy/', {params: {app_id}})
       .then(res => this.records[`a${app_id}`]['deploys'] = res)
   };

@@ -23,15 +23,15 @@ export default observer(function Ext1From() {
   return (
     <Modal
       visible
-      width={900}
+      width={800}
       maskClosable={false}
       title={title}
       onCancel={() => store.ext1Visible = false}
       footer={null}>
       <Steps current={store.page} className={styles.steps}>
         <Steps.Step key={0} title="基本配置"/>
-        <Steps.Step key={1} title="发布主机"/>
-        <Steps.Step key={2} title="任务配置"/>
+        <Steps.Step key={1} title="构建配置"/>
+        <Steps.Step key={2} title="发布配置"/>
       </Steps>
       {store.page === 0 && <Setup1/>}
       {store.page === 1 && <Setup2/>}

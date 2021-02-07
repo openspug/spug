@@ -5,85 +5,99 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { Form, Input, Select, Button, message } from "antd";
-import { hasHostPermission } from 'libs';
+import { QuestionCircleOutlined } from '@ant-design/icons';
+import { Form, Radio, Button, Tooltip } from "antd";
+import { cleanCommand } from 'libs';
+import Editor from 'react-ace';
+import 'ace-builds/src-noconflict/mode-text';
+import 'ace-builds/src-noconflict/mode-sh';
+import 'ace-builds/src-noconflict/theme-tomorrow';
 import store from './store';
-import hostStore from 'pages/host/store';
-import styles from './index.module.css';
 
-@observer
-class Ext1Setup2 extends React.Component {
-  componentDidMount() {
-    if (hostStore.records.length === 0) {
-      hostStore.fetchRecords()
-    }
+export default observer(function () {
+  const Tips = (
+    <a
+      target="_blank"
+      rel="noopener noreferrer"
+      href="https://spug.dev/docs/deploy-config/#%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F">内置全局变量</a>
+  )
+
+  function handleNext() {
+    store.page += 1
   }
 
-  checkStatus = () => {
-    const info = store.deploy;
-    return info['dst_dir'] && info['dst_repo'] && info['versions'] && info['host_ids'].filter(x => x).length > 0
-  };
+  const FilterHead = (
+    <div style={{width: 512, display: 'flex', justifyContent: 'space-between'}}>
+      <span>
+        文件过滤规则 &nbsp;
+        <Tooltip title="请输入相对于项目根目录的文件路径，根据包含或排除规则进行打包。">
+          <QuestionCircleOutlined style={{color: 'rgba(0, 0, 0, 0.45)'}}/>
+        </Tooltip>
+      </span>
+      <Radio.Group
+        size="small"
+        value={store.deploy.filter_rule.type}
+        onChange={e => store.deploy.filter_rule.type = e.target.value}>
+        <Radio.Button value="contain">
+          <Tooltip title="仅打包匹配到的文件或目录，如果内容为空则打包所有。">包含</Tooltip>
+        </Radio.Button>
+        <Radio.Button value="exclude">
+          <Tooltip title="打包时排除匹配到的文件或目录，如果内容为空则不排除任何文件。">排除</Tooltip>
+        </Radio.Button>
+      </Radio.Group>
+    </div>
+  )
 
-  handleNext = () => {
-    const {dst_dir, dst_repo} = store.deploy;
-    if (dst_repo.includes(dst_dir.replace(/\/*$/, '/'))) {
-      message.error('仓库目录不能位于发布部署目录内')
-    } else {
-      store.page += 1
-    }
-  };
-
-  render() {
-    const info = store.deploy;
-    return (
-      <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
-        <Form.Item required label="目标主机部署路径" help="目标主机的应用根目录，例如：/var/www/html">
-          <Input disabled={store.isReadOnly} value={info['dst_dir']} onChange={e => info['dst_dir'] = e.target.value}
-                 placeholder="请输入目标主机部署路径"/>
-        </Form.Item>
-        <Form.Item required label="目标主机仓库路径" help="此目录用于存储应用的历史版本，例如：/data/spug/repos">
-          <Input disabled={store.isReadOnly} value={info['dst_repo']} onChange={e => info['dst_repo'] = e.target.value} placeholder="请输入目标主机仓库路径"/>
-        </Form.Item>
-        <Form.Item required label="保留历史版本数量" help="早于指定数量的历史版本会被删除，以释放空间">
-          <Input disabled={store.isReadOnly} value={info['versions']} onChange={e => info['versions'] = e.target.value} placeholder="请输入保留历史版本数量"/>
-        </Form.Item>
-        <Form.Item required label="发布目标主机">
-          {info['host_ids'].map((id, index) => (
-            <React.Fragment key={index}>
-              <Select
-                value={id}
-                showSearch
-                placeholder="请选择"
-                disabled={store.isReadOnly}
-                style={{width: '80%', marginRight: 10, marginBottom: 12}}
-                optionFilterProp="children"
-                filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
-                onChange={v => store.editHost(index, v)}>
-                {hostStore.records.filter(x => hasHostPermission(x.id)).map(item => (
-                  <Select.Option key={item.id} value={item.id} disabled={info['host_ids'].includes(item.id)}>
-                    {`${item.name}(${item['hostname']}:${item['port']})`}
-                  </Select.Option>
-                ))}
-              </Select>
-              {!store.isReadOnly && info['host_ids'].length > 1 && (
-                <MinusCircleOutlined className={styles.delIcon} onClick={() => store.delHost(index)} />
-              )}
-            </React.Fragment>
-          ))}
-        </Form.Item>
-        <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <Button disabled={store.isReadOnly} type="dashed" style={{width: '80%'}} onClick={store.addHost}>
-            <PlusOutlined />添加目标主机
-          </Button>
-        </Form.Item>
-        <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <Button disabled={!this.checkStatus()} type="primary" onClick={this.handleNext}>下一步</Button>
-          <Button style={{marginLeft: 20}} onClick={() => store.page -= 1}>上一步</Button>
-        </Form.Item>
-      </Form>
-    )
-  }
-}
-
-export default Ext1Setup2
+  const info = store.deploy;
+  return (
+    <Form layout="vertical" style={{padding: '0 120px'}}>
+      <Form.Item label={FilterHead} tooltip="xxx">
+        <Editor
+          readOnly={store.isReadOnly}
+          mode="text"
+          theme="tomorrow"
+          width="100%"
+          height="80px"
+          placeholder="每行一条规则"
+          value={info['filter_rule']['data']}
+          onChange={v => info['filter_rule']['data'] = cleanCommand(v)}
+          style={{border: '1px solid #e8e8e8'}}/>
+      </Form.Item>
+      <Form.Item
+        label="代码检出前执行"
+        tooltip="在运行 Spug 的服务器(或容器)上执行，当前目录为仓库源代码目录，可以执行任意自定义命令。"
+        help={<span>可使用 {Tips}，请避免在此修改已跟踪的文件，防止在检出代码时失败。</span>}>
+        <Editor
+          readOnly={store.isReadOnly}
+          mode="sh"
+          theme="tomorrow"
+          width="100%"
+          height="120px"
+          placeholder="输入要执行的命令"
+          value={info['hook_pre_server']}
+          onChange={v => info['hook_pre_server'] = cleanCommand(v)}
+          style={{border: '1px solid #e8e8e8'}}/>
+      </Form.Item>
+      <Form.Item
+        label="代码检出后执行"
+        style={{marginTop: 12, marginBottom: 24}}
+        tooltip="在运行 Spug 的服务器(或容器)上执行，当前目录为检出后的源代码目录，可执行任意自定义命令。"
+        help={<span>可使用 {Tips}，大多数情况下在此进行构建操作。</span>}>
+        <Editor
+          readOnly={store.isReadOnly}
+          mode="sh"
+          theme="tomorrow"
+          width="100%"
+          height="120px"
+          placeholder="输入要执行的命令"
+          value={info['hook_post_server']}
+          onChange={v => info['hook_post_server'] = cleanCommand(v)}
+          style={{border: '1px solid #e8e8e8'}}/>
+      </Form.Item>
+      <Form.Item wrapperCol={{span: 14, offset: 6}}>
+        <Button type="primary" onClick={handleNext}>下一步</Button>
+        <Button style={{marginLeft: 20}} onClick={() => store.page -= 1}>上一步</Button>
+      </Form.Item>
+    </Form>
+  )
+})
