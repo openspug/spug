@@ -7,7 +7,7 @@ export default observer(function (props) {
   const [loading, setLoading] = useState(false);
   const [group, setGroup] = useState({});
   const [dataSource, setDataSource] = useState([]);
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedRowKeys, setSelectedRowKeys] = useState(props.selectedRowKeys || []);
 
   useEffect(() => {
     if (!store.treeData.length) {
@@ -59,8 +59,8 @@ export default observer(function (props) {
 
   return (
     <Modal
-      visible
-      width="70%"
+      visible={[undefined, true].includes(props.visible)}
+      width={1000}
       title={props.title || '主机列表'}
       onOk={handleSubmit}
       confirmLoading={loading}
