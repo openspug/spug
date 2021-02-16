@@ -120,6 +120,7 @@ USE_TZ = True
 
 AUTHENTICATION_EXCLUDES = (
     '/account/login/',
+    '/setting/basic/',
     re.compile('/apis/.*'),
 )
 

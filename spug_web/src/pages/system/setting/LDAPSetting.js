@@ -9,18 +9,15 @@ import { Form, Button, Input, Space, message } from 'antd';
 import { http } from 'libs';
 import { observer } from 'mobx-react'
 import store from './store';
-import lds from "lodash";
-
 
 export default observer(function () {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const setting = JSON.parse(lds.get(store.settings, 'ldap_service.value', '{}'));
 
   function handleSubmit() {
     store.loading = true;
     const formData = form.getFieldsValue();
-    http.post('/api/setting/', {data: [{key: 'ldap_service', value: JSON.stringify(formData)}]})
+    http.post('/api/setting/', {data: [{key: 'ldap_service', value: formData}]})
       .then(() => {
         message.success('保存成功');
         store.fetchSettings()
@@ -39,7 +36,8 @@ export default observer(function () {
   return (
     <React.Fragment>
       <div className={styles.title}>LDAP设置</div>
-      <Form form={form} initialValues={setting} style={{maxWidth: 400}} labelCol={{span: 8}} wrapperCol={{span: 16}}>
+      <Form form={form} initialValues={store.settings.ldap_service} style={{maxWidth: 400}} labelCol={{span: 8}}
+            wrapperCol={{span: 16}}>
         <Form.Item required name="server" label="LDAP服务地址">
           <Input placeholder="例如：ldap.spug.dev"/>
         </Form.Item>

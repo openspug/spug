@@ -47,6 +47,7 @@
 .formContainer .icon {
     color: rgba(0, 0, 0, .25);
     font-size: 14px;
+    margin-right: 4px;
 }
 
 .formContainer .button {

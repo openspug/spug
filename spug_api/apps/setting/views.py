@@ -15,7 +15,7 @@ import smtplib
 class SettingView(View):
     def get(self, request):
         data = Setting.objects.all()
-        return json_response(data)
+        return json_response([x.to_view() for x in data])
 
     def post(self, request):
         form, error = JsonParser(
@@ -63,8 +63,6 @@ def email_test(request):
 
         except Exception as e:
             error = f'{e}'
-            return json_response(error=error)
-
     return json_response(error=error)
 
 
@@ -77,4 +75,8 @@ def get_about(request):
     })
 
 
-
+def get_basic(request):
+    keys, data = ('MFA',), {}
+    for item in Setting.objects.filter(key__in=keys):
+        data[item.key] = item.real_val
+    return json_response(data)

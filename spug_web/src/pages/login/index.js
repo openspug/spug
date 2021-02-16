@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Tabs, Modal } from 'antd';
-import { UserOutlined, LockOutlined, CopyrightOutlined, GithubOutlined } from '@ant-design/icons';
+import { UserOutlined, LockOutlined, CopyrightOutlined, GithubOutlined, MailOutlined } from '@ant-design/icons';
 import styles from './login.module.css';
 import history from 'libs/history';
 import { http, updatePermissions } from 'libs';
@@ -18,6 +18,7 @@ import hostStore from 'pages/host/store';
 
 export default function () {
   const [form] = Form.useForm();
+  const [counter, setCounter] = useState(0);
   const [loading, setLoading] = useState(false);
   const [loginType, setLoginType] = useState('default');
 
@@ -29,6 +30,14 @@ export default function () {
     hostStore.records = [];
     execStore.hosts = [];
   }, [])
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (counter > 0) {
+        setCounter(counter - 1)
+      }
+    }, 1000)
+  }, [counter])
 
   function handleSubmit() {
     setLoading(true);
@@ -68,6 +77,10 @@ export default function () {
     }
   }
 
+  function handleCaptcha() {
+    setCounter(60);
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.titleContainer}>
@@ -95,6 +108,22 @@ export default function () {
               placeholder="请输入密码"
               onPressEnter={handleSubmit}
               prefix={<LockOutlined className={styles.icon}/>}/>
+          </Form.Item>
+          <Form.Item name="captcha" className={styles.formItem}>
+            <div style={{display: 'flex'}}>
+              <Form.Item noStyle name="captcha">
+                <Input
+                  size="large"
+                  autoComplete="off"
+                  placeholder="请输入验证码"
+                  prefix={<MailOutlined className={styles.icon}/>}/>
+              </Form.Item>
+              {counter > 0 ? (
+                <Button disabled size="large" style={{marginLeft: 8}}>{counter} 秒后重新获取</Button>
+              ) : (
+                <Button size="large" style={{marginLeft: 8}} onClick={handleCaptcha}>获取验证码</Button>
+              )}
+            </div>
           </Form.Item>
         </Form>
 

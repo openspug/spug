@@ -3,18 +3,19 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { observer } from 'mobx-react';
 import { Form, Switch, message } from 'antd';
 import styles from './index.module.css';
 import http from 'libs/http';
 import store from './store';
-import lds from 'lodash';
-
 
 export default observer(function () {
+  const [verify_ip, setVerifyIP] = useState(store.settings.verify_ip);
+  const [mfa, setMFA] = useState(store.settings.MFA);
+
   function handleChangeVerifyIP(v) {
-    lds.set(store.settings, 'verify_ip.value', v);
+    setVerifyIP(v);
     http.post('/api/setting/', {data: [{key: 'verify_ip', value: v}]})
       .then(() => {
         message.success('设置成功');
@@ -22,23 +23,40 @@ export default observer(function () {
       })
   }
 
-  const checked = lds.get(store.settings, 'verify_ip.value') !== 'False'
+  function handleChangeMFA(v) {
+    if (v && !store.settings.spug_key) return message.error('开启MFA认证需要先在基本设置中配置调用凭据');
+    setMFA({...mfa, enable: v});
+    http.post('/api/setting/', {data: [{key: 'MFA', value: {...mfa, enable: v}}]})
+      .then(() => {
+        message.success('设置成功');
+        store.fetchSettings()
+      })
+  }
 
   return (
     <React.Fragment>
       <div className={styles.title}>安全设置</div>
-      <div style={{maxWidth: 500}}>
+      <Form layout="vertical" style={{maxWidth: 500}}>
         <Form.Item
           label="访问IP校验"
-          labelCol={{span: 24}}
           help="建议开启，校验是否获取了真实的访问者IP，防止因为增加的反向代理层导致基于IP的安全策略失效，当校验失败时会在登录时弹窗提醒。如果你在内网部署且仅在内网使用可以关闭该特性。">
           <Switch
             checkedChildren="开启"
             unCheckedChildren="关闭"
             onChange={handleChangeVerifyIP}
-            checked={checked}/>
+            checked={verify_ip}/>
         </Form.Item>
-      </div>
+        <Form.Item
+          label="登录MFA认证"
+          style={{marginTop: 24}}
+          help="建议开启，登录时额外使用短信验证码进行身份验证。">
+          <Switch
+            checkedChildren="开启"
+            unCheckedChildren="关闭"
+            onChange={handleChangeMFA}
+            checked={mfa.enable}/>
+        </Form.Item>
+      </Form>
     </React.Fragment>
   )
 })

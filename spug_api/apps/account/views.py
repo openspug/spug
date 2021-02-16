@@ -199,7 +199,7 @@ def handle_user_info(user, x_real_ip):
     user.last_ip = x_real_ip
     user.save()
     History.objects.create(user=user, ip=x_real_ip)
-    verify_ip = AppSetting.get_default('verify_ip', 'True') == 'True'
+    verify_ip = AppSetting.get_default('verify_ip', True)
     return json_response({
         'access_token': user.access_token,
         'nickname': user.nickname,
