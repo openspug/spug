@@ -3,6 +3,7 @@
 # Released under the AGPL-3.0 License.
 from channels.generic.websocket import WebsocketConsumer
 from django_redis import get_redis_connection
+from asgiref.sync import async_to_sync
 from apps.host.models import Host
 from threading import Thread
 import json
@@ -88,3 +89,18 @@ class SSHConsumer(WebsocketConsumer):
         self.chan = self.ssh.invoke_shell(term='xterm')
         self.chan.transport.set_keepalive(30)
         Thread(target=self.loop_read).start()
+
+
+class NotifyConsumer(WebsocketConsumer):
+    def connect(self):
+        async_to_sync(self.channel_layer.group_add)('notify', self.channel_name)
+        self.accept()
+
+    def disconnect(self, code):
+        async_to_sync(self.channel_layer.group_discard)('notify', self.channel_name)
+
+    def receive(self, **kwargs):
+        self.send(text_data='pong')
+
+    def notify_message(self, event):
+        self.send(text_data=json.dumps(event))

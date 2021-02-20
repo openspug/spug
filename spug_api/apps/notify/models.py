@@ -4,6 +4,7 @@
 from django.db import models
 from django.core.cache import cache
 from libs import ModelMixin, human_datetime
+from libs.channel import Channel
 import time
 
 
@@ -31,6 +32,7 @@ class Notify(models.Model, ModelMixin):
         if not with_quiet or time.time() - cache.get('spug:notify_quiet', 0) > 3600:
             cache.set('spug:notify_quiet', time.time())
             cls.objects.create(source=source, title=title, type=type, content=content)
+            Channel.send_notify(title, content)
 
     def __repr__(self):
         return '<Notify %r>' % self.title

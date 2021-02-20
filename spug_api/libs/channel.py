@@ -25,3 +25,12 @@ class Channel:
             'pkey': pkey
         }
         async_to_sync(layer.send)('ssh_exec', message)
+
+    @staticmethod
+    def send_notify(title, content):
+        message = {
+            'type': 'notify.message',
+            'title': title,
+            'content': content
+        }
+        async_to_sync(layer.group_send)('notify', message)

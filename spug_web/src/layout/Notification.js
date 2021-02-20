@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, List, Dropdown, Badge } from 'antd';
+import { Menu, List, Dropdown, Badge, Button, notification } from 'antd';
 import { CheckOutlined, NotificationOutlined } from '@ant-design/icons';
-import { http } from 'libs';
+import { http, X_TOKEN } from 'libs';
 import moment from 'moment';
 import styles from './layout.module.less';
 
-let interval;
+let ws = {readyState: 3};
+let timer;
 
 export default function () {
   const [loading, setLoading] = useState(false);
@@ -14,10 +15,19 @@ export default function () {
 
   useEffect(() => {
     fetch();
-    interval = setInterval(fetch, 60000);
+    listen();
+    timer = setInterval(() => {
+      if (ws.readyState === 1) {
+        ws.send('ping')
+      } else if (ws.readyState === 3) {
+        listen()
+      }
+    }, 10000)
     return () => {
-      if (interval) clearInterval(interval)
+      if (timer) clearInterval(timer);
+      if (ws.close) ws.close()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function fetch() {
@@ -28,6 +38,24 @@ export default function () {
         setReads([])
       })
       .finally(() => setLoading(false))
+  }
+
+  function listen() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${protocol}//${window.location.host}/api/ws/notify/?x-token=${X_TOKEN}`);
+    ws.onopen = () => ws.send('ok');
+    ws.onmessage = e => {
+      if (e.data === 'pong') {
+      } else {
+        fetch();
+        const {title, content} = JSON.parse(e.data);
+        const key = `open${Date.now()}`;
+        const btn = (
+          <Button type="primary" size="small" onClick={() => notification.close(key)}>知道了</Button>
+        );
+        notification.warning({message: title, description: content, btn, key, top: 64, duration: null})
+      }
+    }
   }
 
   function handleRead(e, item) {
