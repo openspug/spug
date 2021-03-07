@@ -8,12 +8,8 @@ import http from 'libs/http';
 
 class Store {
   @observable records = [];
-  @observable deploys = [];
-  @observable types = [];
   @observable record = {};
-  @observable refs = {};
   @observable counter = {};
-  @observable isLoading = false;
   @observable isFetching = false;
   @observable addVisible = false;
   @observable ext1Visible = false;
@@ -62,6 +58,16 @@ class Store {
       this.f_s_date = null;
       this.f_e_date = null
     }
+  };
+
+  confirmAdd = (deploy) => {
+    this.record = {deploy_id: deploy.id, app_host_ids: deploy.host_ids};
+    if (deploy.extend === '1') {
+      this.ext1Visible = true
+    } else {
+      this.ext2Visible = true
+    }
+    this.addVisible = false
   };
 
   showForm = (info) => {

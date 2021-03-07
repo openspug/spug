@@ -7,8 +7,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { ExclamationCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Form, Select, DatePicker, Modal, Input, message } from 'antd';
-import { SearchForm, AuthDiv, AuthButton, Breadcrumb } from 'components';
-import SelectApp from './SelectApp';
+import { SearchForm, AuthDiv, AuthButton, Breadcrumb, AppSelector } from 'components';
 import Ext1Form from './Ext1Form';
 import Ext2Form from './Ext2Form';
 import Approve from './Approve';
@@ -102,7 +101,10 @@ class Index extends React.Component {
           </SearchForm.Item>
         </SearchForm>
         <ComTable/>
-        {store.addVisible && <SelectApp/>}
+        <AppSelector
+          visible={store.addVisible}
+          onCancel={() => store.addVisible = false}
+          onSelect={store.confirmAdd}/>
         {store.ext1Visible && <Ext1Form/>}
         {store.ext2Visible && <Ext2Form/>}
         {store.approveVisible && <Approve/>}

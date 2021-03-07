@@ -14,6 +14,7 @@ import ACEditor from './ACEditor';
 import Action from './Action';
 import TableCard from './TableCard';
 import Breadcrumb from './Breadcrumb';
+import AppSelector from './AppSelector';
 
 export {
   StatisticsCard,
@@ -27,4 +28,5 @@ export {
   Action,
   TableCard,
   Breadcrumb,
+  AppSelector,
 }
