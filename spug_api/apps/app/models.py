@@ -74,6 +74,8 @@ class DeployExtend1(models.Model, ModelMixin):
     deploy = models.OneToOneField(Deploy, primary_key=True, on_delete=models.CASCADE)
     git_repo = models.CharField(max_length=255)
     dst_dir = models.CharField(max_length=255)
+    dst_repo = models.CharField(max_length=255)
+    versions = models.IntegerField()
     filter_rule = models.TextField()
     hook_pre_server = models.TextField(null=True)
     hook_post_server = models.TextField(null=True)

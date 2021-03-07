@@ -119,7 +119,9 @@ class DeployView(View):
             if form.extend == '1':
                 extend_form, error = JsonParser(
                     Argument('git_repo', handler=str.strip, help='请输入git仓库地址'),
-                    Argument('dst_dir', handler=str.strip, help='请输入发布目标路径'),
+                    Argument('dst_dir', handler=str.strip, help='请输入发布部署路径'),
+                    Argument('dst_repo', handler=str.strip, help='请输入发布存储路径'),
+                    Argument('versions', type=int, filter=lambda x: x > 0, help='请输入发布保留版本数量'),
                     Argument('filter_rule', type=dict, help='参数错误'),
                     Argument('hook_pre_server', handler=str.strip, default=''),
                     Argument('hook_post_server', handler=str.strip, default=''),

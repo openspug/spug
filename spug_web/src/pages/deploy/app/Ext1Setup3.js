@@ -3,9 +3,9 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { observer } from 'mobx-react';
-import { Form, Button, Input, message } from 'antd';
+import { Form, Button, Input, Row, Col, message } from 'antd';
 import Editor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-text';
 import 'ace-builds/src-noconflict/mode-sh';
@@ -38,9 +38,21 @@ export default observer(function () {
   const info = store.deploy;
   return (
     <Form layout="vertical" style={{padding: '0 120px'}}>
-      <Form.Item required label="部署目标路径" tooltip="应用最终在主机上部署路径，构建的结果将会放置于该路径下。">
-        <Input value={info['dst_dir']} onChange={e => info['dst_dir'] = e.target.value} placeholder="请输入部署目标路径" />
+      <Form.Item required label="部署路径" tooltip="应用最终在主机上的部署路径，为了数据安全请确保该目录不存在，Spug 将会自动创建并接管该目录，例如：/var/www/html">
+        <Input value={info['dst_dir']} onChange={e => info['dst_dir'] = e.target.value} placeholder="请输入部署目标路径"/>
       </Form.Item>
+      <Row gutter={24}>
+        <Col span={14}>
+          <Form.Item required label="存储路径" tooltip="此目录用于存储应用的历史版本，例如：/data/spug/repos">
+            <Input value={info['dst_repo']} onChange={e => info['dst_repo'] = e.target.value} placeholder="请输入部署目标路径"/>
+          </Form.Item>
+        </Col>
+        <Col span={10}>
+          <Form.Item required label="版本数量" tooltip="早于指定数量的历史版本会被删除，以释放磁盘空间。">
+            <Input value={info['versions']} onChange={e => info['versions'] = e.target.value} placeholder="请输入部署目标路径"/>
+          </Form.Item>
+        </Col>
+      </Row>
       <Form.Item
         label="应用发布前执行"
         tooltip="在发布的目标主机上运行，当前目录为目标主机上待发布的源代码目录，可执行任意自定义命令。"
