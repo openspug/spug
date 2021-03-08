@@ -2,10 +2,12 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from channels.generic.websocket import WebsocketConsumer
+from django.conf import settings
 from django_redis import get_redis_connection
 from asgiref.sync import async_to_sync
 from apps.host.models import Host
 from threading import Thread
+import time
 import json
 
 
@@ -31,6 +33,44 @@ class ExecConsumer(WebsocketConsumer):
             data = response.decode()
             self.send(text_data=data)
             response = self.get_response()
+        self.send(text_data='pong')
+
+
+class ComConsumer(WebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        token = self.scope['url_route']['kwargs']['token']
+        module = self.scope['url_route']['kwargs']['module']
+        if module == 'build':
+            self.key = f'{settings.BUILD_KEY}:{token}'
+        else:
+            raise TypeError(f'unknown module for {module}')
+        self.rds = get_redis_connection()
+
+    def connect(self):
+        self.accept()
+
+    def disconnect(self, code):
+        self.rds.close()
+
+    def get_response(self, index):
+        counter = 0
+        while counter < 30:
+            response = self.rds.lindex(self.key, index)
+            if response:
+                return response.decode()
+            counter += 1
+            time.sleep(0.2)
+
+    def receive(self, text_data='', **kwargs):
+        if text_data.isdigit():
+            index = int(text_data)
+            response = self.get_response(index)
+            while response:
+                index += 1
+                self.send(text_data=response)
+                time.sleep(1)
+                response = self.get_response(index)
         self.send(text_data='pong')
 
 

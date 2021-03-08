@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'apps.app',
     'apps.deploy',
     'apps.notify',
+    'apps.repository',
 ]
 
 MIDDLEWARE = [
@@ -103,6 +104,7 @@ TEMPLATES = [
 SCHEDULE_KEY = 'spug:schedule'
 MONITOR_KEY = 'spug:monitor'
 REQUEST_KEY = 'spug:request'
+BUILD_KEY = 'spug:build'
 REPOS_DIR = os.path.join(BASE_DIR, 'repos')
 
 # Internationalization
@@ -116,7 +118,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 AUTHENTICATION_EXCLUDES = (
     '/account/login/',
