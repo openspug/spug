@@ -5,6 +5,7 @@
  */
 import { observable, computed, toJS } from 'mobx';
 import http from 'libs/http';
+import lds from 'lodash';
 
 class Store {
   @observable records = {};
@@ -40,6 +41,7 @@ class Store {
       .then(res => {
         const tmp = {};
         for (let item of res) {
+          Object.assign(item, lds.pick(this.records[`a${item.id}`], ['isLoaded', 'deploys']));
           tmp[`a${item.id}`] = item
         }
         this.records = tmp

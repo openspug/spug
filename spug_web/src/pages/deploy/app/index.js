@@ -3,7 +3,7 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Input } from 'antd';
 import { SearchForm, AuthDiv, Breadcrumb } from 'components';
@@ -13,8 +13,15 @@ import Ext1Form from './Ext1Form';
 import Ext2Form from './Ext2Form';
 import AddSelect from './AddSelect';
 import store from './store';
+import envStore from 'pages/config/environment/store';
 
 export default observer(function () {
+  useEffect(() => {
+    store.fetchRecords();
+    if (envStore.records.length === 0) {
+      envStore.fetchRecords()
+    }
+  }, [])
   return (
     <AuthDiv auth="deploy.app.view">
       <Breadcrumb>
