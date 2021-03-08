@@ -12,9 +12,9 @@ import Ext1Form from './Ext1Form';
 import Ext2Form from './Ext2Form';
 import Approve from './Approve';
 import ComTable from './Table';
-import http from 'libs/http';
+import { http, includes } from 'libs';
 import envStore from 'pages/config/environment/store';
-import appStore from 'pages/config/app/store'
+import appStore from 'pages/config/app/store';
 import store from './store';
 import moment from 'moment';
 
@@ -74,14 +74,26 @@ class Index extends React.Component {
         </Breadcrumb>
         <SearchForm>
           <SearchForm.Item span={6} title="发布环境">
-            <Select allowClear value={store.f_env_id} onChange={v => store.f_env_id = v} placeholder="请选择">
+            <Select
+              allowClear
+              showSearch
+              value={store.f_env_id}
+              filterOption={(i, o) => includes(o.children, i)}
+              onChange={v => store.f_env_id = v}
+              placeholder="请选择">
               {envStore.records.map(item => (
                 <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
               ))}
             </Select>
           </SearchForm.Item>
           <SearchForm.Item span={6} title="应用名称">
-            <Select allowClear value={store.f_app_id} onChange={v => store.f_app_id = v} placeholder="请选择">
+            <Select
+              allowClear
+              showSearch
+              value={store.f_app_id}
+              filterOption={(i, o) => includes(o.children, i)}
+              onChange={v => store.f_app_id = v}
+              placeholder="请选择">
               {appStore.records.map(item => (
                 <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
               ))}

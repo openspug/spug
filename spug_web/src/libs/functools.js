@@ -79,7 +79,11 @@ export function human_time(date) {
   const hour = now.getHours() < 10 ? '0' + now.getHours() : now.getHours();
   const minute = now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes();
   const second = now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds();
-  return `${human_date()} ${hour}:${minute}:${second}`
+  return `${hour}:${minute}:${second}`
+}
+
+export function human_datetime(date) {
+  return `${human_date(date)} ${human_time(date)}`
 }
 
 // 生成唯一id
