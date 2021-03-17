@@ -6,14 +6,16 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { UploadOutlined } from '@ant-design/icons';
-import { Modal, Form, Input, Tag, Upload, message, Button } from 'antd';
+import { Modal, Form, Input, Upload, message, Button } from 'antd';
 import hostStore from 'pages/host/store';
 import { http, X_TOKEN } from 'libs';
 import store from './store';
 import lds from 'lodash';
+import HostSelector from "./HostSelector";
 
 export default observer(function () {
   const [form] = Form.useForm();
+  const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [fileList, setFileList] = useState([]);
@@ -49,17 +51,6 @@ export default observer(function () {
         store.ext2Visible = false;
         store.fetchRecords()
       }, () => setLoading(false))
-  }
-
-  function handleChange(id, v) {
-    const index = host_ids.indexOf(id);
-    if (index === -1) {
-      setHostIds([id, ...host_ids])
-    } else {
-      const tmp = lds.clone(host_ids);
-      tmp.splice(index, 1);
-      setHostIds(tmp)
-    }
   }
 
   function handleUploadChange(v) {
@@ -108,14 +99,16 @@ export default observer(function () {
             {fileList.length === 0 ? <Button loading={uploading} icon={<UploadOutlined/>}>点击上传</Button> : null}
           </Upload>
         </Form.Item>
-        <Form.Item required label="发布目标主机" help="通过点击主机名称自由选择本次发布的主机。">
-          {store.record['app_host_ids'].map(id => (
-            <Tag.CheckableTag key={id} checked={host_ids.includes(id)} onChange={v => handleChange(id, v)}>
-              {lds.get(hostStore.idMap, `${id}.name`)}({lds.get(hostStore.idMap, `${id}.hostname`)}:{lds.get(hostStore.idMap, `${id}.port`)})
-            </Tag.CheckableTag>
-          ))}
+        <Form.Item required label="目标主机" help="可以通过创建多个发布申请单，选择主机分批发布。">
+          {host_ids.length > 0 && `已选择 ${host_ids.length} 台`}
+          <Button type="link" onClick={() => setVisible(true)}>选择主机</Button>
         </Form.Item>
       </Form>
+      {visible && <HostSelector
+        host_ids={host_ids}
+        app_host_ids={store.record.app_host_ids}
+        onCancel={() => setVisible(false)}
+        onOk={ids => setHostIds(ids)}/>}
     </Modal>
   )
 })

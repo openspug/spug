@@ -5,14 +5,17 @@
  */
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, Select, Tag, message } from 'antd';
+import { Modal, Form, Input, Select, message, Button } from 'antd';
+import HostSelector from './HostSelector';
 import hostStore from 'pages/host/store';
 import http from 'libs/http';
 import store from './store';
 import lds from 'lodash';
+import moment from 'moment';
 
 export default observer(function () {
   const [form] = Form.useForm();
+  const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [versions, setVersions] = useState([]);
   const [host_ids, setHostIds] = useState([]);
@@ -22,9 +25,7 @@ export default observer(function () {
     setHostIds(lds.clone(host_ids || app_host_ids));
     http.get('/api/repository/', {params: {deploy_id}})
       .then(res => setVersions(res))
-    if (hostStore.records.length === 0) {
-      hostStore.fetchRecords()
-    }
+    if (hostStore.records.length === 0) hostStore.fetchRecords()
   }, [])
 
   function handleSubmit() {
@@ -42,17 +43,6 @@ export default observer(function () {
         store.ext1Visible = false;
         store.fetchRecords()
       }, () => setLoading(false))
-  }
-
-  function handleChange(id) {
-    const index = host_ids.indexOf(id);
-    if (index === -1) {
-      setHostIds([id, ...host_ids])
-    } else {
-      const tmp = lds.clone(host_ids);
-      tmp.splice(index, 1);
-      setHostIds(tmp)
-    }
   }
 
   return (
@@ -74,22 +64,27 @@ export default observer(function () {
               <Select.Option
                 key={item.id}
                 value={item.id}>
-                {item.remarks ? `${item.version} (${item.remarks})` : item.version}
+                <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                  <span>{item.remarks ? `${item.version} (${item.remarks})` : item.version}</span>
+                  <span style={{color: '#999', fontSize: 12}}>构建于 {moment(item.created_at).fromNow()}</span>
+                </div>
               </Select.Option>
             ))}
           </Select>
         </Form.Item>
+        <Form.Item required label="目标主机" help="可以通过创建多个发布申请单，选择主机分批发布。">
+          {host_ids.length > 0 && `已选择 ${host_ids.length} 台`}
+          <Button type="link" onClick={() => setVisible(true)}>选择主机</Button>
+        </Form.Item>
         <Form.Item name="desc" label="备注信息">
           <Input placeholder="请输入备注信息"/>
         </Form.Item>
-        <Form.Item required label="发布主机" help="通过点击主机名称自由选择本次发布的主机。">
-          {store.record.app_host_ids.map(id => (
-            <Tag.CheckableTag key={id} checked={host_ids.includes(id)} onChange={() => handleChange(id)}>
-              {lds.get(hostStore.idMap, `${id}.name`)}({lds.get(hostStore.idMap, `${id}.hostname`)}:{lds.get(hostStore.idMap, `${id}.port`)})
-            </Tag.CheckableTag>
-          ))}
-        </Form.Item>
       </Form>
+      {visible && <HostSelector
+        host_ids={host_ids}
+        app_host_ids={store.record.app_host_ids}
+        onCancel={() => setVisible(false)}
+        onOk={ids => setHostIds(ids)}/>}
     </Modal>
   )
 })
