@@ -12,20 +12,8 @@ import { Action, AuthButton, TableCard } from 'components';
 import styles from './index.module.less';
 import store from './store';
 
-@observer
-class ComTable extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      loading: false
-    }
-  }
-
-  componentDidMount() {
-    store.fetchRecords()
-  }
-
-  columns = [{
+function ComTable() {
+  const columns = [{
     title: '申请标题',
     render: info => (
       <div>
@@ -98,14 +86,13 @@ class ComTable extends React.Component {
         case '-3':
           return <Action>
             <Action.Button auth="deploy.request.do" onClick={() => store.readConsole(info)}>查看</Action.Button>
-            <Popconfirm title="确认要执行该发布申请？" onConfirm={e => this.handleCCC(e, info)}>
+            <Popconfirm title="确认要执行该发布申请？" onConfirm={e => handleDeploy(e, info)}>
               <Action.Button auth="deploy.request.do">发布</Action.Button>
             </Popconfirm>
             <Action.Button
               auth="deploy.request.do"
               disabled={info.type === '2'}
-              loading={this.state.loading}
-              onClick={() => this.handleRollback(info)}>回滚</Action.Button>
+              onClick={() => handleRollback(info)}>回滚</Action.Button>
           </Action>;
         case '3':
           return <Action>
@@ -115,30 +102,27 @@ class ComTable extends React.Component {
             <Action.Button
               auth="deploy.request.do"
               disabled={info.type === '2'}
-              loading={this.state.loading}
-              onClick={() => this.handleRollback(info)}>回滚</Action.Button>
+              onClick={() => handleRollback(info)}>回滚</Action.Button>
           </Action>;
         case '-1':
           return <Action>
             <Action.Button auth="deploy.request.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-            <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+            <Action.Button auth="deploy.request.del" onClick={() => handleDelete(info)}>删除</Action.Button>
           </Action>;
         case '0':
           return <Action>
             <Action.Button auth="deploy.request.approve" onClick={() => store.showApprove(info)}>审核</Action.Button>
             <Action.Button auth="deploy.request.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-            <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+            <Action.Button auth="deploy.request.del" onClick={() => handleDelete(info)}>删除</Action.Button>
           </Action>;
         case '1':
           return <Action>
             <Action.Button auth="deploy.request.do" onClick={() => store.showConsole(info)}>发布</Action.Button>
-            <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+            <Action.Button auth="deploy.request.del" onClick={() => handleDelete(info)}>删除</Action.Button>
           </Action>;
         case '2':
           return <Action>
-            <Action.Link
-              auth="deploy.request.do"
-              to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</Action.Link>
+            <Action.Button auth="deploy.request.do" onClick={() => store.readConsole(info)}>查看</Action.Button>
           </Action>;
         default:
           return null
@@ -146,8 +130,7 @@ class ComTable extends React.Component {
     }
   }];
 
-  handleRollback = (info) => {
-    this.setState({loading: true});
+  function handleRollback(info) {
     http.put('/api/deploy/request/', {id: info.id, action: 'check'})
       .then(res => {
         Modal.confirm({
@@ -162,10 +145,9 @@ class ComTable extends React.Component {
           }
         })
       })
-      .finally(() => this.setState({loading: false}))
-  };
+  }
 
-  handleDelete = (info) => {
+  function handleDelete(info) {
     Modal.confirm({
       title: '删除确认',
       content: `确定要删除【${info['name']}】?`,
@@ -177,9 +159,9 @@ class ComTable extends React.Component {
           })
       }
     })
-  };
+  }
 
-  handleCCC = (e, info) => {
+  function handleDeploy(e, info) {
     const right = document.body.clientWidth - 25 - e.target.getBoundingClientRect().x;
     const bottom = document.body.clientHeight - 40 - e.target.getBoundingClientRect().y;
     store.box.setAttribute('style', `display: block; bottom: ${bottom}px; right: ${right}px;`);
@@ -194,59 +176,37 @@ class ComTable extends React.Component {
 
   }
 
-  render() {
-    let data = store.records;
-    if (store.f_app_id) {
-      data = data.filter(item => item['app_id'] === store.f_app_id)
-    }
-    if (store.f_env_id) {
-      data = data.filter(item => item['env_id'] === store.f_env_id)
-    }
-    if (store.f_s_date) {
-      data = data.filter(item => {
-        const date = item['created_at'].substr(0, 10);
-        return date >= store.f_s_date && date <= store.f_e_date
-      })
-    }
-    if (store.f_status !== 'all') {
-      if (store.f_status === '99') {
-        data = data.filter(item => ['-1', '2'].includes(item['status']))
-      } else {
-        data = data.filter(item => item['status'] === store.f_status)
-      }
-    }
-    return (
-      <TableCard
-        rowKey="id"
-        title="申请列表"
-        loading={store.isFetching}
-        dataSource={data}
-        onReload={store.fetchRecords}
-        actions={[
-          <AuthButton
-            auth="deploy.request.add"
-            type="primary"
-            icon={<PlusOutlined/>}
-            onClick={() => store.addVisible = true}>新建申请</AuthButton>,
-          <Radio.Group value={store.f_status} onChange={e => store.f_status = e.target.value}>
-            <Radio.Button value="all">全部({store.counter['all'] || 0})</Radio.Button>
-            <Radio.Button value="0">待审核({store.counter['0'] || 0})</Radio.Button>
-            <Radio.Button value="1">待发布({store.counter['1'] || 0})</Radio.Button>
-            <Radio.Button value="3">发布成功({store.counter['3'] || 0})</Radio.Button>
-            <Radio.Button value="-3">发布异常({store.counter['-3'] || 0})</Radio.Button>
-            <Radio.Button value="99">其他({store.counter['99'] || 0})</Radio.Button>
-          </Radio.Group>
-        ]}
-        pagination={{
-          showSizeChanger: true,
-          showLessItems: true,
-          hideOnSinglePage: true,
-          showTotal: total => `共 ${total} 条`,
-          pageSizeOptions: ['10', '20', '50', '100']
-        }}
-        columns={this.columns}/>
-    )
-  }
+  return (
+    <TableCard
+      rowKey="id"
+      title="申请列表"
+      columns={columns}
+      loading={store.isFetching}
+      dataSource={store.dataSource}
+      onReload={store.fetchRecords}
+      actions={[
+        <AuthButton
+          auth="deploy.request.add"
+          type="primary"
+          icon={<PlusOutlined/>}
+          onClick={() => store.addVisible = true}>新建申请</AuthButton>,
+        <Radio.Group value={store.f_status} onChange={e => store.f_status = e.target.value}>
+          <Radio.Button value="all">全部({store.counter['all'] || 0})</Radio.Button>
+          <Radio.Button value="0">待审核({store.counter['0'] || 0})</Radio.Button>
+          <Radio.Button value="1">待发布({store.counter['1'] || 0})</Radio.Button>
+          <Radio.Button value="3">发布成功({store.counter['3'] || 0})</Radio.Button>
+          <Radio.Button value="-3">发布异常({store.counter['-3'] || 0})</Radio.Button>
+          <Radio.Button value="99">其他({store.counter['99'] || 0})</Radio.Button>
+        </Radio.Group>
+      ]}
+      pagination={{
+        showSizeChanger: true,
+        showLessItems: true,
+        hideOnSinglePage: true,
+        showTotal: total => `共 ${total} 条`,
+        pageSizeOptions: ['10', '20', '50', '100']
+      }}/>
+  )
 }
 
-export default ComTable
+export default observer(ComTable)

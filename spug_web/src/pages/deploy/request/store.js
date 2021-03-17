@@ -3,7 +3,7 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import { observable } from "mobx";
+import { observable, computed } from "mobx";
 import http from 'libs/http';
 import lds from 'lodash';
 
@@ -19,12 +19,31 @@ class Store {
   @observable ext1Visible = false;
   @observable ext2Visible = false;
   @observable approveVisible = false;
+  @observable rbVisible = false;
 
   @observable f_status = 'all';
   @observable f_app_id;
   @observable f_env_id;
   @observable f_s_date;
   @observable f_e_date;
+
+  @computed get dataSource() {
+    let data = this.records;
+    if (this.f_app_id) data = data.filter(x => x.app_id === this.f_app_id)
+    if (this.f_env_id) data = data.filter(x => x.env_id === this.f_env_id)
+    if (this.f_s_date) data = data.filter(x => {
+        const date = x.created_at.substr(0, 10);
+        return date >= this.f_s_date && date <= this.f_e_date
+      })
+    if (this.f_status !== 'all') {
+      if (this.f_status === '99') {
+        data = data.filter(x => ['-1', '2'].includes(x.status))
+      } else {
+        data = data.filter(x => x.status === this.f_status)
+      }
+    }
+    return data
+  }
 
   fetchRecords = () => {
     this.isFetching = true;
