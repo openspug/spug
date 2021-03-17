@@ -9,6 +9,7 @@ import { BranchesOutlined, BuildOutlined, TagOutlined, PlusOutlined } from '@ant
 import { Radio, Modal, Popover, Tag, Popconfirm, message } from 'antd';
 import { http, hasPermission } from 'libs';
 import { Action, AuthButton, TableCard } from 'components';
+import styles from './index.module.less';
 import store from './store';
 
 @observer
@@ -97,7 +98,7 @@ class ComTable extends React.Component {
         case '-3':
           return <Action>
             <Action.Button auth="deploy.request.do" onClick={() => store.readConsole(info)}>查看</Action.Button>
-            <Popconfirm title="确认要执行该发布申请？" onConfirm={() => store.showConsole(info)}>
+            <Popconfirm title="确认要执行该发布申请？" onConfirm={e => this.handleCCC(e, info)}>
               <Action.Button auth="deploy.request.do">发布</Action.Button>
             </Popconfirm>
             <Action.Button
@@ -177,6 +178,21 @@ class ComTable extends React.Component {
       }
     })
   };
+
+  handleCCC = (e, info) => {
+    const right = document.body.clientWidth - 25 - e.target.getBoundingClientRect().x;
+    const bottom = document.body.clientHeight - 40 - e.target.getBoundingClientRect().y;
+    store.box.setAttribute('style', `display: block; bottom: ${bottom}px; right: ${right}px;`);
+    setTimeout(() => {
+      store.box.setAttribute('class', `${styles.floatBox} ${styles.floatBoxAnimate}`)
+    }, 10);
+    setTimeout(() => {
+      store.showConsole(info);
+      store.box.setAttribute('style', 'display: none');
+      store.box.setAttribute('class', styles.floatBox)
+    }, 300)
+
+  }
 
   render() {
     let data = store.records;

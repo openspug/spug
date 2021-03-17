@@ -11,6 +11,7 @@ class Store {
   @observable records = [];
   @observable record = {};
   @observable counter = {};
+  @observable box = null;
   @observable tabs = [];
   @observable tabModes = {};
   @observable isFetching = false;

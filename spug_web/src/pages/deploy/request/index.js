@@ -131,6 +131,7 @@ class Index extends React.Component {
             ))}
           </Row>
         )}
+        <div ref={el => store.box = el} id='floatBox' className={styles.floatBox}/>
       </AuthDiv>
     )
   }

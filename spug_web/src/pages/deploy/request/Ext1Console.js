@@ -6,7 +6,7 @@
 import React, { useEffect } from 'react';
 import { observer, useLocalStore } from 'mobx-react';
 import { Card, Progress, Modal, Collapse, Steps } from 'antd';
-import { ShrinkOutlined, CaretRightOutlined, LoadingOutlined, } from '@ant-design/icons';
+import { ShrinkOutlined, CaretRightOutlined, LoadingOutlined, CloseOutlined } from '@ant-design/icons';
 import OutView from './OutView';
 import { http, X_TOKEN } from 'libs';
 import styles from './index.module.less';
@@ -73,9 +73,13 @@ function Ext1Console(props) {
   }
 
   return store.tabModes[props.request.id] ? (
-    <Card className={styles.item} bodyStyle={{padding: '8px 12px'}} onClick={switchMiniMode}>
+    <Card
+      className={styles.item}
+      bodyStyle={{padding: '8px 12px'}}
+      onClick={switchMiniMode}>
       <div className={styles.header}>
         <div className={styles.title}>{props.request.name}</div>
+        <CloseOutlined onClick={() => store.showConsole(props.request, true)}/>
       </div>
       {Object.values(outputs).map(item => (
         <Progress
