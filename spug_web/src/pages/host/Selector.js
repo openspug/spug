@@ -78,7 +78,7 @@ export default observer(function (props) {
           {selectedRowKeys.length > 0 && (
             <Alert
               style={{marginBottom: 12}}
-              message={`已选择 ${selectedRowKeys.length} 个主机`}
+              message={`已选择 ${selectedRowKeys.length} 台主机`}
               action={<Button type="link" onClick={() => setSelectedRowKeys([])}>取消选择</Button>}/>
           )}
           <Table
