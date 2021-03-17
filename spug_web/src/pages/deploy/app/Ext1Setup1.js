@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
-import { Switch, Form, Input, Select, Button } from 'antd';
+import { Switch, Form, Input, Select, Button, Radio } from 'antd';
 import envStore from 'pages/config/environment/store';
 import Selector from 'pages/host/Selector';
 import store from './store';
@@ -49,6 +49,12 @@ export default observer(function Ext1Setup1() {
       <Form.Item required label="Git仓库地址">
         <Input disabled={store.isReadOnly} value={info['git_repo']} onChange={e => info['git_repo'] = e.target.value}
                placeholder="请输入Git仓库地址"/>
+      </Form.Item>
+      <Form.Item label="发布模式">
+        <Radio.Group buttonStyle="solid" value={info.is_parallel} onChange={e => info.is_parallel = e.target.value}>
+          <Radio.Button value={true}>并行</Radio.Button>
+          <Radio.Button value={false}>串行</Radio.Button>
+        </Radio.Group>
       </Form.Item>
       <Form.Item label="发布审核">
         <Switch

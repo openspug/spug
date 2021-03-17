@@ -42,8 +42,8 @@ class Deploy(models.Model, ModelMixin):
     host_ids = models.TextField()
     extend = models.CharField(max_length=2, choices=EXTENDS)
     is_audit = models.BooleanField()
+    is_parallel = models.BooleanField(default=True)
     rst_notify = models.CharField(max_length=255, null=True)
-
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
     updated_at = models.CharField(max_length=20, null=True)

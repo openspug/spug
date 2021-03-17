@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
-import { Form, Switch, Select, Button, Input } from "antd";
+import { Form, Switch, Select, Button, Input, Radio } from "antd";
 import envStore from 'pages/config/environment/store';
 import store from './store';
 
@@ -40,6 +40,12 @@ export default observer(function Ext2Setup1() {
         <Form.Item style={{display: 'inline-block', width: '20%', textAlign: 'right'}}>
           <Link disabled={store.isReadOnly} to="/config/environment">新建环境</Link>
         </Form.Item>
+      </Form.Item>
+      <Form.Item label="发布模式">
+        <Radio.Group buttonStyle="solid" value={info.is_parallel} onChange={e => info.is_parallel = e.target.value}>
+          <Radio.Button value={true}>并行</Radio.Button>
+          <Radio.Button value={false}>串行</Radio.Button>
+        </Radio.Group>
       </Form.Item>
       <Form.Item label="发布审核">
         <Switch

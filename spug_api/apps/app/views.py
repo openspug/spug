@@ -7,7 +7,7 @@ from django.conf import settings
 from libs import JsonParser, Argument, json_response
 from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
 from apps.config.models import Config
-from apps.app.utils import parse_envs, fetch_versions, remove_repo
+from apps.app.utils import fetch_versions, remove_repo
 import subprocess
 import json
 import os
@@ -108,6 +108,7 @@ class DeployView(View):
             Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
             Argument('rst_notify', type=dict, help='请选择发布结果通知方式'),
             Argument('extend', filter=lambda x: x in dict(Deploy.EXTENDS), help='请选择发布类型'),
+            Argument('is_parallel', type=bool, default=True),
             Argument('is_audit', type=bool, default=False)
         ).parse(request.body)
         if error is None:
