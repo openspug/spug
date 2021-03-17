@@ -5,6 +5,7 @@ from django.db import models
 from libs import ModelMixin, human_datetime
 from apps.account.models import User
 from apps.app.models import Deploy
+from apps.repository.models import Repository
 
 
 class DeployRequest(models.Model, ModelMixin):
@@ -21,6 +22,7 @@ class DeployRequest(models.Model, ModelMixin):
         ('2', '回滚')
     )
     deploy = models.ForeignKey(Deploy, on_delete=models.CASCADE)
+    repository = models.ForeignKey(Repository, null=True, on_delete=models.SET_NULL)
     name = models.CharField(max_length=50)
     type = models.CharField(max_length=2, choices=TYPES, default='1')
     extra = models.TextField()
@@ -29,6 +31,7 @@ class DeployRequest(models.Model, ModelMixin):
     status = models.CharField(max_length=2, choices=STATUS)
     reason = models.CharField(max_length=255, null=True)
     version = models.CharField(max_length=50, null=True)
+    spug_version = models.CharField(max_length=50, null=True)
 
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')

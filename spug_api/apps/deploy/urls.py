@@ -7,6 +7,7 @@ from .views import *
 
 urlpatterns = [
     path('request/', RequestView.as_view()),
+    path('request/1/', post_request_1),
     path('request/upload/', do_upload),
     path('request/<int:r_id>/', RequestDetailView.as_view()),
 ]

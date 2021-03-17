@@ -22,13 +22,14 @@ class SpugError(Exception):
     pass
 
 
-def deploy_dispatch(request, req, token):
+def dispatch(req):
     rds = get_redis_connection()
+    rds_key = f'{settings.REQUEST_KEY}:{req.id}'
     try:
         api_token = uuid.uuid4().hex
         rds.setex(api_token, 60 * 60, f'{req.deploy.app_id},{req.deploy.env_id}')
-        helper = Helper(rds, token, req.id)
-        helper.send_step('local', 1, f'完成\r\n{human_time()} 发布准备...        ')
+        helper = Helper(rds, rds_key)
+        # helper.send_step('local', 1, f'完成\r\n{human_time()} 发布准备...        ')
         env = AttrDict(
             SPUG_APP_NAME=req.deploy.app.name,
             SPUG_APP_ID=str(req.deploy.app_id),
@@ -43,7 +44,6 @@ def deploy_dispatch(request, req, token):
             SPUG_REPOS_DIR=REPOS_DIR,
         )
         if req.deploy.extend == '1':
-            env.update(json.loads(req.deploy.extend_obj.custom_envs))
             _ext1_deploy(req, helper, env)
         else:
             _ext2_deploy(req, helper, env)
@@ -52,7 +52,7 @@ def deploy_dispatch(request, req, token):
         req.status = '-3'
         raise e
     finally:
-        rds.expire(token, 5 * 60)
+        rds.expire(rds_key, 14 * 24 * 60 * 60)
         rds.close()
         req.save()
         Helper.send_deploy_notify(req)
@@ -60,55 +60,12 @@ def deploy_dispatch(request, req, token):
 
 def _ext1_deploy(req, helper, env):
     extend = req.deploy.extend_obj
-    extras = json.loads(req.extra)
     env.update(SPUG_DST_DIR=extend.dst_dir)
-    if extras[0] == 'branch':
-        tree_ish = extras[2]
-        env.update(SPUG_GIT_BRANCH=extras[1], SPUG_GIT_COMMIT_ID=extras[2])
-    else:
-        tree_ish = extras[1]
-        env.update(SPUG_GIT_TAG=extras[1])
-    if req.type == '2':
-        helper.send_step('local', 6, f'完成\r\n{human_time()} 回滚发布...        跳过')
-    else:
-        helper.local(f'cd {REPOS_DIR} && rm -rf {req.deploy_id}_*')
-        helper.send_step('local', 1, '完成\r\n')
-
-        if extend.hook_pre_server:
-            helper.send_step('local', 2, f'{human_time()} 检出前任务...\r\n')
-            helper.local(f'cd /tmp && {extend.hook_pre_server}', env)
-
-        helper.send_step('local', 3, f'{human_time()} 执行检出...        ')
-        git_dir = os.path.join(REPOS_DIR, str(req.deploy.id))
-        command = f'cd {git_dir} && git archive --prefix={env.SPUG_VERSION}/ {tree_ish} | (cd .. && tar xf -)'
-        helper.local(command)
-        helper.send_step('local', 3, '完成\r\n')
-
-        if extend.hook_post_server:
-            helper.send_step('local', 4, f'{human_time()} 检出后任务...\r\n')
-            helper.local(f'cd {os.path.join(REPOS_DIR, env.SPUG_VERSION)} && {extend.hook_post_server}', env)
-
-        helper.send_step('local', 5, f'\r\n{human_time()} 执行打包...        ')
-        filter_rule, exclude, contain = json.loads(extend.filter_rule), '', env.SPUG_VERSION
-        files = helper.parse_filter_rule(filter_rule['data'])
-        if files:
-            if filter_rule['type'] == 'exclude':
-                excludes = []
-                for x in files:
-                    if x.startswith('/'):
-                        excludes.append(f'--exclude={env.SPUG_VERSION}{x}')
-                    else:
-                        excludes.append(f'--exclude={x}')
-                exclude = ' '.join(excludes)
-            else:
-                contain = ' '.join(f'{env.SPUG_VERSION}/{x}' for x in files)
-        helper.local(f'cd {REPOS_DIR} && tar zcf {env.SPUG_VERSION}.tar.gz {exclude} {contain}')
-        helper.send_step('local', 6, f'完成')
     threads, latest_exception = [], None
     with futures.ThreadPoolExecutor(max_workers=min(10, os.cpu_count() + 5)) as executor:
         for h_id in json.loads(req.host_ids):
             env = AttrDict(env.items())
-            t = executor.submit(_deploy_ext1_host, helper, h_id, extend, env)
+            t = executor.submit(_deploy_ext1_host, req, helper, h_id, env)
             t.h_id = h_id
             threads.append(t)
         for t in futures.as_completed(threads):
@@ -188,34 +145,34 @@ def _ext2_deploy(req, helper, env):
         helper.send_step('local', 100, f'\r\n{human_time()} ** 发布成功 **')
 
 
-def _deploy_ext1_host(helper, h_id, extend, env):
-    helper.send_step(h_id, 1, f'{human_time()} 数据准备...        ')
+def _deploy_ext1_host(req, helper, h_id, env):
+    extend = req.deploy.extend_obj
+    helper.send_step(h_id, 1, f'就绪\r\n{human_time()} 数据准备...        ')
     host = Host.objects.filter(pk=h_id).first()
     if not host:
         helper.send_error(h_id, 'no such host')
     env.update({'SPUG_HOST_ID': h_id, 'SPUG_HOST_NAME': host.hostname})
     ssh = host.get_ssh()
-    if env.SPUG_DEPLOY_TYPE != '2':
-        code, _ = ssh.exec_command(
-            f'mkdir -p {extend.dst_repo} && [ -e {extend.dst_dir} ] && [ ! -L {extend.dst_dir} ]')
-        if code == 0:
-            helper.send_error(host.id, f'检测到该主机的发布目录 {extend.dst_dir!r} 已存在，为了数据安全请自行备份后删除该目录，Spug 将会创建并接管该目录。')
-        # clean
-        clean_command = f'ls -d {extend.deploy_id}_* 2> /dev/null | sort -t _ -rnk2 | tail -n +{extend.versions + 1} | xargs rm -rf'
-        helper.remote(host.id, ssh, f'cd {extend.dst_repo} && rm -rf {env.SPUG_VERSION} && {clean_command}')
-        # transfer files
-        tar_gz_file = f'{env.SPUG_VERSION}.tar.gz'
-        try:
-            ssh.put_file(os.path.join(REPOS_DIR, tar_gz_file), os.path.join(extend.dst_repo, tar_gz_file))
-        except Exception as e:
-            helper.send_error(host.id, f'exception: {e}')
+    code, _ = ssh.exec_command(
+        f'mkdir -p {extend.dst_repo} && [ -e {extend.dst_dir} ] && [ ! -L {extend.dst_dir} ]')
+    if code == 0:
+        helper.send_error(host.id, f'检测到该主机的发布目录 {extend.dst_dir!r} 已存在，为了数据安全请自行备份后删除该目录，Spug 将会创建并接管该目录。')
+    # clean
+    clean_command = f'ls -d {extend.deploy_id}_* 2> /dev/null | sort -t _ -rnk2 | tail -n +{extend.versions + 1} | xargs rm -rf'
+    helper.remote(host.id, ssh, f'cd {extend.dst_repo} && rm -rf {req.spug_version} && {clean_command}')
+    # transfer files
+    tar_gz_file = f'{req.spug_version}.tar.gz'
+    try:
+        ssh.put_file(os.path.join(REPOS_DIR, 'build', tar_gz_file), os.path.join(extend.dst_repo, tar_gz_file))
+    except Exception as e:
+        helper.send_error(host.id, f'exception: {e}')
 
-        command = f'cd {extend.dst_repo} && tar xf {tar_gz_file} && rm -f {env.SPUG_APP_ID}_*.tar.gz'
-        helper.remote(host.id, ssh, command)
+    command = f'cd {extend.dst_repo} && tar xf {tar_gz_file} && rm -f {req.deploy_id}_*.tar.gz'
+    helper.remote(host.id, ssh, command)
     helper.send_step(h_id, 1, '完成\r\n')
 
     # pre host
-    repo_dir = os.path.join(extend.dst_repo, env.SPUG_VERSION)
+    repo_dir = os.path.join(extend.dst_repo, req.spug_version)
     if extend.hook_pre_host:
         helper.send_step(h_id, 2, f'{human_time()} 发布前任务...       \r\n')
         command = f'cd {repo_dir} ; {extend.hook_pre_host}'
@@ -271,11 +228,10 @@ def _deploy_ext2_host(helper, h_id, actions, env):
 
 
 class Helper:
-    def __init__(self, rds, token, r_id):
+    def __init__(self, rds, key):
         self.rds = rds
-        self.token = token
-        self.log_key = f'{settings.REQUEST_KEY}:{r_id}'
-        self.rds.delete(self.log_key)
+        self.key = key
+        self.rds.delete(self.key)
 
     @classmethod
     def _make_dd_notify(cls, action, req, version, host_str):
@@ -425,11 +381,11 @@ class Helper:
         return files
 
     def _send(self, message):
-        self.rds.lpush(self.token, json.dumps(message))
-        self.rds.lpush(self.log_key, json.dumps(message))
+        self.rds.rpush(self.key, json.dumps(message))
 
     def send_info(self, key, message):
-        self._send({'key': key, 'status': 'info', 'data': message})
+        if message:
+            self._send({'key': key, 'data': message})
 
     def send_error(self, key, message, with_break=True):
         message = '\r\n' + message

@@ -9,7 +9,7 @@ import http from 'libs/http';
 class Store {
   @observable records = [];
   @observable record = {};
-  @observable idMap = {};
+  @observable deploy = {};
   @observable outputs = [];
   @observable isFetching = false;
   @observable formVisible = false;

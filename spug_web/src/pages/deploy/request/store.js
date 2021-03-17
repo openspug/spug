@@ -5,11 +5,14 @@
  */
 import { observable } from "mobx";
 import http from 'libs/http';
+import lds from 'lodash';
 
 class Store {
   @observable records = [];
   @observable record = {};
   @observable counter = {};
+  @observable tabs = [];
+  @observable tabModes = {};
   @observable isFetching = false;
   @observable addVisible = false;
   @observable ext1Visible = false;
@@ -82,6 +85,28 @@ class Store {
   showApprove = (info) => {
     this.record = info;
     this.approveVisible = true;
+  };
+
+  showConsole = (info, isClose) => {
+    const index = lds.findIndex(this.tabs, x => x.id === info.id);
+    if (isClose) {
+      if (index !== -1) {
+        this.tabs.splice(index, 1)
+        delete this.tabModes[info.id]
+      }
+    } else if (index === -1) {
+      this.tabModes[info.id] = true
+      this.tabs.push(info)
+    }
+  };
+
+  readConsole = (info) => {
+    this.tabModes[info.id] = false
+    const index = lds.findIndex(this.tabs, x => x.id === info.id);
+    if (index === -1) {
+      info = Object.assign({}, info, {mode: 'read'})
+      this.tabs.push(info)
+    }
   }
 }
 

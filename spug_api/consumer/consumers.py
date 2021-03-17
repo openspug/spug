@@ -43,6 +43,8 @@ class ComConsumer(WebsocketConsumer):
         module = self.scope['url_route']['kwargs']['module']
         if module == 'build':
             self.key = f'{settings.BUILD_KEY}:{token}'
+        elif module == 'request':
+            self.key = f'{settings.REQUEST_KEY}:{token}'
         else:
             raise TypeError(f'unknown module for {module}')
         self.rds = get_redis_connection()
@@ -69,7 +71,6 @@ class ComConsumer(WebsocketConsumer):
             while response:
                 index += 1
                 self.send(text_data=response)
-                time.sleep(1)
                 response = self.get_response(index)
         self.send(text_data='pong')
 

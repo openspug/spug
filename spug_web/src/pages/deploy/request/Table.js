@@ -6,7 +6,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { BranchesOutlined, BuildOutlined, TagOutlined, PlusOutlined } from '@ant-design/icons';
-import { Radio, Modal, Popover, Tag, message } from 'antd';
+import { Radio, Modal, Popover, Tag, Popconfirm, message } from 'antd';
 import { http, hasPermission } from 'libs';
 import { Action, AuthButton, TableCard } from 'components';
 import store from './store';
@@ -42,20 +42,12 @@ class ComTable extends React.Component {
     title: '版本',
     render: info => {
       if (info['app_extend'] === '1') {
-        const [type, ext1, ext2] = info.extra;
-        if (type === 'branch') {
-          return (
-            <React.Fragment>
-              <BranchesOutlined/> {ext1}#{ext2.substr(0, 6)}
-            </React.Fragment>
-          )
-        } else {
-          return (
-            <React.Fragment>
-              <TagOutlined/> {ext1}
-            </React.Fragment>
-          )
-        }
+        const [ext1] = info.rep_extra;
+        return (
+          <React.Fragment>
+            {ext1 === 'branch' ? <BranchesOutlined/> : <TagOutlined/>} {info.version}
+          </React.Fragment>
+        )
       } else {
         return (
           <React.Fragment>
@@ -88,15 +80,15 @@ class ComTable extends React.Component {
   }, {
     title: '申请人',
     dataIndex: 'created_by_user',
+    hide: true
   }, {
     title: '申请时间',
     dataIndex: 'created_at',
-    sorter: (a, b) => a['created_at'].localeCompare(b['created_at'])
+    sorter: (a, b) => a['created_at'].localeCompare(b['created_at']),
+    hide: true
   }, {
     title: '备注',
     dataIndex: 'desc',
-    ellipsis: true,
-    hide: true
   }, {
     title: '操作',
     className: hasPermission('deploy.request.do|deploy.request.edit|deploy.request.approve|deploy.request.del') ? null : 'none',
@@ -104,10 +96,10 @@ class ComTable extends React.Component {
       switch (info.status) {
         case '-3':
           return <Action>
-            <Action.Link
-              auth="deploy.request.do"
-              to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</Action.Link>
-            <Action.Link auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>发布</Action.Link>
+            <Action.Button auth="deploy.request.do" onClick={() => store.readConsole(info)}>查看</Action.Button>
+            <Popconfirm title="确认要执行该发布申请？" onConfirm={() => store.showConsole(info)}>
+              <Action.Button auth="deploy.request.do">发布</Action.Button>
+            </Popconfirm>
             <Action.Button
               auth="deploy.request.do"
               disabled={info.type === '2'}
@@ -138,7 +130,7 @@ class ComTable extends React.Component {
           </Action>;
         case '1':
           return <Action>
-            <Action.Link auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>发布</Action.Link>
+            <Action.Button auth="deploy.request.do" onClick={() => store.showConsole(info)}>发布</Action.Button>
             <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
           </Action>;
         case '2':

@@ -13,10 +13,13 @@ import json
 
 class RepositoryView(View):
     def get(self, request):
+        deploy_id = request.GET.get('deploy_id')
         data = Repository.objects.annotate(
             app_name=F('app__name'),
             env_name=F('env__name'),
             created_by_user=F('created_by__nickname'))
+        if deploy_id:
+            data = data.filter(deploy_id=deploy_id, status='5')
         return json_response([x.to_view() for x in data])
 
     def post(self, request):
@@ -39,6 +42,20 @@ class RepositoryView(View):
                 **form)
             Thread(target=dispatch, args=(rep,)).start()
             return json_response(rep.to_view())
+        return json_response(error=error)
+
+    def patch(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='参数错误'),
+            Argument('action', help='参数错误')
+        ).parse(request.body)
+        if error is None:
+            rep = Repository.objects.filter(pk=form.id).first()
+            if not rep:
+                return json_response(error='未找到指定构建记录')
+            if form.action == 'rebuild':
+                Thread(target=dispatch, args=(rep,)).start()
+                return json_response(rep.to_view())
         return json_response(error=error)
 
     def delete(self, request):

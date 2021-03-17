@@ -6,17 +6,19 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { ExclamationCircleOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Form, Select, DatePicker, Modal, Input, message } from 'antd';
+import { Form, Select, DatePicker, Modal, Input, Row, Col, message } from 'antd';
 import { SearchForm, AuthDiv, AuthButton, Breadcrumb, AppSelector } from 'components';
 import Ext1Form from './Ext1Form';
 import Ext2Form from './Ext2Form';
 import Approve from './Approve';
 import ComTable from './Table';
+import Ext1Console from './Ext1Console';
 import { http, includes } from 'libs';
 import envStore from 'pages/config/environment/store';
 import appStore from 'pages/config/app/store';
 import store from './store';
 import moment from 'moment';
+import styles from './index.module.less';
 
 @observer
 class Index extends React.Component {
@@ -120,6 +122,15 @@ class Index extends React.Component {
         {store.ext1Visible && <Ext1Form/>}
         {store.ext2Visible && <Ext2Form/>}
         {store.approveVisible && <Approve/>}
+        {store.tabs.length > 0 && (
+          <Row gutter={12} className={styles.miniConsole}>
+            {store.tabs.map(item => (
+              <Col key={item.id}>
+                <Ext1Console request={item}/>
+              </Col>
+            ))}
+          </Row>
+        )}
       </AuthDiv>
     )
   }

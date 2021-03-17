@@ -9,14 +9,14 @@ from django_redis import get_redis_connection
 from libs import json_response, JsonParser, Argument, human_datetime, human_time
 from apps.deploy.models import DeployRequest
 from apps.app.models import Deploy, DeployExtend2
-from apps.deploy.utils import deploy_dispatch, Helper
+from apps.repository.models import Repository
+from apps.deploy.utils import dispatch, Helper
 from apps.host.models import Host
 from collections import defaultdict
 from threading import Thread
 from datetime import datetime
 import subprocess
 import json
-import uuid
 import os
 
 
@@ -34,6 +34,7 @@ class RequestView(View):
                 app_name=F('deploy__app__name'),
                 app_host_ids=F('deploy__host_ids'),
                 app_extend=F('deploy__extend'),
+                rep_extra=F('repository__extra'),
                 created_by_user=F('created_by__nickname')):
             tmp = item.to_dict()
             tmp['env_id'] = item.env_id
@@ -41,8 +42,8 @@ class RequestView(View):
             tmp['app_id'] = item.app_id
             tmp['app_name'] = item.app_name
             tmp['app_extend'] = item.app_extend
-            tmp['extra'] = json.loads(item.extra)
             tmp['host_ids'] = json.loads(item.host_ids)
+            tmp['rep_extra'] = json.loads(item.rep_extra) if item.rep_extra else None
             tmp['app_host_ids'] = json.loads(item.app_host_ids)
             tmp['status_alias'] = item.get_status_display()
             tmp['created_by_user'] = item.created_by_user
@@ -62,10 +63,6 @@ class RequestView(View):
             deploy = Deploy.objects.filter(pk=form.deploy_id).first()
             if not deploy:
                 return json_response(error='未找到该发布配置')
-            if form.extra[0] == 'tag' and not form.extra[1]:
-                return json_response(error='请选择要发布的Tag')
-            if form.extra[0] == 'branch' and not form.extra[2]:
-                return json_response(error='请选择要发布的分支及Commit ID')
             if deploy.extend == '2':
                 if form.extra[0]:
                     form.extra[0] = form.extra[0].replace("'", '')
@@ -165,28 +162,29 @@ class RequestDetailView(View):
         if not req:
             return json_response(error='未找到指定发布申请')
         hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
-        targets = [{'id': x.id, 'title': f'{x.name}({x.hostname}:{x.port})'} for x in hosts]
-        server_actions, host_actions, outputs = [], [], []
+        server_actions, host_actions = [], []
+        outputs = {x.id: {'id': x.id, 'title': x.name, 'data': []} for x in hosts}
         if req.deploy.extend == '2':
             server_actions = json.loads(req.deploy.extend_obj.server_actions)
             host_actions = json.loads(req.deploy.extend_obj.host_actions)
-        if request.GET.get('log'):
-            rds, key, counter = get_redis_connection(), f'{settings.REQUEST_KEY}:{r_id}', 0
+        rds, key, counter = get_redis_connection(), f'{settings.REQUEST_KEY}:{r_id}', 0
+        data = rds.lrange(key, counter, counter + 9)
+        while data:
+            counter += 10
+            for item in data:
+                item = json.loads(item.decode())
+                if 'data' in item:
+                    outputs[item['key']]['data'].append(item['data'])
+                if 'step' in item:
+                    outputs[item['key']]['step'] = item['step']
+                if 'status' in item:
+                    outputs[item['key']]['status'] = item['status']
             data = rds.lrange(key, counter, counter + 9)
-            while data:
-                counter += 10
-                outputs.extend(x.decode() for x in data)
-                data = rds.lrange(key, counter, counter + 9)
         return json_response({
-            'app_name': req.deploy.app.name,
-            'env_name': req.deploy.env.name,
-            'status': req.status,
-            'type': req.type,
-            'status_alias': req.get_status_display(),
-            'targets': targets,
             'server_actions': server_actions,
             'host_actions': host_actions,
-            'outputs': outputs
+            'outputs': outputs,
+            'status': req.status
         })
 
     def post(self, request, r_id):
@@ -201,17 +199,14 @@ class RequestDetailView(View):
         if req.status not in ('1', '-3'):
             return json_response(error='该申请单当前状态还不能执行发布')
         hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
-        token = uuid.uuid4().hex
-        outputs = {str(x.id): {'data': []} for x in hosts}
-        outputs.update(local={'data': [f'{human_time()} 建立接连...        ']})
+        message = f'{human_time()} 等待调度...        '
+        outputs = {x.id: {'id': x.id, 'title': x.name, 'step': 0, 'data': [message]} for x in hosts}
         req.status = '2'
         req.do_at = human_datetime()
         req.do_by = request.user
-        if not req.version:
-            req.version = f'{req.deploy_id}_{req.id}_{datetime.now().strftime("%Y%m%d%H%M%S")}'
         req.save()
-        Thread(target=deploy_dispatch, args=(request, req, token)).start()
-        return json_response({'token': token, 'type': req.type, 'outputs': outputs})
+        Thread(target=dispatch, args=(req,)).start()
+        return json_response({'type': req.type, 'outputs': outputs})
 
     def patch(self, request, r_id):
         form, error = JsonParser(
@@ -233,6 +228,36 @@ class RequestDetailView(View):
             req.save()
             Thread(target=Helper.send_deploy_notify, args=(req, 'approve_rst')).start()
         return json_response(error=error)
+
+
+def post_request_1(request):
+    form, error = JsonParser(
+        Argument('id', type=int, required=False),
+        Argument('name', help='请输申请标题'),
+        Argument('repository_id', type=int, help='请选择发布版本'),
+        Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
+        Argument('desc', required=False),
+    ).parse(request.body)
+    if error is None:
+        repository = Repository.objects.filter(pk=form.repository_id).first()
+        if not repository:
+            return json_response(error='未找到指定构建版本记录')
+        form.name = form.name.replace("'", '')
+        form.status = '0' if repository.deploy.is_audit else '1'
+        form.version = repository.version
+        form.spug_version = repository.spug_version
+        form.deploy_id = repository.deploy_id
+        form.host_ids = json.dumps(form.host_ids)
+        if form.id:
+            req = DeployRequest.objects.get(pk=form.id)
+            is_required_notify = repository.deploy.is_audit and req.status == '-1'
+            DeployRequest.objects.filter(pk=form.id).update(created_by=request.user, reason=None, **form)
+        else:
+            req = DeployRequest.objects.create(created_by=request.user, **form)
+            is_required_notify = repository.deploy.is_audit
+        if is_required_notify:
+            Thread(target=Helper.send_deploy_notify, args=(req, 'approve_req')).start()
+    return json_response(error=error)
 
 
 def do_upload(request):

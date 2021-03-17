@@ -8,6 +8,7 @@ import { observer } from 'mobx-react';
 import { Modal, Form, Input, Switch, message } from 'antd';
 import http from 'libs/http';
 import store from './store';
+import styles from './index.module.less';
 
 export default observer(function () {
   const [form] = Form.useForm();
@@ -38,6 +39,7 @@ export default observer(function () {
       title="审核发布申请"
       onCancel={() => store.approveVisible = false}
       confirmLoading={loading}
+      className={styles.approve}
       onOk={handleSubmit}>
       <Form form={form} labelCol={{span: 6}} wrapperCol={{span: 14}} onValuesChange={handleChange}>
         <Form.Item required name="is_pass" initialValue={true} valuePropName="checked" label="审批结果">
