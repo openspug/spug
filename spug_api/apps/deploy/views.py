@@ -236,6 +236,7 @@ def post_request_1(request):
         Argument('name', help='请输申请标题'),
         Argument('repository_id', type=int, help='请选择发布版本'),
         Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
+        Argument('type', default='1'),
         Argument('desc', required=False),
     ).parse(request.body)
     if error is None:

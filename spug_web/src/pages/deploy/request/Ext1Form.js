@@ -36,6 +36,7 @@ export default observer(function () {
     const formData = form.getFieldsValue();
     formData['id'] = store.record.id;
     formData['host_ids'] = host_ids;
+    formData['type'] = store.record.type;
     formData['deploy_id'] = store.record.deploy_id;
     http.post('/api/deploy/request/1/', formData)
       .then(res => {
@@ -45,6 +46,7 @@ export default observer(function () {
       }, () => setLoading(false))
   }
 
+  const {app_host_ids, type, rb_id,} = store.record;
   return (
     <Modal
       visible
@@ -58,12 +60,10 @@ export default observer(function () {
         <Form.Item required name="name" label="申请标题">
           <Input placeholder="请输入申请标题"/>
         </Form.Item>
-        <Form.Item required name="repository_id" label="发布版本">
+        <Form.Item required name="repository_id" label={type === '2' ? '回滚版本' : '发布版本'}>
           <Select placeholder="请选择">
             {versions.map(item => (
-              <Select.Option
-                key={item.id}
-                value={item.id}>
+              <Select.Option key={item.id} value={item.id} disabled={type === '2' && item.id >= rb_id}>
                 <div style={{display: 'flex', justifyContent: 'space-between'}}>
                   <span>{item.remarks ? `${item.version} (${item.remarks})` : item.version}</span>
                   <span style={{color: '#999', fontSize: 12}}>构建于 {moment(item.created_at).fromNow()}</span>
@@ -82,7 +82,7 @@ export default observer(function () {
       </Form>
       {visible && <HostSelector
         host_ids={host_ids}
-        app_host_ids={store.record.app_host_ids}
+        app_host_ids={app_host_ids}
         onCancel={() => setVisible(false)}
         onOk={ids => setHostIds(ids)}/>}
     </Modal>

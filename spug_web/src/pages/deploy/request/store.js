@@ -19,7 +19,6 @@ class Store {
   @observable ext1Visible = false;
   @observable ext2Visible = false;
   @observable approveVisible = false;
-  @observable rbVisible = false;
 
   @observable f_status = 'all';
   @observable f_app_id;
@@ -92,6 +91,18 @@ class Store {
     }
     this.addVisible = false
   };
+
+  rollback = (info) => {
+    this.record = lds.pick(info, ['deploy_id', 'app_host_ids', 'host_ids']);
+    this.record.type = '2';
+    this.record.rb_id = info.repository_id;
+    this.record.name = `${info.name} - 回滚`;
+    if (info.app_extend === '1') {
+      this.ext1Visible = true
+    } else {
+      this.ext2Visible = true
+    }
+  }
 
   showForm = (info) => {
     this.record = info;

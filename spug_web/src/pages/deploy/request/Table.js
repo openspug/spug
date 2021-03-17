@@ -92,7 +92,7 @@ function ComTable() {
             <Action.Button
               auth="deploy.request.do"
               disabled={info.type === '2'}
-              onClick={() => handleRollback(info)}>回滚</Action.Button>
+              onClick={() => store.rollback(info)}>回滚</Action.Button>
           </Action>;
         case '3':
           return <Action>
@@ -102,7 +102,7 @@ function ComTable() {
             <Action.Button
               auth="deploy.request.do"
               disabled={info.type === '2'}
-              onClick={() => handleRollback(info)}>回滚</Action.Button>
+              onClick={() => store.rollback(info)}>回滚</Action.Button>
           </Action>;
         case '-1':
           return <Action>
