@@ -247,7 +247,7 @@ def post_request_1(request):
         form.version = repository.version
         form.spug_version = repository.spug_version
         form.deploy_id = repository.deploy_id
-        form.host_ids = json.dumps(form.host_ids)
+        form.host_ids = json.dumps(sorted(form.host_ids))
         if form.id:
             req = DeployRequest.objects.get(pk=form.id)
             is_required_notify = repository.deploy.is_audit and req.status == '-1'
