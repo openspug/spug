@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { ExclamationCircleOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Form, Select, DatePicker, Modal, Input, Row, Col, message } from 'antd';
+import { Form, Select, DatePicker, Modal, Input, Space, message } from 'antd';
 import { SearchForm, AuthDiv, AuthButton, Breadcrumb, AppSelector } from 'components';
 import Ext1Form from './Ext1Form';
 import Ext2Form from './Ext2Form';
@@ -113,17 +113,15 @@ function Index() {
       {store.ext2Visible && <Ext2Form/>}
       {store.approveVisible && <Approve/>}
       {store.tabs.length > 0 && (
-        <Row gutter={12} className={styles.miniConsole}>
+        <Space className={styles.miniConsole}>
           {store.tabs.map(item => (
-            <Col key={item.id}>
-              {item.app_extend === '1' ? (
-                <Ext1Console request={item}/>
-              ) : (
-                <Ext2Console request={item}/>
-              )}
-            </Col>
+            item.app_extend === '1' ? (
+              <Ext1Console key={item.id} request={item}/>
+            ) : (
+              <Ext2Console key={item.id} request={item}/>
+            )
           ))}
-        </Row>
+        </Space>
       )}
       <div ref={el => store.box = el} id='floatBox' className={styles.floatBox}/>
     </AuthDiv>
