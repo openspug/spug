@@ -25,7 +25,7 @@ export default observer(function () {
   const [draggable, setDraggable] = useState(false);
   const [action, setAction] = useState('');
   const [expands, setExpands] = useState([]);
-  const [treeData, setTreeData] = useState();
+  const [treeData, setTreeData] = useState([]);
   const [bakTreeData, setBakTreeData] = useState();
 
   useEffect(() => {
