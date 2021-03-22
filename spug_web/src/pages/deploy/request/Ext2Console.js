@@ -90,7 +90,7 @@ function Ext2Console(props) {
         <CloseOutlined onClick={() => store.showConsole(props.request, true)}/>
       </div>
       <Progress percent={(outputs.local.step + 1) * (90 / (1 + sActions.length)).toFixed(0)}
-          status={outputs.local.step === 100 ? 'success' : outputs.local.status === 'error' ? 'exception' : 'active'}/>
+                status={outputs.local.step === 100 ? 'success' : outputs.local.status === 'error' ? 'exception' : 'active'}/>
       {Object.values(outputs).filter(x => x.id !== 'local').map(item => (
         <Progress
           key={item.id}
@@ -114,12 +114,15 @@ function Ext2Console(props) {
       ]}>
       <Collapse defaultActiveKey="0" className={styles.collapse}>
         <Collapse.Panel header={(
-          <Steps size="small" className={styles.step} current={outputs.local.step} status={outputs.local.status}>
-            <StepItem  style={{width: 200}} title="建立连接" item={outputs.local} step={0}/>
-            {sActions.map((item, index) => (
-              <StepItem style={{width: 200}} key={index} title={item.title} item={outputs.local} step={index + 1}/>
-            ))}
-          </Steps>
+          <div className={styles.header}>
+            <b className={styles.title}/>
+            <Steps size="small" className={styles.step} current={outputs.local.step} status={outputs.local.status}>
+              <StepItem title="建立连接" item={outputs.local} step={0}/>
+              {sActions.map((item, index) => (
+                <StepItem key={index} title={item.title} item={outputs.local} step={index + 1}/>
+              ))}
+            </Steps>
+          </div>
         )}>
           <OutView records={outputs.local.data}/>
         </Collapse.Panel>
@@ -134,7 +137,7 @@ function Ext2Console(props) {
             key={index}
             header={
               <div className={styles.header}>
-                <b className={styles.title}>{item.title}{item.step}</b>
+                <b className={styles.title}>{item.title}</b>
                 <Steps size="small" className={styles.step} current={item.step} status={item.status}>
                   <StepItem title="等待调度" item={item} step={0}/>
                   {hActions.map((action, index) => (

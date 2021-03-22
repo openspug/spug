@@ -124,10 +124,10 @@ class RequestDetailView(View):
         if not req:
             return json_response(error='未找到指定发布申请')
         hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
-        outputs = {x.id: {'id': x.id, 'title': x.name, 'data': []} for x in hosts}
+        outputs = {x.id: {'id': x.id, 'title': x.name, 'data': [f'{human_time()} 读取数据...        ']} for x in hosts}
         response = {'outputs': outputs, 'status': req.status}
         if req.deploy.extend == '2':
-            outputs['local'] = {'id': 'local', 'data': []}
+            outputs['local'] = {'id': 'local', 'data': [f'{human_time()} 读取数据...        ']}
             response['s_actions'] = json.loads(req.deploy.extend_obj.server_actions)
             response['h_actions'] = json.loads(req.deploy.extend_obj.host_actions)
         rds, key, counter = get_redis_connection(), f'{settings.REQUEST_KEY}:{r_id}', 0
