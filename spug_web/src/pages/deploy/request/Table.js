@@ -40,7 +40,7 @@ function ComTable() {
       } else {
         return (
           <React.Fragment>
-            <BuildOutlined/> {info.extra[0]}
+            <BuildOutlined/> {info.version}
           </React.Fragment>
         )
       }
@@ -96,9 +96,7 @@ function ComTable() {
           </Action>;
         case '3':
           return <Action>
-            <Action.Link
-              auth="deploy.request.do"
-              to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</Action.Link>
+            <Action.Button auth="deploy.request.do" onClick={() => store.readConsole(info)}>查看</Action.Button>
             <Action.Button
               auth="deploy.request.do"
               disabled={info.type === '2'}
@@ -129,23 +127,6 @@ function ComTable() {
       }
     }
   }];
-
-  function handleRollback(info) {
-    http.put('/api/deploy/request/', {id: info.id, action: 'check'})
-      .then(res => {
-        Modal.confirm({
-          title: '回滚确认',
-          content: `确定要回滚至 ${res['date']} 创建的名称为【${res['name']}】的发布申请版本?`,
-          onOk: () => {
-            return http.put('/api/deploy/request/', {id: info.id, action: 'do'})
-              .then(() => {
-                message.success('回滚申请创建成功');
-                store.fetchRecords()
-              })
-          }
-        })
-      })
-  }
 
   function handleDelete(info) {
     Modal.confirm({

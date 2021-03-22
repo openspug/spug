@@ -3,7 +3,7 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { observer, useLocalStore } from 'mobx-react';
 import { Card, Progress, Modal, Collapse, Steps } from 'antd';
 import { ShrinkOutlined, CaretRightOutlined, LoadingOutlined, CloseOutlined } from '@ant-design/icons';
@@ -12,8 +12,10 @@ import { http, X_TOKEN } from 'libs';
 import styles from './index.module.less';
 import store from './store';
 
-function Ext1Console(props) {
-  const outputs = useLocalStore(() => ({}));
+function Ext2Console(props) {
+  const outputs = useLocalStore(() => ({local: {id: 'local'}}));
+  const [sActions, setSActions] = useState([]);
+  const [hActions, setHActions] = useState([]);
 
   useEffect(props.request.mode === 'read' ? readDeploy : doDeploy, [])
 
@@ -21,6 +23,8 @@ function Ext1Console(props) {
     let socket;
     http.get(`/api/deploy/request/${props.request.id}/`)
       .then(res => {
+        setSActions(res.s_actions);
+        setHActions(res.h_actions);
         Object.assign(outputs, res.outputs)
         if (res.status === '2') {
           socket = _makeSocket()
@@ -33,6 +37,8 @@ function Ext1Console(props) {
     let socket;
     http.post(`/api/deploy/request/${props.request.id}/`)
       .then(res => {
+        setSActions(res.s_actions);
+        setHActions(res.h_actions);
         Object.assign(outputs, res.outputs)
         socket = _makeSocket()
       })
@@ -62,7 +68,9 @@ function Ext1Console(props) {
   function StepItem(props) {
     let icon = null;
     if (props.step === props.item.step && props.item.status !== 'error') {
-      icon = <LoadingOutlined/>
+      if (props.item.id === 'local' || outputs.local.step === 100) {
+        icon = <LoadingOutlined/>
+      }
     }
     return <Steps.Step {...props} icon={icon}/>
   }
@@ -81,10 +89,12 @@ function Ext1Console(props) {
         <div className={styles.title}>{props.request.name}</div>
         <CloseOutlined onClick={() => store.showConsole(props.request, true)}/>
       </div>
-      {Object.values(outputs).map(item => (
+      <Progress percent={(outputs.local.step + 1) * (90 / (1 + sActions.length)).toFixed(0)}
+          status={outputs.local.step === 100 ? 'success' : outputs.local.status === 'error' ? 'exception' : 'active'}/>
+      {Object.values(outputs).filter(x => x.id !== 'local').map(item => (
         <Progress
           key={item.id}
-          percent={(item.step + 1) * 18}
+          percent={item.step * (90 / (hActions.length).toFixed(0))}
           status={item.step === 100 ? 'success' : item.status === 'error' ? 'exception' : 'active'}/>
       ))}
     </Card>
@@ -102,31 +112,42 @@ function Ext1Console(props) {
           <ShrinkOutlined/>
         </div>
       ]}>
+      <Collapse defaultActiveKey="0" className={styles.collapse}>
+        <Collapse.Panel header={(
+          <Steps size="small" className={styles.step} current={outputs.local.step} status={outputs.local.status}>
+            <StepItem  style={{width: 200}} title="建立连接" item={outputs.local} step={0}/>
+            {sActions.map((item, index) => (
+              <StepItem style={{width: 200}} key={index} title={item.title} item={outputs.local} step={index + 1}/>
+            ))}
+          </Steps>
+        )}>
+          <OutView records={outputs.local.data}/>
+        </Collapse.Panel>
+      </Collapse>
       <Collapse
-        defaultActiveKey={'0'}
+        defaultActiveKey="0"
         className={styles.collapse}
+        style={{marginTop: 24}}
         expandIcon={({isActive}) => <CaretRightOutlined style={{fontSize: 16}} rotate={isActive ? 90 : 0}/>}>
-        {Object.values(outputs).map((item, index) => (
+        {Object.values(outputs).filter(x => x.id !== 'local').map((item, index) => (
           <Collapse.Panel
             key={index}
             header={
               <div className={styles.header}>
-                <b className={styles.title}>{item.title}</b>
+                <b className={styles.title}>{item.title}{item.step}</b>
                 <Steps size="small" className={styles.step} current={item.step} status={item.status}>
                   <StepItem title="等待调度" item={item} step={0}/>
-                  <StepItem title="数据准备" item={item} step={1}/>
-                  <StepItem title="发布前任务" item={item} step={2}/>
-                  <StepItem title="执行发布" item={item} step={3}/>
-                  <StepItem title="发布后任务" item={item} step={4}/>
+                  {hActions.map((action, index) => (
+                    <StepItem key={index} title={action.title} item={item} step={index + 1}/>
+                  ))}
                 </Steps>
               </div>}>
             <OutView records={item.data}/>
           </Collapse.Panel>
         ))}
-
       </Collapse>
     </Modal>
   )
 }
 
-export default observer(Ext1Console)
+export default observer(Ext2Console)

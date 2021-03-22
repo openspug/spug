@@ -29,7 +29,6 @@ def dispatch(req):
         api_token = uuid.uuid4().hex
         rds.setex(api_token, 60 * 60, f'{req.deploy.app_id},{req.deploy.env_id}')
         helper = Helper(rds, rds_key)
-        # helper.send_step('local', 1, f'完成\r\n{human_time()} 发布准备...        ')
         env = AttrDict(
             SPUG_APP_NAME=req.deploy.app.name,
             SPUG_APP_ID=str(req.deploy.app_id),
@@ -80,18 +79,16 @@ def _ext1_deploy(req, helper, env):
 
 
 def _ext2_deploy(req, helper, env):
-    extend = req.deploy.extend_obj
-    extras = json.loads(req.extra)
+    helper.send_info('local', f'完成\r\n')
+    extend, step = req.deploy.extend_obj, 1
     host_actions = json.loads(extend.host_actions)
     server_actions = json.loads(extend.server_actions)
-    if extras and extras[0]:
-        env.update({'SPUG_RELEASE': extras[0]})
-    step = 2
+    env.update({'SPUG_RELEASE': req.version})
     for action in server_actions:
-        helper.send_step('local', step, f'\r\n{human_time()} {action["title"]}...\r\n')
+        helper.send_step('local', step, f'{human_time()} {action["title"]}...\r\n')
         helper.local(f'cd /tmp && {action["data"]}', env)
         step += 1
-    helper.send_step('local', 100, '完成\r\n' if step == 2 else '\r\n')
+    helper.send_step('local', 100, '\r\n')
 
     tmp_transfer_file = None
     for action in host_actions:
@@ -119,17 +116,18 @@ def _ext2_deploy(req, helper, env):
                             else:
                                 excludes.append(f'--exclude={x}')
                         exclude = ' '.join(excludes)
-            tar_gz_file = f'{env.SPUG_VERSION}.tar.gz'
+            tar_gz_file = f'{env.spug_version}.tar.gz'
             helper.local(f'cd {sp_dir} && tar zcf {tar_gz_file} {exclude} {contain}')
             helper.send_info('local', '完成\r\n')
             tmp_transfer_file = os.path.join(sp_dir, tar_gz_file)
             break
     if host_actions:
         threads, latest_exception = [], None
-        with futures.ThreadPoolExecutor(max_workers=min(10, os.cpu_count() + 5)) as executor:
+        max_workers = min(10, os.cpu_count() * 4) if req.deploy.is_parallel else 1
+        with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
             for h_id in json.loads(req.host_ids):
                 env = AttrDict(env.items())
-                t = executor.submit(_deploy_ext2_host, helper, h_id, host_actions, env)
+                t = executor.submit(_deploy_ext2_host, helper, h_id, host_actions, env, req.spug_version)
                 t.h_id = h_id
                 threads.append(t)
             for t in futures.as_completed(threads):
@@ -190,23 +188,22 @@ def _deploy_ext1_host(req, helper, h_id, env):
         command = f'cd {extend.dst_dir} ; {extend.hook_post_host}'
         helper.remote(host.id, ssh, command, env)
 
-    helper.send_step(h_id, 5, f'\r\n{human_time()} ** 发布成功 **')
+    helper.send_step(h_id, 100, f'\r\n{human_time()} ** 发布成功 **')
 
 
-def _deploy_ext2_host(helper, h_id, actions, env):
-    helper.send_step(h_id, 1, f'{human_time()} 数据准备...        ')
+def _deploy_ext2_host(helper, h_id, actions, env, spug_version):
+    helper.send_info(h_id, '就绪\r\n')
     host = Host.objects.filter(pk=h_id).first()
     if not host:
         helper.send_error(h_id, 'no such host')
     env.update({'SPUG_HOST_ID': h_id, 'SPUG_HOST_NAME': host.hostname})
     ssh = host.get_ssh()
-    helper.send_step(h_id, 2, '完成\r\n')
     for index, action in enumerate(actions):
-        helper.send_step(h_id, 2 + index, f'{human_time()} {action["title"]}...\r\n')
+        helper.send_step(h_id, 1 + index, f'{human_time()} {action["title"]}...\r\n')
         if action.get('type') == 'transfer':
             if action.get('src_mode') == '1':
                 try:
-                    ssh.put_file(os.path.join(REPOS_DIR, env.SPUG_DEPLOY_ID, env.SPUG_VERSION), action['dst'])
+                    ssh.put_file(os.path.join(REPOS_DIR, env.SPUG_DEPLOY_ID, spug_version), action['dst'])
                 except Exception as e:
                     helper.send_error(host.id, f'exception: {e}')
                 helper.send_info(host.id, 'transfer completed\r\n')

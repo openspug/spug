@@ -72,8 +72,8 @@ export default observer(function () {
             ))}
           </Select>
         </Form.Item>
-        <Form.Item required label="目标主机" help="可以通过创建多个发布申请单，选择主机分批发布。">
-          {host_ids.length > 0 && `已选择 ${host_ids.length} 台`}
+        <Form.Item required label="目标主机" tooltip="可以通过创建多个发布申请单，选择主机分批发布。">
+          {host_ids.length > 0 && `已选择 ${host_ids.length} 台（可选${app_host_ids.length}）`}
           <Button type="link" onClick={() => setVisible(true)}>选择主机</Button>
         </Form.Item>
         <Form.Item name="desc" label="备注信息">

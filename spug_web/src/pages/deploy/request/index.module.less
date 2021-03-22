@@ -19,6 +19,10 @@
     box-shadow: 0 0 4px rgba(0, 0, 0, .3);
     border-radius: 5px;
 
+    :global(.ant-progress-text) {
+      text-align: center;
+    }
+
     .header {
       display: flex;
       justify-content: space-between;
@@ -98,6 +102,10 @@
 
 .collapse :global(.ant-collapse-content-box) {
   padding: 0;
+}
+
+.upload :global(.ant-upload-list-item) {
+    margin: 0;
 }
 
 .floatBox {

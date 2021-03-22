@@ -6,12 +6,14 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
-import { Form, Switch, Select, Button, Input, Radio } from "antd";
+import { Form, Switch, Select, Button, Input, Radio } from 'antd';
 import envStore from 'pages/config/environment/store';
+import Selector from 'pages/host/Selector';
 import store from './store';
 
 export default observer(function Ext2Setup1() {
   const [envs, setEnvs] = useState([]);
+  const [selectorVisible, setSelectorVisible] = useState(false);
 
   function updateEnvs() {
     const ids = store.currentRecord['deploys'].map(x => x.env_id);
@@ -40,6 +42,10 @@ export default observer(function Ext2Setup1() {
         <Form.Item style={{display: 'inline-block', width: '20%', textAlign: 'right'}}>
           <Link disabled={store.isReadOnly} to="/config/environment">新建环境</Link>
         </Form.Item>
+      </Form.Item>
+      <Form.Item required label="目标主机">
+        {info.host_ids.length > 0 && `已选择 ${info.host_ids.length} 台`}
+        <Button type="link" onClick={() => setSelectorVisible(true)}>选择主机</Button>
       </Form.Item>
       <Form.Item label="发布模式">
         <Radio.Group buttonStyle="solid" value={info.is_parallel} onChange={e => info.is_parallel = e.target.value}>
@@ -82,6 +88,11 @@ export default observer(function Ext2Setup1() {
           disabled={!info.env_id}
           onClick={() => store.page += 1}>下一步</Button>
       </Form.Item>
+      <Selector
+        visible={selectorVisible}
+        selectedRowKeys={[...info.host_ids]}
+        onCancel={() => setSelectorVisible(false)}
+        onOk={(_, ids) => info.host_ids = ids}/>
     </Form>
   )
 })

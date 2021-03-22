@@ -43,51 +43,13 @@ class RequestView(View):
             tmp['app_name'] = item.app_name
             tmp['app_extend'] = item.app_extend
             tmp['host_ids'] = json.loads(item.host_ids)
+            tmp['extra'] = json.loads(item.extra) if item.extra else None
             tmp['rep_extra'] = json.loads(item.rep_extra) if item.rep_extra else None
             tmp['app_host_ids'] = json.loads(item.app_host_ids)
             tmp['status_alias'] = item.get_status_display()
             tmp['created_by_user'] = item.created_by_user
             data.append(tmp)
         return json_response(data)
-
-    def post(self, request):
-        form, error = JsonParser(
-            Argument('id', type=int, required=False),
-            Argument('deploy_id', type=int, help='缺少必要参数'),
-            Argument('name', help='请输申请标题'),
-            Argument('extra', type=list, help='缺少必要参数'),
-            Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
-            Argument('desc', required=False),
-        ).parse(request.body)
-        if error is None:
-            deploy = Deploy.objects.filter(pk=form.deploy_id).first()
-            if not deploy:
-                return json_response(error='未找到该发布配置')
-            if deploy.extend == '2':
-                if form.extra[0]:
-                    form.extra[0] = form.extra[0].replace("'", '')
-                if DeployExtend2.objects.filter(deploy=deploy, host_actions__contains='"src_mode": "1"').exists():
-                    if len(form.extra) < 2:
-                        return json_response(error='该应用的发布配置中使用了数据传输动作且设置为发布时上传，请上传要传输的数据')
-                    form.version = form.extra[1].get('path')
-            form.name = form.name.replace("'", '')
-            form.status = '0' if deploy.is_audit else '1'
-            form.extra = json.dumps(form.extra)
-            form.host_ids = json.dumps(form.host_ids)
-            if form.id:
-                req = DeployRequest.objects.get(pk=form.id)
-                is_required_notify = deploy.is_audit and req.status == '-1'
-                DeployRequest.objects.filter(pk=form.id).update(
-                    created_by=request.user,
-                    reason=None,
-                    **form
-                )
-            else:
-                req = DeployRequest.objects.create(created_by=request.user, **form)
-                is_required_notify = deploy.is_audit
-            if is_required_notify:
-                Thread(target=Helper.send_deploy_notify, args=(req, 'approve_req')).start()
-        return json_response(error=error)
 
     def put(self, request):
         form, error = JsonParser(
@@ -162,11 +124,12 @@ class RequestDetailView(View):
         if not req:
             return json_response(error='未找到指定发布申请')
         hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
-        server_actions, host_actions = [], []
         outputs = {x.id: {'id': x.id, 'title': x.name, 'data': []} for x in hosts}
+        response = {'outputs': outputs, 'status': req.status}
         if req.deploy.extend == '2':
-            server_actions = json.loads(req.deploy.extend_obj.server_actions)
-            host_actions = json.loads(req.deploy.extend_obj.host_actions)
+            outputs['local'] = {'id': 'local', 'data': []}
+            response['s_actions'] = json.loads(req.deploy.extend_obj.server_actions)
+            response['h_actions'] = json.loads(req.deploy.extend_obj.host_actions)
         rds, key, counter = get_redis_connection(), f'{settings.REQUEST_KEY}:{r_id}', 0
         data = rds.lrange(key, counter, counter + 9)
         while data:
@@ -180,12 +143,7 @@ class RequestDetailView(View):
                 if 'status' in item:
                     outputs[item['key']]['status'] = item['status']
             data = rds.lrange(key, counter, counter + 9)
-        return json_response({
-            'server_actions': server_actions,
-            'host_actions': host_actions,
-            'outputs': outputs,
-            'status': req.status
-        })
+        return json_response(response)
 
     def post(self, request, r_id):
         query = {'pk': r_id}
@@ -206,7 +164,13 @@ class RequestDetailView(View):
         req.do_by = request.user
         req.save()
         Thread(target=dispatch, args=(req,)).start()
-        return json_response({'type': req.type, 'outputs': outputs})
+        if req.deploy.extend == '2':
+            message = f'{human_time()} 建立连接...        '
+            outputs['local'] = {'id': 'local', 'step': 0, 'data': [message]}
+            s_actions = json.loads(req.deploy.extend_obj.server_actions)
+            h_actions = json.loads(req.deploy.extend_obj.host_actions)
+            return json_response({'s_actions': s_actions, 'h_actions': h_actions, 'outputs': outputs})
+        return json_response({'outputs': outputs})
 
     def patch(self, request, r_id):
         form, error = JsonParser(
@@ -256,6 +220,43 @@ def post_request_1(request):
         else:
             req = DeployRequest.objects.create(created_by=request.user, **form)
             is_required_notify = repository.deploy.is_audit
+        if is_required_notify:
+            Thread(target=Helper.send_deploy_notify, args=(req, 'approve_req')).start()
+    return json_response(error=error)
+
+
+def post_request_2(request):
+    form, error = JsonParser(
+        Argument('id', type=int, required=False),
+        Argument('deploy_id', type=int, help='缺少必要参数'),
+        Argument('name', help='请输申请标题'),
+        Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
+        Argument('extra', type=dict, required=False),
+        Argument('version', required=False),
+        Argument('desc', required=False),
+    ).parse(request.body)
+    if error is None:
+        deploy = Deploy.objects.filter(pk=form.deploy_id).first()
+        if not deploy:
+            return json_response(error='未找到该发布配置')
+        extra = form.pop('extra')
+        if DeployExtend2.objects.filter(deploy=deploy, host_actions__contains='"src_mode": "1"').exists():
+            if not extra:
+                return json_response(error='该应用的发布配置中使用了数据传输动作且设置为发布时上传，请上传要传输的数据')
+            form.spug_version = extra['path']
+            form.extra = json.dumps(extra)
+        else:
+            form.spug_version = Repository.make_spug_version(deploy.id)
+        form.name = form.name.replace("'", '')
+        form.status = '0' if deploy.is_audit else '1'
+        form.host_ids = json.dumps(form.host_ids)
+        if form.id:
+            req = DeployRequest.objects.get(pk=form.id)
+            is_required_notify = deploy.is_audit and req.status == '-1'
+            DeployRequest.objects.filter(pk=form.id).update(created_by=request.user, reason=None, **form)
+        else:
+            req = DeployRequest.objects.create(created_by=request.user, **form)
+            is_required_notify = deploy.is_audit
         if is_required_notify:
             Thread(target=Helper.send_deploy_notify, args=(req, 'approve_req')).start()
     return json_response(error=error)

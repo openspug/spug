@@ -13,6 +13,7 @@ import Ext2Form from './Ext2Form';
 import Approve from './Approve';
 import ComTable from './Table';
 import Ext1Console from './Ext1Console';
+import Ext2Console from './Ext2Console';
 import { http, includes } from 'libs';
 import envStore from 'pages/config/environment/store';
 import appStore from 'pages/config/app/store';
@@ -115,7 +116,11 @@ function Index() {
         <Row gutter={12} className={styles.miniConsole}>
           {store.tabs.map(item => (
             <Col key={item.id}>
-              <Ext1Console request={item}/>
+              {item.app_extend === '1' ? (
+                <Ext1Console request={item}/>
+              ) : (
+                <Ext2Console request={item}/>
+              )}
             </Col>
           ))}
         </Row>
