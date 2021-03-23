@@ -5,6 +5,7 @@ from django.views.generic import View
 from django.db.models import F
 from libs import json_response, JsonParser, Argument
 from apps.repository.models import Repository
+from apps.deploy.models import DeployRequest
 from apps.repository.utils import dispatch
 from apps.app.models import Deploy
 from threading import Thread
@@ -66,5 +67,21 @@ class RepositoryView(View):
             repository = Repository.objects.filter(pk=form.id).first()
             if not repository:
                 return json_response(error='未找到指定构建记录')
-
+            if repository.deployrequest_set.exists():
+                return json_response(error='已关联发布申请无法删除')
+            repository.delete()
         return json_response(error=error)
+
+
+def get_requests(request):
+    form, error = JsonParser(
+        Argument('repository_id', type=int, help='参数错误')
+    ).parse(request.GET)
+    if error is None:
+        requests = []
+        for item in DeployRequest.objects.filter(repository_id=form.repository_id):
+            data = item.to_dict(selects=('id', 'name', 'created_at'))
+            data['host_ids'] = json.loads(item.host_ids)
+            data['status_alias'] = item.get_status_display()
+            requests.append(data)
+        return json_response(requests)

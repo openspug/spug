@@ -14,20 +14,6 @@ import store from './store';
 function ComTable() {
   const [loading, setLoading] = useState();
 
-  function handleDelete(info) {
-    Modal.confirm({
-      title: '删除确认',
-      content: `确定要删除【${info['name']}】?`,
-      onOk: () => {
-        return http.delete('/api/config/environment/', {params: {id: info.id}})
-          .then(() => {
-            message.success('删除成功');
-            store.fetchRecords()
-          })
-      }
-    })
-  }
-
   function handleRebuild(info) {
     if (info.status === '5') {
       Modal.confirm({
@@ -71,10 +57,10 @@ function ComTable() {
         showTotal: total => `共 ${total} 条`,
         pageSizeOptions: ['10', '20', '50', '100']
       }}>
-      <Table.Column ellipsis title="应用" dataIndex="app_name"/>
+      <Table.Column title="应用" dataIndex="app_name"/>
       <Table.Column title="环境" dataIndex="env_name"/>
       <Table.Column title="版本" dataIndex="version"/>
-      <Table.Column ellipsis title="备注" dataIndex="remarks"/>
+      <Table.Column title="备注" dataIndex="remarks"/>
       <Table.Column hide title="构建时间" dataIndex="created_at"/>
       <Table.Column hide title="构建人" dataIndex="created_by_user"/>
       <Table.Column width={100} title="状态"

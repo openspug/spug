@@ -7,4 +7,5 @@ from .views import *
 
 urlpatterns = [
     path('', RepositoryView.as_view()),
+    path('request/', get_requests),
 ]
