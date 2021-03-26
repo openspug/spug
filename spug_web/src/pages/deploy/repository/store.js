@@ -34,6 +34,11 @@ class Store {
       .finally(() => this.isFetching = false)
   };
 
+  showForm = () => {
+    this.record = {};
+    this.addVisible = true
+  };
+
   confirmAdd = (deploy) => {
     this.deploy = deploy;
     this.formVisible = true;

@@ -48,7 +48,7 @@ function ComTable() {
           auth="config.env.add"
           type="primary"
           icon={<PlusOutlined/>}
-          onClick={() => store.addVisible = true}>新建</AuthButton>
+          onClick={store.showForm}>新建</AuthButton>
       ]}
       pagination={{
         showSizeChanger: true,

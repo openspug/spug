@@ -15,59 +15,64 @@ export default observer(function () {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
-  const [git_type, setGitType] = useState(lds.get(store.deploy, 'extra.0', 'branch'));
-  const [extra1, setExtra1] = useState(lds.get(store.deploy, 'extra.1'));
-  const [extra2, setExtra2] = useState(lds.get(store.deploy, 'extra.2'));
+  const [git_type, setGitType] = useState();
+  const [extra, setExtra] = useState();
+  const [extra1, setExtra1] = useState();
+  const [extra2, setExtra2] = useState();
   const [versions, setVersions] = useState({});
 
   useEffect(() => {
     fetchVersions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  useEffect(() => {
-    if (extra1 === undefined) {
-      const {branches, tags} = versions;
-      let [extra1, extra2] = [undefined, undefined];
-      if (git_type === 'branch') {
-        if (branches) {
-          extra1 = _getDefaultBranch(branches);
-          extra2 = lds.get(branches[extra1], '0.id')
-        }
+  function _setDefault(type, new_extra, new_versions) {
+    const now_extra = new_extra || extra;
+    const now_versions = new_versions || versions;
+     const {branches, tags} = now_versions;
+    if (type === 'branch') {
+      let [branch, commit] = [now_extra[1], null];
+      if (branches[branch]) {
+        commit = lds.get(branches[branch], '0.id')
       } else {
-        if (tags) {
-          extra1 = lds.get(Object.keys(tags), 0)
+        branch = lds.get(Object.keys(branches), 0)
+        commit = lds.get(branches, `${branch}.0.id`)
+      }
+      setExtra1(branch)
+      setExtra2(commit)
+    } else {
+      setExtra1(lds.get(Object.keys(tags), 0))
+    }
+  }
+
+  function _initial(versions) {
+    const {branches, tags} = versions;
+    if (branches && tags) {
+      for (let item of store.records) {
+        if (item.deploy_id === store.deploy.id) {
+          const type = item.extra[0];
+          setExtra(item.extra);
+          setGitType(type);
+          _setDefault(type, item.extra, versions)
+          break
         }
       }
-      setExtra1(extra1)
-      setExtra2(extra2)
     }
-  }, [versions, git_type, extra1])
+  }
 
   function fetchVersions() {
     setFetching(true);
     http.get(`/api/app/deploy/${store.deploy.id}/versions/`, {timeout: 120000})
-      .then(res => setVersions(res))
+      .then(res => {
+        setVersions(res);
+        _initial(res)
+      })
       .finally(() => setFetching(false))
   }
 
-  function _getDefaultBranch(branches) {
-    branches = Object.keys(branches);
-    let branch = branches[0];
-    for (let item of store.records) {
-      if (item['deploy_id'] === store.record['deploy_id']) {
-        const b = lds.get(item, 'extra.1');
-        if (branches.includes(b)) {
-          branch = b
-        }
-        break
-      }
-    }
-    return branch
-  }
-
   function switchType(v) {
-    setExtra1(undefined);
-    setGitType(v)
+    setGitType(v);
+    _setDefault(v)
   }
 
   function switchExtra1(v) {
