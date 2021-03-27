@@ -201,6 +201,7 @@ def handle_user_info(user, x_real_ip):
     History.objects.create(user=user, ip=x_real_ip)
     verify_ip = AppSetting.get_default('verify_ip', True)
     return json_response({
+        'id': user.id,
         'access_token': user.access_token,
         'nickname': user.nickname,
         'is_supper': user.is_supper,

@@ -1,0 +1,69 @@
+.notice {
+  :global(.ant-card-body) {
+    height: 220px;
+    padding: 0 24px;
+  }
+
+  button {
+    padding-right: 0;
+  }
+
+  .title {
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+  }
+
+  .title:hover {
+    color: #1890ff
+  }
+
+  .add {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 8px;
+    height: 30px;
+    border-radius: 2px;
+    border: 1px dashed #d9d9d9;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .add:hover {
+    border: 1px dashed #1890ff;
+    color: #1890ff;
+  }
+
+  .item {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    :global(.anticon) {
+      cursor: pointer;
+      color: #1890ff;
+    }
+  }
+}
+
+.nav {
+  margin-top: 12px;
+
+  :global(.ant-card) {
+    height: 120px;
+    background-color: #fafafa;
+    cursor: pointer;
+
+    :global(.ant-card-meta-description) {
+      display: -webkit-box;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+  }
+
+}

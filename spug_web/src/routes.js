@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import {
+  DashboardOutlined,
   DesktopOutlined,
   CloudServerOutlined,
   CodeOutlined,
@@ -15,41 +16,41 @@ import {
   AlertOutlined,
   SettingOutlined
 } from '@ant-design/icons';
+
 import HomeIndex from './pages/home';
-
+import DashboardIndex from './pages/dashboard';
 import HostIndex from './pages/host';
-
 import ExecTask from './pages/exec/task';
 import ExecTemplate from './pages/exec/template';
-
 import DeployApp from './pages/deploy/app';
 import DeployRepository from './pages/deploy/repository';
 import DeployRequest from './pages/deploy/request';
 import DoExt1Index from './pages/deploy/do/Ext1Index';
 import DoExt2Index from './pages/deploy/do/Ext2Index';
-
 import ScheduleIndex from './pages/schedule';
-
 import ConfigEnvironment from './pages/config/environment';
 import ConfigService from './pages/config/service';
 import ConfigApp from './pages/config/app';
 import ConfigSetting from './pages/config/setting';
-
 import MonitorIndex from './pages/monitor';
-
 import AlarmIndex from './pages/alarm/alarm';
 import AlarmGroup from './pages/alarm/group';
 import AlarmContact from './pages/alarm/contact';
-
 import SystemAccount from './pages/system/account';
 import SystemRole from './pages/system/role';
 import SystemSetting from './pages/system/setting';
-
 import WelcomeIndex from './pages/welcome/index';
 import WelcomeInfo from './pages/welcome/info';
 
 export default [
   {icon: <DesktopOutlined/>, title: '工作台', auth: 'home.home.view', path: '/home', component: HomeIndex},
+  {
+    icon: <DashboardOutlined/>,
+    title: 'Dashboard',
+    auth: 'home.home.view',
+    path: '/dashboard',
+    component: DashboardIndex
+  },
   {icon: <CloudServerOutlined/>, title: '主机管理', auth: 'host.host.view', path: '/host', component: HostIndex},
   {
     icon: <CodeOutlined/>, title: '批量执行', auth: 'exec.task.do|exec.template.view', child: [

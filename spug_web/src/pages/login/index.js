@@ -64,6 +64,7 @@ export default function () {
   }
 
   function doLogin(data) {
+    localStorage.setItem('id', data['id']);
     localStorage.setItem('token', data['access_token']);
     localStorage.setItem('nickname', data['nickname']);
     localStorage.setItem('is_supper', data['is_supper']);
