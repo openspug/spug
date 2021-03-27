@@ -52,7 +52,7 @@ export default observer(function () {
       visible
       width={600}
       maskClosable={false}
-      title="新建发布申请"
+      title={`${store.record.id ? '编辑' : '新建'}发布申请`}
       onCancel={() => store.ext1Visible = false}
       confirmLoading={loading}
       onOk={handleSubmit}>
