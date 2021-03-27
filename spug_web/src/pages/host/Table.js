@@ -69,7 +69,7 @@ class ComTable extends React.Component {
           sorter={(a, b) => a.name.localeCompare(b.name)}/>
         <Table.Column title="连接地址" dataIndex="hostname" sorter={(a, b) => a.name.localeCompare(b.name)}/>
         <Table.Column hide width={100} title="端口" dataIndex="port"/>
-        <Table.Column hide ellipsis title="备注信息" dataIndex="desc"/>
+        <Table.Column title="备注信息" dataIndex="desc"/>
         {hasPermission('host.host.edit|host.host.del|host.host.console') && (
           <Table.Column width={200} title="操作" render={info => (
             <Action>
