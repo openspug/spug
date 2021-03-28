@@ -63,10 +63,27 @@
 .nav {
   margin-top: 12px;
 
-  :global(.ant-card) {
-    height: 120px;
-    background-color: #fafafa;
+  .add {
     cursor: pointer;
+    height: 166px;
+    border: 1px dashed #d9d9d9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .add:hover {
+    border: 1px dashed #1890ff;
+    color: #1890ff;
+  }
+
+  :global(.ant-card) {
+    height: 166px;
+    background-color: #fafafa;
+
+    :global(.ant-card-actions) {
+      background-color: #f0f0f0;
+    }
 
     :global(.ant-card-meta-description) {
       display: -webkit-box;
@@ -76,5 +93,12 @@
       -webkit-box-orient: vertical;
     }
   }
-
 }
+
+.minusIcon {
+    font-size: 26px;
+    color: #a6a6a6;
+  }
+  .minusIcon:hover {
+    color: #ff4d4f;
+  }
