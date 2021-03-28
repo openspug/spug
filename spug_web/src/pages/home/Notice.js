@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Card, List, Modal, Form, Input, Switch, Divider } from 'antd';
 import { DownSquareOutlined, PlusOutlined, UpSquareOutlined, SoundOutlined } from '@ant-design/icons';
 import { http } from 'libs';
-import styles from "./index.module.less";
+import styles from './index.module.less';
 
 function NoticeIndex(props) {
   const id = localStorage.getItem('id');
@@ -20,7 +20,7 @@ function NoticeIndex(props) {
 
   function fetch() {
     setFetching(true);
-    http.get('/api/notice/')
+    http.get('/api/home/notice/')
       .then(res => {
         setRecords(res);
         for (let item of res) {
@@ -36,7 +36,7 @@ function NoticeIndex(props) {
     setLoading(true);
     const formData = form.getFieldsValue();
     formData['id'] = record.id;
-    http.post('/api/notice/', formData)
+    http.post('/api/home/notice/', formData)
       .then(() => {
         fetch()
         setRecord(null)
@@ -51,14 +51,14 @@ function NoticeIndex(props) {
 
   function handleSort(e, info, sort) {
     e.stopPropagation();
-    http.patch('/api/notice/', {id: info.id, sort})
+    http.patch('/api/home/notice/', {id: info.id, sort})
       .then(() => fetch())
   }
 
   function handleRead() {
     if (!notice.read_ids.includes(id)) {
       const formData = {id: notice.id, read: 1};
-      http.patch('/api/notice/', formData)
+      http.patch('/api/home/notice/', formData)
         .then(() => fetch())
     }
     setNotice(null);

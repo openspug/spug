@@ -3,7 +3,7 @@
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
 from libs import json_response, JsonParser, Argument
-from apps.notice.models import Notice
+from apps.home.models import Notice
 import json
 
 

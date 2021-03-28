@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'apps.deploy',
     'apps.notify',
     'apps.repository',
-    'apps.notice',
+    'apps.home',
 ]
 
 MIDDLEWARE = [
