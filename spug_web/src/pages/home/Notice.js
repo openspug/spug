@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, List, Modal, Form, Input, Switch, Divider, Tag } from 'antd';
+import { Button, Card, List, Modal, Form, Input, Switch, Divider } from 'antd';
 import { DownSquareOutlined, PlusOutlined, UpSquareOutlined, SoundOutlined } from '@ant-design/icons';
 import { http } from 'libs';
 import styles from "./index.module.less";
@@ -21,7 +21,14 @@ function NoticeIndex(props) {
   function fetch() {
     setFetching(true);
     http.get('/api/notice/')
-      .then(res => setRecords(res))
+      .then(res => {
+        setRecords(res);
+        for (let item of res) {
+          if (item.is_stress && !item.read_ids.includes(id)) {
+            setNotice(item)
+          }
+        }
+      })
       .finally(() => setFetching(false))
   }
 
