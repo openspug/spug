@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) OpenSpug Organization. https://github.com/openspug/spug
+ * Copyright (c) <spug.dev@gmail.com>
+ * Released under the AGPL-3.0 License.
+ */
 import React, { useEffect, useState } from 'react';
 import { Button, Card, List, Modal, Form, Input, Switch, Divider } from 'antd';
 import { DownSquareOutlined, PlusOutlined, UpSquareOutlined, SoundOutlined } from '@ant-design/icons';
