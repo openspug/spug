@@ -1,7 +1,8 @@
 .notice {
   :global(.ant-card-body) {
-    height: 220px;
+    height: 234px;
     padding: 0 24px;
+    overflow: auto;
   }
 
   button {
@@ -9,15 +10,25 @@
   }
 
   .title {
+    flex: 1;
     cursor: pointer;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-
   }
 
   .title:hover {
     color: #1890ff
+  }
+
+  .badge {
+    overflow: hidden;
+  }
+
+  .date {
+    display: inline-block;
+    font-size: 12px;
+    color: #999;
   }
 
   .add {

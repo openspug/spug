@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, List, Modal, Form, Input, Switch, Divider, Badge } from 'antd';
-import { DownSquareOutlined, PlusOutlined, UpSquareOutlined } from '@ant-design/icons';
+import { Button, Card, List, Modal, Form, Input, Switch, Divider, Tag } from 'antd';
+import { DownSquareOutlined, PlusOutlined, UpSquareOutlined, SoundOutlined } from '@ant-design/icons';
 import { http } from 'libs';
 import styles from "./index.module.less";
 
@@ -80,9 +80,10 @@ function NoticeIndex(props) {
       ) : (
         <List>
           {records.map(item => (
-            <List.Item key={item.id} onClick={() => setNotice(item)}>
-              <Badge dot={!item.read_ids.includes(id)}><span className={styles.title}>{item.title}</span></Badge>
-              <span style={{fontSize: 12, color: '#999'}}>{item.created_at.substr(0, 10)}</span>
+            <List.Item key={item.id} className={styles.item} onClick={() => setNotice(item)}>
+              {!item.read_ids.includes(id) && <SoundOutlined style={{color: '#ff4d4f', marginRight: 4}} />}
+              <span className={styles.title}>{item.title}</span>
+              <span className={styles.date}>{item.created_at.substr(0, 10)}</span>
             </List.Item>
           ))}
           {records.length === 0 && (
