@@ -39,10 +39,11 @@ function NavIndex(props) {
     <Card
       title="便捷导航"
       className={styles.nav}
+      bodyStyle={{paddingBottom: 0, minHeight: 166}}
       extra={<Button type="link" onClick={() => setIsEdit(!isEdit)}>{isEdit ? '完成' : '编辑'}</Button>}>
       {isEdit ? (
         <Row gutter={24}>
-          <Col span={6}>
+          <Col span={6} style={{marginBottom: 24}}>
             <div
               className={styles.add}
               onClick={() => setRecord({links: [{}]})}>
@@ -51,7 +52,7 @@ function NavIndex(props) {
             </div>
           </Col>
           {records.map(item => (
-            <Col key={item.id} span={6}>
+            <Col key={item.id} span={6} style={{marginBottom: 24}}>
               <Card actions={[
                 <LeftSquareOutlined onClick={() => handleSort(item, 'up')}/>,
                 <RightSquareOutlined onClick={() => handleSort(item, 'down')}/>,
@@ -68,7 +69,7 @@ function NavIndex(props) {
       ) : (
         <Row gutter={24}>
           {records.map(item => (
-            <Col key={item.id} span={6}>
+            <Col key={item.id} span={6} style={{marginBottom: 24}}>
               <Card actions={item.links.map(x => <span>{x.name}</span>)}>
                 <Card.Meta
                   avatar={<Avatar src={item.logo}/>}
