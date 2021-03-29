@@ -5,6 +5,7 @@ from django.urls import path
 
 from .views import *
 from apps.home.notice import NoticeView
+from apps.home.navigation import NavView
 
 urlpatterns = [
     path('statistic/', get_statistic),
@@ -12,4 +13,5 @@ urlpatterns = [
     path('deploy/', get_deploy),
     path('request/', get_request),
     path('notice/', NoticeView.as_view()),
+    path('navigation/', NavView.as_view()),
 ]

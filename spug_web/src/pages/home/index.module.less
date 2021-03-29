@@ -68,6 +68,7 @@
     height: 166px;
     border: 1px dashed #d9d9d9;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
   }
@@ -79,13 +80,14 @@
 
   :global(.ant-card) {
     height: 166px;
-    background-color: #fafafa;
+    background-color: #fdfdfd;
 
     :global(.ant-card-actions) {
-      background-color: #f0f0f0;
+      background-color: #fafafa;
     }
 
     :global(.ant-card-meta-description) {
+      height: 44px;
       display: -webkit-box;
       text-overflow: ellipsis;
       overflow: hidden;

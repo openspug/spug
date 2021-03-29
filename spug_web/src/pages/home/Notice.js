@@ -20,10 +20,11 @@ function NoticeIndex(props) {
   const [notice, setNotice] = useState();
 
   useEffect(() => {
-    fetch()
+    fetchRecords()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function fetch() {
+  function fetchRecords() {
     setFetching(true);
     http.get('/api/home/notice/')
       .then(res => {
@@ -43,7 +44,7 @@ function NoticeIndex(props) {
     formData['id'] = record.id;
     http.post('/api/home/notice/', formData)
       .then(() => {
-        fetch()
+        fetchRecords()
         setRecord(null)
       })
       .finally(() => setLoading(false))
@@ -57,14 +58,14 @@ function NoticeIndex(props) {
   function handleSort(e, info, sort) {
     e.stopPropagation();
     http.patch('/api/home/notice/', {id: info.id, sort})
-      .then(() => fetch())
+      .then(() => fetchRecords())
   }
 
   function handleRead() {
     if (!notice.read_ids.includes(id)) {
       const formData = {id: notice.id, read: 1};
       http.patch('/api/home/notice/', formData)
-        .then(() => fetch())
+        .then(() => fetchRecords())
     }
     setNotice(null);
   }

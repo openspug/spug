@@ -22,3 +22,21 @@ class Notice(models.Model, ModelMixin):
     class Meta:
         db_table = 'notices'
         ordering = ('-sort_id',)
+
+
+class Navigation(models.Model, ModelMixin):
+    title = models.CharField(max_length=64)
+    desc = models.CharField(max_length=128)
+    logo = models.TextField()
+    links = models.TextField()
+    sort_id = models.IntegerField(default=0, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def to_view(self):
+        tmp = self.to_dict()
+        tmp['links'] = json.loads(self.links)
+        return tmp
+
+    class Meta:
+        db_table = 'navigations'
+        ordering = ('-sort_id',)
