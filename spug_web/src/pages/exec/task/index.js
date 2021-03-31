@@ -6,9 +6,9 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { PlusOutlined, ThunderboltOutlined } from '@ant-design/icons';
-import { Form, Button, Card, Tag } from 'antd';
+import { Form, Button, Card, Alert } from 'antd';
 import { ACEditor, AuthDiv, Breadcrumb } from 'components';
-import HostSelector from './HostSelector';
+import Selector from 'pages/host/Selector';
 import TemplateSelector from './TemplateSelector';
 import ExecConsole from './ExecConsole';
 import { http, cleanCommand } from 'libs';
@@ -26,7 +26,7 @@ class TaskIndex extends React.Component {
 
   handleSubmit = () => {
     this.setState({loading: true});
-    const host_ids = store.hosts.map(item => item.id);
+    const host_ids = store.host_ids;
     http.post('/api/exec/do/', {host_ids, command: cleanCommand(this.state.body)})
       .then(store.switchConsole)
       .finally(() => this.setState({loading: false}))
@@ -43,17 +43,15 @@ class TaskIndex extends React.Component {
         </Breadcrumb>
         <Card>
           <Form layout="vertical">
-            <Form.Item label="执行主机" style={{marginBottom: 12}}>
-              {store.hosts.map(item => (
-                <Tag
-                  closable
-                  color="#108ee9"
-                  key={item.id}
-                  onClose={() => store.hosts = store.hosts.filter(x => x.id !== item.id)}>
-                  {item.name}({item.hostname}:{item.port})</Tag>
-              ))}
+            <Form.Item required label="目标主机">
+              {store.host_ids.length > 0 && (
+                <Alert style={{width: 200}} type="info" message={`已选择 ${store.host_ids.length} 台`}/>
+              )}
             </Form.Item>
-            <Button style={{marginBottom: 24}} icon={<PlusOutlined/>} onClick={store.switchHost}>从主机列表中选择</Button>
+            <Button
+              style={{marginBottom: 24}}
+              icon={<PlusOutlined/>}
+              onClick={() => store.showHost = true}>从主机列表中选择</Button>
             <Form.Item label="执行命令">
               <ACEditor mode="sh" value={body} height="300px" onChange={body => this.setState({body})}/>
             </Form.Item>
@@ -63,10 +61,14 @@ class TaskIndex extends React.Component {
             <Button icon={<ThunderboltOutlined/>} type="primary" onClick={this.handleSubmit}>开始执行</Button>
           </Form>
         </Card>
-        {store.showHost && <HostSelector onCancel={store.switchHost} onOk={hosts => store.hosts = hosts}/>}
         {store.showTemplate &&
         <TemplateSelector onCancel={store.switchTemplate} onOk={v => this.setState({body: body + v})}/>}
         {store.showConsole && <ExecConsole token={token} onCancel={store.switchConsole}/>}
+        <Selector
+          visible={store.showHost}
+          selectedRowKeys={[...store.host_ids]}
+          onCancel={() => store.showHost = false}
+          onOk={(_, ids) => store.host_ids = ids}/>
       </AuthDiv>
     );
   }

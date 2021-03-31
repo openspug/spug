@@ -4,10 +4,11 @@
  * Released under the AGPL-3.0 License.
  */
 import { observable } from "mobx";
+import hostStore from 'pages/host/store';
 
 class Store {
   @observable outputs = {};
-  @observable hosts = [];
+  @observable host_ids = [];
   @observable token = null;
   @observable isFullscreen = false;
   @observable showHost = false;
@@ -27,10 +28,11 @@ class Store {
       this.showConsole = false;
       this.outputs = {}
     } else {
-      for (let item of this.hosts) {
-        const key = `${item.hostname}:${item.port}`;
+      for (let id of this.host_ids) {
+        const host = hostStore.idMap[id];
+        const key = `${host.hostname}:${host.port}`;
         this.outputs[key] = {
-          title: `${item.name}(${key})`,
+          title: `${host.name}(${key})`,
           system: ['### Establishing communication\n'],
           info: [],
           error: [],
