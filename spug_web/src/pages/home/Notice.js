@@ -4,7 +4,7 @@
  * Released under the AGPL-3.0 License.
  */
 import React, { useEffect, useState } from 'react';
-import { Button, Card, List, Modal, Form, Input, Switch, Divider } from 'antd';
+import { Button, Card, List, Modal, Form, Input, Switch, Divider, Typography } from 'antd';
 import { DownSquareOutlined, PlusOutlined, UpSquareOutlined, SoundOutlined } from '@ant-design/icons';
 import { http } from 'libs';
 import styles from './index.module.less';
@@ -125,7 +125,11 @@ function NoticeIndex(props) {
       </Modal>
       {notice ? (
         <Modal title={notice.title} visible={notice} footer={null} onCancel={handleRead}>
-          {notice.content}
+          <Typography>
+            {notice.content.split('\n').map((item, index) => (
+              <Typography.Paragraph key={index}>{item}</Typography.Paragraph>
+            ))}
+          </Typography>
         </Modal>
       ) : null}
     </Card>
