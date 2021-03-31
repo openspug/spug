@@ -12,7 +12,7 @@ import store from './store';
 
 export default observer(function () {
   const [verify_ip, setVerifyIP] = useState(store.settings.verify_ip);
-  const [mfa, setMFA] = useState(store.settings.MFA);
+  const [mfa, setMFA] = useState(store.settings.MFA || {});
 
   function handleChangeVerifyIP(v) {
     setVerifyIP(v);
