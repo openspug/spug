@@ -115,7 +115,9 @@ function ComTable() {
           </Action>;
         case '1':
           return <Action>
-            <Action.Button auth="deploy.request.do" onClick={() => store.showConsole(info)}>发布</Action.Button>
+            <Popconfirm title="确认要执行该发布申请？" onConfirm={e => handleDeploy(e, info)}>
+              <Action.Button auth="deploy.request.do">发布</Action.Button>
+            </Popconfirm>
             <Action.Button auth="deploy.request.del" onClick={() => handleDelete(info)}>删除</Action.Button>
           </Action>;
         case '2':

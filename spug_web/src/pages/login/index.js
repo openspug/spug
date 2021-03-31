@@ -74,7 +74,7 @@ export default function () {
     if (history.location.state && history.location.state['from']) {
       history.push(history.location.state['from'])
     } else {
-      history.push('/welcome/index')
+      history.push('/home')
     }
   }
 
