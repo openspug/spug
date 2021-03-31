@@ -25,7 +25,6 @@ export default observer(function () {
   const [draggable, setDraggable] = useState(false);
   const [action, setAction] = useState('');
   const [expands, setExpands] = useState([]);
-  const [treeData, setTreeData] = useState();
   const [bakTreeData, setBakTreeData] = useState();
 
   useEffect(() => {
@@ -67,19 +66,19 @@ export default observer(function () {
   }
 
   function handleAddRoot() {
-    setBakTreeData(lds.cloneDeep(treeData));
+    setBakTreeData(lds.cloneDeep(store.treeData));
     const current = {key: 0, parent_id: 0, title: ''};
-    treeData.unshift(current);
-    setTreeData(lds.cloneDeep(treeData));
+    store.treeData.unshift(current);
+    store.treeData = lds.cloneDeep(store.treeData);
     store.group = current;
     setAction('edit')
   }
 
   function handleAdd() {
-    setBakTreeData(lds.cloneDeep(treeData));
+    setBakTreeData(lds.cloneDeep(store.treeData));
     const current = {key: 0, parent_id: store.group.key, title: ''};
     store.group.children.unshift(current);
-    setTreeData(lds.cloneDeep(treeData));
+    store.treeData = lds.cloneDeep(store.treeData);
     if (!expands.includes(store.group.key)) setExpands([store.group.key, ...expands]);
     store.group = current;
     setAction('edit')
@@ -95,7 +94,7 @@ export default observer(function () {
 
   function handleBlur() {
     if (store.group.key === 0) {
-      setTreeData(bakTreeData)
+      store.treeData = bakTreeData
     }
     setAction('')
   }
