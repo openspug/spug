@@ -38,7 +38,7 @@ export default observer(function () {
     formData['host_ids'] = host_ids;
     formData['type'] = store.record.type;
     formData['deploy_id'] = store.record.deploy_id;
-    http.post('/api/deploy/request/1/', formData)
+    http.post('/api/deploy/request/ext1/', formData)
       .then(res => {
         message.success('操作成功');
         store.ext1Visible = false;

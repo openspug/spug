@@ -194,7 +194,7 @@ class RequestDetailView(View):
         return json_response(error=error)
 
 
-def post_request_1(request):
+def post_request_ext1(request):
     form, error = JsonParser(
         Argument('id', type=int, required=False),
         Argument('name', help='请输申请标题'),
@@ -225,7 +225,7 @@ def post_request_1(request):
     return json_response(error=error)
 
 
-def post_request_2(request):
+def post_request_ext2(request):
     form, error = JsonParser(
         Argument('id', type=int, required=False),
         Argument('deploy_id', type=int, help='缺少必要参数'),

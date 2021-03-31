@@ -39,7 +39,7 @@ export default observer(function () {
     formData['host_ids'] = host_ids;
     formData['deploy_id'] = store.record.deploy_id;
     if (fileList.length > 0) formData['extra'] = lds.pick(fileList[0], ['path', 'name']);
-    http.post('/api/deploy/request/2/', formData)
+    http.post('/api/deploy/request/ext2/', formData)
       .then(res => {
         message.success('操作成功');
         store.ext2Visible = false;
