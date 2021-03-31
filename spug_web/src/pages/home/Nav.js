@@ -70,7 +70,8 @@ function NavIndex(props) {
         <Row gutter={24}>
           {records.map(item => (
             <Col key={item.id} span={6} style={{marginBottom: 24}}>
-              <Card actions={item.links.map(x => <span>{x.name}</span>)}>
+              <Card
+                actions={item.links.map(x => <a href={x.url} rel="noopener noreferrer" target="_blank">{x.name}</a>)}>
                 <Card.Meta
                   avatar={<Avatar src={item.logo}/>}
                   title={item.title}
