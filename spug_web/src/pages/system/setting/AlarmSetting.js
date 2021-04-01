@@ -12,7 +12,7 @@ import store from './store';
 
 export default observer(function () {
   const [form] = Form.useForm();
-  const setting = store.settings.mail_service;
+  const setting = store.settings.mail_service || {};
   const [mode, setMode] = useState(setting.server === undefined ? '1' : '2');
   const [loading, setLoading] = useState(false);
 
