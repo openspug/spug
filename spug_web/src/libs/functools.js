@@ -4,6 +4,7 @@
  * Released under the AGPL-3.0 License.
  */
 let Permission = {
+  isReady: false,
   isSuper: false,
   hostPerms: [],
   permissions: []
@@ -13,6 +14,7 @@ export let X_TOKEN;
 
 export function updatePermissions() {
   X_TOKEN = localStorage.getItem('token');
+  Permission.isReady = true;
   Permission.isSuper = localStorage.getItem('is_supper') === 'true';
   Permission.hostPerms = JSON.parse(localStorage.getItem('host_perms') || '[]');
   Permission.permissions = JSON.parse(localStorage.getItem('permissions') || '[]');
@@ -20,8 +22,8 @@ export function updatePermissions() {
 
 // 前端页面的权限判断(仅作为前端功能展示的控制，具体权限控制应在后端实现)
 export function hasPermission(strCode) {
+  if (!Permission.isReady) updatePermissions();
   const {isSuper, permissions} = Permission;
-  // console.log(isSuper, strCode, permissions);
   if (!strCode || isSuper) return true;
   for (let or_item of strCode.split('|')) {
     if (isSubArray(permissions, or_item.split('&'))) {

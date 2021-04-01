@@ -10,21 +10,19 @@ import Sider from './Sider';
 import Header from './Header';
 import Footer from './Footer'
 import routes from '../routes';
-import { updatePermissions, hasPermission } from 'libs';
+import { hasPermission } from 'libs';
 import styles from './layout.module.less';
 
-function initRoutes(routes) {
-  const Routes = [];
+function initRoutes(Routes, routes) {
   for (let route of routes) {
     if (route.component) {
       if (!route.auth || hasPermission(route.auth)) {
         Routes.push(<Route exact key={route.path} path={route.path} component={route.component}/>)
       }
     } else if (route.child) {
-      initRoutes(route.child)
+      initRoutes(Routes, route.child)
     }
   }
-  return Routes
 }
 
 // 404
@@ -47,8 +45,9 @@ export default function () {
   const [Routes, setRoutes] = useState([]);
 
   useEffect(() => {
-    updatePermissions();
-    setRoutes(initRoutes(routes));
+    const Routes = [];
+    initRoutes(Routes, routes);
+    setRoutes(Routes)
   }, [])
 
   return (
