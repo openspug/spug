@@ -3,7 +3,7 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import { Layout } from 'antd';
 import Sider from './Sider';
@@ -13,9 +13,8 @@ import routes from '../routes';
 import { updatePermissions, hasPermission } from 'libs';
 import styles from './layout.module.less';
 
-const Routes = [];
-
 function initRoutes(routes) {
+  const Routes = [];
   for (let route of routes) {
     if (route.component) {
       if (!route.auth || hasPermission(route.auth)) {
@@ -25,10 +24,8 @@ function initRoutes(routes) {
       initRoutes(route.child)
     }
   }
+  return Routes
 }
-
-updatePermissions()
-initRoutes(routes)
 
 // 404
 function NotFound() {
@@ -47,6 +44,12 @@ function NotFound() {
 
 export default function () {
   const [collapsed, setCollapsed] = useState(false)
+  const [Routes, setRoutes] = useState([]);
+
+  useEffect(() => {
+    updatePermissions();
+    setRoutes(initRoutes(routes));
+  }, [])
 
   return (
     <Layout>
