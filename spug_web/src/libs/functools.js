@@ -22,7 +22,6 @@ export function updatePermissions() {
 
 // 前端页面的权限判断(仅作为前端功能展示的控制，具体权限控制应在后端实现)
 export function hasPermission(strCode) {
-  if (!Permission.isReady) updatePermissions();
   const {isSuper, permissions} = Permission;
   if (!strCode || isSuper) return true;
   for (let or_item of strCode.split('|')) {

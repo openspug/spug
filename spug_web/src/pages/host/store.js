@@ -11,7 +11,7 @@ class Store {
   counter = {};
   @observable records = [];
   @observable treeData = [];
-  @observable groups = [];
+  @observable groups = {};
   @observable group = {};
   @observable record = {};
   @observable idMap = {};

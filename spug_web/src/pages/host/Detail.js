@@ -5,6 +5,7 @@ import store from './store';
 
 export default observer(function () {
   const host = store.record;
+  const group_ids = host.group_ids || [];
   return (
     <Drawer
       width={500}
@@ -20,9 +21,9 @@ export default observer(function () {
         <Descriptions.Item label="描述信息">{host.desc}</Descriptions.Item>
         <Descriptions.Item label="所属分组">
           <List >
-            <List.Item>腾讯云/华北区</List.Item>
-            <List.Item>腾讯云/测试环境/电商商城系统</List.Item>
-            <List.Item>腾讯云/测试环境/订单后台系统</List.Item>
+            {group_ids.map(g_id => (
+              <List.Item style={{padding: '6px 0'}}>{store.groups[g_id]}</List.Item>
+            ))}
           </List>
         </Descriptions.Item>
       </Descriptions>

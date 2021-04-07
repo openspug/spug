@@ -13,9 +13,10 @@ import App from './App';
 import moment from 'moment';
 import 'moment/locale/zh-cn';
 import * as serviceWorker from './serviceWorker';
-import { history } from 'libs';
+import { history, updatePermissions } from 'libs';
 
 moment.locale('zh-cn');
+updatePermissions();
 
 ReactDOM.render(
   <Router history={history}>

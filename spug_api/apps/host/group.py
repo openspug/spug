@@ -25,12 +25,12 @@ def merge_children(data, prefix, childes):
         if item['children']:
             merge_children(data, name, item['children'])
         else:
-            data.append({'id': item['key'], 'name': name})
+            data[item['key']] = name
 
 
 class GroupView(View):
     def get(self, request):
-        data, data2 = dict(), []
+        data, data2 = dict(), dict()
         for item in Group.objects.filter(parent_id=0):
             data[item.id] = item.to_view()
         fetch_children(data)
