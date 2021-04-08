@@ -7,14 +7,14 @@ from libs import json_response, JsonParser, Argument
 from apps.host.models import Group
 
 
-def fetch_children(data):
+def fetch_children(data, with_hosts):
     if data:
         sub_data = dict()
         for item in Group.objects.filter(parent_id__in=data.keys()):
-            tmp = item.to_view()
+            tmp = item.to_view(with_hosts)
             sub_data[item.id] = tmp
             data[item.parent_id]['children'].append(tmp)
-        return fetch_children(sub_data)
+        return fetch_children(sub_data, with_hosts)
 
 
 def merge_children(data, prefix, childes):
@@ -22,7 +22,7 @@ def merge_children(data, prefix, childes):
     for item in childes:
         name = f'{prefix}{item["title"]}'
         item['name'] = name
-        if item['children']:
+        if item.get('children'):
             merge_children(data, name, item['children'])
         else:
             data[item['key']] = name
@@ -30,10 +30,11 @@ def merge_children(data, prefix, childes):
 
 class GroupView(View):
     def get(self, request):
+        with_hosts = request.GET.get('with_hosts')
         data, data2 = dict(), dict()
         for item in Group.objects.filter(parent_id=0):
-            data[item.id] = item.to_view()
-        fetch_children(data)
+            data[item.id] = item.to_view(with_hosts)
+        fetch_children(data, with_hosts)
         if not data:
             grp = Group.objects.create(name='Default', sort_id=1)
             data[grp.id] = grp.to_view()

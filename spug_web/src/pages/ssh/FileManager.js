@@ -15,14 +15,13 @@ import {
 } from '@ant-design/icons';
 import { http, uniqueId, X_TOKEN } from 'libs';
 import lds from 'lodash';
-import styles from './index.module.css'
+import styles from './index.module.less'
 
 
 class FileManager extends React.Component {
   constructor(props) {
     super(props);
     this.input = null;
-    this.id = props.id;
     this.state = {
       fetching: false,
       showDot: false,
@@ -92,7 +91,7 @@ class FileManager extends React.Component {
     this.setState({fetching: true});
     pwd = pwd || this.state.pwd;
     const path = '/' + pwd.join('/');
-    http.get('/api/file/', {params: {id: this.id, path}})
+    http.get('/api/file/', {params: {id: this.props.id, path}})
       .then(res => {
         const objects = lds.orderBy(res, [this._kindSort, 'name'], ['desc', 'asc']);
         this.setState({objects, pwd})
@@ -154,7 +153,7 @@ class FileManager extends React.Component {
   handleDownload = (name) => {
     const file = `/${this.state.pwd.join('/')}/${name}`;
     const link = document.createElement('a');
-    link.href = `/api/file/object/?id=${this.id}&file=${file}&x-token=${X_TOKEN}`;
+    link.href = `/api/file/object/?id=${this.props.id}&file=${file}&x-token=${X_TOKEN}`;
     document.body.appendChild(link);
     const evt = document.createEvent("MouseEvents");
     evt.initEvent("click", false, false);
@@ -169,7 +168,7 @@ class FileManager extends React.Component {
       title: '删除文件确认',
       content: `确认删除文件：${file} ?`,
       onOk: () => {
-        return http.delete('/api/file/object/', {params: {id: this.id, file}})
+        return http.delete('/api/file/object/', {params: {id: this.props.id, file}})
           .then(() => {
             message.success('删除成功');
             this.fetchFiles()

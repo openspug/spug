@@ -48,13 +48,14 @@ class Group(models.Model, ModelMixin):
     sort_id = models.IntegerField(default=0)
     hosts = models.ManyToManyField(Host, related_name='groups')
 
-    def to_view(self):
-        return {
-            'key': self.id,
-            'value': self.id,
-            'title': self.name,
-            'children': []
-        }
+    def to_view(self, with_hosts=False):
+        response = dict(key=self.id, value=self.id, title=self.name, children=[])
+        if with_hosts:
+            def make_item(x):
+                return dict(title=x.name, key=f'{self.id}_{x.id}', id=x.id, isLeaf=True)
+
+            response['children'] = [make_item(x) for x in self.hosts.all()]
+        return response
 
     class Meta:
         db_table = 'host_groups'
