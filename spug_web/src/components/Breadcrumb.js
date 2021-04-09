@@ -27,7 +27,10 @@ export default class extends React.Component {
         <Breadcrumb>
           {this.props.children}
         </Breadcrumb>
-        <div className={styles.title}>{title}</div>
+        <div className={styles.title}>
+          <span>{title}</span>
+          {this.props.extra}
+        </div>
       </div>
     )
   }

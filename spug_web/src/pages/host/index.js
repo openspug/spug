@@ -5,7 +5,8 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Row, Col } from 'antd';
+import { Row, Col, Button } from 'antd';
+import { RobotOutlined } from '@ant-design/icons';
 import { AuthDiv, Breadcrumb } from 'components';
 import Group from './Group';
 import ComTable from './Table';
@@ -16,9 +17,13 @@ import Selector from './Selector';
 import store from './store';
 
 export default observer(function () {
+  function openTerminal() {
+    window.open('/ssh')
+  }
+
   return (
     <AuthDiv auth="host.host.view">
-      <Breadcrumb>
+      <Breadcrumb extra={<Button type="primary" icon={<RobotOutlined/>} onClick={openTerminal}>Web 终端</Button>}>
         <Breadcrumb.Item>首页</Breadcrumb.Item>
         <Breadcrumb.Item>主机管理</Breadcrumb.Item>
       </Breadcrumb>

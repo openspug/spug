@@ -22,7 +22,7 @@ export default observer(function () {
         <Descriptions.Item label="所属分组">
           <List >
             {group_ids.map(g_id => (
-              <List.Item style={{padding: '6px 0'}}>{store.groups[g_id]}</List.Item>
+              <List.Item key={g_id} style={{padding: '6px 0'}}>{store.groups[g_id]}</List.Item>
             ))}
           </List>
         </Descriptions.Item>
