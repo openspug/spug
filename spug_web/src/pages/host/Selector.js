@@ -57,6 +57,11 @@ export default observer(function (props) {
     }
   }
 
+  function handleChangeGrp(node) {
+    setGroup(node);
+    if (props.oneGroup) setSelectedRowKeys([])
+  }
+
   return (
     <Modal
       visible={[undefined, true].includes(props.visible)}
@@ -71,7 +76,7 @@ export default observer(function (props) {
             selectedKeys={[group.key]}
             treeData={store.treeData}
             titleRender={treeRender}
-            onSelect={(_, {node}) => setGroup(node)}
+            onSelect={(_, {node}) => handleChangeGrp(node)}
           />
         </Col>
         <Col span={18}>

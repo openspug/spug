@@ -20,15 +20,20 @@ import store from './store';
 import lds from 'lodash';
 
 export default observer(function () {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState();
   const [visible, setVisible] = useState(false);
   const [draggable, setDraggable] = useState(false);
   const [action, setAction] = useState('');
-  const [expands, setExpands] = useState([]);
+  const [expands, setExpands] = useState();
   const [bakTreeData, setBakTreeData] = useState();
 
   useEffect(() => {
-    if (!loading) store.fetchGroups()
+    if (!loading) store.fetchGroups().then(() => {
+      if (loading === undefined) {
+        const tmp = store.treeData.filter(x => x.children.length)
+        setExpands(tmp.map(x => x.key))
+      }
+    })
   }, [loading])
 
   const menus = (
@@ -132,7 +137,7 @@ export default observer(function () {
     <Card
       title="分组列表"
       loading={store.grpFetching}
-      extra={<Switch checked={draggable} onChange={setDraggable} checkedChildren="拖拽" unCheckedChildren="浏览"/>}>
+      extra={<Switch checked={draggable} onChange={setDraggable} checkedChildren="排版" unCheckedChildren="浏览"/>}>
       <Dropdown
         overlay={menus}
         visible={visible}

@@ -35,7 +35,8 @@ export default observer(function () {
       <Detail/>
       {store.formVisible && <ComForm/>}
       {store.importVisible && <ComImport/>}
-      {store.selectorVisible && <Selector onCancel={() => store.selectorVisible = false} onOk={store.updateGroup}/>}
+      {store.selectorVisible &&
+      <Selector oneGroup={!store.addByCopy} onCancel={() => store.selectorVisible = false} onOk={store.updateGroup}/>}
     </AuthDiv>
   );
 })
