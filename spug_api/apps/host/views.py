@@ -13,7 +13,7 @@ from apps.monitor.models import Detection
 from apps.account.models import Role
 from libs.ssh import SSH, AuthenticationException
 from paramiko.ssh_exception import BadAuthenticationType
-from libs import human_datetime, AttrDict
+from libs import AttrDict
 from openpyxl import load_workbook
 import socket
 
@@ -25,7 +25,7 @@ class HostView(View):
             if not request.user.has_host_perm(host_id):
                 return json_response(error='无权访问该主机，请联系管理员')
             return json_response(Host.objects.get(pk=host_id))
-        hosts = {x.id: x.to_view() for x in Host.objects.filter(deleted_by_id__isnull=True)}
+        hosts = {x.id: x.to_view() for x in Host.objects.all()}
         for rel in Group.hosts.through.objects.all():
             hosts[rel.host_id]['group_ids'].append(rel.group_id)
         return json_response(list(hosts.values()))
@@ -48,7 +48,7 @@ class HostView(View):
                 return json_response('auth fail')
 
             group_ids = form.pop('group_ids')
-            other = Host.objects.filter(name=form.name, deleted_by_id__isnull=True).first()
+            other = Host.objects.filter(name=form.name).first()
             if other and (not form.id or other.id != form.id):
                 return json_response(error=f'已存在的主机名称【{form.name}】')
             if form.id:
@@ -94,10 +94,7 @@ class HostView(View):
             role = Role.objects.filter(host_perms__regex=fr'[^0-9]{form.id}[^0-9]').first()
             if role:
                 return json_response(error=f'角色【{role.name}】的主机权限关联了该主机，请解除关联后再尝试删除该主机')
-            Host.objects.filter(pk=form.id).update(
-                deleted_at=human_datetime(),
-                deleted_by=request.user,
-            )
+            Host.objects.filter(pk=form.id).delete()
         return json_response(error=error)
 
 
@@ -121,8 +118,7 @@ def post_import(request):
             password=row[5].value,
             desc=row[6].value
         )
-        if Host.objects.filter(hostname=data.hostname, port=data.port, username=data.username,
-                               deleted_by_id__isnull=True).exists():
+        if Host.objects.filter(hostname=data.hostname, port=data.port, username=data.username).exists():
             summary['skip'].append(i)
             continue
         try:
@@ -139,7 +135,7 @@ def post_import(request):
         except Exception:
             summary['error'].append(i)
             continue
-        if Host.objects.filter(name=data.name, deleted_by_id__isnull=True).exists():
+        if Host.objects.filter(name=data.name).exists():
             summary['repeat'].append(i)
             continue
         host = Host.objects.create(created_by=request.user, **data)

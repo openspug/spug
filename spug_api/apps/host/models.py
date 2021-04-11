@@ -15,11 +15,8 @@ class Host(models.Model, ModelMixin):
     username = models.CharField(max_length=50)
     pkey = models.TextField(null=True)
     desc = models.CharField(max_length=255, null=True)
-
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
-    deleted_at = models.CharField(max_length=20, null=True)
-    deleted_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)
 
     @property
     def private_key(self):
@@ -40,6 +37,37 @@ class Host(models.Model, ModelMixin):
     class Meta:
         db_table = 'hosts'
         ordering = ('-id',)
+
+
+class HostExtend(models.Model, ModelMixin):
+    INSTANCE_CHARGE_TYPES = (
+        ('PrePaid', '包年包月'),
+        ('PostPaid', '按量付费'),
+        ('Other', '其他')
+    )
+    INTERNET_CHARGE_TYPES = (
+        ('PayByTraffic', '按流量计费'),
+        ('PayByBandwidth', '按带宽计费'),
+        ('Other', '其他')
+    )
+    host = models.OneToOneField(Host, on_delete=models.CASCADE)
+    instance_id = models.CharField(max_length=64)
+    zone_id = models.CharField(max_length=30)
+    cpu = models.IntegerField()
+    memory = models.FloatField()
+    disk = models.CharField(max_length=255)
+    os_name = models.CharField(max_length=50)
+    os_type = models.CharField(max_length=20)
+    private_ip_address = models.CharField(max_length=255)
+    public_ip_address = models.CharField(max_length=255)
+    instance_charge_type = models.CharField(max_length=20, choices=INSTANCE_CHARGE_TYPES)
+    internet_charge_type = models.CharField(max_length=20, choices=INTERNET_CHARGE_TYPES)
+    created_time = models.CharField(max_length=20)
+    expired_time = models.CharField(max_length=20, null=True)
+    updated_at = models.CharField(max_length=20, default=human_datetime)
+
+    class Meta:
+        db_table = 'host_extend'
 
 
 class Group(models.Model, ModelMixin):
