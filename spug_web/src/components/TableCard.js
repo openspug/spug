@@ -82,13 +82,13 @@ function Header(props) {
     <div className={styles.toolbar}>
       <div className={styles.title}>{props.title}</div>
       <div className={styles.option}>
-        <Space size="middle">
+        <Space size="middle" style={{marginRight: 10}}>
           {actions.map((item, index) => (
             <React.Fragment key={index}>{item}</React.Fragment>
           ))}
         </Space>
         {actions.length ? <Divider type="vertical"/> : null}
-        <Space>
+        <Space className={styles.icons}>
           <ReloadOutlined onClick={props.onReload}/>
           <Popover
             arrowPointAtCenter
