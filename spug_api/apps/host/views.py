@@ -10,7 +10,6 @@ from apps.host.models import Host, Group
 from apps.app.models import Deploy
 from apps.schedule.models import Task
 from apps.monitor.models import Detection
-from apps.account.models import Role
 from libs.ssh import SSH, AuthenticationException
 from paramiko.ssh_exception import BadAuthenticationType
 from libs import AttrDict
@@ -25,7 +24,7 @@ class HostView(View):
             if not request.user.has_host_perm(host_id):
                 return json_response(error='无权访问该主机，请联系管理员')
             return json_response(Host.objects.get(pk=host_id))
-        hosts = {x.id: x.to_view() for x in Host.objects.all()}
+        hosts = {x.id: x.to_view() for x in Host.objects.select_related('hostextend').all()}
         for rel in Group.hosts.through.objects.all():
             hosts[rel.host_id]['group_ids'].append(rel.group_id)
         return json_response(list(hosts.values()))
@@ -91,10 +90,8 @@ class HostView(View):
             detection = Detection.objects.filter(type__in=('3', '4'), addr=form.id).first()
             if detection:
                 return json_response(error=f'监控中心的任务【{detection.name}】关联了该主机，请解除关联后再尝试删除该主机')
-            role = Role.objects.filter(host_perms__regex=fr'[^0-9]{form.id}[^0-9]').first()
-            if role:
-                return json_response(error=f'角色【{role.name}】的主机权限关联了该主机，请解除关联后再尝试删除该主机')
             Host.objects.filter(pk=form.id).delete()
+            print('pk: ', form.id)
         return json_response(error=error)
 
 

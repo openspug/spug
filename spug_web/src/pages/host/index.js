@@ -12,6 +12,7 @@ import Group from './Group';
 import ComTable from './Table';
 import ComForm from './Form';
 import ComImport from './Import';
+import CloudImport from './CloudImport';
 import Detail from './Detail';
 import Selector from './Selector';
 import store from './store';
@@ -40,6 +41,7 @@ export default observer(function () {
       <Detail/>
       {store.formVisible && <ComForm/>}
       {store.importVisible && <ComImport/>}
+      {store.cloudImport && <CloudImport/>}
       {store.selectorVisible &&
       <Selector oneGroup={!store.addByCopy} onCancel={() => store.selectorVisible = false} onOk={store.updateGroup}/>}
     </AuthDiv>

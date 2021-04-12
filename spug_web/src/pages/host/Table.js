@@ -5,11 +5,12 @@
  */
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Table, Modal, message } from 'antd';
-import { PlusOutlined, ImportOutlined } from '@ant-design/icons';
-import { Action, TableCard, AuthButton } from 'components';
+import { Table, Modal, Dropdown, Button, Menu, Avatar, Tooltip, Space, Tag, message } from 'antd';
+import { PlusOutlined, DownOutlined } from '@ant-design/icons';
+import { Action, TableCard, AuthButton, AuthFragment } from 'components';
 import { http, hasPermission } from 'libs';
 import store from './store';
+import icons from './icons';
 
 function ComTable() {
   useEffect(() => {
@@ -30,6 +31,24 @@ function ComTable() {
     })
   }
 
+  function handleImport(menu) {
+    if (menu.key === 'excel') {
+      store.importVisible = true
+    } else {
+      store.cloudImport = menu.key
+    }
+  }
+
+  function IpAddress(props) {
+    if (props.ip && props.ip.length > 0) {
+      return (
+        <div>{props.ip[0]}<span style={{color: '#999'}}>（{props.isPublic ? '公' : '私有'}）</span></div>
+      )
+    } else {
+      return null
+    }
+  }
+
   return (
     <TableCard
       rowKey="id"
@@ -43,11 +62,32 @@ function ComTable() {
           type="primary"
           icon={<PlusOutlined/>}
           onClick={() => store.showForm()}>新建</AuthButton>,
-        <AuthButton
-          auth="host.host.add"
-          type="primary"
-          icon={<ImportOutlined/>}
-          onClick={() => store.importVisible = true}>批量导入</AuthButton>
+        <AuthFragment auth="host.host.add">
+          <Dropdown overlay={(
+            <Menu onClick={handleImport}>
+              <Menu.Item key="excel">
+                <Space>
+                  <Avatar shape="square" size={20} src={icons.excel}/>
+                  <span>Excel</span>
+                </Space>
+              </Menu.Item>
+              <Menu.Item key="ali">
+                <Space>
+                  <Avatar shape="square" size={20} src={icons.alibaba}/>
+                  <span>阿里云</span>
+                </Space>
+              </Menu.Item>
+              <Menu.Item key="tencent">
+                <Space>
+                  <Avatar shape="square" size={20} src={icons.tencent}/>
+                  <span>腾讯云</span>
+                </Space>
+              </Menu.Item>
+            </Menu>
+          )}>
+            <Button type="primary">批量导入 <DownOutlined/></Button>
+          </Dropdown>
+        </AuthFragment>
       ]}
       pagination={{
         showSizeChanger: true,
@@ -61,14 +101,30 @@ function ComTable() {
         title="主机名称"
         render={info => <Action.Button onClick={() => store.showDetail(info)}>{info.name}</Action.Button>}
         sorter={(a, b) => a.name.localeCompare(b.name)}/>
-      <Table.Column title="连接地址" dataIndex="hostname" sorter={(a, b) => a.name.localeCompare(b.name)}/>
-      <Table.Column hide width={100} title="端口" dataIndex="port"/>
-      <Table.Column title="备注信息" dataIndex="desc"/>
+      <Table.Column title="IP地址" render={info => (
+        <div>
+          <IpAddress ip={info.public_ip_address} isPublic/>
+          <IpAddress ip={info.private_ip_address}/>
+        </div>
+      )}/>
+      <Table.Column title="配置信息" render={info => (
+        <Space>
+          <Tooltip title={info.os_name}>
+            <Avatar shape="square" size={16} src={icons[info.os_type]}/>
+          </Tooltip>
+          <span>{info.cpu}核 {info.memory}GB</span>
+        </Space>
+      )}/>
+      <Table.Column hide title="备注信息" dataIndex="desc"/>
+      <Table.Column
+        title="状态"
+        dataIndex="is_verified"
+        render={v => v ? <Tag color="green">已验证</Tag> : <Tag color="orange">未验证</Tag>}/>
       {hasPermission('host.host.edit|host.host.del|host.host.console') && (
         <Table.Column width={160} title="操作" render={info => (
           <Action>
             <Action.Button auth="host.host.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-            <Action.Button auth="host.host.del" onClick={() => handleDelete(info)}>删除</Action.Button>
+            <Action.Button danger auth="host.host.del" onClick={() => handleDelete(info)}>删除</Action.Button>
           </Action>
         )}/>
       )}

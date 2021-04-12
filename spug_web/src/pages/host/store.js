@@ -20,6 +20,7 @@ class Store {
   @observable isFetching = false;
   @observable formVisible = false;
   @observable importVisible = false;
+  @observable cloudImport = null;
   @observable detailVisible = false;
   @observable selectorVisible = false;
 

@@ -124,7 +124,7 @@ export default observer(function () {
             <Input addonBefore="-p" placeholder="端口"/>
           </Form.Item>
         </Form.Item>
-        <Form.Item label="独立密钥" extra="默认使用全局密钥，如果上传了独立密钥则优先使用该密钥。">
+        <Form.Item label="独立密钥" extra="默认使用全局密钥，如果上传了独立密钥（私钥）则优先使用该密钥。">
           <Upload name="file" fileList={fileList} headers={{'X-Token': X_TOKEN}} beforeUpload={handleUpload}
                   onChange={handleUploadChange}>
             {fileList.length === 0 ? <Button loading={uploading} icon={<UploadOutlined/>}>点击上传</Button> : null}

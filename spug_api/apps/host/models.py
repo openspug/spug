@@ -6,15 +6,17 @@ from libs import ModelMixin, human_datetime
 from apps.account.models import User
 from apps.setting.utils import AppSetting
 from libs.ssh import SSH
+import json
 
 
 class Host(models.Model, ModelMixin):
     name = models.CharField(max_length=50)
     hostname = models.CharField(max_length=50)
-    port = models.IntegerField()
+    port = models.IntegerField(null=True)
     username = models.CharField(max_length=50)
     pkey = models.TextField(null=True)
     desc = models.CharField(max_length=255, null=True)
+    is_verified = models.BooleanField(default=False)
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
 
@@ -28,6 +30,8 @@ class Host(models.Model, ModelMixin):
 
     def to_view(self):
         tmp = self.to_dict()
+        if hasattr(self, 'hostextend'):
+            tmp.update(self.hostextend.to_view())
         tmp['group_ids'] = []
         return tmp
 
@@ -55,7 +59,7 @@ class HostExtend(models.Model, ModelMixin):
     zone_id = models.CharField(max_length=30)
     cpu = models.IntegerField()
     memory = models.FloatField()
-    disk = models.CharField(max_length=255)
+    disk = models.CharField(max_length=255, default='[]')
     os_name = models.CharField(max_length=50)
     os_type = models.CharField(max_length=20)
     private_ip_address = models.CharField(max_length=255)
@@ -65,6 +69,15 @@ class HostExtend(models.Model, ModelMixin):
     created_time = models.CharField(max_length=20)
     expired_time = models.CharField(max_length=20, null=True)
     updated_at = models.CharField(max_length=20, default=human_datetime)
+
+    def to_view(self):
+        tmp = self.to_dict(excludes=('id',))
+        tmp['disk'] = json.loads(self.disk)
+        tmp['private_ip_address'] = json.loads(self.private_ip_address)
+        tmp['public_ip_address'] = json.loads(self.public_ip_address)
+        tmp['instance_charge_type_alias'] = self.get_instance_charge_type_display()
+        tmp['internet_charge_type_alisa'] = self.get_internet_charge_type_display()
+        return tmp
 
     class Meta:
         db_table = 'host_extend'
