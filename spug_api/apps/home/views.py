@@ -17,11 +17,11 @@ import json
 def get_statistic(request):
     if request.user.is_supper:
         app = App.objects.count()
-        host = Host.objects.filter(deleted_at__isnull=True).count()
+        host = Host.objects.count()
     else:
         deploy_perms, host_perms = request.user.deploy_perms, request.user.host_perms
         app = App.objects.filter(id__in=deploy_perms['apps']).count()
-        host = Host.objects.filter(id__in=host_perms, deleted_at__isnull=True).count()
+        host = Host.objects.filter(id__in=host_perms).count()
     data = {
         'app': app,
         'host': host,
