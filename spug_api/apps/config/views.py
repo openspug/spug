@@ -33,8 +33,30 @@ class EnvironmentView(View):
                 Environment.objects.filter(pk=form.id).update(**form)
             else:
                 env = Environment.objects.create(created_by=request.user, **form)
+                env.sort_id = env.id
+                env.save()
                 if request.user.role:
                     request.user.role.add_deploy_perm('envs', env.id)
+        return json_response(error=error)
+
+    def patch(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='参数错误'),
+            Argument('sort', filter=lambda x: x in ('up', 'down'), required=False)
+        ).parse(request.body)
+        if error is None:
+            env = Environment.objects.filter(pk=form.id).first()
+            if not env:
+                return json_response(error='未找到指定环境')
+            if form.sort:
+                if form.sort == 'up':
+                    tmp = Environment.objects.filter(sort_id__gt=env.sort_id).last()
+                else:
+                    tmp = Environment.objects.filter(sort_id__lt=env.sort_id).first()
+                if tmp:
+                    tmp.sort_id, env.sort_id = env.sort_id, tmp.sort_id
+                    tmp.save()
+            env.save()
         return json_response(error=error)
 
     def delete(self, request):

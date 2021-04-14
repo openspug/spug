@@ -10,6 +10,7 @@ class Environment(models.Model, ModelMixin):
     name = models.CharField(max_length=50)
     key = models.CharField(max_length=50)
     desc = models.CharField(max_length=255, null=True)
+    sort_id = models.IntegerField(default=0, db_index=True)
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, on_delete=models.PROTECT)
 
@@ -18,7 +19,7 @@ class Environment(models.Model, ModelMixin):
 
     class Meta:
         db_table = 'environments'
-        ordering = ('-id',)
+        ordering = ('-sort_id',)
 
 
 class Service(models.Model, ModelMixin):
