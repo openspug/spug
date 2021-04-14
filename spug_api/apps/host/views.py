@@ -51,11 +51,14 @@ class HostView(View):
             if other and (not form.id or other.id != form.id):
                 return json_response(error=f'已存在的主机名称【{form.name}】')
             if form.id:
-                Host.objects.filter(pk=form.id).update(**form)
+                Host.objects.filter(pk=form.id).update(is_verified=True, **form)
                 host = Host.objects.get(pk=form.id)
             else:
-                host = Host.objects.create(created_by=request.user, **form)
+                host = Host.objects.create(created_by=request.user, is_verified=True, **form)
             host.groups.set(group_ids)
+            response = host.to_view()
+            response['group_ids'] = group_ids
+            return json_response(response)
         return json_response(error=error)
 
     def patch(self, request):
@@ -91,7 +94,6 @@ class HostView(View):
             if detection:
                 return json_response(error=f'监控中心的任务【{detection.name}】关联了该主机，请解除关联后再尝试删除该主机')
             Host.objects.filter(pk=form.id).delete()
-            print('pk: ', form.id)
         return json_response(error=error)
 
 
@@ -143,13 +145,7 @@ def post_import(request):
 
 
 def valid_ssh(hostname, port, username, password=None, pkey=None, with_expect=True):
-    try:
-        private_key = AppSetting.get('private_key')
-        public_key = AppSetting.get('public_key')
-    except KeyError:
-        private_key, public_key = SSH.generate_key()
-        AppSetting.set('private_key', private_key, 'ssh private key')
-        AppSetting.set('public_key', public_key, 'ssh public key')
+    private_key, public_key = AppSetting.get_ssh_key()
     if password:
         _cli = SSH(hostname, port, username, password=str(password))
         _cli.add_public_key(public_key)

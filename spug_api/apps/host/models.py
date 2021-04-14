@@ -46,7 +46,7 @@ class Host(models.Model, ModelMixin):
 class HostExtend(models.Model, ModelMixin):
     INSTANCE_CHARGE_TYPES = (
         ('PrePaid', '包年包月'),
-        ('PostPaid', '按量付费'),
+        ('PostPaid', '按量计费'),
         ('Other', '其他')
     )
     INTERNET_CHARGE_TYPES = (
@@ -55,8 +55,8 @@ class HostExtend(models.Model, ModelMixin):
         ('Other', '其他')
     )
     host = models.OneToOneField(Host, on_delete=models.CASCADE)
-    instance_id = models.CharField(max_length=64)
-    zone_id = models.CharField(max_length=30)
+    instance_id = models.CharField(max_length=64, null=True)
+    zone_id = models.CharField(max_length=30, null=True)
     cpu = models.IntegerField()
     memory = models.FloatField()
     disk = models.CharField(max_length=255, default='[]')
@@ -66,7 +66,7 @@ class HostExtend(models.Model, ModelMixin):
     public_ip_address = models.CharField(max_length=255)
     instance_charge_type = models.CharField(max_length=20, choices=INSTANCE_CHARGE_TYPES)
     internet_charge_type = models.CharField(max_length=20, choices=INTERNET_CHARGE_TYPES)
-    created_time = models.CharField(max_length=20)
+    created_time = models.CharField(max_length=20, null=True)
     expired_time = models.CharField(max_length=20, null=True)
     updated_at = models.CharField(max_length=20, default=human_datetime)
 

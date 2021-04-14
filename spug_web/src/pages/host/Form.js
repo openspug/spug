@@ -46,7 +46,8 @@ export default observer(function () {
         } else {
           message.success('操作成功');
           store.formVisible = false;
-          store.fetchRecords()
+          store.fetchRecords();
+          if (!store.record.id) handleNext(res)
         }
       }, () => setLoading(false))
   }
@@ -57,10 +58,22 @@ export default observer(function () {
       return http.post('/api/host/', formData).then(res => {
         message.success('验证成功');
         store.formVisible = false;
-        store.fetchRecords()
+        store.fetchRecords();
+        if (!store.record.id) handleNext(res)
       })
     }
     message.error('请输入授权密码')
+  }
+
+  function handleNext(res) {
+    Modal.confirm({
+      title: '提示信息',
+      content: '是否继续完善主机的扩展信息？',
+      onOk: () => {
+        store.record = res;
+        store.detailVisible = true
+      }
+    })
   }
 
   const ConfirmForm = (props) => (
@@ -94,14 +107,14 @@ export default observer(function () {
   return (
     <Modal
       visible
-      width={800}
+      width={700}
       maskClosable={false}
       title={store.record.id ? '编辑主机' : '新建主机'}
       okText="验证"
       onCancel={() => store.formVisible = false}
       confirmLoading={loading}
       onOk={handleSubmit}>
-      <Form form={form} labelCol={{span: 6}} wrapperCol={{span: 14}} initialValues={info}>
+      <Form form={form} labelCol={{span: 5}} wrapperCol={{span: 17}} initialValues={info}>
         <Form.Item required name="group_ids" label="主机分组">
           <TreeSelect
             multiple

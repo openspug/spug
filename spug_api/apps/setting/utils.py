@@ -3,6 +3,7 @@
 # Released under the AGPL-3.0 License.
 from functools import lru_cache
 from apps.setting.models import Setting, KEYS_DEFAULT
+from libs.ssh import SSH
 import json
 
 
@@ -29,3 +30,13 @@ class AppSetting:
             Setting.objects.update_or_create(key=key, defaults={'value': value, 'desc': desc})
         else:
             raise KeyError('invalid key')
+
+    @classmethod
+    def get_ssh_key(cls):
+        public_key = cls.get_default('public_key')
+        private_key = cls.get_default('private_key')
+        if not private_key or not public_key:
+            private_key, public_key = SSH.generate_key()
+            cls.set('private_key', private_key)
+            cls.set('public_key', public_key)
+        return private_key, public_key

@@ -18,6 +18,11 @@ class ModelMixin(object):
         else:
             return {f.attname: getattr(self, f.attname) for f in self._meta.fields}
 
+    def update_by_dict(self, data):
+        for key, value in data.items():
+            setattr(self, key, value)
+        self.save()
+
 
 # 使用该混入类，需要request.user对象实现has_perms方法
 class PermissionMixin(object):
