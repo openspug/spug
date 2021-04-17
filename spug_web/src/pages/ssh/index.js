@@ -23,6 +23,7 @@ function WebSSH(props) {
   const [activeId, setActiveId] = useState();
 
   useEffect(() => {
+    window.document.title = 'Spug web terminal'
     window.addEventListener('beforeunload', leaveTips)
     http.get('/api/host/group/?with_hosts=1')
       .then(res => setTreeData(res.treeData))
