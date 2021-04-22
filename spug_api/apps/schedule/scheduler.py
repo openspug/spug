@@ -6,22 +6,20 @@ from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.cron import CronTrigger
-from apscheduler.events import EVENT_SCHEDULER_SHUTDOWN, EVENT_JOB_MAX_INSTANCES, EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
+from apscheduler.events import EVENT_SCHEDULER_SHUTDOWN, EVENT_JOB_MAX_INSTANCES, EVENT_JOB_ERROR
 from django_redis import get_redis_connection
 from django.utils.functional import SimpleLazyObject
 from django.db import close_old_connections
 from apps.schedule.models import Task, History
 from apps.schedule.utils import send_fail_notify
 from apps.notify.models import Notify
-from apps.schedule.executors import dispatch
-from apps.schedule.utils import auto_clean_schedule_history
-from apps.alarm.utils import auto_clean_alarm_records
-from apps.account.utils import auto_clean_login_history
-from apps.deploy.utils import auto_update_status
+from apps.schedule.builtin import auto_run_by_day, auto_run_by_minute
 from django.conf import settings
 from libs import AttrDict, human_datetime
 import logging
 import json
+
+SCHEDULE_WORKER_KEY = settings.SCHEDULE_WORKER_KEY
 
 
 class Scheduler:
@@ -42,7 +40,8 @@ class Scheduler:
         self.scheduler = BackgroundScheduler(timezone=self.timezone, executors={'default': ThreadPoolExecutor(30)})
         self.scheduler.add_listener(
             self._handle_event,
-            EVENT_SCHEDULER_SHUTDOWN | EVENT_JOB_ERROR | EVENT_JOB_MAX_INSTANCES | EVENT_JOB_EXECUTED)
+            EVENT_SCHEDULER_SHUTDOWN | EVENT_JOB_ERROR | EVENT_JOB_MAX_INSTANCES
+        )
 
     @classmethod
     def parse_trigger(cls, trigger, trigger_args):
@@ -71,26 +70,24 @@ class Scheduler:
         elif event.code == EVENT_JOB_ERROR:
             logging.warning(f'EVENT_JOB_ERROR: job_id {event.job_id} exception: {event.exception}')
             send_fail_notify(obj, f'执行异常：{event.exception}')
-        elif event.code == EVENT_JOB_EXECUTED:
-            if event.retval:
-                score = 0
-                for item in event.retval:
-                    score += 1 if item[1] else 0
-                history = History.objects.create(
-                    task_id=event.job_id,
-                    status=2 if score == len(event.retval) else 1 if score else 0,
-                    run_time=human_datetime(event.scheduled_run_time),
-                    output=json.dumps(event.retval)
-                )
-                Task.objects.filter(pk=event.job_id).update(latest=history)
-                if score != 0:
-                    send_fail_notify(obj)
 
     def _init_builtin_jobs(self):
-        self.scheduler.add_job(auto_clean_alarm_records, 'cron', hour=0, minute=1)
-        self.scheduler.add_job(auto_clean_login_history, 'cron', hour=0, minute=2)
-        self.scheduler.add_job(auto_clean_schedule_history, 'cron', hour=0, minute=3)
-        self.scheduler.add_job(auto_update_status, 'interval', minutes=5)
+        self.scheduler.add_job(auto_run_by_day, 'cron', hour=1, minute=20)
+        self.scheduler.add_job(auto_run_by_minute, 'interval', minutes=5)
+
+    def _dispatch(self, task_id, command, targets):
+        close_old_connections()
+        output = {x: None for x in targets}
+        history = History.objects.create(
+            task_id=task_id,
+            status='0',
+            run_time=human_datetime(),
+            output=json.dumps(output)
+        )
+        Task.objects.filter(pk=task_id).update(latest_id=history.id)
+        rds_cli = get_redis_connection()
+        for t in targets:
+            rds_cli.rpush(SCHEDULE_WORKER_KEY, json.dumps([history.id, t, command]))
 
     def _init(self):
         self.scheduler.start()
@@ -98,10 +95,10 @@ class Scheduler:
         for task in Task.objects.filter(is_active=True):
             trigger = self.parse_trigger(task.trigger, task.trigger_args)
             self.scheduler.add_job(
-                dispatch,
+                self._dispatch,
                 trigger,
                 id=str(task.id),
-                args=(task.command, json.loads(task.targets)),
+                args=(task.id, task.command, json.loads(task.targets)),
             )
 
     def run(self):
@@ -115,10 +112,10 @@ class Scheduler:
             if task.action in ('add', 'modify'):
                 trigger = self.parse_trigger(task.trigger, task.trigger_args)
                 self.scheduler.add_job(
-                    dispatch,
+                    self._dispatch,
                     trigger,
                     id=str(task.id),
-                    args=(task.command, task.targets),
+                    args=(task.id, task.command, task.targets),
                     replace_existing=True
                 )
             elif task.action == 'remove':

@@ -9,8 +9,8 @@ import json
 
 class History(models.Model, ModelMixin):
     STATUS = (
-        (0, '成功'),
-        (1, '异常'),
+        (0, '执行中'),
+        (1, '成功'),
         (2, '失败'),
     )
     task_id = models.IntegerField()

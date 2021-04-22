@@ -1,54 +1,62 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
-from queue import Queue
-from threading import Thread
 from libs.ssh import AuthenticationException
+from django.db import close_old_connections, transaction
 from apps.host.models import Host
-from django.db import close_old_connections
+from apps.schedule.models import History, Task
+from apps.schedule.utils import send_fail_notify
 import subprocess
 import socket
 import time
+import json
 
 
-def local_executor(q, command):
-    exit_code, out, now = -1, None, time.time()
+def local_executor(command):
+    code, out, now = 1, None, time.time()
+    task = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
-        task = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        exit_code = task.wait()
+        code = task.wait(3600)
         out = task.stdout.read() + task.stderr.read()
-    finally:
-        q.put(('local', exit_code, round(time.time() - now, 3), out.decode()))
+        out = out.decode()
+    except subprocess.TimeoutExpired:
+        # task.kill()
+        out = 'timeout, wait more than 1 hour'
+    return code, round(time.time() - now, 3), out
 
 
-def host_executor(q, host, command):
-    exit_code, out, now = -1, None, time.time()
+def host_executor(host, command):
+    code, out, now = 1, None, time.time()
     try:
         cli = host.get_ssh()
-        exit_code, out = cli.exec_command(command)
-        out = out if out else None
+        code, out = cli.exec_command(command)
     except AuthenticationException:
         out = 'ssh authentication fail'
     except socket.error as e:
         out = f'network error {e}'
-    finally:
-        q.put((host.id, exit_code, round(time.time() - now, 3), out))
+    return code, round(time.time() - now, 3), out
 
 
-def dispatch(command, targets, in_view=False):
-    if not in_view:
+def schedule_worker_handler(job):
+    history_id, host_id, command = json.loads(job)
+    if host_id == 'local':
+        code, duration, out = local_executor(command)
+    else:
         close_old_connections()
-    threads, q = [], Queue()
-    for t in targets:
-        if t == 'local':
-            threads.append(Thread(target=local_executor, args=(q, command)))
-        elif isinstance(t, int):
-            host = Host.objects.filter(pk=t).first()
-            if not host:
-                raise ValueError(f'unknown host id: {t!r}')
-            threads.append(Thread(target=host_executor, args=(q, host, command)))
+        host = Host.objects.filter(pk=host_id).first()
+        if not host:
+            code, duration, out = 1, 0, f'unknown host id for {host_id!r}'
         else:
-            raise ValueError(f'invalid target: {t!r}')
-    for t in threads:
-        t.start()
-    return [q.get() for _ in threads]
+            code, duration, out = host_executor(host, command)
+    close_old_connections()
+    with transaction.atomic():
+        history = History.objects.select_for_update().get(pk=history_id)
+        output = json.loads(history.output)
+        output[str(host_id)] = [code, duration, out]
+        history.output = json.dumps(output)
+        if all(output.values()):
+            history.status = '1' if sum(x[0] for x in output.values()) == 0 else '2'
+        history.save()
+    if history.status == '2':
+        task = Task.objects.get(pk=history.task_id)
+        send_fail_notify(task)

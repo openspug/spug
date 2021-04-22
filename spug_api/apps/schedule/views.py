@@ -7,7 +7,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apps.schedule.scheduler import Scheduler
 from apps.schedule.models import Task, History
-from apps.schedule.executors import dispatch
+from apps.schedule.executors import local_executor, host_executor
 from apps.host.models import Host
 from django.conf import settings
 from libs import json_response, JsonParser, Argument, human_datetime
@@ -110,30 +110,43 @@ class HistoryView(View):
         task = Task.objects.filter(pk=t_id).first()
         if not task:
             return json_response(error='未找到指定任务')
-        data = dispatch(task.command, json.loads(task.targets), True)
-        score = 0
-        for item in data:
-            score += 1 if item[1] else 0
+        outputs, status = {}, 1
+        for host_id in json.loads(task.targets):
+            if host_id == 'local':
+                code, duration, out = local_executor(task.command)
+            else:
+                host = Host.objects.filter(pk=host_id).first()
+                if not host:
+                    code, duration, out = 1, 0, f'unknown host id for {host_id!r}'
+                else:
+                    code, duration, out = host_executor(host, task.command)
+            if code != 0:
+                status = 2
+            outputs[host_id] = [code, duration, out]
+
         history = History.objects.create(
-            task_id=t_id,
-            status=2 if score == len(data) else 1 if score else 0,
+            task_id=task.id,
+            status=status,
             run_time=human_datetime(),
-            output=json.dumps(data)
+            output=json.dumps(outputs)
         )
         return json_response(history.id)
 
     def _fetch_detail(self, h_id):
         record = History.objects.filter(pk=h_id).first()
         outputs = json.loads(record.output)
-        host_ids = (x[0] for x in outputs if isinstance(x[0], int))
-        hosts_info = {x.id: x.name for x in Host.objects.filter(id__in=host_ids)}
+        host_ids = (x for x in outputs.keys() if x != 'local')
+        hosts_info = {str(x.id): x.name for x in Host.objects.filter(id__in=host_ids)}
         data = {'run_time': record.run_time, 'success': 0, 'failure': 0, 'duration': 0, 'outputs': []}
-        for h_id, code, duration, out in outputs:
+        for host_id, value in outputs.items():
+            if not value:
+                continue
+            code, duration, out = value
             key = 'success' if code == 0 else 'failure'
             data[key] += 1
             data['duration'] += duration
             data['outputs'].append({
-                'name': hosts_info.get(h_id, '本机'),
+                'name': hosts_info.get(host_id, '本机'),
                 'code': code,
                 'duration': duration,
                 'output': out})

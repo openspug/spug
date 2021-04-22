@@ -1,21 +1,11 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
-from apps.schedule.models import Task, History
 from apps.notify.models import Notify
 from libs.utils import human_datetime
 from threading import Thread
 import requests
 import json
-
-
-def auto_clean_schedule_history():
-    for task in Task.objects.all():
-        try:
-            record = History.objects.filter(task_id=task.id)[50]
-            History.objects.filter(task_id=task.id, id__lt=record.id).delete()
-        except IndexError:
-            pass
 
 
 def send_fail_notify(task, msg=None):

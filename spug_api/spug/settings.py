@@ -103,7 +103,9 @@ TEMPLATES = [
 ]
 
 SCHEDULE_KEY = 'spug:schedule'
+SCHEDULE_WORKER_KEY = 'spug:schedule:worker'
 MONITOR_KEY = 'spug:monitor'
+MONITOR_WORKER_KEY = 'spug:monitor:worker'
 REQUEST_KEY = 'spug:request'
 BUILD_KEY = 'spug:build'
 REPOS_DIR = os.path.join(BASE_DIR, 'repos')
