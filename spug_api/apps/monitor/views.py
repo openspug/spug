@@ -21,7 +21,7 @@ class DetectionView(View):
             Argument('id', type=int, required=False),
             Argument('name', help='请输入任务名称'),
             Argument('group', help='请选择任务分组'),
-            Argument('addr', help='请输入监控地址'),
+            Argument('targets', type=list, filter=lambda x: len(x), help='请输入监控地址'),
             Argument('type', filter=lambda x: x in dict(Detection.TYPES), help='请选择监控类型'),
             Argument('extra', required=False),
             Argument('desc', required=False),
@@ -32,6 +32,7 @@ class DetectionView(View):
             Argument('notify_mode', type=list, help='请选择报警方式'),
         ).parse(request.body)
         if error is None:
+            form.targets = json.dumps(form.targets)
             form.notify_grp = json.dumps(form.notify_grp)
             form.notify_mode = json.dumps(form.notify_mode)
             if form.id:
@@ -63,7 +64,7 @@ class DetectionView(View):
                 if form.is_active:
                     task = Detection.objects.filter(pk=form.id).first()
                     message = {'id': form.id, 'action': 'add'}
-                    message.update(task.to_dict(selects=('addr', 'extra', 'rate', 'type')))
+                    message.update(task.to_dict(selects=('targets', 'extra', 'rate', 'type')))
                 else:
                     message = {'id': form.id, 'action': 'remove'}
                 rds_cli = get_redis_connection()
@@ -86,10 +87,10 @@ class DetectionView(View):
 def run_test(request):
     form, error = JsonParser(
         Argument('type', help='请选择监控类型'),
-        Argument('addr', help='请输入监控地址'),
+        Argument('targets', type=list, filter=lambda x: len(x), help='请输入监控地址'),
         Argument('extra', required=False)
     ).parse(request.body)
     if error is None:
-        is_success, message = dispatch(form.type, form.addr, form.extra, True)
+        is_success, message = dispatch(form.type, form.targets[0], form.extra)
         return json_response({'is_success': is_success, 'message': message})
     return json_response(error=error)

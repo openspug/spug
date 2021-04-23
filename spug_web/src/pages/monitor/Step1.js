@@ -3,15 +3,16 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { observer } from 'mobx-react';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { Modal, Form, Input, Select, Button } from 'antd';
+import { Modal, Form, Input, Select, Button, message } from 'antd';
 import TemplateSelector from '../exec/task/TemplateSelector';
+import Selector from 'pages/host/Selector';
 import { LinkButton, ACEditor } from 'components';
-import { http, cleanCommand, hasHostPermission } from 'libs';
+import { http, cleanCommand } from 'libs';
 import store from './store';
-import hostStore from '../host/store';
+import lds from 'lodash';
 
 const helpMap = {
   '1': '返回HTTP状态码200-399则判定为正常，其他为异常。',
@@ -21,20 +22,12 @@ const helpMap = {
 export default observer(function () {
   const [loading, setLoading] = useState(false);
   const [showTmp, setShowTmp] = useState(false);
-
-  useEffect(() => {
-    const { type, addr } = store.record;
-    if (type === '1' && addr) {
-      store.record.sitePrefix = addr.startsWith('http://') ? 'http://' : 'https://';
-      store.record.domain = store.record.addr.replace(store.record.sitePrefix, '')
-    }
-  }, [])
+  const [showSelector, setShowSelector] = useState(false);
 
   function handleTest() {
     setLoading(true)
-    const { type, sitePrefix, domain } = store.record;
-    if (type === '1') store.record.addr = sitePrefix + domain;
-    http.post('/api/monitor/test/', store.record, { timeout: 120000 })
+    const formData = lds.pick(store.record, ['type', 'targets', 'extra'])
+    http.post('/api/monitor/test/', formData, { timeout: 120000 })
       .then(res => {
         if (res.is_success) {
           Modal.success({ content: res.message })
@@ -47,7 +40,7 @@ export default observer(function () {
 
   function handleChangeType(v) {
     store.record.type = v;
-    store.record.addr = undefined;
+    store.record.targets = [];
     store.record.extra = undefined;
   };
 
@@ -71,35 +64,30 @@ export default observer(function () {
     })
   }
 
-  const SiteBefore = (
-    <Select style={{ width: 90 }} value={store.record.sitePrefix} onChange={v => store.record.sitePrefix = v}>
-      <Select.Option value="http://">http://</Select.Option>
-      <Select.Option value="https://">https://</Select.Option>
-    </Select>
-  )
-
   function canNext() {
-    const { type, addr, extra, domain, group } = store.record;
-    if (type === '1') {
-      return name && domain && group
-    } else if (type === '5') {
-      return name && addr && group
+    const { type, targets, extra, group } = store.record;
+    const is_verify = name && group && targets.length;
+    if (['2', '3', '4'].includes(type)) {
+      return is_verify && extra
     } else {
-      return name && addr && extra && group
+      return is_verify
     }
   }
 
   function toNext() {
+    const {type, extra} = store.record;
+    if (!Number(extra) > 0) {
+      if (type === '1' && extra) return message.error('请输入正确的响应时间')
+      if (type === '2') return message.error('请输入正确的端口号')
+    }
     store.page += 1;
-    const { type, sitePrefix, domain } = store.record;
-    if (type === '1') store.record.addr = sitePrefix + domain;
   }
 
   function getStyle(t) {
     return t.includes(store.record.type) ? { display: 'flex' } : { display: 'none' }
   }
 
-  const { name, desc, type, addr, extra, domain, group } = store.record;
+  const { name, desc, type, targets, extra, group } = store.record;
   return (
     <Form labelCol={{ span: 6 }} wrapperCol={{ span: 14 }}>
       <Form.Item required label="监控分组" style={{ marginBottom: 0 }}>
@@ -114,7 +102,7 @@ export default observer(function () {
           <Button type="link" onClick={handleAddGroup}>添加分组</Button>
         </Form.Item>
       </Form.Item>
-      <Form.Item label="监控类型" help={helpMap[type]}>
+      <Form.Item label="监控类型" tooltip={helpMap[type]}>
         <Select placeholder="请选择监控类型" value={type} onChange={handleChangeType}>
           <Select.Option value="1">站点检测</Select.Option>
           <Select.Option value="2">端口检测</Select.Option>
@@ -127,29 +115,27 @@ export default observer(function () {
         <Input value={name} onChange={e => store.record.name = e.target.value} placeholder="请输入监控名称" />
       </Form.Item>
       <Form.Item required label="监控地址" style={getStyle(['1'])}>
-        <Input
-          value={domain}
-          addonBefore={SiteBefore}
-          placeholder="请输入监控地址"
-          onChange={e => store.record.domain = e.target.value} />
+        <Select
+          mode="tags"
+          value={targets}
+          onChange={v => store.record.targets = v}
+          placeholder="http(s)://开头，支持多个地址，每输入完成一个后按回车确认"
+          notFoundContent={null} />
       </Form.Item>
       <Form.Item required label="监控地址" style={getStyle(['2', '5'])}>
-        <Input value={addr} placeholder="请输入监控地址（IP/域名）" onChange={e => store.record.addr = e.target.value} />
+        <Select
+          mode="tags"
+          value={targets}
+          onChange={v => store.record.targets = v}
+          placeholder="IP或域名，支持多个地址，每输入完成一个后按回车确认"
+          notFoundContent={null} />
       </Form.Item>
       <Form.Item required label="监控主机" style={getStyle(['3', '4'])}>
-        <Select
-          showSearch
-          value={addr}
-          placeholder="请选择主机"
-          optionFilterProp="children"
-          filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
-          onChange={v => store.record.addr = v}>
-          {hostStore.records.filter(x => x.id === Number(addr) || hasHostPermission(x.id)).map(item => (
-            <Select.Option value={String(item.id)} key={item.id}>
-              {`${item.name}(${item.hostname}:${item.port})`}
-            </Select.Option>
-          ))}
-        </Select>
+        {store.record.targets?.length > 0 && `已选择 ${store.record.targets.length} 台`}
+        <Button type="link" onClick={() => setShowSelector(true)}>选择主机</Button>
+      </Form.Item>
+      <Form.Item label="响应时间" style={getStyle(['1'])}>
+        <Input suffix="ms" placeholder="最长响应时间（毫秒），不设置则默认10秒超时" onChange={e => store.record.extra = e.target.value}/>
       </Form.Item>
       <Form.Item required label="检测端口" style={getStyle(['2'])}>
         <Input value={extra} placeholder="请输入端口号" onChange={e => store.record.extra = e.target.value} />
@@ -175,9 +161,15 @@ export default observer(function () {
 
       <Form.Item wrapperCol={{ span: 14, offset: 6 }} style={{ marginTop: 12 }}>
         <Button disabled={!canNext()} type="primary" onClick={toNext}>下一步</Button>
-        <Button disabled={false} type="link" loading={loading} onClick={handleTest}>执行测试</Button>
+        <Button disabled={!canNext()} type="link" loading={loading} onClick={handleTest}>执行测试</Button>
+        <span style={{color: '#888', fontSize: 12}}>Tips: 仅测试第一个监控地址</span>
       </Form.Item>
       {showTmp && <TemplateSelector onOk={v => store.record.extra += v} onCancel={() => setShowTmp(false)} />}
+      <Selector
+        visible={showSelector}
+        selectedRowKeys={[...store.record.targets]}
+        onCancel={() => setShowSelector(false)}
+        onOk={(_, ids) => store.record.targets = ids}/>
     </Form>
   )
 })

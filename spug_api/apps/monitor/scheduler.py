@@ -10,7 +10,6 @@ from django.utils.functional import SimpleLazyObject
 from django.db import close_old_connections
 from apps.monitor.models import Detection
 from apps.alarm.models import Alarm
-from apps.monitor.executors import dispatch
 from apps.monitor.utils import seconds_to_human
 from apps.notify.models import Notify
 from django.conf import settings
@@ -20,6 +19,8 @@ import logging
 import json
 import time
 
+MONITOR_WORKER_KEY = settings.MONITOR_WORKER_KEY
+
 
 class Scheduler:
     timezone = settings.TIME_ZONE
@@ -28,7 +29,8 @@ class Scheduler:
         self.scheduler = BackgroundScheduler(timezone=self.timezone, executors={'default': ThreadPoolExecutor(30)})
         self.scheduler.add_listener(
             self._handle_event,
-            EVENT_SCHEDULER_SHUTDOWN | EVENT_JOB_ERROR | EVENT_JOB_MAX_INSTANCES | EVENT_JOB_EXECUTED)
+            EVENT_SCHEDULER_SHUTDOWN | EVENT_JOB_ERROR | EVENT_JOB_MAX_INSTANCES
+        )
 
     def _record_alarm(self, obj, status):
         duration = seconds_to_human(time.time() - obj.latest_fault_time)
@@ -97,15 +99,22 @@ class Scheduler:
             obj.save()
             self._handle_notify(obj, is_notified, out)
 
+    def _dispatch(self, task_id, tp, targets, extra):
+        close_old_connections()
+        Detection.objects.filter(pk=task_id).update(latest_run_time=human_datetime())
+        rds_cli = get_redis_connection()
+        for t in json.loads(targets):
+            rds_cli.rpush(MONITOR_WORKER_KEY, json.dumps([task_id, tp, t, extra]))
+
     def _init(self):
         self.scheduler.start()
         for item in Detection.objects.filter(is_active=True):
             trigger = IntervalTrigger(minutes=int(item.rate), timezone=self.timezone)
             self.scheduler.add_job(
-                dispatch,
+                self._dispatch,
                 trigger,
                 id=str(item.id),
-                args=(item.type, item.addr, item.extra),
+                args=(item.id, item.type, item.targets, item.extra),
             )
 
     def run(self):
@@ -119,10 +128,10 @@ class Scheduler:
             if task.action in ('add', 'modify'):
                 trigger = IntervalTrigger(minutes=int(task.rate), timezone=self.timezone)
                 self.scheduler.add_job(
-                    dispatch,
+                    self._dispatch,
                     trigger,
                     id=str(task.id),
-                    args=(task.type, task.addr, task.extra),
+                    args=(task.id, task.type, task.targets, task.extra),
                     replace_existing=True
                 )
             elif task.action == 'remove':

@@ -8,13 +8,18 @@ import subprocess
 import platform
 import requests
 import logging
+import json
 
 logging.captureWarnings(True)
 
 
-def site_check(url):
+def site_check(url, limit):
     try:
         res = requests.get(url, timeout=10, verify=False)
+        if limit:
+            duration = int(res.elapsed.total_seconds() * 1000)
+            if duration > int(limit):
+                return False, f'响应时间：{duration}ms'
         return 200 <= res.status_code < 400, f'返回状态码：{res.status_code}'
     except Exception as e:
         return False, f'异常信息：{e}'
@@ -58,9 +63,41 @@ def host_executor(host, command):
         return False, f'异常信息：{e}'
 
 
-def dispatch(tp, addr, extra, in_view=False):
-    if not in_view:
+def monitor_worker_handler(job):
+    print('enter: ', job)
+    task_id, tp, addr, extra = json.loads(job)
+    if tp == '1':
+        is_ok, message = site_check(addr, extra)
+    elif tp == '2':
+        is_ok, message = port_check(addr, extra)
+    elif tp == '5':
+        is_ok, message = ping_check(addr)
+    elif tp not in ('3', '4'):
+        is_ok, message = False, f'invalid monitor type for {tp!r}'
+    else:
         close_old_connections()
+        command = f'ps -ef|grep -v grep|grep {extra!r}' if tp == '3' else extra
+        host = Host.objects.filter(pk=addr).first()
+        if not host:
+            is_ok, message = False, f'unknown host id for {addr!r}'
+        else:
+            is_ok, message = host_executor(host, command)
+
+
+    # is_notified = True if obj.latest_notify_time else False
+    # if obj.latest_status in [0, None] and is_ok is False:
+    #     obj.latest_fault_time = int(time.time())
+    # if is_ok:
+    #     obj.latest_notify_time = 0
+    #     obj.fault_times = 0
+    # else:
+    #     obj.fault_times += 1
+    # obj.latest_status = 0 if is_ok else 1
+    # obj.latest_run_time = human_datetime(event.scheduled_run_time)
+    # obj.save()
+    # self._handle_notify(obj, is_notified, out)
+
+def dispatch(tp, addr, extra):
     if tp == '1':
         return site_check(addr)
     elif tp == '2':

@@ -22,7 +22,8 @@ class Detection(models.Model, ModelMixin):
     name = models.CharField(max_length=50)
     type = models.CharField(max_length=2, choices=TYPES)
     group = models.CharField(max_length=255, null=True)
-    addr = models.CharField(max_length=255)
+    addr = models.CharField(max_length=255)   # 要删除的
+    targets = models.TextField()
     extra = models.TextField(null=True)
     desc = models.CharField(max_length=255, null=True)
     is_active = models.BooleanField(default=True)
@@ -48,6 +49,7 @@ class Detection(models.Model, ModelMixin):
         tmp['latest_status_alias'] = self.get_latest_status_display()
         tmp['notify_mode'] = json.loads(self.notify_mode)
         tmp['notify_grp'] = json.loads(self.notify_grp)
+        tmp['targets'] = json.loads(self.targets)
         return tmp
 
     def __repr__(self):

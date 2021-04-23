@@ -58,7 +58,7 @@ class Store {
   };
 
   showForm = (info) => {
-    info = info || {type: '1', sitePrefix: 'http://'};
+    info = info || {type: '1', targets: []};
     this.page = 0;
     this.record = lds.cloneDeep(info);
     this.formVisible = true;

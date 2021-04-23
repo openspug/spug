@@ -6,6 +6,7 @@ from django.conf import settings
 from django_redis import get_redis_connection
 from concurrent.futures import ThreadPoolExecutor
 from apps.schedule.executors import schedule_worker_handler
+from apps.monitor.executors import monitor_worker_handler
 import logging
 
 MONITOR_WORKER_KEY = settings.MONITOR_WORKER_KEY
@@ -24,7 +25,7 @@ class Worker:
             if key.decode() == SCHEDULE_WORKER_KEY:
                 self._executor.submit(schedule_worker_handler, job)
             else:
-                pass
+                self._executor.submit(monitor_worker_handler, job)
 
 
 class Command(BaseCommand):
