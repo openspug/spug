@@ -27,12 +27,12 @@ export default observer(function () {
   function handleTest() {
     setLoading(true)
     const formData = lds.pick(store.record, ['type', 'targets', 'extra'])
-    http.post('/api/monitor/test/', formData, { timeout: 120000 })
+    http.post('/api/monitor/test/', formData, {timeout: 120000})
       .then(res => {
         if (res.is_success) {
-          Modal.success({ content: res.message })
+          Modal.success({content: res.message})
         } else {
-          Modal.warning({ content: res.message })
+          Modal.warning({content: res.message})
         }
       })
       .finally(() => setLoading(false))
@@ -46,13 +46,13 @@ export default observer(function () {
 
   function handleAddGroup() {
     Modal.confirm({
-      icon: <ExclamationCircleOutlined />,
+      icon: <ExclamationCircleOutlined/>,
       title: '添加监控分组',
       content: (
-        <Form layout="vertical" style={{ marginTop: 24 }}>
+        <Form layout="vertical" style={{marginTop: 24}}>
           <Form.Item required label="监控分组">
-            <Input onChange={e => store.record.group = e.target.value} />
-            
+            <Input onChange={e => store.record.group = e.target.value}/>
+
           </Form.Item>
         </Form>
       ),
@@ -65,7 +65,7 @@ export default observer(function () {
   }
 
   function canNext() {
-    const { type, targets, extra, group } = store.record;
+    const {type, targets, extra, group} = store.record;
     const is_verify = name && group && targets.length;
     if (['2', '3', '4'].includes(type)) {
       return is_verify && extra
@@ -84,21 +84,21 @@ export default observer(function () {
   }
 
   function getStyle(t) {
-    return t.includes(store.record.type) ? { display: 'flex' } : { display: 'none' }
+    return t.includes(store.record.type) ? {display: 'flex'} : {display: 'none'}
   }
 
-  const { name, desc, type, targets, extra, group } = store.record;
+  const {name, desc, type, targets, extra, group} = store.record;
   return (
-    <Form labelCol={{ span: 6 }} wrapperCol={{ span: 14 }}>
-      <Form.Item required label="监控分组" style={{ marginBottom: 0 }}>
-        <Form.Item style={{ display: 'inline-block', width: 'calc(75%)', marginRight: 8 }}>
+    <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
+      <Form.Item required label="监控分组" style={{marginBottom: 0}}>
+        <Form.Item style={{display: 'inline-block', width: 'calc(75%)', marginRight: 8}}>
           <Select value={group} placeholder="请选择监控分组" onChange={v => store.record.group = v}>
             {store.groups.map(item => (
               <Select.Option value={item} key={item}>{item}</Select.Option>
             ))}
           </Select>
         </Form.Item>
-        <Form.Item style={{ display: 'inline-block', width: 'calc(25%-8px)' }}>
+        <Form.Item style={{display: 'inline-block', width: 'calc(25%-8px)'}}>
           <Button type="link" onClick={handleAddGroup}>添加分组</Button>
         </Form.Item>
       </Form.Item>
@@ -112,7 +112,7 @@ export default observer(function () {
         </Select>
       </Form.Item>
       <Form.Item required label="监控名称">
-        <Input value={name} onChange={e => store.record.name = e.target.value} placeholder="请输入监控名称" />
+        <Input value={name} onChange={e => store.record.name = e.target.value} placeholder="请输入监控名称"/>
       </Form.Item>
       <Form.Item required label="监控地址" style={getStyle(['1'])}>
         <Select
@@ -120,7 +120,7 @@ export default observer(function () {
           value={targets}
           onChange={v => store.record.targets = v}
           placeholder="http(s)://开头，支持多个地址，每输入完成一个后按回车确认"
-          notFoundContent={null} />
+          notFoundContent={null}/>
       </Form.Item>
       <Form.Item required label="监控地址" style={getStyle(['2', '5'])}>
         <Select
@@ -128,20 +128,21 @@ export default observer(function () {
           value={targets}
           onChange={v => store.record.targets = v}
           placeholder="IP或域名，支持多个地址，每输入完成一个后按回车确认"
-          notFoundContent={null} />
+          notFoundContent={null}/>
       </Form.Item>
       <Form.Item required label="监控主机" style={getStyle(['3', '4'])}>
         {store.record.targets?.length > 0 && `已选择 ${store.record.targets.length} 台`}
         <Button type="link" onClick={() => setShowSelector(true)}>选择主机</Button>
       </Form.Item>
       <Form.Item label="响应时间" style={getStyle(['1'])}>
-        <Input suffix="ms" placeholder="最长响应时间（毫秒），不设置则默认10秒超时" onChange={e => store.record.extra = e.target.value}/>
+        <Input suffix="ms" value={extra} placeholder="最长响应时间（毫秒），不设置则默认10秒超时"
+               onChange={e => store.record.extra = e.target.value}/>
       </Form.Item>
       <Form.Item required label="检测端口" style={getStyle(['2'])}>
-        <Input value={extra} placeholder="请输入端口号" onChange={e => store.record.extra = e.target.value} />
+        <Input value={extra} placeholder="请输入端口号" onChange={e => store.record.extra = e.target.value}/>
       </Form.Item>
       <Form.Item required label="进程名称" help="执行 ps -ef 看到的进程名称。" style={getStyle(['3'])}>
-        <Input value={extra} placeholder="请输入进程名称" onChange={e => store.record.extra = e.target.value} />
+        <Input value={extra} placeholder="请输入进程名称" onChange={e => store.record.extra = e.target.value}/>
       </Form.Item>
       <Form.Item
         required
@@ -153,18 +154,18 @@ export default observer(function () {
           value={extra || ''}
           width="100%"
           height="200px"
-          onChange={e => store.record.extra = cleanCommand(e)} />
+          onChange={e => store.record.extra = cleanCommand(e)}/>
       </Form.Item>
       <Form.Item label="备注信息">
-        <Input.TextArea value={desc} onChange={e => store.record.desc = e.target.value} placeholder="请输入备注信息" />
+        <Input.TextArea value={desc} onChange={e => store.record.desc = e.target.value} placeholder="请输入备注信息"/>
       </Form.Item>
 
-      <Form.Item wrapperCol={{ span: 14, offset: 6 }} style={{ marginTop: 12 }}>
+      <Form.Item wrapperCol={{span: 14, offset: 6}} style={{marginTop: 12}}>
         <Button disabled={!canNext()} type="primary" onClick={toNext}>下一步</Button>
         <Button disabled={!canNext()} type="link" loading={loading} onClick={handleTest}>执行测试</Button>
         <span style={{color: '#888', fontSize: 12}}>Tips: 仅测试第一个监控地址</span>
       </Form.Item>
-      {showTmp && <TemplateSelector onOk={v => store.record.extra += v} onCancel={() => setShowTmp(false)} />}
+      {showTmp && <TemplateSelector onOk={v => store.record.extra += v} onCancel={() => setShowTmp(false)}/>}
       <Selector
         visible={showSelector}
         selectedRowKeys={[...store.record.targets]}

@@ -12,7 +12,6 @@ import { http, hasPermission } from 'libs';
 import groupStore from '../alarm/group/store';
 import hostStore from '../host/store';
 import store from './store';
-import lds from 'lodash';
 
 @observer
 class ComTable extends React.Component {
@@ -102,9 +101,9 @@ class ComTable extends React.Component {
         <Table.Column title="频率" dataIndex="rate" render={value => `${value}分钟`}/>
         <Table.Column title="状态" render={info => {
           if (info.is_active) {
-              return <Tag color="green">监控中</Tag>
+              return <Tag color="blue">已启用</Tag>
           } else {
-            return <Tag color="red">未启用</Tag>
+            return <Tag color="red">已禁用</Tag>
           }
         }}/>
         <Table.Column title="更新于" dataIndex="latest_run_time_alias"

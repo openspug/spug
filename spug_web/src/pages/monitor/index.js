@@ -34,13 +34,6 @@ export default observer(function () {
             {store.types.map(item => <Select.Option key={item} value={item}>{item}</Select.Option>)}
           </Select>
         </SearchForm.Item>
-        <SearchForm.Item span={7} title="任务状态">
-          <Select allowClear value={store.f_status} onChange={v => store.f_status = v} placeholder="请选择">
-            <Select.Option value={-1}>待检测</Select.Option>
-            <Select.Option value={0}>正常</Select.Option>
-            <Select.Option value={1}>异常</Select.Option>
-          </Select>
-        </SearchForm.Item>
       </SearchForm>
       <ComTable/>
       {store.formVisible && <ComForm/>}

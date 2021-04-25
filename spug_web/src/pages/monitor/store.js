@@ -19,7 +19,6 @@ class Store {
 
   @observable f_name;
   @observable f_type;
-  @observable f_status;
   @observable f_active = '';
   @observable f_group;
 
@@ -29,13 +28,6 @@ class Store {
     if (this.f_name) records = records.filter(x => x.name.toLowerCase().includes(this.f_name.toLowerCase()));
     if (this.f_type) records = records.filter(x => x.type_alias === this.f_type);
     if (this.f_group) records = records.filter(x => x.group === this.f_group);
-    if (this.f_status !== undefined) {
-      if (this.f_status === -1) {
-        records = records.filter(x => x.is_active && !x.latest_status_alias);
-      } else {
-        records = records.filter(x => x.latest_status === this.f_status)
-      }
-    }
     return records
   }
 

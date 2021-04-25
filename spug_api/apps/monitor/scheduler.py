@@ -4,20 +4,18 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.triggers.interval import IntervalTrigger
-from apscheduler.events import EVENT_SCHEDULER_SHUTDOWN, EVENT_JOB_MAX_INSTANCES, EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
+from apscheduler.events import EVENT_SCHEDULER_SHUTDOWN, EVENT_JOB_MAX_INSTANCES, EVENT_JOB_ERROR
 from django_redis import get_redis_connection
 from django.utils.functional import SimpleLazyObject
 from django.db import close_old_connections
 from apps.monitor.models import Detection
-from apps.alarm.models import Alarm
-from apps.monitor.utils import seconds_to_human
 from apps.notify.models import Notify
 from django.conf import settings
-from libs import spug, AttrDict, human_datetime, human_diff_time
-from datetime import datetime
+from libs import AttrDict, human_datetime
+from datetime import datetime, timedelta
+from random import randint
 import logging
 import json
-import time
 
 MONITOR_WORKER_KEY = settings.MONITOR_WORKER_KEY
 
@@ -32,46 +30,6 @@ class Scheduler:
             EVENT_SCHEDULER_SHUTDOWN | EVENT_JOB_ERROR | EVENT_JOB_MAX_INSTANCES
         )
 
-    def _record_alarm(self, obj, status):
-        duration = seconds_to_human(time.time() - obj.latest_fault_time)
-        Alarm.objects.create(
-            name=obj.name,
-            type=obj.get_type_display(),
-            status=status,
-            duration=duration,
-            notify_grp=obj.notify_grp,
-            notify_mode=obj.notify_mode)
-
-    def _do_notify(self, event, obj, out):
-        obj.out = out
-        obj.grp = json.loads(obj.notify_grp)
-        if event == '2':
-            obj.duration = human_diff_time(datetime.now(), datetime.fromtimestamp(obj.latest_fault_time))
-        for mode in json.loads(obj.notify_mode):
-            if mode == '1':
-                spug.notify_by_wx(event, obj)
-            elif mode == '3':
-                spug.notify_by_dd(event, obj)
-            elif mode == '4':
-                spug.notify_by_email(event, obj)
-            elif mode == '5':
-                spug.notify_by_qy_wx(event, obj)
-
-    def _handle_notify(self, obj, is_notified, out):
-        if obj.latest_status == 0:
-            if is_notified:
-                self._record_alarm(obj, '2')
-                logging.warning(f'{human_datetime()} recover job_id: {obj.id}, job_name: {obj.name}')
-                self._do_notify('2', obj, out)
-        else:
-            if obj.fault_times >= obj.threshold:
-                if time.time() - obj.latest_notify_time >= obj.quiet * 60:
-                    obj.latest_notify_time = int(time.time())
-                    obj.save()
-                    self._record_alarm(obj, '1')
-                    logging.warning(f'{human_datetime()} notify job_id: {obj.id}, job_name: {obj.name}')
-                    self._do_notify('1', obj, out)
-
     def _handle_event(self, event):
         close_old_connections()
         obj = SimpleLazyObject(lambda: Detection.objects.filter(pk=event.job_id).first())
@@ -84,20 +42,6 @@ class Scheduler:
         elif event.code == EVENT_JOB_ERROR:
             logging.warning(f'EVENT_JOB_ERROR: job_id {event.job_id} exception: {event.exception}')
             Notify.make_notify('monitor', '1', f'{obj.name} - 执行异常', f'{event.exception}')
-        elif event.code == EVENT_JOB_EXECUTED:
-            is_ok, out = event.retval
-            is_notified = True if obj.latest_notify_time else False
-            if obj.latest_status in [0, None] and is_ok is False:
-                obj.latest_fault_time = int(time.time())
-            if is_ok:
-                obj.latest_notify_time = 0
-                obj.fault_times = 0
-            else:
-                obj.fault_times += 1
-            obj.latest_status = 0 if is_ok else 1
-            obj.latest_run_time = human_datetime(event.scheduled_run_time)
-            obj.save()
-            self._handle_notify(obj, is_notified, out)
 
     def _dispatch(self, task_id, tp, targets, extra, threshold, quiet):
         close_old_connections()
@@ -109,12 +53,14 @@ class Scheduler:
     def _init(self):
         self.scheduler.start()
         for item in Detection.objects.filter(is_active=True):
+            now = datetime.now()
             trigger = IntervalTrigger(minutes=int(item.rate), timezone=self.timezone)
             self.scheduler.add_job(
                 self._dispatch,
                 trigger,
                 id=str(item.id),
                 args=(item.id, item.type, item.targets, item.extra, item.threshold, item.quiet),
+                next_run_time=now + timedelta(seconds=randint(0, 60))
             )
 
     def run(self):
