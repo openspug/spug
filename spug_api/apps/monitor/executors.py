@@ -2,13 +2,16 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.db import close_old_connections
+from django_redis import get_redis_connection
 from apps.host.models import Host
+from apps.monitor.utils import handle_notify
 from socket import socket
 import subprocess
 import platform
 import requests
 import logging
 import json
+import time
 
 logging.captureWarnings(True)
 
@@ -64,8 +67,8 @@ def host_executor(host, command):
 
 
 def monitor_worker_handler(job):
-    print('enter: ', job)
-    task_id, tp, addr, extra = json.loads(job)
+    task_id, tp, addr, extra, threshold, quiet = json.loads(job)
+    target = addr
     if tp == '1':
         is_ok, message = site_check(addr, extra)
     elif tp == '2':
@@ -82,20 +85,24 @@ def monitor_worker_handler(job):
             is_ok, message = False, f'unknown host id for {addr!r}'
         else:
             is_ok, message = host_executor(host, command)
+        target = f'{host.name}({host.hostname})'
 
+    rds, key, f_count, f_time = get_redis_connection(), f'spug:det:{task_id}', f'c_{addr}', f't_{addr}'
+    v_count, v_time = rds.hmget(key, f_count, f_time)
+    if is_ok:
+        if v_count:
+            rds.hdel(key, f_count, f_time)
+        if v_time:
+            logging.warning('send recovery notification')
+            handle_notify(task_id, target, is_ok, message, int(v_count) + 1)
+        return
+    v_count = rds.hincrby(key, f_count)
+    if v_count >= threshold:
+        if not v_time or int(time.time()) - int(v_time) >= quiet * 60:
+            rds.hset(key, f_time, int(time.time()))
+            logging.warning('send fault alarm notification')
+            handle_notify(task_id, target, is_ok, message, v_count)
 
-    # is_notified = True if obj.latest_notify_time else False
-    # if obj.latest_status in [0, None] and is_ok is False:
-    #     obj.latest_fault_time = int(time.time())
-    # if is_ok:
-    #     obj.latest_notify_time = 0
-    #     obj.fault_times = 0
-    # else:
-    #     obj.fault_times += 1
-    # obj.latest_status = 0 if is_ok else 1
-    # obj.latest_run_time = human_datetime(event.scheduled_run_time)
-    # obj.save()
-    # self._handle_notify(obj, is_notified, out)
 
 def dispatch(tp, addr, extra):
     if tp == '1':

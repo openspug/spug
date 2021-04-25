@@ -21,6 +21,7 @@ class Alarm(models.Model, ModelMixin):
     )
     name = models.CharField(max_length=50)
     type = models.CharField(max_length=50)
+    target = models.CharField(max_length=100)
     notify_mode = models.CharField(max_length=255)
     notify_grp = models.CharField(max_length=255)
     status = models.CharField(max_length=2, choices=STATUS)

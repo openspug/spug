@@ -99,25 +99,12 @@ class ComTable extends React.Component {
         <Table.Column title="监控分组" dataIndex="group" />
         <Table.Column title="监控名称" dataIndex="name"/>
         <Table.Column title="类型" dataIndex="type_alias"/>
-        <Table.Column ellipsis title="地址" render={info => {
-          if ('34'.includes(info.type)) {
-            return lds.get(this.state.hosts, `${info.addr}.name`)
-          } else {
-            return info.addr
-          }
-        }}/>
         <Table.Column title="频率" dataIndex="rate" render={value => `${value}分钟`}/>
         <Table.Column title="状态" render={info => {
           if (info.is_active) {
-            if (info['latest_status'] === 0) {
-              return <Tag color="green">正常</Tag>
-            } else if (info['latest_status'] === 1) {
-              return <Tag color="red">异常</Tag>
-            } else {
-              return <Tag color="orange">待检测</Tag>
-            }
+              return <Tag color="green">监控中</Tag>
           } else {
-            return <Tag>未启用</Tag>
+            return <Tag color="red">未启用</Tag>
           }
         }}/>
         <Table.Column title="更新于" dataIndex="latest_run_time_alias"

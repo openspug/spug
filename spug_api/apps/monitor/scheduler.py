@@ -99,12 +99,12 @@ class Scheduler:
             obj.save()
             self._handle_notify(obj, is_notified, out)
 
-    def _dispatch(self, task_id, tp, targets, extra):
+    def _dispatch(self, task_id, tp, targets, extra, threshold, quiet):
         close_old_connections()
         Detection.objects.filter(pk=task_id).update(latest_run_time=human_datetime())
         rds_cli = get_redis_connection()
         for t in json.loads(targets):
-            rds_cli.rpush(MONITOR_WORKER_KEY, json.dumps([task_id, tp, t, extra]))
+            rds_cli.rpush(MONITOR_WORKER_KEY, json.dumps([task_id, tp, t, extra, threshold, quiet]))
 
     def _init(self):
         self.scheduler.start()
@@ -114,7 +114,7 @@ class Scheduler:
                 self._dispatch,
                 trigger,
                 id=str(item.id),
-                args=(item.id, item.type, item.targets, item.extra),
+                args=(item.id, item.type, item.targets, item.extra, item.threshold, item.quiet),
             )
 
     def run(self):
@@ -131,7 +131,7 @@ class Scheduler:
                     self._dispatch,
                     trigger,
                     id=str(task.id),
-                    args=(task.id, task.type, task.targets, task.extra),
+                    args=(task.id, task.type, task.targets, task.extra, task.threshold, task.quiet),
                     replace_existing=True
                 )
             elif task.action == 'remove':

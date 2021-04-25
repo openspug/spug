@@ -12,6 +12,8 @@ import logging
 MONITOR_WORKER_KEY = settings.MONITOR_WORKER_KEY
 SCHEDULE_WORKER_KEY = settings.SCHEDULE_WORKER_KEY
 
+logging.basicConfig(level=logging.WARNING, format='%(asctime)s %(message)s')
+
 
 class Worker:
     def __init__(self):

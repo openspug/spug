@@ -16,13 +16,12 @@ class Detection(models.Model, ModelMixin):
         ('5', 'Ping检测'),
     )
     STATUS = (
-        (0, '成功'),
-        (1, '失败'),
+        (0, '正常'),
+        (1, '异常'),
     )
     name = models.CharField(max_length=50)
     type = models.CharField(max_length=2, choices=TYPES)
     group = models.CharField(max_length=255, null=True)
-    addr = models.CharField(max_length=255)   # 要删除的
     targets = models.TextField()
     extra = models.TextField(null=True)
     desc = models.CharField(max_length=255, null=True)
@@ -33,10 +32,7 @@ class Detection(models.Model, ModelMixin):
     fault_times = models.SmallIntegerField(default=0)
     notify_mode = models.CharField(max_length=255)
     notify_grp = models.CharField(max_length=255)
-    latest_status = models.SmallIntegerField(choices=STATUS, null=True)
     latest_run_time = models.CharField(max_length=20, null=True)
-    latest_fault_time = models.IntegerField(null=True)
-    latest_notify_time = models.IntegerField(default=0)
 
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
@@ -46,7 +42,6 @@ class Detection(models.Model, ModelMixin):
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
         tmp['type_alias'] = self.get_type_display()
-        tmp['latest_status_alias'] = self.get_latest_status_display()
         tmp['notify_mode'] = json.loads(self.notify_mode)
         tmp['notify_grp'] = json.loads(self.notify_grp)
         tmp['targets'] = json.loads(self.targets)

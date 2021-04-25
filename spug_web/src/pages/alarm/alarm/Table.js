@@ -43,6 +43,9 @@ class ComTable extends React.Component {
     title: '监控类型',
     dataIndex: 'type',
   }, {
+    title: '监控对象',
+    dataIndex: 'target'
+  }, {
     title: '状态',
     dataIndex: 'status',
     render: value => value === '1' ? <Tag color="orange">报警发生</Tag> : <Tag color="green">故障恢复</Tag>
