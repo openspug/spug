@@ -151,6 +151,7 @@ class DeployView(View):
                     return json_response(error=error)
                 if len(extend_form.server_actions) + len(extend_form.host_actions) == 0:
                     return json_response(error='请至少设置一个执行的动作')
+                extend_form.require_upload = any(x.get('src_mode') == '1' for x in extend_form.host_actions)
                 extend_form.server_actions = json.dumps(extend_form.server_actions)
                 extend_form.host_actions = json.dumps(extend_form.host_actions)
                 if form.id:

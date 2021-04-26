@@ -69,7 +69,7 @@ export default observer(function () {
     return false
   }
 
-  const {app_host_ids, deploy_id, type} = store.record;
+  const {app_host_ids, deploy_id, type, require_upload} = store.record;
   return (
     <Modal
       visible
@@ -89,12 +89,14 @@ export default observer(function () {
           tooltip="可以在自定义脚本中引用该变量，用于设置本次发布相关的动态变量，在脚本中通过 $SPUG_RELEASE 来使用该值。">
           <Input placeholder="请输入环境变量 SPUG_RELEASE 的值"/>
         </Form.Item>
-        <Form.Item label="上传数据" tooltip="通过数据传输动作来使用上传的文件。" className={styles.upload}>
-          <Upload name="file" fileList={fileList} headers={{'X-Token': X_TOKEN}} beforeUpload={handleUpload}
-                  data={{deploy_id}} onChange={handleUploadChange}>
-            {fileList.length === 0 ? <Button loading={uploading} icon={<UploadOutlined/>}>点击上传</Button> : null}
-          </Upload>
-        </Form.Item>
+        {require_upload && (
+          <Form.Item required label="上传数据" tooltip="通过数据传输动作来使用上传的文件。" className={styles.upload}>
+            <Upload name="file" fileList={fileList} headers={{'X-Token': X_TOKEN}} beforeUpload={handleUpload}
+                    data={{deploy_id}} onChange={handleUploadChange}>
+              {fileList.length === 0 ? <Button loading={uploading} icon={<UploadOutlined/>}>点击上传</Button> : null}
+            </Upload>
+          </Form.Item>
+        )}
         <Form.Item required label="目标主机" tooltip="可以通过创建多个发布申请单，选择主机分批发布。">
           {host_ids.length > 0 && `已选择 ${host_ids.length} 台（可选${app_host_ids.length}）`}
           <Button type="link" onClick={() => setVisible(true)}>选择主机</Button>

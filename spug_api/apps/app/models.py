@@ -98,6 +98,7 @@ class DeployExtend2(models.Model, ModelMixin):
     deploy = models.OneToOneField(Deploy, primary_key=True, on_delete=models.CASCADE)
     server_actions = models.TextField()
     host_actions = models.TextField()
+    require_upload = models.BooleanField(default=False)
 
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)

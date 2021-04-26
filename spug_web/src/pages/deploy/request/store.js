@@ -32,9 +32,9 @@ class Store {
     if (this.f_app_id) data = data.filter(x => x.app_id === this.f_app_id)
     if (this.f_env_id) data = data.filter(x => x.env_id === this.f_env_id)
     if (this.f_s_date) data = data.filter(x => {
-        const date = x.created_at.substr(0, 10);
-        return date >= this.f_s_date && date <= this.f_e_date
-      })
+      const date = x.created_at.substr(0, 10);
+      return date >= this.f_s_date && date <= this.f_e_date
+    })
     if (this.f_status !== 'all') {
       if (this.f_status === '99') {
         data = data.filter(x => ['-1', '2'].includes(x.status))
@@ -84,7 +84,8 @@ class Store {
   };
 
   confirmAdd = (deploy) => {
-    this.record = {deploy_id: deploy.id, app_host_ids: deploy.host_ids};
+    const {id, host_ids, require_upload} = deploy;
+    this.record = {deploy_id: id, app_host_ids: host_ids, require_upload};
     if (deploy.extend === '1') {
       this.ext1Visible = true
     } else {
