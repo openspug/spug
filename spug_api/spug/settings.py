@@ -34,7 +34,6 @@ ALLOWED_HOSTS = ['127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
-    'channels',
     'apps.account',
     'apps.host',
     'apps.setting',
@@ -48,6 +47,7 @@ INSTALLED_APPS = [
     'apps.notify',
     'apps.repository',
     'apps.home',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -106,6 +106,7 @@ SCHEDULE_KEY = 'spug:schedule'
 SCHEDULE_WORKER_KEY = 'spug:schedule:worker'
 MONITOR_KEY = 'spug:monitor'
 MONITOR_WORKER_KEY = 'spug:monitor:worker'
+EXEC_WORKER_KEY = 'spug:exec:worker'
 REQUEST_KEY = 'spug:request'
 BUILD_KEY = 'spug:build'
 REPOS_DIR = os.path.join(BASE_DIR, 'repos')

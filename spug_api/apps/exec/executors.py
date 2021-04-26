@@ -1,7 +1,6 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
-from channels.consumer import SyncConsumer
 from django_redis import get_redis_connection
 from libs.ssh import SSH
 import threading
@@ -9,14 +8,13 @@ import socket
 import json
 
 
-class SSHExecutor(SyncConsumer):
-    def exec(self, job):
-        job = Job(**job)
-        threading.Thread(target=job.run).start()
+def exec_worker_handler(job):
+    job = Job(**json.loads(job))
+    threading.Thread(target=job.run).start()
 
 
 class Job:
-    def __init__(self, hostname, port, username, pkey, command, token=None, **kwargs):
+    def __init__(self, hostname, port, username, pkey, command, token=None):
         self.ssh_cli = SSH(hostname, port, username, pkey)
         self.key = f'{hostname}:{port}'
         self.command = command

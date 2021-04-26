@@ -2,10 +2,13 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
+from django_redis import get_redis_connection
+from django.conf import settings
 from libs import json_response, JsonParser, Argument, human_datetime
-from libs.channel import Channel
 from apps.exec.models import ExecTemplate
 from apps.host.models import Host
+import uuid
+import json
 
 
 class TemplateView(View):
@@ -49,9 +52,9 @@ def do_task(request):
     if error is None:
         if not request.user.has_host_perm(form.host_ids):
             return json_response(error='无权访问主机，请联系管理员')
-        token = Channel.get_token()
+        token, rds = uuid.uuid4().hex, get_redis_connection()
         for host in Host.objects.filter(id__in=form.host_ids):
-            Channel.send_ssh_executor(
+            data = dict(
                 token=token,
                 hostname=host.hostname,
                 port=host.port,
@@ -59,5 +62,6 @@ def do_task(request):
                 command=form.command,
                 pkey=host.private_key,
             )
+            rds.rpush(settings.EXEC_WORKER_KEY, json.dumps(data))
         return json_response(token)
     return json_response(error=error)

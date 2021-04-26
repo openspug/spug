@@ -14,19 +14,6 @@ class Channel:
         return uuid.uuid4().hex
 
     @staticmethod
-    def send_ssh_executor(hostname, port, username, command, pkey, token=None):
-        message = {
-            'type': 'exec',
-            'token': token,
-            'hostname': hostname,
-            'port': port,
-            'username': username,
-            'command': command,
-            'pkey': pkey
-        }
-        async_to_sync(layer.send)('ssh_exec', message)
-
-    @staticmethod
     def send_notify(title, content):
         message = {
             'type': 'notify.message',
