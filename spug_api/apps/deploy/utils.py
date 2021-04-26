@@ -82,6 +82,9 @@ def _ext2_deploy(req, helper, env):
     host_actions = json.loads(extend.host_actions)
     server_actions = json.loads(extend.server_actions)
     env.update({'SPUG_RELEASE': req.version})
+    if req.version:
+        for index, value in enumerate(req.version.split()):
+            env.update({f'SPUG_RELEASE_{index + 1}': value})
     for action in server_actions:
         helper.send_step('local', step, f'{human_time()} {action["title"]}...\r\n')
         helper.local(f'cd /tmp && {action["data"]}', env)
