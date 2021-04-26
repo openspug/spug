@@ -25,6 +25,7 @@ SCHEDULE_WORKER_KEY = settings.SCHEDULE_WORKER_KEY
 class Scheduler:
     timezone = settings.TIME_ZONE
     week_map = {
+        '-': '-',
         '*': '*',
         '7': '6',
         '0': '6',
@@ -44,6 +45,10 @@ class Scheduler:
         )
 
     @classmethod
+    def covert_week(cls, week_str):
+        return ''.join(map(lambda x: cls.week_map[x], week_str))
+
+    @classmethod
     def parse_trigger(cls, trigger, trigger_args):
         if trigger == 'interval':
             return IntervalTrigger(seconds=int(trigger_args), timezone=cls.timezone)
@@ -52,7 +57,7 @@ class Scheduler:
         elif trigger == 'cron':
             args = json.loads(trigger_args) if not isinstance(trigger_args, dict) else trigger_args
             minute, hour, day, month, week = args['rule'].split()
-            week = cls.week_map[week]
+            week = cls.covert_week(week)
             return CronTrigger(minute=minute, hour=hour, day=day, month=month, day_of_week=week,
                                start_date=args['start'], end_date=args['stop'])
         else:
