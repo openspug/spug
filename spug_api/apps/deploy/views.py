@@ -130,6 +130,8 @@ class RequestDetailView(View):
             outputs['local'] = {'id': 'local', 'data': [f'{human_time()} 读取数据...        ']}
             response['s_actions'] = json.loads(req.deploy.extend_obj.server_actions)
             response['h_actions'] = json.loads(req.deploy.extend_obj.host_actions)
+            if not response['h_actions']:
+                response['outputs'] = {'local': outputs['local']}
         rds, key, counter = get_redis_connection(), f'{settings.REQUEST_KEY}:{r_id}', 0
         data = rds.lrange(key, counter, counter + 9)
         while data:
@@ -169,6 +171,8 @@ class RequestDetailView(View):
             outputs['local'] = {'id': 'local', 'step': 0, 'data': [message]}
             s_actions = json.loads(req.deploy.extend_obj.server_actions)
             h_actions = json.loads(req.deploy.extend_obj.host_actions)
+            if not h_actions:
+                outputs = {'local': outputs['local']}
             return json_response({'s_actions': s_actions, 'h_actions': h_actions, 'outputs': outputs})
         return json_response({'outputs': outputs})
 

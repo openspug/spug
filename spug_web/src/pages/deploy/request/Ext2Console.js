@@ -80,6 +80,7 @@ function Ext2Console(props) {
     store.tabModes[props.request.id] = !value
   }
 
+  const hostOutputs = Object.values(outputs).filter(x => x.id !== 'local');
   return store.tabModes[props.request.id] ? (
     <Card
       className={styles.item}
@@ -127,28 +128,30 @@ function Ext2Console(props) {
           <OutView records={outputs.local.data}/>
         </Collapse.Panel>
       </Collapse>
-      <Collapse
-        defaultActiveKey="0"
-        className={styles.collapse}
-        style={{marginTop: 24}}
-        expandIcon={({isActive}) => <CaretRightOutlined style={{fontSize: 16}} rotate={isActive ? 90 : 0}/>}>
-        {Object.values(outputs).filter(x => x.id !== 'local').map((item, index) => (
-          <Collapse.Panel
-            key={index}
-            header={
-              <div className={styles.header}>
-                <b className={styles.title}>{item.title}</b>
-                <Steps size="small" className={styles.step} current={item.step} status={item.status}>
-                  <StepItem title="等待调度" item={item} step={0}/>
-                  {hActions.map((action, index) => (
-                    <StepItem key={index} title={action.title} item={item} step={index + 1}/>
-                  ))}
-                </Steps>
-              </div>}>
-            <OutView records={item.data}/>
-          </Collapse.Panel>
-        ))}
-      </Collapse>
+      {hostOutputs.length > 0 && (
+        <Collapse
+          defaultActiveKey="0"
+          className={styles.collapse}
+          style={{marginTop: 24}}
+          expandIcon={({isActive}) => <CaretRightOutlined style={{fontSize: 16}} rotate={isActive ? 90 : 0}/>}>
+          {hostOutputs.map((item, index) => (
+            <Collapse.Panel
+              key={index}
+              header={
+                <div className={styles.header}>
+                  <b className={styles.title}>{item.title}</b>
+                  <Steps size="small" className={styles.step} current={item.step} status={item.status}>
+                    <StepItem title="等待调度" item={item} step={0}/>
+                    {hActions.map((action, index) => (
+                      <StepItem key={index} title={action.title} item={item} step={index + 1}/>
+                    ))}
+                  </Steps>
+                </div>}>
+              <OutView records={item.data}/>
+            </Collapse.Panel>
+          ))}
+        </Collapse>
+      )}
     </Modal>
   )
 }
