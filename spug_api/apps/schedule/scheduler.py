@@ -78,7 +78,7 @@ class Scheduler:
 
     def _init_builtin_jobs(self):
         self.scheduler.add_job(auto_run_by_day, 'cron', hour=1, minute=20)
-        self.scheduler.add_job(auto_run_by_minute, 'interval', minutes=5)
+        self.scheduler.add_job(auto_run_by_minute, 'interval', minutes=1)
 
     def _dispatch(self, task_id, command, targets):
         close_old_connections()

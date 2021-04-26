@@ -6,8 +6,10 @@ from apps.account.models import History
 from apps.alarm.models import Alarm
 from apps.schedule.models import Task
 from apps.deploy.models import DeployRequest
-from libs.utils import parse_time
+from apps.deploy.utils import dispatch
+from libs.utils import parse_time, human_datetime
 from datetime import datetime, timedelta
+from threading import Thread
 
 
 def auto_run_by_day():
@@ -24,8 +26,15 @@ def auto_run_by_day():
 
 
 def auto_run_by_minute():
+    close_old_connections()
     now = datetime.now()
     for req in DeployRequest.objects.filter(status='2'):
         if (now - parse_time(req.do_at)).seconds > 3600:
             req.status = '-3'
             req.save()
+    for req in DeployRequest.objects.filter(status='1', plan__lte=now):
+        req.status = '2'
+        req.do_at = human_datetime()
+        req.do_by = req.created_by
+        req.save()
+        Thread(target=dispatch, args=(req,)).start()

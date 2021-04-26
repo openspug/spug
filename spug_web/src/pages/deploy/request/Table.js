@@ -6,7 +6,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { BranchesOutlined, BuildOutlined, TagOutlined, PlusOutlined } from '@ant-design/icons';
-import { Radio, Modal, Popover, Tag, Popconfirm, message } from 'antd';
+import { Radio, Modal, Popover, Tag, Popconfirm, Tooltip, message } from 'antd';
 import { http, hasPermission } from 'libs';
 import { Action, AuthButton, TableCard } from 'components';
 import styles from './index.module.less';
@@ -17,7 +17,8 @@ function ComTable() {
     title: '申请标题',
     render: info => (
       <div>
-        {info.type === '2' && <Tag color="#f50">R</Tag>}
+        {info.type === '2' && <Tooltip title="回滚发布"><Tag color="#f50">R</Tag></Tooltip>}
+        {info.plan && <Tooltip title={`定时发布（${info.plan}）`}> <Tag color="#108ee9">P</Tag></Tooltip>}
         {info.name}
       </div>
     )

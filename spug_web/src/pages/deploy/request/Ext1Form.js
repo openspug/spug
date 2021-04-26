@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, Select, message, Button } from 'antd';
+import { Modal, Form, Input, Select, DatePicker, message, Button } from 'antd';
 import HostSelector from './HostSelector';
 import hostStore from 'pages/host/store';
 import http from 'libs/http';
@@ -19,6 +19,7 @@ export default observer(function () {
   const [loading, setLoading] = useState(false);
   const [versions, setVersions] = useState([]);
   const [host_ids, setHostIds] = useState([]);
+  const [plan, setPlan] = useState(store.record.plan);
 
   useEffect(() => {
     const {deploy_id, app_host_ids, host_ids} = store.record;
@@ -38,6 +39,7 @@ export default observer(function () {
     formData['host_ids'] = host_ids;
     formData['type'] = store.record.type;
     formData['deploy_id'] = store.record.deploy_id;
+    if (plan) formData.plan = plan.format('YYYY-MM-DD HH:mm:00');
     http.post('/api/deploy/request/ext1/', formData)
       .then(res => {
         message.success('操作成功');
@@ -46,7 +48,7 @@ export default observer(function () {
       }, () => setLoading(false))
   }
 
-  const {app_host_ids, type, rb_id,} = store.record;
+  const {app_host_ids, type, rb_id} = store.record;
   return (
     <Modal
       visible
@@ -56,7 +58,7 @@ export default observer(function () {
       onCancel={() => store.ext1Visible = false}
       confirmLoading={loading}
       onOk={handleSubmit}>
-      <Form form={form} initialValues={store.record} labelCol={{span: 5}} wrapperCol={{span: 17}}>
+      <Form form={form} initialValues={store.record} labelCol={{span: 6}} wrapperCol={{span: 16}}>
         <Form.Item required name="name" label="申请标题">
           <Input placeholder="请输入申请标题"/>
         </Form.Item>
@@ -79,6 +81,18 @@ export default observer(function () {
         <Form.Item name="desc" label="备注信息">
           <Input placeholder="请输入备注信息"/>
         </Form.Item>
+        {type !== '2' && (
+          <Form.Item label="定时发布" tooltip="在到达指定时间后自动发布，会有最多1分钟的延迟。">
+            <DatePicker
+              showTime
+              value={plan}
+              style={{width: 180}}
+              format="YYYY-MM-DD HH:mm"
+              placeholder="请设置发布时间"
+              onChange={setPlan}/>
+            {plan ? <span style={{marginLeft: 24, fontSize: 12, color: '#888'}}>大约 {plan.fromNow()}</span> : null}
+          </Form.Item>
+        )}
       </Form>
       {visible && <HostSelector
         host_ids={host_ids}

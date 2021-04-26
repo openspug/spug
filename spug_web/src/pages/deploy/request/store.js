@@ -5,6 +5,7 @@
  */
 import { observable, computed } from "mobx";
 import http from 'libs/http';
+import moment from 'moment';
 import lds from 'lodash';
 
 class Store {
@@ -106,6 +107,7 @@ class Store {
 
   showForm = (info) => {
     this.record = info;
+    if (info.plan) this.record.plan = moment(info.plan);
     if (info['app_extend'] === '1') {
       this.ext1Visible = true
     } else {

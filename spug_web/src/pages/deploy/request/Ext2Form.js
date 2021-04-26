@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { UploadOutlined } from '@ant-design/icons';
-import { Modal, Form, Input, Upload, message, Button } from 'antd';
+import { Modal, Form, Input, Upload, DatePicker, message, Button } from 'antd';
 import hostStore from 'pages/host/store';
 import HostSelector from './HostSelector';
 import { http, X_TOKEN } from 'libs';
@@ -21,6 +21,7 @@ export default observer(function () {
   const [uploading, setUploading] = useState(false);
   const [fileList, setFileList] = useState([]);
   const [host_ids, setHostIds] = useState([]);
+  const [plan, setPlan] = useState(store.record.plan);
 
   useEffect(() => {
     const {app_host_ids, host_ids, extra} = store.record;
@@ -38,6 +39,7 @@ export default observer(function () {
     formData['id'] = store.record.id;
     formData['host_ids'] = host_ids;
     formData['deploy_id'] = store.record.deploy_id;
+    if (plan) formData.plan = plan.format('YYYY-MM-DD HH:mm:00');
     if (fileList.length > 0) formData['extra'] = lds.pick(fileList[0], ['path', 'name']);
     http.post('/api/deploy/request/ext2/', formData)
       .then(res => {
@@ -67,17 +69,17 @@ export default observer(function () {
     return false
   }
 
-  const {app_host_ids, deploy_id} = store.record;
+  const {app_host_ids, deploy_id, type} = store.record;
   return (
     <Modal
       visible
-      width={800}
+      width={600}
       maskClosable={false}
       title={`${store.record.id ? '编辑' : '新建'}发布申请`}
       onCancel={() => store.ext2Visible = false}
       confirmLoading={loading}
       onOk={handleSubmit}>
-      <Form form={form} initialValues={store.record} labelCol={{span: 6}} wrapperCol={{span: 14}}>
+      <Form form={form} initialValues={store.record} labelCol={{span: 6}} wrapperCol={{span: 16}}>
         <Form.Item required name="name" label="申请标题">
           <Input placeholder="请输入申请标题"/>
         </Form.Item>
@@ -100,6 +102,18 @@ export default observer(function () {
         <Form.Item name="desc" label="备注信息">
           <Input placeholder="请输入备注信息"/>
         </Form.Item>
+        {type !== '2' && (
+          <Form.Item label="定时发布" tooltip="在到达指定时间后自动发布，会有最多1分钟的延迟。">
+            <DatePicker
+              showTime
+              value={plan}
+              style={{width: 180}}
+              format="YYYY-MM-DD HH:mm"
+              placeholder="请设置发布时间"
+              onChange={setPlan}/>
+            {plan ? <span style={{marginLeft: 24, fontSize: 12, color: '#888'}}>大约 {plan.fromNow()}</span> : null}
+          </Form.Item>
+        )}
       </Form>
       {visible && <HostSelector
         host_ids={host_ids}
