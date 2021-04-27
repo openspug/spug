@@ -19,6 +19,7 @@ class Store {
   @observable addVisible = false;
   @observable ext1Visible = false;
   @observable ext2Visible = false;
+  @observable autoVisible = false;
   @observable selectorVisible = false;
 
   @observable f_name;
@@ -78,6 +79,11 @@ class Store {
       this.addVisible = true;
     }
   };
+
+  showAutoDeploy = (deploy) => {
+    this.deploy = deploy;
+    this.autoVisible = true
+  }
 
   addHost = () => {
     this.deploy['host_ids'].push(undefined)

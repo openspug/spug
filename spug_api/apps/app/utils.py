@@ -23,10 +23,14 @@ def parse_envs(text):
 def fetch_versions(deploy: Deploy):
     git_repo = deploy.extend_obj.git_repo
     repo_dir = os.path.join(settings.REPOS_DIR, str(deploy.id))
-    try:
-        pkey = AppSetting.get('private_key')
-    except KeyError:
-        pkey = None
+    pkey = AppSetting.get_default('private_key')
+    with Git(git_repo, repo_dir, pkey) as git:
+        return git.fetch_branches_tags()
+
+
+def fetch_repo(deploy_id, git_repo):
+    repo_dir = os.path.join(settings.REPOS_DIR, str(deploy_id))
+    pkey = AppSetting.get_default('private_key')
     with Git(git_repo, repo_dir, pkey) as git:
         return git.fetch_branches_tags()
 

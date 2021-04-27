@@ -21,7 +21,7 @@ class Git:
             self.repo.archive(f, commit)
 
     def fetch_branches_tags(self):
-        self._fetch()
+        self.fetch()
         branches, tags = {}, {}
         for ref in self.repo.references:
             if isinstance(ref, RemoteReference):
@@ -42,7 +42,7 @@ class Git:
         tags = sorted(tags.items(), key=lambda x: x[1]['date'], reverse=True)
         return branches, dict(tags)
 
-    def _fetch(self):
+    def fetch(self):
         try:
             self.repo.remotes.origin.fetch(p=True, P=True)
         except GitCommandError as e:

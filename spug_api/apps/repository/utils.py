@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import close_old_connections
 from libs.utils import AttrDict, human_time
 from apps.repository.models import Repository
+from apps.app.utils import fetch_repo
 import subprocess
 import json
 import uuid
@@ -51,6 +52,7 @@ def dispatch(rep: Repository):
         rds.expire(rds_key, 14 * 24 * 60 * 60)
         rds.close()
         rep.save()
+        return rep
 
 
 def _build(rep: Repository, helper, env):
@@ -66,6 +68,7 @@ def _build(rep: Repository, helper, env):
     else:
         tree_ish = extras[1]
         env.update(SPUG_GIT_TAG=extras[1])
+    fetch_repo(rep.deploy_id, extend.git_repo)
     helper.send_info('local', '完成\r\n')
 
     if extend.hook_pre_server:
@@ -115,7 +118,6 @@ class Helper:
         return files
 
     def _send(self, message):
-        print(message)
         self.rds.rpush(self.key, json.dumps(message))
 
     def send_info(self, key, message):

@@ -19,7 +19,8 @@ class DeployRequest(models.Model, ModelMixin):
     )
     TYPES = (
         ('1', '正常发布'),
-        ('2', '回滚')
+        ('2', '回滚'),
+        ('3', '自动发布'),
     )
     deploy = models.ForeignKey(Deploy, on_delete=models.CASCADE)
     repository = models.ForeignKey(Repository, null=True, on_delete=models.SET_NULL)

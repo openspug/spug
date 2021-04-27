@@ -12,6 +12,7 @@ import ComForm from './Form';
 import Ext1Form from './Ext1Form';
 import Ext2Form from './Ext2Form';
 import AddSelect from './AddSelect';
+import AutoDeploy from './AutoDeploy';
 import store from './store';
 import envStore from 'pages/config/environment/store';
 
@@ -42,6 +43,7 @@ export default observer(function () {
       {store.addVisible && <AddSelect/>}
       {store.ext1Visible && <Ext1Form/>}
       {store.ext2Visible && <Ext2Form/>}
+      {store.autoVisible && <AutoDeploy/>}
     </AuthDiv>
   );
 })

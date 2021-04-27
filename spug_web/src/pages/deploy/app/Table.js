@@ -102,10 +102,13 @@ function ComTable() {
             <Action>
               <Action.Button
                 auth="deploy.app.config"
-                onClick={e => store.showExtForm(e, record.id, info, false, true)}>查看</Action.Button>
-              <Action.Button auth="deploy.app.edit"
-                             onClick={e => store.showExtForm(e, record.id, info)}>编辑</Action.Button>
-              <Action.Button auth="deploy.app.edit" onClick={() => handleDeployDelete(info)}>删除</Action.Button>
+                onClick={e => store.showAutoDeploy(info)}>Webhook</Action.Button>
+              {hasPermission('deploy.app.edit') ? (
+                <Action.Button onClick={e => store.showExtForm(e, record.id, info)}>编辑</Action.Button>
+              ) : hasPermission('deploy.app.config') ? (
+                <Action.Button onClick={e => store.showExtForm(e, record.id, info, false, true)}>查看</Action.Button>
+              ) : null}
+              <Action.Button danger auth="deploy.app.edit" onClick={() => handleDeployDelete(info)}>删除</Action.Button>
             </Action>
           )}/>
         )}
@@ -155,7 +158,7 @@ function ComTable() {
             <Action.Button auth="deploy.app.edit" onClick={e => store.showExtForm(e, info.id)}>新建发布</Action.Button>
             <Action.Button auth="deploy.app.edit" onClick={e => handleClone(e, info.id)}>克隆发布</Action.Button>
             <Action.Button auth="deploy.app.edit" onClick={e => store.showForm(e, info)}>编辑</Action.Button>
-            <Action.Button auth="deploy.app.del" onClick={e => handleDelete(e, info)}>删除</Action.Button>
+            <Action.Button danger auth="deploy.app.del" onClick={e => handleDelete(e, info)}>删除</Action.Button>
           </Action>
         )}/>
       )}
