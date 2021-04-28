@@ -14,7 +14,6 @@ from libs.ssh import SSH, AuthenticationException
 from paramiko.ssh_exception import BadAuthenticationType
 from libs import AttrDict
 from openpyxl import load_workbook
-import socket
 
 
 class HostView(View):
@@ -90,7 +89,7 @@ class HostView(View):
             task = Task.objects.filter(targets__regex=fr'[^0-9]{form.id}[^0-9]').first()
             if task:
                 return json_response(error=f'任务计划中的任务【{task.name}】关联了该主机，请解除关联后再尝试删除该主机')
-            detection = Detection.objects.filter(type__in=('3', '4'), addr=form.id).first()
+            detection = Detection.objects.filter(type__in=('3', '4'), targets__regex=fr'[^0-9]{form.id}[^0-9]').first()
             if detection:
                 return json_response(error=f'监控中心的任务【{detection.name}】关联了该主机，请解除关联后再尝试删除该主机')
             Host.objects.filter(pk=form.id).delete()
@@ -99,6 +98,7 @@ class HostView(View):
 
 def post_import(request):
     password = request.POST.get('password')
+    group_id = request.POST.get('group_id')
     file = request.FILES['file']
     ws = load_workbook(file, read_only=True)['Sheet1']
     summary = {'invalid': [], 'skip': [], 'repeat': [], 'success': []}
@@ -109,13 +109,12 @@ def post_import(request):
             summary['invalid'].append(i)
             continue
         data = AttrDict(
-            zone=row[0].value,
-            name=row[1].value,
-            hostname=row[2].value,
-            port=row[3].value,
-            username=row[4].value,
-            password=row[5].value,
-            desc=row[6].value
+            name=row[0].value,
+            hostname=row[1].value,
+            port=row[2].value,
+            username=row[3].value,
+            password=row[4].value,
+            desc=row[5].value
         )
         if Host.objects.filter(hostname=data.hostname, port=data.port, username=data.username).exists():
             summary['skip'].append(i)
@@ -130,6 +129,7 @@ def post_import(request):
         except Exception:
             pass
         host = Host.objects.create(created_by=request.user, **data)
+        host.groups.add(group_id)
         if request.user.role:
             request.user.role.add_host_perm(host.id)
         summary['success'].append(i)

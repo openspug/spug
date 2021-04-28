@@ -6,6 +6,7 @@
 import { observable, computed } from 'mobx';
 import { message } from 'antd';
 import http from 'libs/http';
+import lds from 'lodash';
 
 class Store {
   counter = {};
@@ -87,10 +88,11 @@ class Store {
 
   refreshCounter = () => {
     if (this.treeData.length && this.records.length) {
-      for (let item of this.treeData) {
+      const treeData = lds.cloneDeep(this.treeData);
+      for (let item of treeData) {
         this._refreshCounter(item)
       }
-      this.treeData = [...this.treeData]
+      this.treeData = treeData
     }
   }
 
@@ -101,6 +103,7 @@ class Store {
       item.all_host_ids = item.all_host_ids.concat(ids)
     }
     item.all_host_ids = Array.from(new Set(item.all_host_ids));
+    if (this.group.key === item.key) this.group = item;
     return item.all_host_ids
   }
 

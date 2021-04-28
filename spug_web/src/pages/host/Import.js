@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react';
 import { UploadOutlined } from '@ant-design/icons';
-import { Modal, Form, Input, Upload, Button, Tooltip, Alert } from 'antd';
+import { Modal, Form, Input, Upload, Button, Tooltip, Alert, Cascader, message } from 'antd';
 import http from 'libs/http';
 import store from './store';
 
@@ -14,11 +14,14 @@ export default observer(function () {
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState('');
   const [fileList, setFileList] = useState([]);
+  const [groupId, setGroupId] = useState([]);
 
   function handleSubmit() {
+    if (groupId.length === 0) return message.error('请选择要导入的分组');
     setLoading(true);
     const formData = new FormData();
     formData.append('file', fileList[0]);
+    formData.append('group_id', groupId[groupId.length - 1]);
     if (password) formData.append('password', password);
     http.post('/api/host/import/', formData, {timeout: 120000})
       .then(res => {
@@ -35,7 +38,11 @@ export default observer(function () {
             {res['repeat'].length > 0 && <Form.Item style={{margin: 0, color: '#1890ff'}} label="重复主机名">
               <Tooltip title={`相关行：${res['repeat'].join(', ')}`}>{res['repeat'].length}</Tooltip>
             </Form.Item>}
-          </Form>
+          </Form>,
+          onOk: () => {
+            store.fetchRecords();
+            store.importVisible = false
+          }
         })
       })
       .finally(() => setLoading(false))
@@ -52,7 +59,6 @@ export default observer(function () {
   return (
     <Modal
       visible
-      width={800}
       maskClosable={false}
       title="批量导入"
       okText="导入"
@@ -60,12 +66,22 @@ export default observer(function () {
       confirmLoading={loading}
       okButtonProps={{disabled: !fileList.length}}
       onOk={handleSubmit}>
-      <Alert closable showIcon type="info" message={null}
-             style={{width: 600, margin: '0 auto 20px', color: '#31708f !important'}}
-             description="导入或输入的密码仅作首次验证使用，并不会存储密码。"/>
+      <Alert
+        showIcon
+        type="info"
+        style={{width: 365, margin: '0 auto 20px'}}
+        message="导入或输入的密码仅作首次验证使用，不会存储。"/>
       <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
         <Form.Item label="模板下载" help="请下载使用该模板填充数据后导入">
           <a href="/resource/主机导入模板.xlsx">主机导入模板.xlsx</a>
+        </Form.Item>
+        <Form.Item required label="选择分组">
+          <Cascader
+            value={groupId}
+            onChange={setGroupId}
+            options={store.treeData}
+            fieldNames={{label: 'title'}}
+            placeholder="请选择"/>
         </Form.Item>
         <Form.Item label="默认密码" help="如果excel中密码为空则使用该密码">
           <Input
@@ -74,11 +90,15 @@ export default observer(function () {
             placeholder="请输入默认主机密码"/>
         </Form.Item>
         <Form.Item required label="导入数据">
-          <Upload name="file" accept=".xls, .xlsx" fileList={fileList} beforeUpload={() => false}
-                  onChange={handleUpload}>
-            <Button>
-              <UploadOutlined/> 点击上传
-            </Button>
+          <Upload
+            name="file"
+            accept=".xls, .xlsx"
+            fileList={fileList}
+            beforeUpload={() => false}
+            onChange={handleUpload}>
+            {fileList.length === 0 && (
+              <Button><UploadOutlined/> 点击上传</Button>
+            )}
           </Upload>
         </Form.Item>
       </Form>
