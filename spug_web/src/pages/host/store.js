@@ -44,7 +44,6 @@ class Store {
         for (let item of this.records) {
           this.idMap[item.id] = item
         }
-        this._makeCounter();
         this.refreshCounter()
       })
       .finally(() => this.isFetching = false)
@@ -87,6 +86,7 @@ class Store {
   }
 
   refreshCounter = () => {
+    this._makeCounter();
     if (this.treeData.length && this.records.length) {
       const treeData = lds.cloneDeep(this.treeData);
       for (let item of treeData) {
