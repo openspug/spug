@@ -63,7 +63,7 @@ class Store {
   initial = () => {
     this.isFetching = true;
     this.grpFetching = true;
-    http.all([http.get('/api/host/'), http.get('/api/host/group/')])
+    return http.all([http.get('/api/host/'), http.get('/api/host/group/')])
       .then(http.spread((res1, res2) => {
         this.records = res1;
         this.records.map(item => this.idMap[item.id] = item);

@@ -48,7 +48,11 @@ export default observer(function Ext2Setup1() {
         <Button type="link" onClick={() => setSelectorVisible(true)}>选择主机</Button>
       </Form.Item>
       <Form.Item label="发布模式">
-        <Radio.Group buttonStyle="solid" value={info.is_parallel} onChange={e => info.is_parallel = e.target.value}>
+        <Radio.Group
+          buttonStyle="solid"
+          defaultValue={true}
+          value={info.is_parallel}
+          onChange={e => info.is_parallel = e.target.value}>
           <Radio.Button value={true}>并行</Radio.Button>
           <Radio.Button value={false}>串行</Radio.Button>
         </Radio.Group>

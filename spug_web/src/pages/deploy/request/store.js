@@ -128,6 +128,7 @@ class Store {
         this.tabs.splice(index, 1)
         delete this.tabModes[info.id]
       }
+      this.fetchRecords()
     } else if (index === -1) {
       this.tabModes[info.id] = true
       this.tabs.push(info)

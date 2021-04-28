@@ -35,6 +35,7 @@ function Ext1Console(props) {
       .then(res => {
         Object.assign(outputs, res.outputs)
         socket = _makeSocket()
+        store.fetchRecords()
       })
     return () => socket && socket.close()
   }

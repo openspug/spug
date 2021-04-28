@@ -11,8 +11,7 @@ export default observer(function (props) {
 
   useEffect(() => {
     if (!store.treeData.length) {
-      store.fetchRecords()
-      store.fetchGroups()
+      store.initial()
         .then(() => setGroup(store.treeData[0]))
     } else {
       setGroup(store.treeData[0])
