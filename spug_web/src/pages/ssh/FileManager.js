@@ -121,7 +121,7 @@ class FileManager extends React.Component {
       const token = uniqueId();
       this._updatePercent(token);
       formData.append('file', file);
-      formData.append('id', this.id);
+      formData.append('id', this.props.id);
       formData.append('token', token);
       formData.append('path', '/' + this.state.pwd.join('/'));
       this.input.value = '';
