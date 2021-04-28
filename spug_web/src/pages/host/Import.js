@@ -26,12 +26,6 @@ export default observer(function () {
           title: '导入结果',
           content: <Form labelCol={{span: 7}} wrapperCol={{span: 14}}>
             <Form.Item style={{margin: 0}} label="导入成功">{res.success.length}</Form.Item>
-            {res['fail'].length > 0 && <Form.Item style={{margin: 0, color: '#1890ff'}} label="验证失败">
-              <Tooltip title={`相关行：${res['fail'].join(', ')}`}>{res['fail'].length}</Tooltip>
-            </Form.Item>}
-            {res['network'].length > 0 && <Form.Item style={{margin: 0, color: '#1890ff'}} label="网络错误">
-              <Tooltip title={`相关行：${res['network'].join(', ')}`}>{res['network'].length}</Tooltip>
-            </Form.Item>}
             {res['skip'].length > 0 && <Form.Item style={{margin: 0, color: '#1890ff'}} label="重复数据">
               <Tooltip title={`相关行：${res['skip'].join(', ')}`}>{res['skip'].length}</Tooltip>
             </Form.Item>}
@@ -40,9 +34,6 @@ export default observer(function () {
             </Form.Item>}
             {res['repeat'].length > 0 && <Form.Item style={{margin: 0, color: '#1890ff'}} label="重复主机名">
               <Tooltip title={`相关行：${res['repeat'].join(', ')}`}>{res['repeat'].length}</Tooltip>
-            </Form.Item>}
-            {res['error'].length > 0 && <Form.Item style={{margin: 0, color: '#1890ff'}} label="其他错误">
-              <Tooltip title={`请通过新建主机查看具体错误信息，相关行：${res['error'].join(', ')}`}>{res['error'].length}</Tooltip>
             </Form.Item>}
           </Form>
         })

@@ -101,7 +101,7 @@ def post_import(request):
     password = request.POST.get('password')
     file = request.FILES['file']
     ws = load_workbook(file, read_only=True)['Sheet1']
-    summary = {'invalid': [], 'skip': [], 'fail': [], 'network': [], 'repeat': [], 'success': [], 'error': []}
+    summary = {'invalid': [], 'skip': [], 'repeat': [], 'success': []}
     for i, row in enumerate(ws.rows):
         if i == 0:  # 第1行是表头 略过
             continue
@@ -120,23 +120,15 @@ def post_import(request):
         if Host.objects.filter(hostname=data.hostname, port=data.port, username=data.username).exists():
             summary['skip'].append(i)
             continue
-        try:
-            if valid_ssh(data.hostname, data.port, data.username, data.pop('password') or password, None,
-                         False) is False:
-                summary['fail'].append(i)
-                continue
-        except AuthenticationException:
-            summary['fail'].append(i)
-            continue
-        except socket.error:
-            summary['network'].append(i)
-            continue
-        except Exception:
-            summary['error'].append(i)
-            continue
         if Host.objects.filter(name=data.name).exists():
             summary['repeat'].append(i)
             continue
+        try:
+            password = data.pop('password') or password
+            if valid_ssh(data.hostname, data.port, data.username, password, None, False) is False:
+                data.is_verified = True
+        except Exception:
+            pass
         host = Host.objects.create(created_by=request.user, **data)
         if request.user.role:
             request.user.role.add_host_perm(host.id)
