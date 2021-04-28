@@ -16,7 +16,7 @@ export default observer(function () {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [git_type, setGitType] = useState();
-  const [extra, setExtra] = useState();
+  const [extra, setExtra] = useState([]);
   const [extra1, setExtra1] = useState();
   const [extra2, setExtra2] = useState();
   const [versions, setVersions] = useState({});
@@ -29,7 +29,7 @@ export default observer(function () {
   function _setDefault(type, new_extra, new_versions) {
     const now_extra = new_extra || extra;
     const now_versions = new_versions || versions;
-     const {branches, tags} = now_versions;
+    const {branches, tags} = now_versions;
     if (type === 'branch') {
       let [branch, commit] = [now_extra[1], null];
       if (branches[branch]) {
@@ -53,10 +53,14 @@ export default observer(function () {
           const type = item.extra[0];
           setExtra(item.extra);
           setGitType(type);
-          _setDefault(type, item.extra, versions)
-          break
+          return _setDefault(type, item.extra, versions);
         }
       }
+      setGitType('branch');
+      const branch = lds.get(Object.keys(branches), 0);
+      const commit = lds.get(branches, `${branch}.0.id`);
+      setExtra1(branch);
+      setExtra2(commit)
     }
   }
 
