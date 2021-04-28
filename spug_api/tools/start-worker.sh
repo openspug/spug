@@ -15,4 +15,4 @@ else
   PYTHON=python
 fi
 
-exec $PYTHON manage.py runworker ssh_exec
+exec $PYTHON manage.py runworker
