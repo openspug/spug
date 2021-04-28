@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, Select, Radio, Button, message } from 'antd';
+import { Modal, Form, Input, Select, Radio, Button, Alert, message } from 'antd';
 import { LoadingOutlined, SyncOutlined } from '@ant-design/icons';
 import { http } from 'libs';
 import store from './store';
@@ -13,11 +13,14 @@ export default observer(function AutoDeploy() {
   const [branches, setBranches] = useState([]);
   const [branch, setBranch] = useState();
   const [url, setURL] = useState();
+  const [key, setKey] = useState();
 
   useEffect(() => {
     if (store.deploy.extend === '1') {
       fetchVersions()
     }
+    http.get('/api/app/kit/key/')
+      .then(res => setKey(res))
   }, [])
 
   useEffect(() => {
@@ -36,9 +39,9 @@ export default observer(function AutoDeploy() {
       .finally(() => setFetching(false))
   }
 
-  function copyToClipBoard() {
+  function copyToClipBoard(data) {
     const t = document.createElement('input');
-    t.value = url;
+    t.value = data;
     document.body.appendChild(t);
     t.select();
     document.execCommand('copy');
@@ -54,6 +57,7 @@ export default observer(function AutoDeploy() {
       title="Webhook"
       footer={null}
       onCancel={() => store.autoVisible = false}>
+      <Alert showIcon type="info" style={{width: 440, margin: '0 auto 24px'}} message="Webhook可以用来与Gitlab或Gitee结合实现触发后自动发布。"/>
       <Form labelCol={{span: 6}} wrapperCol={{span: 16}}>
         <Form.Item required label="触发方式">
           <Radio.Group value={type} onChange={e => setType(e.target.value)}>
@@ -96,7 +100,16 @@ export default observer(function AutoDeploy() {
           </Form.Item>
         ) : (
           <Form.Item label="Webhook URL" extra="点击复制链接，目前仅支持Gitee和Gitlab。">
-            <div className={styles.webhook} onClick={copyToClipBoard}>{url}</div>
+            <div className={styles.webhook} onClick={() => copyToClipBoard(url)}>{url}</div>
+          </Form.Item>
+        )}
+        {key ? (
+          <Form.Item label="Secret Token" tooltip="调用该Webhook接口的访问凭据，在Gitee中为WebHook 密码。" extra="点击复制">
+            <div className={styles.webhook} onClick={() => copyToClipBoard(key)}>{key}</div>
+          </Form.Item>
+        ) : (
+          <Form.Item label="Secret Token" tooltip="调用该Webhook接口的访问凭据，在Gitee中为WebHook密码。">
+            <div style={{color: '#ff4d4f'}}>请在系统管理/系统设置/开放服务设置中设置。</div>
           </Form.Item>
         )}
       </Form>

@@ -8,6 +8,7 @@ from libs import JsonParser, Argument, json_response
 from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
 from apps.config.models import Config
 from apps.app.utils import fetch_versions, remove_repo
+from apps.setting.utils import AppSetting
 import subprocess
 import json
 import os
@@ -15,12 +16,6 @@ import os
 
 class AppView(View):
     def get(self, request):
-        # v2.3.14 临时数据初始化
-        app = App.objects.first()
-        if app and hasattr(app, 'sort_id') and app.sort_id == 0:
-            for app in App.objects.all():
-                app.sort_id = app.id
-                app.save()
         query = {}
         if not request.user.is_supper:
             query['id__in'] = request.user.deploy_perms['apps']
@@ -181,3 +176,8 @@ def get_versions(request, d_id):
         return json_response(error='该应用不支持此操作')
     branches, tags = fetch_versions(deploy)
     return json_response({'branches': branches, 'tags': tags})
+
+
+def kit_key(request):
+    api_key = AppSetting.get_default('api_key')
+    return json_response(api_key)
