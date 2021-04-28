@@ -27,12 +27,7 @@ function WebSSH(props) {
       fitPlugin.fit();
     };
     socket.onclose = e => {
-      if (e.code === 3333) {
-        window.location.href = "about:blank";
-        window.close()
-      } else {
-        setTimeout(() => term.write('\r\nConnection is closed.\r\n'), 200)
-      }
+      setTimeout(() => term.write('\r\nConnection is closed.\r\n'), 200)
     };
     term.onData(data => socket.send(JSON.stringify({data})));
     term.onResize(({cols, rows}) => socket.send(JSON.stringify({resize: [cols, rows]})));
