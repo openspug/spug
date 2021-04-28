@@ -130,7 +130,7 @@ AUTHENTICATION_EXCLUDES = (
     re.compile('/apis/.*'),
 )
 
-SPUG_VERSION = 'v2.3.14'
+SPUG_VERSION = 'v3.0.1'
 
 # override default config
 try:
