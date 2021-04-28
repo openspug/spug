@@ -65,15 +65,15 @@ function ComTable() {
       <Table.Column hide title="构建人" dataIndex="created_by_user"/>
       <Table.Column width={100} title="状态"
                     render={info => <Tag color={statusColorMap[info.status]}>{info.status_alias}</Tag>}/>
-      {hasPermission('config.env.edit|config.env.del') && (
+      {hasPermission('deploy.repository.detail|deploy.repository.build|deploy.repository.log') && (
         <Table.Column width={180} title="操作" render={info => (
           <Action>
-            <Action.Button auth="config.env.edit" onClick={() => store.showDetail(info)}>详情</Action.Button>
+            <Action.Button auth="deploy.repository.detail" onClick={() => store.showDetail(info)}>详情</Action.Button>
             <Action.Button
-              auth="config.env.del"
+              auth="deploy.repository.build"
               loading={loading === info.id}
               onClick={() => handleRebuild(info)}>构建</Action.Button>
-            <Action.Button auth="config.env.del" onClick={() => store.showConsole(info)}>日志</Action.Button>
+            <Action.Button auth="deploy.repository.log" onClick={() => store.showConsole(info)}>日志</Action.Button>
           </Action>
         )}/>
       )}

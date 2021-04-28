@@ -66,6 +66,15 @@ export default [{
       {key: 'config', label: '查看配置'},
     ]
   }, {
+    key: 'repository',
+    label: '构建仓库',
+    perms: [
+      {key: 'view', label: '查看构建'},
+      {key: 'detail', label: '构建详情'},
+      {key: 'build', label: '构建仓库'},
+      {key: 'log', label: '构建日志'},
+    ]
+  },{
     key: 'request',
     label: '发布申请',
     perms: [

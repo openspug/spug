@@ -22,7 +22,7 @@ export default observer(function () {
     if (!appStore.records.length) appStore.fetchRecords()
   }, [])
   return (
-    <AuthDiv auth="config.env.view">
+    <AuthDiv auth="deploy.repository.view">
       <Breadcrumb>
         <Breadcrumb.Item>首页</Breadcrumb.Item>
         <Breadcrumb.Item>应用发布</Breadcrumb.Item>
