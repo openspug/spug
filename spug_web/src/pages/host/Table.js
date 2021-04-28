@@ -62,7 +62,7 @@ function ComTable() {
           type="primary"
           icon={<PlusOutlined/>}
           onClick={() => store.showForm()}>新建</AuthButton>,
-        <AuthFragment auth="host.host.add">
+        <AuthFragment auth="host.host.import">
           <Dropdown overlay={(
             <Menu onClick={handleImport}>
               <Menu.Item key="excel">

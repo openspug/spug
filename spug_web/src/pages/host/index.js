@@ -7,7 +7,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { Row, Col, Button } from 'antd';
 import { CodeOutlined } from '@ant-design/icons';
-import { AuthDiv, Breadcrumb } from 'components';
+import { AuthDiv, Breadcrumb, AuthButton } from 'components';
 import Group from './Group';
 import ComTable from './Table';
 import ComForm from './Form';
@@ -24,7 +24,7 @@ export default observer(function () {
 
   return (
     <AuthDiv auth="host.host.view">
-      <Breadcrumb extra={<Button type="primary" icon={<CodeOutlined/>} onClick={openTerminal}>Web 终端</Button>}>
+      <Breadcrumb extra={<AuthButton auth="host.host.console" type="primary" icon={<CodeOutlined/>} onClick={openTerminal}>Web 终端</AuthButton>}>
         <Breadcrumb.Item>首页</Breadcrumb.Item>
         <Breadcrumb.Item>主机管理</Breadcrumb.Item>
       </Breadcrumb>
