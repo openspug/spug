@@ -28,13 +28,16 @@ export default observer(function () {
   const [bakTreeData, setBakTreeData] = useState();
 
   useEffect(() => {
-    if (!loading) store.fetchGroups().then(() => {
-      if (loading === undefined) {
-        const tmp = store.treeData.filter(x => x.children.length)
-        setExpands(tmp.map(x => x.key))
-      }
-    })
+    if (loading === false) store.fetchGroups()
   }, [loading])
+
+  useEffect(() => {
+    if (store.treeData.length > 0 && expands === undefined) {
+      const tmp = store.treeData.filter(x => x.children.length)
+      setExpands(tmp.map(x => x.key))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [store.treeData])
 
   const menus = (
     <Menu onClick={() => setVisible(false)}>

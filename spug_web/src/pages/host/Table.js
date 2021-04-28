@@ -3,7 +3,7 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React, { useEffect } from 'react';
+import React  from 'react';
 import { observer } from 'mobx-react';
 import { Table, Modal, Dropdown, Button, Menu, Avatar, Tooltip, Space, Tag, message } from 'antd';
 import { PlusOutlined, DownOutlined } from '@ant-design/icons';
@@ -13,10 +13,6 @@ import store from './store';
 import icons from './icons';
 
 function ComTable() {
-  useEffect(() => {
-    store.fetchRecords()
-  }, [])
-
   function handleDelete(text) {
     Modal.confirm({
       title: '删除确认',

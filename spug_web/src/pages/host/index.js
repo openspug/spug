@@ -3,9 +3,9 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Row, Col, Button } from 'antd';
+import { Row, Col } from 'antd';
 import { CodeOutlined } from '@ant-design/icons';
 import { AuthDiv, Breadcrumb, AuthButton } from 'components';
 import Group from './Group';
@@ -18,6 +18,10 @@ import Selector from './Selector';
 import store from './store';
 
 export default observer(function () {
+  useEffect(() => {
+    store.initial()
+  }, [])
+
   function openTerminal() {
     window.open('/ssh')
   }

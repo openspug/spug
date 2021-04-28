@@ -40,10 +40,11 @@ class Store {
     this.isFetching = true;
     return http.get('/api/host/')
       .then(res => {
+        const tmp = {};
         this.records = res;
-        for (let item of this.records) {
-          this.idMap[item.id] = item
-        }
+        this.records.map(item => tmp[item.id] = item);
+        this.idMap = tmp;
+        this._makeCounter();
         this.refreshCounter()
       })
       .finally(() => this.isFetching = false)
@@ -53,12 +54,28 @@ class Store {
     this.grpFetching = true;
     return http.get('/api/host/group/')
       .then(res => {
-        this.treeData = res.treeData;
         this.groups = res.groups;
-        if (!this.group.key) this.group = this.treeData[0];
-        this.refreshCounter()
+        this.refreshCounter(res.treeData)
       })
       .finally(() => this.grpFetching = false)
+  }
+
+  initial = () => {
+    this.isFetching = true;
+    this.grpFetching = true;
+    http.all([http.get('/api/host/'), http.get('/api/host/group/')])
+      .then(http.spread((res1, res2) => {
+        this.records = res1;
+        this.records.map(item => this.idMap[item.id] = item);
+        this.group = res2.treeData[0];
+        this.groups = res2.groups;
+        this._makeCounter();
+        this.refreshCounter(res2.treeData)
+      }))
+      .finally(() => {
+        this.isFetching = false;
+        this.grpFetching = false
+      })
   }
 
   updateGroup = (group, host_ids) => {
@@ -85,10 +102,9 @@ class Store {
     this.selectorVisible = true;
   }
 
-  refreshCounter = () => {
-    this._makeCounter();
-    if (this.treeData.length && this.records.length) {
-      const treeData = lds.cloneDeep(this.treeData);
+  refreshCounter = (treeData) => {
+    treeData = treeData || lds.cloneDeep(this.treeData);
+    if (treeData.length && this.records.length) {
       for (let item of treeData) {
         this._refreshCounter(item)
       }
