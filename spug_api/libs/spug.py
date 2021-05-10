@@ -9,7 +9,7 @@ from libs.utils import human_datetime
 import requests
 import json
 
-spug_server = 'http://spug-wx.qbangmang.com'
+spug_server = 'https://api.spug.cc'
 notify_source = 'monitor'
 
 
