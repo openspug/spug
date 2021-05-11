@@ -10,7 +10,7 @@
     "bizcharts": "^3.5.6",
     "history": "^4.10.1",
     "http-proxy-middleware": "^0.20.0",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "mobx": "^5.15.0",
     "mobx-react": "^6.1.4",
     "moment": "^2.24.0",
