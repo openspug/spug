@@ -1,0 +1,65 @@
+###
+# 初始化: docker-compose exec spug create_admin
+#
+# ADMIN 用户名/密码：admin/spug.dev
+#
+# 注意: 从 v2.3.15 开始，默认创建 ADMIN 用户
+#   关于管理员：
+#     你可以使用自己创建或删除其他超级管理员用户
+#     创建：docker-compose exec spug create_admin USERNAME PASSWORD
+#     删除: docker-compose exec spug delete_admin USERNAME
+# 
+#   关于 SECRET_KEY:
+#     生成：docker-compose exec spug generate_secret_key
+###
+version: '3.4'
+
+services:
+  spug:
+    restart: always
+    build:
+      context: ./build
+    # image: whatwewant/spug:${VERSION}
+    ports:
+      - 8080:80
+    environment:
+      SECRET_KEY: $SECRET_KEY
+      DB_HOST: $DB_HOST
+      DB_PORT: $DB_PORT
+      DB_USER: $DB_USER
+      DB_PASSWORD: $DB_PASSWORD
+      DB_NAME: $DB_NAME
+      REDIS_HOST: $REDIS_HOST
+      REDIS_PORT: $REDIS_PORT
+      REDIS_PASSWORD: $REDIS_PASSWORD
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - spug
+
+  mysql:
+    restart: always
+    image: mysql:5.7
+    environment:
+      # MYSQL_ROOT_HOST: '0.0.0.0'
+      MYSQL_ROOT_PASSWORD: $DB_ROOT_PASSWORD_USER
+      MYSQL_USER: $DB_USER
+      MYSQL_PASSWORD: $DB_PASSWORD
+      MYSQL_DATABASE: $DB_NAME
+    volumes:
+      - ${CONFIG_DIR}/mysql/my.cnf:/etc/mysql/my.cnf
+      - ${VOLUME_DIR}/mysql/lib:/var/lib/mysql
+    networks:
+      - spug
+
+  redis:
+    image: redis:5-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - ${VOLUME_DIR}/redis:/data
+    networks:
+      - spug
+
+networks:
+  spug:

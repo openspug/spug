@@ -1,0 +1,31 @@
+#!/bin/sh
+
+CMD="create_admin" #$0
+USERNAME=$1
+PASSWORD=$2
+NICKNAME=${3:-ADMIN}
+
+help() {
+  echo "How to:"
+  echo "  $CMD YOUR_USERNAME YOUR_PASSWORD [YOUR_NICKNAME]"
+  echo ""
+  echo "Example:"
+  echo "  $CMD admin spug.dev"
+  echo "  $CMD admin spug.dev Zero"
+  echo ""
+}
+
+if [ "$1" = "" ] || [ "$2" = "" ]; then
+  echo "ERROR: username and password are required."
+  echo ""
+
+  help
+  exit
+fi
+
+
+# @DEPRIATED `useradd` instead of `user add`
+# python manage.py useradd -u admin -p spug.dev -s -n 管理员
+#
+#
+python manage.py user add -u $USERNAME -p ${PASSWORD} -s -n ${NICKNAME}

@@ -1,0 +1,28 @@
+#!/bin/sh
+
+CMD="delete_admin" #$0
+USERNAME=$1
+
+help() {
+  echo "How to:"
+  echo "  $CMD ADMIN_USERNAME"
+  echo ""
+  echo "Example:"
+  echo "  $CMD admin"
+  echo ""
+}
+
+if [ "$1" = "" ]; then
+  echo "ERROR: username are required."
+  echo ""
+
+  help
+  exit
+fi
+
+
+# @DEPRIATED `useradd` instead of `user add`
+# python manage.py useradd -u admin -p spug.dev -s -n 管理员
+#
+#
+python manage.py user del -u $USERNAME
