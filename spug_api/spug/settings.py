@@ -71,12 +71,21 @@ DATABASES = {
     }
 }
 
+REDIS_CONFIG = {
+  "HOST": os.getenv('REDIS_HOST') or '127.0.0.1',
+  "PORT": os.getenv('REDIS_PORT') or '6379',
+  "PASSWORD": os.getenv('REDIS_PASSWORD') or '',
+  "DB0": os.getenv('REDIS_DATABASE_0') or '0',
+  "DB1": os.getenv('REDIS_DATABASE_1') or '1',
+}
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "LOCATION": "redis://" + REDIS_CONFIG['HOST'] + ":" + REDIS_CONFIG['PORT'] + "/" + REDIS_CONFIG['DB1'],
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PASSWORD": REDIS_CONFIG['PASSWORD'],
         }
     }
 }
@@ -85,7 +94,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("redis://:" + REDIS_CONFIG['PASSWORD'] + "@" + REDIS_CONFIG['HOST'] + ":" + REDIS_CONFIG['PORT'] + "/" + REDIS_CONFIG['DB0'])],
             "capacity": 1000,
             "expiry": 120,
         },

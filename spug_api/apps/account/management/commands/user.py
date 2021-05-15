@@ -26,8 +26,10 @@ class Command(BaseCommand):
         message = '''
         账户管理命令用法：
             user add    创建账户，例如：user add -u admin -p 123 -n 管理员 -s
+            user del    删除账户，例如：user del -u admin
             user reset  重置账户密码，例如：user reset -u admin -p 123
             user enable 启用被禁用的账户，例如：user enable -u admin
+            user disable 禁用的账户，例如：user disable -u admin
         '''
         self.stdout.write(message)
 
@@ -47,6 +49,18 @@ class Command(BaseCommand):
                     is_supper=options['s'],
                 )
                 self.echo_success('创建用户成功')
+        elif action == 'del':
+            if not options['u']:
+                self.echo_error('缺少参数')
+                self.print_help()
+            
+            user = User.objects.filter(username=options['u'], deleted_by_id__isnull=True).first()
+            if not user:
+                return self.echo_error(f'未找到登录名为【{options["u"]}】的账户')
+
+            user.delete()
+            cache.delete(user.username)
+            self.echo_success('账户已删除')
         elif action == 'enable':
             if not options['u']:
                 self.echo_error('缺少参数')
@@ -58,6 +72,19 @@ class Command(BaseCommand):
             user.save()
             cache.delete(user.username)
             self.echo_success('账户已启用')
+        elif action == 'disable':
+            if not options['u']:
+                self.echo_error('缺少参数')
+                self.print_help()
+                
+            user = User.objects.filter(username=options['u'], deleted_by_id__isnull=True).first()
+            if not user:
+                return self.echo_error(f'未找到登录名为【{options["u"]}】的账户')
+
+            user.is_active = False
+            user.save()
+            cache.delete(user.username)
+            self.echo_success('账户已禁用')
         elif action == 'reset':
             if not all((options['u'], options['p'])):
                 self.echo_error('缺少参数')
