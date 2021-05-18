@@ -41,6 +41,7 @@ class ComForm extends React.Component {
       .then(res => {
         if (res === 'auth fail') {
           if (formData.pkey) {
+            this.setState({loading: false});
             message.error('独立密钥认证失败')
           } else {
             this.setState({loading: false});
