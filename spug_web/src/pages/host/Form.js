@@ -56,6 +56,7 @@ class ComForm extends React.Component {
           store.fetchRecords()
         }
       })
+      .catch(() => null)
       .finally(() => {
         this.setState({loading: false});
       });
