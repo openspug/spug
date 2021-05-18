@@ -41,10 +41,8 @@ class ComForm extends React.Component {
       .then(res => {
         if (res === 'auth fail') {
           if (formData.pkey) {
-            this.setState({loading: false});
             message.error('独立密钥认证失败')
           } else {
-            this.setState({loading: false});
             Modal.confirm({
               icon: 'exclamation-circle',
               title: '首次验证请输入密码',
@@ -57,7 +55,10 @@ class ComForm extends React.Component {
           store.formVisible = false;
           store.fetchRecords()
         }
-      }, () => this.setState({loading: false}))
+      })
+      .finally(() => {
+        this.setState({loading: false});
+      });
   };
 
   handleConfirm = (formData) => {
