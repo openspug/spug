@@ -32,10 +32,10 @@ export default observer(function () {
     http.post('/api/host/', formData)
       .then(res => {
         if (res === 'auth fail') {
+          setLoading(false)
           if (formData.pkey) {
             message.error('独立密钥认证失败')
           } else {
-            setLoading(false)
             Modal.confirm({
               icon: <ExclamationCircleOutlined/>,
               title: '首次验证请输入密码',
