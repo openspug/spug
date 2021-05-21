@@ -25,13 +25,15 @@ export default [{
       {key: 'import', label: '批量导入'},
       {key: 'edit', label: '编辑主机'},
       {key: 'del', label: '删除主机'},
-      {key: 'console', label: 'Web终端'},
     ]
   }, {
     key: 'console',
-    label: 'Console',
+    label: 'Web终端',
     perms: [
-      {key: 'manager', label: '文件管理器'},
+      {key: 'view', label: '使用Web终端'},
+      {key: 'list', label: '查看文件'},
+      {key: 'upload', label: '上传文件'},
+      {key: 'del', label: '删除文件'},
     ]
   }]
 }, {

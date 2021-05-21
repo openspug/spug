@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import { Layout } from 'antd';
+import { NotFound } from 'components';
 import Sider from './Sider';
 import Header from './Header';
 import Footer from './Footer'
@@ -23,21 +24,6 @@ function initRoutes(Routes, routes) {
       initRoutes(Routes, route.child)
     }
   }
-}
-
-// 404
-function NotFound() {
-  return (
-    <div className={styles.router}>
-      <div className={styles.imgBlock}>
-        <div className={styles.img}/>
-      </div>
-      <div>
-        <h1 className={styles.title}>404</h1>
-        <div className={styles.desc}>抱歉，你访问的页面不存在</div>
-      </div>
-    </div>
-  )
 }
 
 export default function () {

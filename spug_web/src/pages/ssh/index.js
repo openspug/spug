@@ -7,9 +7,10 @@ import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Tabs, Tree, Button, Spin } from 'antd';
 import { FolderOutlined, FolderOpenOutlined, CloudServerOutlined } from '@ant-design/icons';
+import { NotFound } from 'components';
 import Terminal from './Terminal';
 import FileManager from './FileManager';
-import { http } from 'libs';
+import { http, hasPermission } from 'libs';
 import styles from './index.module.less';
 import LogoSpugText from 'layout/logo-spug-txt.png';
 import lds from 'lodash';
@@ -78,7 +79,7 @@ function WebSSH(props) {
     '/____// .___/ \\__,_/ \\__, /    |__/|__/ \\___//_.___/   \\__/ \\___//_/   /_/ /_/ /_//_//_/ /_/ \\__,_//_/   \n' +
     '     /_/            /____/                                                                               \n'
 
-  return (
+  return hasPermission('host.console.view') ? (
     <div className={styles.container}>
       <div className={styles.sider}>
         <div className={styles.logo}>
@@ -116,6 +117,10 @@ function WebSSH(props) {
         <pre className={styles.fig}>{spug_web_terminal}</pre>
       </div>
       <FileManager id={activeId} visible={visible} onClose={() => setVisible(false)}/>
+    </div>
+  ) : (
+    <div style={{height: '100vh'}}>
+      <NotFound/>
     </div>
   )
 }

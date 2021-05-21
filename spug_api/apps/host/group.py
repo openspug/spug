@@ -30,10 +30,11 @@ def merge_children(data, prefix, childes):
 
 def filter_by_perm(data, result, ids):
     for item in data:
-        if item['key'] in ids:
-            result.append(item)
-        elif item['children']:
-            filter_by_perm(item['children'], result, ids)
+        if 'children' in item:
+            if item['key'] in ids:
+                result.append(item)
+            elif item['children']:
+                filter_by_perm(item['children'], result, ids)
 
 
 class GroupView(View):
