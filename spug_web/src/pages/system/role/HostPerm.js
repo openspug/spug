@@ -18,7 +18,7 @@ export default observer(function () {
 
   useEffect(() => {
     if (hostStore.treeData.length === 0) {
-      hostStore.fetchGroups()
+      hostStore.initial()
     }
   }, [])
 
