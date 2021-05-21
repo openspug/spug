@@ -98,12 +98,6 @@ class Role(models.Model, ModelMixin):
         self.deploy_perms = json.dumps(perms)
         self.save()
 
-    def add_host_perm(self, value):
-        perms = json.loads(self.host_perms) if self.host_perms else []
-        perms.append(value)
-        self.host_perms = json.dumps(perms)
-        self.save()
-
     def __repr__(self):
         return '<Role name=%r>' % self.name
 

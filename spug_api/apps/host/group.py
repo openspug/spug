@@ -28,6 +28,14 @@ def merge_children(data, prefix, childes):
             data[item['key']] = name
 
 
+def filter_by_perm(data, result, ids):
+    for item in data:
+        if item['key'] in ids:
+            result.append(item)
+        elif item['children']:
+            filter_by_perm(item['children'], result, ids)
+
+
 class GroupView(View):
     def get(self, request):
         with_hosts = request.GET.get('with_hosts')
@@ -38,10 +46,13 @@ class GroupView(View):
         if not data:
             grp = Group.objects.create(name='Default', sort_id=1)
             data[grp.id] = grp.to_view()
-
-        data = list(data.values())
-        merge_children(data2, '', data)
-        return json_response({'treeData': data, 'groups': data2})
+        if request.user.is_supper:
+            tree_data = list(data.values())
+        else:
+            tree_data, ids = [], request.user.host_perms
+            filter_by_perm(data.values(), tree_data, ids)
+        merge_children(data2, '', tree_data)
+        return json_response({'treeData': tree_data, 'groups': data2})
 
     def post(self, request):
         form, error = JsonParser(

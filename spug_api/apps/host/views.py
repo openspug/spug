@@ -18,11 +18,6 @@ from openpyxl import load_workbook
 
 class HostView(View):
     def get(self, request):
-        host_id = request.GET.get('id')
-        if host_id:
-            if not request.user.has_host_perm(host_id):
-                return json_response(error='无权访问该主机，请联系管理员')
-            return json_response(Host.objects.get(pk=host_id))
         hosts = {x.id: x.to_view() for x in Host.objects.select_related('hostextend').all()}
         for rel in Group.hosts.through.objects.all():
             hosts[rel.host_id]['group_ids'].append(rel.group_id)
@@ -130,8 +125,6 @@ def post_import(request):
             pass
         host = Host.objects.create(created_by=request.user, **data)
         host.groups.add(group_id)
-        if request.user.role:
-            request.user.role.add_host_perm(host.id)
         summary['success'].append(i)
     return json_response(summary)
 
