@@ -15,7 +15,7 @@ import {
   ScissorOutlined
 } from '@ant-design/icons';
 import { LoadingOutlined } from '@ant-design/icons';
-import { http } from 'libs';
+import { hasPermission, http } from 'libs';
 import store from './store';
 import lds from 'lodash';
 
@@ -107,6 +107,13 @@ export default observer(function () {
     setAction('')
   }
 
+  function handleRightClick(v) {
+    if (hasPermission('host.group.edit')) {
+      store.group = v.node;
+      setVisible(true)
+    }
+  }
+
   function handleExpand(keys, {_, node}) {
     if (node.children.length > 0) {
       setExpands(keys)
@@ -140,7 +147,12 @@ export default observer(function () {
     <Card
       title="分组列表"
       loading={store.grpFetching}
-      extra={<Switch checked={draggable} onChange={setDraggable} checkedChildren="排版" unCheckedChildren="浏览"/>}>
+      extra={<Switch
+        disabled={!hasPermission('host.group.edit')}
+        checked={draggable}
+        onChange={setDraggable}
+        checkedChildren="排版"
+        unCheckedChildren="浏览"/>}>
       <Dropdown
         overlay={menus}
         visible={visible}
@@ -156,10 +168,7 @@ export default observer(function () {
           onSelect={(_, {node}) => store.group = node}
           onExpand={handleExpand}
           onDrop={handleDrag}
-          onRightClick={v => {
-            store.group = v.node;
-            setVisible(true)
-          }}
+          onRightClick={handleRightClick}
         />
       </Dropdown>
     </Card>
