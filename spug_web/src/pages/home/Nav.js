@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { Avatar, Button, Card, Col, Row } from 'antd';
 import { LeftSquareOutlined, RightSquareOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import NavForm from './NavForm';
-import { http } from 'libs';
+import { http, hasPermission } from 'libs';
 import styles from './index.module.less';
 
 function NavIndex(props) {
@@ -40,7 +40,8 @@ function NavIndex(props) {
       title="便捷导航"
       className={styles.nav}
       bodyStyle={{paddingBottom: 0, minHeight: 166}}
-      extra={<Button type="link" onClick={() => setIsEdit(!isEdit)}>{isEdit ? '完成' : '编辑'}</Button>}>
+      extra={<Button hidden={!hasPermission('admin')} type="link"
+                     onClick={() => setIsEdit(!isEdit)}>{isEdit ? '完成' : '编辑'}</Button>}>
       {isEdit ? (
         <Row gutter={24}>
           <Col span={6} style={{marginBottom: 24}}>

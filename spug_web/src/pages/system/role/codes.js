@@ -4,13 +4,13 @@
  * Released under the AGPL-3.0 License.
  */
 export default [{
-  key: 'home',
-  label: '工作台',
+  key: 'dashboard',
+  label: 'Dashboard',
   pages: [{
-    key: 'home',
-    label: '工作台',
+    key: 'dashboard',
+    label: 'Dashboard',
     perms: [
-      {key: 'view', label: '查看工作台'}
+      {key: 'view', label: '查看Dashboard'}
     ]
   }]
 }, {

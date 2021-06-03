@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Card, List, Modal, Form, Input, Switch, Divider, Typography } from 'antd';
 import { DownSquareOutlined, PlusOutlined, UpSquareOutlined, SoundOutlined } from '@ant-design/icons';
-import { http } from 'libs';
+import { http, hasPermission } from 'libs';
 import styles from './index.module.less';
 
 function NoticeIndex(props) {
@@ -75,7 +75,7 @@ function NoticeIndex(props) {
       title="系统公告"
       loading={fetching}
       className={styles.notice}
-      extra={<Button type="link" onClick={() => setIsEdit(!isEdit)}>{isEdit ? '完成' : '编辑'}</Button>}>
+      extra={<Button hidden={!hasPermission('admin')} type="link" onClick={() => setIsEdit(!isEdit)}>{isEdit ? '完成' : '编辑'}</Button>}>
       {isEdit ? (
         <List>
           <div className={styles.add} onClick={() => showForm({})}><PlusOutlined/>新建公告</div>

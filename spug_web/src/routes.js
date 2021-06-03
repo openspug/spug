@@ -43,11 +43,11 @@ import WelcomeIndex from './pages/welcome/index';
 import WelcomeInfo from './pages/welcome/info';
 
 export default [
-  {icon: <DesktopOutlined/>, title: '工作台', auth: 'home.home.view', path: '/home', component: HomeIndex},
+  {icon: <DesktopOutlined/>, title: '工作台', path: '/home', component: HomeIndex},
   {
     icon: <DashboardOutlined/>,
     title: 'Dashboard',
-    auth: 'home.home.view',
+    auth: 'dashboard.dashboard.view',
     path: '/dashboard',
     component: DashboardIndex
   },
