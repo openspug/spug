@@ -50,7 +50,7 @@ class GroupView(View):
         if request.user.is_supper:
             tree_data = list(data.values())
         else:
-            tree_data, ids = [], request.user.host_perms
+            tree_data, ids = [], request.user.group_perms
             filter_by_perm(data.values(), tree_data, ids)
         merge_children(data2, '', tree_data)
         return json_response({'treeData': tree_data, 'groups': data2})

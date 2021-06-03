@@ -7,7 +7,6 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { Form, Select, Button } from 'antd';
-import { hasHostPermission } from 'libs';
 import store from './store';
 import hostStore from 'pages/host/store';
 import styles from './index.module.css';
@@ -27,7 +26,7 @@ export default observer(function () {
               filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
               onChange={v => store.editTarget(index, v)}>
               <Select.Option value="local" disabled={store.targets.includes('local')}>本机</Select.Option>
-              {hostStore.records.filter(x => x.id === id || hasHostPermission(x.id)).map(item => (
+              {hostStore.records.map(item => (
                 <Select.Option key={item.id} value={item.id} disabled={store.targets.includes(item.id)}>
                   {`${item.name}(${item['hostname']}:${item['port']})`}
                 </Select.Option>

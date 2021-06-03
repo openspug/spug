@@ -6,6 +6,7 @@ from django.conf import settings
 from django_redis import get_redis_connection
 from asgiref.sync import async_to_sync
 from apps.host.models import Host
+from apps.account.utils import has_host_perm
 from threading import Thread
 import time
 import json
@@ -109,7 +110,7 @@ class SSHConsumer(WebsocketConsumer):
         # print('Connection close')
 
     def connect(self):
-        if self.user.has_host_perm(self.id):
+        if has_host_perm(self.user, self.id):
             self.accept()
             self._init()
         else:

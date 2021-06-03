@@ -6,7 +6,6 @@
 let Permission = {
   isReady: false,
   isSuper: false,
-  hostPerms: [],
   permissions: []
 };
 
@@ -16,7 +15,6 @@ export function updatePermissions() {
   X_TOKEN = localStorage.getItem('token');
   Permission.isReady = true;
   Permission.isSuper = localStorage.getItem('is_supper') === 'true';
-  Permission.hostPerms = JSON.parse(localStorage.getItem('host_perms') || '[]');
   Permission.permissions = JSON.parse(localStorage.getItem('permissions') || '[]');
 }
 
@@ -30,11 +28,6 @@ export function hasPermission(strCode) {
     }
   }
   return false
-}
-
-export function hasHostPermission(id) {
-  const {isSuper, hostPerms} = Permission;
-  return isSuper || hostPerms.includes(id)
 }
 
 export function includes(s, key) {

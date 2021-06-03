@@ -4,6 +4,7 @@
 from django.views.generic import View
 from django_redis import get_redis_connection
 from apps.host.models import Host
+from apps.account.utils import has_host_perm
 from apps.file.utils import FileResponseAfter, parse_sftp_attr
 from libs import json_response, JsonParser, Argument
 from functools import partial
@@ -17,7 +18,7 @@ class FileView(View):
             Argument('path', help='参数错误')
         ).parse(request.GET)
         if error is None:
-            if not request.user.has_host_perm(form.id):
+            if not has_host_perm(request.user, form.id):
                 return json_response(error='无权访问主机，请联系管理员')
             host = Host.objects.get(pk=form.id)
             if not host:
@@ -35,7 +36,7 @@ class ObjectView(View):
             Argument('file', help='请输入文件路径')
         ).parse(request.GET)
         if error is None:
-            if not request.user.has_host_perm(form.id):
+            if not has_host_perm(request.user, form.id):
                 return json_response(error='无权访问主机，请联系管理员')
             host = Host.objects.filter(pk=form.id).first()
             if not host:
@@ -54,7 +55,7 @@ class ObjectView(View):
             Argument('path', help='参数错误'),
         ).parse(request.POST)
         if error is None:
-            if not request.user.has_host_perm(form.id):
+            if not has_host_perm(request.user, form.id):
                 return json_response(error='无权访问主机，请联系管理员')
             file = request.FILES.get('file')
             if not file:
@@ -74,7 +75,7 @@ class ObjectView(View):
             Argument('file', help='请输入文件路径')
         ).parse(request.GET)
         if error is None:
-            if not request.user.has_host_perm(form.id):
+            if not has_host_perm(request.user, form.id):
                 return json_response(error='无权访问主机，请联系管理员')
             host = Host.objects.get(pk=form.id)
             if not host:

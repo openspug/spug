@@ -7,6 +7,7 @@ from django.conf import settings
 from libs import json_response, JsonParser, Argument, human_datetime
 from apps.exec.models import ExecTemplate
 from apps.host.models import Host
+from apps.account.utils import has_host_perm
 import uuid
 import json
 
@@ -50,7 +51,7 @@ def do_task(request):
         Argument('command', help='请输入执行命令内容')
     ).parse(request.body)
     if error is None:
-        if not request.user.has_host_perm(form.host_ids):
+        if not has_host_perm(request.user, form.host_ids):
             return json_response(error='无权访问主机，请联系管理员')
         token, rds = uuid.uuid4().hex, get_redis_connection()
         for host in Host.objects.filter(id__in=form.host_ids):

@@ -100,7 +100,7 @@ class RoleView(View):
             Argument('id', type=int, help='参数错误'),
             Argument('page_perms', type=dict, required=False),
             Argument('deploy_perms', type=dict, required=False),
-            Argument('host_perms', type=list, required=False)
+            Argument('group_perms', type=list, required=False)
         ).parse(request.body)
         if error is None:
             role = Role.objects.filter(pk=form.pop('id')).first()
@@ -110,8 +110,8 @@ class RoleView(View):
                 role.page_perms = json.dumps(form.page_perms)
             if form.deploy_perms is not None:
                 role.deploy_perms = json.dumps(form.deploy_perms)
-            if form.host_perms is not None:
-                role.host_perms = json.dumps(form.host_perms)
+            if form.group_perms is not None:
+                role.group_perms = json.dumps(form.group_perms)
             role.user_set.update(token_expired=0)
             role.save()
         return json_response(error=error)
@@ -206,7 +206,6 @@ def handle_user_info(user, x_real_ip):
         'nickname': user.nickname,
         'is_supper': user.is_supper,
         'has_real_ip': x_real_ip and ipaddress.ip_address(x_real_ip).is_global if verify_ip else True,
-        'host_perms': [] if user.is_supper else user.host_perms,
         'permissions': [] if user.is_supper else user.page_perms
     })
 

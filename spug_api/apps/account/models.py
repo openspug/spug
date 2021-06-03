@@ -52,13 +52,8 @@ class User(models.Model, ModelMixin):
         return perms
 
     @property
-    def host_perms(self):
-        return json.loads(self.role.host_perms) if self.role and self.role.host_perms else []
-
-    def has_host_perm(self, host_id):
-        if isinstance(host_id, (list, set, tuple)):
-            return self.is_supper or set(host_id).issubset(set(self.host_perms))
-        return self.is_supper or int(host_id) in self.host_perms
+    def group_perms(self):
+        return json.loads(self.role.group_perms) if self.role and self.role.group_perms else []
 
     def has_perms(self, codes):
         # return self.is_supper or self.role in codes
@@ -77,8 +72,7 @@ class Role(models.Model, ModelMixin):
     desc = models.CharField(max_length=255, null=True)
     page_perms = models.TextField(null=True)
     deploy_perms = models.TextField(null=True)
-    host_perms = models.TextField(null=True)
-
+    group_perms = models.TextField(null=True)
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='+')
 
@@ -86,7 +80,7 @@ class Role(models.Model, ModelMixin):
         tmp = super().to_dict(*args, **kwargs)
         tmp['page_perms'] = json.loads(self.page_perms) if self.page_perms else {}
         tmp['deploy_perms'] = json.loads(self.deploy_perms) if self.deploy_perms else {}
-        tmp['host_perms'] = json.loads(self.host_perms) if self.host_perms else []
+        tmp['group_perms'] = json.loads(self.group_perms) if self.group_perms else []
         tmp['used'] = self.user_set.count()
         return tmp
 

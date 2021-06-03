@@ -8,6 +8,7 @@ from apps.schedule.models import Task
 from apps.monitor.models import Detection
 from apps.alarm.models import Alarm
 from apps.deploy.models import Deploy, DeployRequest
+from apps.account.utils import get_host_perms
 from libs.utils import json_response, human_date, parse_time
 from libs.parser import JsonParser, Argument
 from datetime import datetime, timedelta
@@ -19,9 +20,9 @@ def get_statistic(request):
         app = App.objects.count()
         host = Host.objects.count()
     else:
-        deploy_perms, host_perms = request.user.deploy_perms, request.user.host_perms
+        deploy_perms, host_perms = request.user.deploy_perms, get_host_perms(request.user)
         app = App.objects.filter(id__in=deploy_perms['apps']).count()
-        host = Host.objects.filter(id__in=host_perms).count()
+        host = len(host_perms)
     data = {
         'app': app,
         'host': host,

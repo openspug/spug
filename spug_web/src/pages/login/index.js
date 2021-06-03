@@ -69,7 +69,6 @@ export default function () {
     localStorage.setItem('nickname', data['nickname']);
     localStorage.setItem('is_supper', data['is_supper']);
     localStorage.setItem('permissions', JSON.stringify(data['permissions']));
-    localStorage.setItem('host_perms', JSON.stringify(data['host_perms']));
     updatePermissions();
     if (history.location.state && history.location.state['from']) {
       history.push(history.location.state['from'])

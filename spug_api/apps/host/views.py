@@ -6,6 +6,7 @@ from django.db.models import F
 from django.http.response import HttpResponseBadRequest
 from libs import json_response, JsonParser, Argument
 from apps.setting.utils import AppSetting
+from apps.account.utils import get_host_perms
 from apps.host.models import Host, Group
 from apps.app.models import Deploy
 from apps.schedule.models import Task
@@ -18,8 +19,11 @@ from openpyxl import load_workbook
 
 class HostView(View):
     def get(self, request):
-        hosts = {x.id: x.to_view() for x in Host.objects.select_related('hostextend').all()}
-        for rel in Group.hosts.through.objects.all():
+        hosts = Host.objects.select_related('hostextend')
+        if not request.user.is_supper:
+            hosts = hosts.filter(id__in=get_host_perms(request.user))
+        hosts = {x.id: x.to_view() for x in hosts}
+        for rel in Group.hosts.through.objects.filter(host_id__in=hosts.keys()):
             hosts[rel.host_id]['group_ids'].append(rel.group_id)
         return json_response(list(hosts.values()))
 
