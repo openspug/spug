@@ -28,7 +28,7 @@ export default observer(function () {
 
   return (
     <AuthDiv auth="host.host.view">
-      <Breadcrumb extra={<AuthButton auth="host.host.console" type="primary" icon={<CodeOutlined/>} onClick={openTerminal}>Web 终端</AuthButton>}>
+      <Breadcrumb extra={<AuthButton auth="host.console.view" type="primary" icon={<CodeOutlined/>} onClick={openTerminal}>Web 终端</AuthButton>}>
         <Breadcrumb.Item>首页</Breadcrumb.Item>
         <Breadcrumb.Item>主机管理</Breadcrumb.Item>
       </Breadcrumb>

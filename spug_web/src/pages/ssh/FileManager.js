@@ -13,6 +13,7 @@ import {
   HomeOutlined,
   UploadOutlined
 } from '@ant-design/icons';
+import { AuthButton, Action } from 'components';
 import { http, uniqueId, X_TOKEN } from 'libs';
 import lds from 'lodash';
 import styles from './index.module.less'
@@ -62,18 +63,18 @@ class FileManager extends React.Component {
     title: '属性',
     key: 'attr',
     render: info => `${info.kind}${info.code}`,
-    width: 120
+    width: 110
   }, {
     title: '操作',
-    width: 80,
+    width: 100,
     align: 'right',
     key: 'action',
     render: info => info.kind === '-' ? (
-      <React.Fragment>
-        <DownloadOutlined style={{color: '#1890ff'}} onClick={() => this.handleDownload(info.name)}/>
-        <Divider type="vertical"/>
-        <DeleteOutlined style={{color: 'red'}} onClick={() => this.handleDelete(info.name)}/>
-      </React.Fragment>
+      <Action>
+        <Action.Button icon={<DownloadOutlined/>} onClick={() => this.handleDownload(info.name)}/>
+        <Action.Button auth="host.console.del" danger icon={<DeleteOutlined/>}
+                       onClick={() => this.handleDelete(info.name)}/>
+      </Action>
     ) : null
   }];
 
@@ -210,8 +211,13 @@ class FileManager extends React.Component {
               checkedChildren="开启"
               unCheckedChildren="关闭"
               onChange={v => this.setState({showDot: v})}/>
-            <Button style={{marginLeft: 10}} size="small" type="primary" icon={<UploadOutlined/>}
-                    onClick={this.handleUpload}>上传文件</Button>
+            <AuthButton
+              auth="host.console.upload"
+              style={{marginLeft: 10}}
+              size="small"
+              type="primary"
+              icon={<UploadOutlined/>}
+              onClick={this.handleUpload}>上传文件</AuthButton>
           </div>
         </div>
         {this.state.uploading && (

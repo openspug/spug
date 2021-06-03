@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Tabs, Tree, Button, Spin } from 'antd';
 import { FolderOutlined, FolderOpenOutlined, CloudServerOutlined } from '@ant-design/icons';
-import { NotFound } from 'components';
+import { NotFound, AuthButton } from 'components';
 import Terminal from './Terminal';
 import FileManager from './FileManager';
 import { http, hasPermission } from 'libs';
@@ -103,11 +103,13 @@ function WebSSH(props) {
           type="editable-card"
           onTabClick={key => setActiveId(key)}
           onEdit={handleRemove}
-          tabBarExtraContent={<Button
+          tabBarExtraContent={<AuthButton
+            auth="host.console.list"
             type="primary"
+            disabled={!activeId}
             style={{marginRight: 5}}
             onClick={() => setVisible(true)}
-            icon={<FolderOpenOutlined/>}>文件管理器</Button>}>
+            icon={<FolderOpenOutlined/>}>文件管理器</AuthButton>}>
           {hosts.map(item => (
             <Tabs.TabPane key={item.id} tab={item.title}>
               <Terminal id={item.id} activeId={activeId}/>

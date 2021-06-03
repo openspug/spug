@@ -12,9 +12,10 @@ import {
   EditOutlined,
   DeleteOutlined,
   CopyOutlined,
-  ScissorOutlined
+  ScissorOutlined,
+  LoadingOutlined
 } from '@ant-design/icons';
-import { LoadingOutlined } from '@ant-design/icons';
+import { AuthFragment } from 'components';
 import { hasPermission, http } from 'libs';
 import store from './store';
 import lds from 'lodash';
@@ -108,7 +109,7 @@ export default observer(function () {
   }
 
   function handleRightClick(v) {
-    if (hasPermission('host.group.edit')) {
+    if (hasPermission('admin')) {
       store.group = v.node;
       setVisible(true)
     }
@@ -147,12 +148,14 @@ export default observer(function () {
     <Card
       title="分组列表"
       loading={store.grpFetching}
-      extra={<Switch
-        disabled={!hasPermission('host.group.edit')}
-        checked={draggable}
-        onChange={setDraggable}
-        checkedChildren="排版"
-        unCheckedChildren="浏览"/>}>
+      extra={(
+        <AuthFragment auth="admin">
+          <Switch
+            checked={draggable}
+            onChange={setDraggable}
+            checkedChildren="排版"
+            unCheckedChildren="浏览"/>
+        </AuthFragment>)}>
       <Dropdown
         overlay={menus}
         visible={visible}
