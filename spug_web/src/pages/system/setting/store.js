@@ -21,6 +21,10 @@ class Store {
       })
       .finally(() => this.isFetching = false)
   };
+
+  update = (key, value) => {
+    this.settings[key] = value
+  }
 }
 
 export default new Store()

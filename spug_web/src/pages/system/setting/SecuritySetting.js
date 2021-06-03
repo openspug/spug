@@ -49,7 +49,7 @@ export default observer(function () {
         <Form.Item
           label="登录MFA认证"
           style={{marginTop: 24}}
-          help="建议开启，登录时额外使用短信验证码进行身份验证。">
+          help="建议开启，登录时额外使用验证码进行身份验证。">
           <Switch
             checkedChildren="开启"
             unCheckedChildren="关闭"

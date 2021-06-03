@@ -85,7 +85,7 @@ export default function () {
     <div className={styles.container}>
       <div className={styles.titleContainer}>
         <div><img className={styles.logo} src={logo} alt="logo"/></div>
-        <div className={styles.desc}>灵活、强大、功能全面的开源运维平台</div>
+        <div className={styles.desc}>灵活、强大、易用的开源运维平台</div>
       </div>
       <div className={styles.formContainer}>
         <Tabs className={styles.tabs} onTabClick={v => setLoginType(v)}>
