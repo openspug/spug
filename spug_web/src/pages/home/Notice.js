@@ -4,9 +4,10 @@
  * Released under the AGPL-3.0 License.
  */
 import React, { useEffect, useState } from 'react';
-import { Button, Card, List, Modal, Form, Input, Switch, Divider, Typography } from 'antd';
+import { Card, List, Modal, Form, Input, Switch, Divider, Typography } from 'antd';
 import { DownSquareOutlined, PlusOutlined, UpSquareOutlined, SoundOutlined } from '@ant-design/icons';
-import { http, hasPermission } from 'libs';
+import { AuthButton } from 'components';
+import { http } from 'libs';
 import styles from './index.module.less';
 
 function NoticeIndex(props) {
@@ -75,7 +76,8 @@ function NoticeIndex(props) {
       title="系统公告"
       loading={fetching}
       className={styles.notice}
-      extra={<Button hidden={!hasPermission('admin')} type="link" onClick={() => setIsEdit(!isEdit)}>{isEdit ? '完成' : '编辑'}</Button>}>
+      extra={<AuthButton auth="admin" type="link"
+                         onClick={() => setIsEdit(!isEdit)}>{isEdit ? '完成' : '编辑'}</AuthButton>}>
       {isEdit ? (
         <List>
           <div className={styles.add} onClick={() => showForm({})}><PlusOutlined/>新建公告</div>
@@ -94,7 +96,7 @@ function NoticeIndex(props) {
         <List>
           {records.map(item => (
             <List.Item key={item.id} className={styles.item} onClick={() => setNotice(item)}>
-              {!item.read_ids.includes(id) && <SoundOutlined style={{color: '#ff4d4f', marginRight: 4}} />}
+              {!item.read_ids.includes(id) && <SoundOutlined style={{color: '#ff4d4f', marginRight: 4}}/>}
               <span className={styles.title}>{item.title}</span>
               <span className={styles.date}>{item.created_at.substr(0, 10)}</span>
             </List.Item>
