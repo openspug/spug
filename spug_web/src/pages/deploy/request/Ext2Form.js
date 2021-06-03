@@ -73,7 +73,7 @@ export default observer(function () {
   return (
     <Modal
       visible
-      width={600}
+      width={700}
       maskClosable={false}
       title={`${store.record.id ? '编辑' : '新建'}发布申请`}
       onCancel={() => store.ext2Visible = false}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Drawer, Descriptions, Table, Button } from 'antd';
+import { AuthDiv } from 'components';
 import { http } from 'libs';
 import store from './store';
 
@@ -35,10 +36,12 @@ export default observer(function (props) {
       visible={props.visible}
       onClose={() => store.detailVisible = false}
       footer={(
-        <div style={{display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end'}}>
+        <AuthDiv
+          auth="deploy.repository.del"
+          style={{display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end'}}>
           <span style={{color: '#999', fontSize: 12}}>Tips: 已关联发布申请的构建版本无法删除。</span>
           <Button danger loading={loading} disabled={requests.length > 0} onClick={handleDelete}>删除</Button>
-        </div>
+        </AuthDiv>
       )}>
       <Descriptions column={1} title={<span style={{fontSize: 22}}>基本信息</span>}>
         <Descriptions.Item label="应用">{record.app_name}</Descriptions.Item>

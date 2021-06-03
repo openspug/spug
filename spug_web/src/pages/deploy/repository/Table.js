@@ -45,7 +45,7 @@ function ComTable() {
       onReload={store.fetchRecords}
       actions={[
         <AuthButton
-          auth="config.env.add"
+          auth="deploy.repository.add"
           type="primary"
           icon={<PlusOutlined/>}
           onClick={store.showForm}>新建</AuthButton>
@@ -68,12 +68,12 @@ function ComTable() {
       {hasPermission('deploy.repository.detail|deploy.repository.build|deploy.repository.log') && (
         <Table.Column width={180} title="操作" render={info => (
           <Action>
-            <Action.Button auth="deploy.repository.detail" onClick={() => store.showDetail(info)}>详情</Action.Button>
+            <Action.Button auth="deploy.repository.view" onClick={() => store.showDetail(info)}>详情</Action.Button>
             <Action.Button
               auth="deploy.repository.build"
               loading={loading === info.id}
               onClick={() => handleRebuild(info)}>构建</Action.Button>
-            <Action.Button auth="deploy.repository.log" onClick={() => store.showConsole(info)}>日志</Action.Button>
+            <Action.Button auth="deploy.repository.build" onClick={() => store.showConsole(info)}>日志</Action.Button>
           </Action>
         )}/>
       )}

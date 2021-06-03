@@ -73,9 +73,9 @@ export default [{
     label: '构建仓库',
     perms: [
       {key: 'view', label: '查看构建'},
-      {key: 'detail', label: '构建详情'},
-      {key: 'build', label: '构建仓库'},
-      {key: 'log', label: '构建日志'},
+      {key: 'add', label: '新建版本'},
+      {key: 'build', label: '执行构建'},
+      {key: 'del', label: '删除版本'},
     ]
   },{
     key: 'request',

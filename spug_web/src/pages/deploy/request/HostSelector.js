@@ -44,6 +44,8 @@ export default observer(function (props) {
       <Table
         rowKey="id"
         dataSource={props.app_host_ids.map(id => ({id}))}
+        pagination={false}
+        scroll={{y: 480}}
         onRow={record => {
           return {
             onClick: () => handleClickRow(record)
