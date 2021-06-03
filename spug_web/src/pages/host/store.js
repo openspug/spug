@@ -10,7 +10,7 @@ import lds from 'lodash';
 
 class Store {
   counter = {};
-  @observable records = [];
+  @observable records = null;
   @observable treeData = [];
   @observable groups = {};
   @observable group = {};
@@ -104,7 +104,7 @@ class Store {
 
   refreshCounter = (treeData) => {
     treeData = treeData || lds.cloneDeep(this.treeData);
-    if (treeData.length && this.records.length) {
+    if (treeData.length && this.records !== null) {
       for (let item of treeData) {
         this._refreshCounter(item)
       }
