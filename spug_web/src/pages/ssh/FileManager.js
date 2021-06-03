@@ -4,7 +4,7 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
-import { Drawer, Breadcrumb, Table, Divider, Switch, Button, Progress, Modal, message } from 'antd';
+import { Drawer, Breadcrumb, Table, Switch, Progress, Modal, message } from 'antd';
 import {
   DeleteOutlined,
   DownloadOutlined,

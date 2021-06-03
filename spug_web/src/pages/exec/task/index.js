@@ -45,7 +45,7 @@ class TaskIndex extends React.Component {
           <Form layout="vertical">
             <Form.Item required label="目标主机">
               {store.host_ids.length > 0 && (
-                <Alert style={{width: 200}} type="info" message={`已选择 ${store.host_ids.length} 台`}/>
+                <Alert style={{width: 200}} type="info" message={`已选择 ${store.host_ids.length} 台主机`}/>
               )}
             </Form.Item>
             <Button

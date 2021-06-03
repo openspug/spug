@@ -5,7 +5,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Tabs, Tree, Button, Spin } from 'antd';
+import { Tabs, Tree, Spin } from 'antd';
 import { FolderOutlined, FolderOpenOutlined, CloudServerOutlined } from '@ant-design/icons';
 import { NotFound, AuthButton } from 'components';
 import Terminal from './Terminal';

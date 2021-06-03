@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Row, Col, Tree, Table, Button, Alert } from 'antd';
 import store from './store';
+import styles from './index.module.less';
 
 export default observer(function (props) {
   const [loading, setLoading] = useState(false);
@@ -65,6 +66,7 @@ export default observer(function (props) {
     <Modal
       visible={[undefined, true].includes(props.visible)}
       width={1000}
+      className={styles.selector}
       title={props.title || '主机列表'}
       onOk={handleSubmit}
       confirmLoading={loading}
@@ -88,6 +90,8 @@ export default observer(function (props) {
           <Table
             rowKey="id"
             dataSource={dataSource}
+            pagination={false}
+            scroll={{y: 480}}
             onRow={record => {
               return {
                 onClick: () => handleClickRow(record)
