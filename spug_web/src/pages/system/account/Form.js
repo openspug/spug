@@ -71,7 +71,14 @@ export default observer(function () {
             <Link to="/system/role">新建角色</Link>
           </Form.Item>
         </Form.Item>
-        <Form.Item name="wx_token" label="微信Token">
+        <Form.Item
+          name="wx_token"
+          label="微信Token"
+          help={(
+            <span>
+              如果启用了MFA（两步验证）则该项为必填。
+              <a target="_blank" rel="noopener noreferrer" href="https://spug.dev/docs/wx-token/">什么是微信Token？</a>
+            </span>)}>
           <Input placeholder="请输入微信Token"/>
         </Form.Item>
       </Form>
