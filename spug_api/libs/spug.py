@@ -15,7 +15,8 @@ notify_source = 'monitor'
 
 def send_login_wx_code(wx_token, code):
     url = f'{spug_server}/apis/login/wx/'
-    res = requests.post(url, json={'token': wx_token, 'code': code}, timeout=30)
+    spug_key = AppSetting.get_default('spug_key')
+    res = requests.post(url, json={'token': spug_key, 'user': wx_token, 'code': code}, timeout=30)
     if res.status_code != 200:
         raise Exception(f'status code: {res.status_code}')
     res = res.json()
