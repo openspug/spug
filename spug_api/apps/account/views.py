@@ -167,9 +167,10 @@ def login(request):
         if user and not user.is_active:
             return json_response(error="账户已被系统禁用")
         if form.type == 'ldap':
-            if not AppSetting.get_default('ldap_service'):
+            config = AppSetting.get_default('ldap_service')
+            if not config:
                 return json_response(error='请在系统设置中配置LDAP后再尝试通过该方式登录')
-            ldap = LDAP()
+            ldap = LDAP(**config)
             is_success, message = ldap.valid_user(form.username, form.password)
             if is_success:
                 if not user:
