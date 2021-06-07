@@ -21,6 +21,8 @@ export default function () {
   const [counter, setCounter] = useState(0);
   const [loading, setLoading] = useState(false);
   const [loginType, setLoginType] = useState('default');
+  const [codeVisible, setCodeVisible] = useState(false);
+  const [codeLoading, setCodeLoading] = useState(false);
 
   useEffect(() => {
     envStore.records = [];
@@ -45,7 +47,11 @@ export default function () {
     formData['type'] = loginType;
     http.post('/api/account/login/', formData)
       .then(data => {
-        if (!data['has_real_ip']) {
+        if (data['required_mfa']) {
+          setCodeVisible(true);
+          setCounter(30);
+          setLoading(false)
+        } else if (!data['has_real_ip']) {
           Modal.warning({
             title: '安全警告',
             className: styles.tips,
@@ -78,7 +84,12 @@ export default function () {
   }
 
   function handleCaptcha() {
-    setCounter(60);
+    setCodeLoading(true);
+    const formData = form.getFieldsValue(['username', 'password']);
+    formData['type'] = loginType;
+    http.post('/api/account/login/', formData)
+      .then(() => setCounter(30))
+      .finally(() => setCodeLoading(false))
   }
 
   return (
@@ -109,7 +120,7 @@ export default function () {
               onPressEnter={handleSubmit}
               prefix={<LockOutlined className={styles.icon}/>}/>
           </Form.Item>
-          <Form.Item name="captcha" className={styles.formItem}>
+          <Form.Item hidden={!codeVisible} name="captcha" className={styles.formItem}>
             <div style={{display: 'flex'}}>
               <Form.Item noStyle name="captcha">
                 <Input
@@ -121,7 +132,8 @@ export default function () {
               {counter > 0 ? (
                 <Button disabled size="large" style={{marginLeft: 8}}>{counter} 秒后重新获取</Button>
               ) : (
-                <Button size="large" style={{marginLeft: 8}} onClick={handleCaptcha}>获取验证码</Button>
+                <Button size="large" loading={codeLoading} style={{marginLeft: 8}}
+                        onClick={handleCaptcha}>获取验证码</Button>
               )}
             </div>
           </Form.Item>

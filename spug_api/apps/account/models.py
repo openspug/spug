@@ -19,6 +19,7 @@ class User(models.Model, ModelMixin):
     last_login = models.CharField(max_length=20)
     last_ip = models.CharField(max_length=50)
     role = models.ForeignKey('Role', on_delete=models.PROTECT, null=True)
+    wx_token = models.CharField(max_length=50, null=True)
 
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey('User', models.PROTECT, related_name='+', null=True)

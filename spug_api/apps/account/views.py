@@ -5,7 +5,8 @@ from django.core.cache import cache
 from django.views.generic import View
 from django.db.models import F
 from libs import JsonParser, Argument, human_datetime, json_response
-from libs.utils import get_request_real_ip
+from libs.utils import get_request_real_ip, generate_random_str
+from libs.spug import send_login_wx_code
 from apps.account.models import User, Role, History
 from apps.setting.utils import AppSetting
 from libs.ldap import LDAP
@@ -18,7 +19,7 @@ import json
 class UserView(View):
     def get(self, request):
         users = []
-        for u in User.objects.filter(is_supper=False, deleted_by_id__isnull=True).annotate(role_name=F('role__name')):
+        for u in User.objects.filter(deleted_by_id__isnull=True).annotate(role_name=F('role__name')):
             tmp = u.to_dict(excludes=('access_token', 'password_hash'))
             tmp['role_name'] = u.role_name
             users.append(tmp)
@@ -30,6 +31,7 @@ class UserView(View):
             Argument('password', help='请输入密码'),
             Argument('nickname', help='请输入姓名'),
             Argument('role_id', type=int, help='请选择角色'),
+            Argument('wx_token', required=False),
         ).parse(request.body)
         if error is None:
             if User.objects.filter(username=form.username, deleted_by_id__isnull=True).exists():
@@ -46,6 +48,7 @@ class UserView(View):
             Argument('password', required=False),
             Argument('nickname', required=False),
             Argument('role_id', required=False),
+            Argument('wx_token', required=False),
             Argument('is_active', type=bool, required=False),
         ).parse(request.body, True)
         if error is None:
@@ -156,10 +159,10 @@ def login(request):
     form, error = JsonParser(
         Argument('username', help='请输入用户名'),
         Argument('password', help='请输入密码'),
+        Argument('captcha', required=False),
         Argument('type', required=False)
     ).parse(request.body)
     if error is None:
-        x_real_ip = get_request_real_ip(request.headers)
         user = User.objects.filter(username=form.username, type=form.type).first()
         if user and not user.is_active:
             return json_response(error="账户已被系统禁用")
@@ -171,13 +174,13 @@ def login(request):
             if is_success:
                 if not user:
                     user = User.objects.create(username=form.username, nickname=form.username, type=form.type)
-                return handle_user_info(user, x_real_ip)
+                return handle_user_info(request, user, form.captcha)
             elif message:
                 return json_response(error=message)
         else:
             if user and user.deleted_by is None:
                 if user.verify_password(form.password):
-                    return handle_user_info(user, x_real_ip)
+                    return handle_user_info(request, user, form.captcha)
 
         value = cache.get_or_set(form.username, 0, 86400)
         if value >= 3:
@@ -190,8 +193,29 @@ def login(request):
     return json_response(error=error)
 
 
-def handle_user_info(user, x_real_ip):
+def handle_user_info(request, user, captcha):
     cache.delete(user.username)
+    key = f'{user.username}:code'
+    if captcha:
+        code = cache.get(key)
+        if not code:
+            return json_response(error='验证码已失效，请重新获取')
+        if code != captcha:
+            ttl = cache.ttl(key)
+            cache.expire(key, ttl - 100)
+            return json_response(error='验证码错误')
+        cache.delete(key)
+    else:
+        mfa = AppSetting.get_default('MFA', {'enable': False})
+        if mfa['enable']:
+            if not user.wx_token:
+                return json_response(error='已启用登录双重认证，但您的账户未配置微信Token，请联系管理员')
+            code = generate_random_str(6)
+            send_login_wx_code(user.wx_token, code)
+            cache.set(key, code, 300)
+            return json_response({'required_mfa': True})
+
+    x_real_ip = get_request_real_ip(request.headers)
     token_isvalid = user.access_token and len(user.access_token) == 32 and user.token_expired >= time.time()
     user.access_token = user.access_token if token_isvalid else uuid.uuid4().hex
     user.token_expired = time.time() + 8 * 60 * 60

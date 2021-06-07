@@ -71,6 +71,9 @@ export default observer(function () {
             <Link to="/system/role">新建角色</Link>
           </Form.Item>
         </Form.Item>
+        <Form.Item name="wx_token" label="微信Token">
+          <Input placeholder="请输入微信Token"/>
+        </Form.Item>
       </Form>
     </Modal>
   )
