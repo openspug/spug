@@ -25,6 +25,15 @@ export default observer(function () {
 
   function handleChangeMFA(v) {
     if (v && !store.settings.spug_key) return message.error('开启MFA认证需要先在基本设置中配置调用凭据');
+    if (v) {
+      http.get('/api/setting/mfa_test/')
+        .then(() => _doModify(v))
+    } else {
+      _doModify(v)
+    }
+  }
+
+  function _doModify(v) {
     setMFA({...mfa, enable: v});
     http.post('/api/setting/', {data: [{key: 'MFA', value: {...mfa, enable: v}}]})
       .then(() => {

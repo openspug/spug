@@ -5,6 +5,7 @@ import django
 from django.views.generic import View
 from django.conf import settings
 from libs import JsonParser, Argument, json_response
+from apps.account.models import User
 from apps.setting.utils import AppSetting
 from apps.setting.models import Setting
 import platform
@@ -59,11 +60,18 @@ def email_test(request):
             else:
                 server = smtplib.SMTP(form.server, form.port, timeout=3)
             server.login(form.username, form.password)
-            return json_response()    
+            return json_response()
 
         except Exception as e:
             error = f'{e}'
     return json_response(error=error)
+
+
+def mfa_test(request):
+    for user in User.objects.filter(is_supper=True):
+        if not user.wx_token:
+            return json_response(error=f'检测到管理员账户 {user.nickname} 未配置微信Token，请配置后再尝试启用MFA认证，否则可能造成系统无法正常登录。')
+    return json_response()
 
 
 def get_about(request):
@@ -73,10 +81,3 @@ def get_about(request):
         'spug_version': settings.SPUG_VERSION,
         'django_version': django.get_version()
     })
-
-
-def get_basic(request):
-    keys, data = ('MFA',), {}
-    for item in Setting.objects.filter(key__in=keys):
-        data[item.key] = item.real_val
-    return json_response(data)
