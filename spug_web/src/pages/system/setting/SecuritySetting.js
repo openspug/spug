@@ -58,7 +58,7 @@ export default observer(function () {
         <Form.Item
           label="登录MFA（两步）认证"
           style={{marginTop: 24}}
-          help={<span>建议开启，登录时额外使用验证码进行身份验证。开启后未配置微信Token的账户将无法登录，<a
+          help={<span>建议开启，登录时额外使用验证码进行身份验证。开启前至少要确保管理员账户配置了微信Token（账户管理/用户/编辑），开启后未配置微信Token的账户将无法登录，<a
             target="_blank" rel="noopener noreferrer" href="https://spug.dev/docs/wx-token/">什么是微信Token？</a></span>}>
           <Switch
             checkedChildren="开启"
