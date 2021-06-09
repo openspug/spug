@@ -4,7 +4,7 @@
  * Released under the AGPL-3.0 License.
  */
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Tabs, Modal } from 'antd';
+import { Form, Input, Button, Tabs, Modal, message } from 'antd';
 import { UserOutlined, LockOutlined, CopyrightOutlined, GithubOutlined, MailOutlined } from '@ant-design/icons';
 import styles from './login.module.css';
 import history from 'libs/history';
@@ -42,8 +42,9 @@ export default function () {
   }, [counter])
 
   function handleSubmit() {
-    setLoading(true);
     const formData = form.getFieldsValue();
+    if (codeVisible && !formData.captcha) return message.error('请输入验证码');
+    setLoading(true);
     formData['type'] = loginType;
     http.post('/api/account/login/', formData)
       .then(data => {
