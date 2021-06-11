@@ -48,7 +48,7 @@ def parse_utc_date(value):
         return None
     s_format = '%Y-%m-%dT%H:%M:%S%z'
     if len(value) == 17:
-        s_format = '%Y-%m-%dT%H:%M%z'
+        s_format = '%Y-%m-%dT%H:%MZ'
     date = datetime.strptime(value, s_format)
     return date.astimezone().strftime('%Y-%m-%d %H:%M:%S')
 
