@@ -48,7 +48,7 @@ export default function Sider(props) {
   const openKey = OpenKeysMap[tmp];
   if (openKey) {
     selectedKey = tmp;
-    if (openKey !== 1 && !openKeys.includes(openKey)) {
+    if (openKey !== 1 && !props.collapsed && !openKeys.includes(openKey)) {
       setOpenKeys([...openKeys, openKey])
     }
   }
