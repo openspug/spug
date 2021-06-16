@@ -14,7 +14,6 @@ export default observer(function () {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [password, setPassword] = useState();
   const [fileList, setFileList] = useState([]);
 
   useEffect(() => {
@@ -36,10 +35,11 @@ export default observer(function () {
           if (formData.pkey) {
             message.error('独立密钥认证失败')
           } else {
+            const onChange = v => formData.password = v;
             Modal.confirm({
               icon: <ExclamationCircleOutlined/>,
               title: '首次验证请输入密码',
-              content: <ConfirmForm username={formData.username}/>,
+              content: <ConfirmForm username={formData.username} onChange={onChange}/>,
               onOk: () => handleConfirm(formData),
             })
           }
@@ -53,8 +53,7 @@ export default observer(function () {
   }
 
   function handleConfirm(formData) {
-    if (password) {
-      formData['password'] = password;
+    if (formData.password) {
       return http.post('/api/host/', formData).then(res => {
         message.success('验证成功');
         store.formVisible = false;
@@ -79,7 +78,7 @@ export default observer(function () {
   const ConfirmForm = (props) => (
     <Form layout="vertical" style={{marginTop: 24}}>
       <Form.Item required label="授权密码" help={`用户 ${props.username} 的密码， 该密码仅做首次验证使用，不会存储该密码。`}>
-        <Input.Password onChange={e => setPassword(e.target.value)}/>
+        <Input.Password onChange={e => props.onChange(e.target.value)}/>
       </Form.Item>
     </Form>
   )
