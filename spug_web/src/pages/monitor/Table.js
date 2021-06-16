@@ -25,7 +25,7 @@ class ComTable extends React.Component {
   componentDidMount() {
     store.fetchRecords();
     if (groupStore.records.length === 0) groupStore.fetchRecords();
-    if (hostStore.records.length === 0) {
+    if (!hostStore.records || hostStore.records.length === 0) {
       hostStore.fetchRecords().then(this._handleHosts)
     } else {
       this._handleHosts()
