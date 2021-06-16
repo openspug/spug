@@ -106,7 +106,7 @@ def monitor_worker_handler(job):
 
 def dispatch(tp, addr, extra):
     if tp == '1':
-        return site_check(addr)
+        return site_check(addr, extra)
     elif tp == '2':
         return port_check(addr, extra)
     elif tp == '5':
