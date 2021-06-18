@@ -3,7 +3,7 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { ExclamationCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Form, Select, DatePicker, Modal, Input, Space, message } from 'antd';
@@ -22,9 +22,6 @@ import moment from 'moment';
 import styles from './index.module.less';
 
 function Index() {
-  const [expire, setExpire] = useState();
-  const [count, setCount] = useState();
-
   useEffect(() => {
     store.fetchRecords()
     if (envStore.records.length === 0) envStore.fetchRecords()
@@ -32,6 +29,7 @@ function Index() {
   }, [])
 
   function handleBatchDel() {
+    let [expire, count] = [];
     Modal.confirm({
       icon: <ExclamationCircleOutlined/>,
       title: '批量删除发布申请',
@@ -39,11 +37,11 @@ function Index() {
         <Form layout="vertical" style={{marginTop: 24}}>
           <Form.Item label="截止日期 :" help={<div>将删除截止日期<span style={{color: 'red'}}>之前</span>的所有发布申请记录。</div>}>
             <DatePicker style={{width: 200}} placeholder="请输入"
-                        onChange={val => setExpire(val.format('YYYY-MM-DD'))}/>
+                        onChange={val => expire = val.format('YYYY-MM-DD')}/>
           </Form.Item>
           <Form.Item label="保留记录 :" help="每个应用每个环境仅保留最新的N条发布申请，优先级高于截止日期">
             <Input allowClear style={{width: 200}} placeholder="请输入保留个数"
-                   onChange={e => setCount(e.target.value)}/>
+                   onChange={e => count = e.target.value}/>
           </Form.Item>
         </Form>
       ),
