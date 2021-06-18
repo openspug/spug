@@ -327,15 +327,7 @@ class Helper:
         rst_notify = json.loads(req.deploy.rst_notify)
         host_ids = json.loads(req.host_ids)
         if rst_notify['mode'] != '0' and rst_notify.get('value'):
-            extra = json.loads(req.extra)
-            if req.deploy.extend == '1':
-                mode, extra1, extra2 = extra
-                if mode == 'branch':
-                    version = f'{extra1}#{extra2[:6]}'
-                else:
-                    version = extra1
-            else:
-                version = extra[0] or ''
+            version = req.version
             hosts = [{'id': x.id, 'name': x.name} for x in Host.objects.filter(id__in=host_ids)]
             host_str = ', '.join(x['name'] for x in hosts[:2])
             if len(hosts) > 2:
