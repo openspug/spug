@@ -26,7 +26,7 @@ export default observer(function () {
     setHostIds(lds.clone(host_ids || app_host_ids));
     http.get('/api/repository/', {params: {deploy_id}})
       .then(res => setVersions(res))
-    if (hostStore.records.length === 0) hostStore.fetchRecords()
+    if (!hostStore.records || hostStore.records.length === 0) hostStore.fetchRecords()
   }, [])
 
   function handleSubmit() {

@@ -26,7 +26,7 @@ export default observer(function () {
   useEffect(() => {
     const {app_host_ids, host_ids, extra} = store.record;
     setHostIds(lds.clone(host_ids || app_host_ids));
-    if (hostStore.records.length === 0) hostStore.fetchRecords();
+    if (!hostStore.records || hostStore.records.length === 0) hostStore.fetchRecords();
     if (store.record.extra) setFileList([{...extra, uid: '0'}])
   }, [])
 
