@@ -162,7 +162,10 @@ class DeployView(View):
             Argument('id', type=int, help='请指定操作对象')
         ).parse(request.GET)
         if error is None:
-            Deploy.objects.filter(pk=form.id).delete()
+            deploy = Deploy.objects.get(pk=form.id)
+            if deploy.repository_set.exists():
+                return json_response(error='已存在关联的构建版本，请删除关联的构建版本后再尝试删除发布配置')
+            deploy.delete()
             repo_dir = os.path.join(settings.REPOS_DIR, str(form.id))
             subprocess.Popen(f'rm -rf {repo_dir} {repo_dir + "_*"}', shell=True)
         return json_response(error=error)
