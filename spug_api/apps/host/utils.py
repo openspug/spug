@@ -102,7 +102,10 @@ def fetch_ali_instances(ak, ac, region_id, page_number=1):
     if 'Instances' not in res:
         raise Exception(res)
     for item in res['Instances']['Instance']:
-        network_interface = item['NetworkInterfaces']['NetworkInterface']
+        if 'NetworkInterfaces' in item:
+            network_interface = item['NetworkInterfaces']['NetworkInterface']
+        else:
+            network_interface = []
         data[item['InstanceId']] = dict(
             instance_id=item['InstanceId'],
             os_name=item['OSName'],
