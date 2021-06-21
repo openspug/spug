@@ -118,7 +118,7 @@ def _ext2_deploy(req, helper, env):
                                 excludes.append(f'--exclude={x}')
                         exclude = ' '.join(excludes)
             tar_gz_file = f'{req.spug_version}.tar.gz'
-            helper.local(f'tar -C {sp_dir} -zcf {tar_gz_file} {exclude} {contain}')
+            helper.local(f'cd {sp_dir} && tar -zcf {tar_gz_file} {exclude} {contain}')
             helper.send_info('local', f'{human_time()} 打包完成\r\n')
             tmp_transfer_file = os.path.join(sp_dir, tar_gz_file)
             break
