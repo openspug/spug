@@ -3,7 +3,7 @@
 # Released under the AGPL-3.0 License.
 from libs.helper import make_ali_request, make_tencent_request
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 def check_os_type(os_name):
@@ -46,10 +46,10 @@ def check_internet_charge_type(value, supplier):
 def parse_utc_date(value):
     if not value:
         return None
-    s_format = '%Y-%m-%dT%H:%M:%S%z'
+    s_format = '%Y-%m-%dT%H:%M:%SZ'
     if len(value) == 17:
-        s_format = '%Y-%m-%dT%H:%M%z'
-    date = datetime.strptime(value, s_format)
+        s_format = '%Y-%m-%dT%H:%MZ'
+    date = datetime.strptime(value, s_format).replace(tzinfo=timezone.utc)
     return date.astimezone().strftime('%Y-%m-%d %H:%M:%S')
 
 
