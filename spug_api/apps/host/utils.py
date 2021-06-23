@@ -53,13 +53,6 @@ def parse_utc_date(value):
     return date.astimezone().strftime('%Y-%m-%d %H:%M:%S')
 
 
-def parse__date(value, supplier):
-    if not value:
-        return None
-    date = datetime.strptime(value, '%Y-%m-%dT%H:%M%z')
-    return date.astimezone().strftime('%Y-%m-%d %H:%M:%S')
-
-
 def fetch_ali_regions(ak, ac):
     params = dict(Action='DescribeRegions')
     res = make_ali_request(ak, ac, 'http://ecs.aliyuncs.com', params)
