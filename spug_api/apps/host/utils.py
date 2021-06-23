@@ -76,7 +76,7 @@ def fetch_ali_disks(ak, ac, region_id, page_number=1):
             data[item['InstanceId']].append(item['Size'])
         if len(res['Disks']['Disk']) == page_size:
             page_number += 1
-            new_data = fetch_ali_disks(ak, ac, 'http://ecs.aliyuncs.com', page_number)
+            new_data = fetch_ali_disks(ak, ac, region_id, page_number)
             data.update(new_data)
         return data
     else:
@@ -114,8 +114,7 @@ def fetch_ali_instances(ak, ac, region_id, page_number=1):
             zone_id=item['ZoneId']
         )
     if len(res['Instances']['Instance']) == page_size:
-        page_number += 1
-        new_data = fetch_ali_instances(ak, ac, region_id, page_number)
+        new_data = fetch_ali_instances(ak, ac, region_id, page_number + 1)
         data.update(new_data)
     if page_number != 1:
         return data
