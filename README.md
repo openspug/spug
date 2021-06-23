@@ -81,11 +81,6 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
 #### 角色权限
 ![image](https://cdn.spug.cc/img/role-2.0.png)
 
-## 更多功能
-如果你还想 Spug 支持新的特性，请点击打开 [FeatHub](https://feathub.com/openspug/spug) 进行投票，我们将综合考虑投票结果等因素来确定开发的优先级。
-
-[![Feature Requests](https://feathub.com/openspug/spug?format=svg)](https://feathub.com/openspug/spug)
-
 
 ## 赞助
 <table>
@@ -117,9 +112,9 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
 </table>
 
 ## 开发者群
-#### QQ群号: 783951751
+#### QQ群号: 122194636
 <div >
-   <img src="https://cdn.spug.cc/img/spug-qq.png" width = "300" height = "300" alt="spug-qq" align=center />
+   <img src="https://cdn.spug.cc/img/spug-qq-2.png" width = "300" height = "300" alt="spug-qq" align=center />
 <div>
 
 #### 微信：关注Spug运维公众号加微信群、获取最新产品动态
