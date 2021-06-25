@@ -111,5 +111,7 @@ class GroupView(View):
                 return json_response(error='请移除子分组后再尝试删除')
             if group.hosts.exists():
                 return json_response(error='请移除分组下的主机后再尝试删除')
+            if Group.objects.exclude(pk=form.id).exists():
+                return json_response(error='请至少保留一个分组')
             group.delete()
         return json_response(error=error)

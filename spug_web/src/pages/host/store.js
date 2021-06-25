@@ -30,7 +30,7 @@ class Store {
 
   @computed get dataSource() {
     let records = [];
-    if (this.group.all_host_ids) records = this.records.filter(x => this.group.all_host_ids.includes(x.id));
+    if (this.group.all_host_ids) records = this.records ? this.records.filter(x => this.group.all_host_ids.includes(x.id)) : [];
     if (this.f_name) records = records.filter(x => x.name.toLowerCase().includes(this.f_name.toLowerCase()));
     if (this.f_host) records = records.filter(x => x.hostname.toLowerCase().includes(this.f_host.toLowerCase()));
     return records
@@ -67,7 +67,7 @@ class Store {
       .then(http.spread((res1, res2) => {
         this.records = res1;
         this.records.map(item => this.idMap[item.id] = item);
-        this.group = res2.treeData[0];
+        this.group = res2.treeData[0] || {};
         this.groups = res2.groups;
         this._makeCounter();
         this.refreshCounter(res2.treeData)

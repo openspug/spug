@@ -145,7 +145,7 @@ export default observer(function () {
         <Form.Item name="desc" label="备注信息">
           <Input.TextArea placeholder="请输入主机备注信息"/>
         </Form.Item>
-        <Form.Item wrapperCol={{span: 14, offset: 6}}>
+        <Form.Item wrapperCol={{span: 17, offset: 5}}>
           <Alert showIcon type="info" message="首次验证时需要输入登录用户名对应的密码，该密码会用于配置密钥连接，不会存储该密码。" />
         </Form.Item>
       </Form>

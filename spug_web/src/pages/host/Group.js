@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Input, Card, Tree, Dropdown, Menu, Switch, message } from 'antd';
+import { Input, Card, Tree, Dropdown, Menu, Switch, Tooltip, message } from 'antd';
 import {
   FolderOutlined,
   FolderAddOutlined,
@@ -13,7 +13,8 @@ import {
   DeleteOutlined,
   CopyOutlined,
   ScissorOutlined,
-  LoadingOutlined
+  LoadingOutlined,
+  QuestionCircleOutlined
 } from '@ant-design/icons';
 import { AuthFragment } from 'components';
 import { hasPermission, http } from 'libs';
@@ -155,6 +156,7 @@ export default observer(function () {
             onChange={setDraggable}
             checkedChildren="排版"
             unCheckedChildren="浏览"/>
+          <Tooltip title="右键点击分组进行编辑，开启排版模式后可通过拖拽分组进行快速排序。"><QuestionCircleOutlined style={{marginLeft: 8, color: '#999'}}/></Tooltip>
         </AuthFragment>)}>
       <Dropdown
         overlay={menus}
@@ -163,6 +165,7 @@ export default observer(function () {
         onVisibleChange={v => v || setVisible(v)}>
         <Tree.DirectoryTree
           autoExpandParent
+          expandAction="doubleClick"
           draggable={draggable}
           treeData={store.treeData}
           titleRender={treeRender}
@@ -174,6 +177,9 @@ export default observer(function () {
           onRightClick={handleRightClick}
         />
       </Dropdown>
+      {store.records && store.treeData.length === 0 && (
+        <div style={{color: '#999'}}>你还没有可访问的主机分组，请联系管理员分配主机权限。</div>
+      )}
     </Card>
   )
 })
