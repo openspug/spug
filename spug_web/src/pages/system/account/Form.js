@@ -59,7 +59,7 @@ export default observer(function () {
             <Input type="password" placeholder="请输入密码"/>
           </Form.Item>
         )}
-        <Form.Item required label="角色" style={{marginBottom: 0}}>
+        <Form.Item hidden={store.record.is_supper} required label="角色" style={{marginBottom: 0}}>
           <Form.Item name="role_id" style={{display: 'inline-block', width: '80%'}}>
             <Select placeholder="请选择">
               {roleStore.records.map(item => (
