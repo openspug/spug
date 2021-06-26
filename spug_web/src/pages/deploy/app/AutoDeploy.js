@@ -99,16 +99,16 @@ export default observer(function AutoDeploy() {
             <div style={{color: '#ff4d4f'}}>请指定分支名称。</div>
           </Form.Item>
         ) : (
-          <Form.Item label="Webhook URL" extra="点击复制链接，目前仅支持Gitee和Gitlab。">
+          <Form.Item label="Webhook URL" extra="点击复制链接，目前支持Gitee、Gitlab和Gogs。">
             <div className={styles.webhook} onClick={() => copyToClipBoard(url)}>{url}</div>
           </Form.Item>
         )}
         {key ? (
-          <Form.Item label="Secret Token" tooltip="调用该Webhook接口的访问凭据，在Gitee中为WebHook 密码。" extra="点击复制">
+          <Form.Item label="Secret Token" tooltip="调用该Webhook接口的访问凭据，在Gitee中为WebHook密码，Gogs中为密钥文本。" extra="点击复制">
             <div className={styles.webhook} onClick={() => copyToClipBoard(key)}>{key}</div>
           </Form.Item>
         ) : (
-          <Form.Item label="Secret Token" tooltip="调用该Webhook接口的访问凭据，在Gitee中为WebHook密码。">
+          <Form.Item label="Secret Token" tooltip="调用该Webhook接口的访问凭据，在Gitee中为WebHook密码，Gogs中为密钥文本。">
             <div style={{color: '#ff4d4f'}}>请在系统管理/系统设置/开放服务设置中设置。</div>
           </Form.Item>
         )}
