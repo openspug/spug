@@ -96,7 +96,6 @@ class HostView(View):
 
 
 def post_import(request):
-    password = request.POST.get('password')
     group_id = request.POST.get('group_id')
     file = request.FILES['file']
     ws = load_workbook(file, read_only=True)['Sheet1']
@@ -112,8 +111,7 @@ def post_import(request):
             hostname=row[1].value,
             port=row[2].value,
             username=row[3].value,
-            password=row[4].value,
-            desc=row[5].value
+            desc=row[4].value
         )
         if Host.objects.filter(hostname=data.hostname, port=data.port, username=data.username).exists():
             summary['skip'].append(i)
@@ -121,12 +119,6 @@ def post_import(request):
         if Host.objects.filter(name=data.name).exists():
             summary['repeat'].append(i)
             continue
-        try:
-            password = data.pop('password') or password
-            if valid_ssh(data.hostname, data.port, data.username, password, None, False) is False:
-                data.is_verified = True
-        except Exception:
-            pass
         host = Host.objects.create(created_by=request.user, **data)
         host.groups.add(group_id)
         summary['success'].append(i)
