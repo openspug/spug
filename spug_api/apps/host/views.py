@@ -4,7 +4,7 @@
 from django.views.generic import View
 from django.db.models import F
 from django.http.response import HttpResponseBadRequest
-from libs import json_response, JsonParser, Argument
+from libs import json_response, JsonParser, Argument, AttrDict
 from apps.setting.utils import AppSetting
 from apps.account.utils import get_host_perms
 from apps.host.models import Host, Group
@@ -13,7 +13,6 @@ from apps.schedule.models import Task
 from apps.monitor.models import Detection
 from libs.ssh import SSH, AuthenticationException
 from paramiko.ssh_exception import BadAuthenticationType
-from libs import AttrDict
 from openpyxl import load_workbook
 
 
@@ -40,8 +39,7 @@ class HostView(View):
             Argument('password', required=False),
         ).parse(request.body)
         if error is None:
-            if valid_ssh(form.hostname, form.port, form.username, password=form.pop('password'),
-                         pkey=form.pkey) is False:
+            if not valid_ssh(form.hostname, form.port, form.username, password=form.pop('password'), pkey=form.pkey):
                 return json_response('auth fail')
 
             group_ids = form.pop('group_ids')
@@ -125,25 +123,23 @@ def post_import(request):
     return json_response(summary)
 
 
-def valid_ssh(hostname, port, username, password=None, pkey=None, with_expect=True):
+def valid_ssh(hostname, port, username, password=None, pkey=None):
     private_key, public_key = AppSetting.get_ssh_key()
-    if password:
-        _cli = SSH(hostname, port, username, password=str(password))
-        _cli.add_public_key(public_key)
-    if pkey:
-        private_key = pkey
     try:
-        cli = SSH(hostname, port, username, private_key)
-        cli.ping()
+        if pkey:
+            private_key = pkey
+        elif password:
+            ssh = SSH(hostname, port, username, password=str(password))
+            ssh.add_public_key(public_key)
+
+        ssh = SSH(hostname, port, username, private_key)
+        ssh.ping()
+        return True
     except BadAuthenticationType:
-        if with_expect:
-            raise TypeError('该主机不支持密钥认证，请参考官方文档，错误代码：E01')
-        return False
+        raise TypeError('该主机不支持密钥认证，请参考官方文档，错误代码：E01')
     except AuthenticationException:
-        if password and with_expect:
+        if password:
             raise ValueError('密钥认证失败，请参考官方文档，错误代码：E02')
-        return False
-    return True
 
 
 def post_parse(request):
