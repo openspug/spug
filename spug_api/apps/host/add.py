@@ -45,12 +45,13 @@ def cloud_import(request):
         host_add_ids = []
         for item in instances:
             instance_id = item['instance_id']
+            host_name = item.pop('instance_name')
             item['public_ip_address'] = json.dumps(item['public_ip_address'] or [])
             item['private_ip_address'] = json.dumps(item['private_ip_address'] or [])
             if HostExtend.objects.filter(instance_id=instance_id).exists():
                 HostExtend.objects.filter(instance_id=instance_id).update(**item)
             else:
-                host = Host.objects.create(name=instance_id, created_by=request.user)
+                host = Host.objects.create(name=host_name, created_by=request.user)
                 HostExtend.objects.create(host=host, **item)
                 host_add_ids.append(host.id)
         if host_add_ids:

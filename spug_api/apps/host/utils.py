@@ -101,6 +101,7 @@ def fetch_ali_instances(ak, ac, region_id, page_number=1):
             network_interface = []
         data[item['InstanceId']] = dict(
             instance_id=item['InstanceId'],
+            instance_name=item['InstanceName'],
             os_name=item['OSName'],
             os_type=check_os_type(item['OSName']),
             cpu=item['Cpu'],
@@ -149,6 +150,7 @@ def fetch_tencent_instances(ak, ac, region_id, page_number=1):
         internet_charge_type = item['InternetAccessible']['InternetChargeType']
         data.append(dict(
             instance_id=item['InstanceId'],
+            instance_name=item['InstanceName'],
             os_name=item['OsName'],
             os_type=check_os_type(item['OsName']),
             cpu=item['CPU'],
