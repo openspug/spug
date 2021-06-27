@@ -4,8 +4,7 @@
 from django.views.generic import View
 from libs import json_response, JsonParser, Argument, human_datetime
 from apps.host.models import Host, HostExtend
-from apps.host.utils import check_os_type
-import ipaddress
+from apps.host.utils import check_os_type, fetch_host_extend
 import json
 
 
@@ -20,33 +19,8 @@ class ExtendView(View):
                 return json_response(error='未找到指定主机')
             if not host.is_verified:
                 return json_response(error='该主机还未验证')
-            cli = host.get_ssh()
-            commands = [
-                "lscpu | grep '^CPU(s)' | awk '{print $2}'",
-                "free -m | awk 'NR==2{print $2}'",
-                "hostname -I",
-                "cat /etc/os-release | grep PRETTY_NAME | awk -F \\\" '{print $2}'",
-                "fdisk -l | grep '^Disk /' | awk '{print $5}'"
-            ]
-            code, out = cli.exec_command(';'.join(commands))
-            if code != 0:
-                return json_response(error=f'Exception: {out}')
-            response = {'disk': [], 'public_ip_address': [], 'private_ip_address': []}
-            for index, line in enumerate(out.strip().split('\n')):
-                if index == 0:
-                    response['cpu'] = int(line)
-                elif index == 1:
-                    response['memory'] = round(int(line) / 1000, 1)
-                elif index == 2:
-                    for ip in line.split():
-                        if ipaddress.ip_address(ip).is_global:
-                            response['public_ip_address'].append(ip)
-                        else:
-                            response['private_ip_address'].append(ip)
-                elif index == 3:
-                    response['os_name'] = line
-                else:
-                    response['disk'].append(round(int(line) / 1024 / 1024 / 1024, 0))
+            ssh = host.get_ssh()
+            response = fetch_host_extend(ssh)
             return json_response(response)
         return json_response(error=error)
 
