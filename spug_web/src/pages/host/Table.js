@@ -3,9 +3,9 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React  from 'react';
+import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Modal, Dropdown, Button, Menu, Avatar, Tooltip, Space, Tag, message } from 'antd';
+import { Table, Modal, Dropdown, Button, Menu, Avatar, Tooltip, Space, Tag, Radio, message } from 'antd';
 import { PlusOutlined, DownOutlined } from '@ant-design/icons';
 import { Action, TableCard, AuthButton, AuthFragment } from 'components';
 import { http, hasPermission } from 'libs';
@@ -83,7 +83,11 @@ function ComTable() {
           )}>
             <Button type="primary">批量导入 <DownOutlined/></Button>
           </Dropdown>
-        </AuthFragment>
+        </AuthFragment>,
+        <Radio.Group value={store.f_status} onChange={e => store.f_status = e.target.value}>
+          <Radio.Button value="">全部</Radio.Button>
+          <Radio.Button value={false}>未验证</Radio.Button>
+        </Radio.Group>
       ]}
       pagination={{
         showSizeChanger: true,

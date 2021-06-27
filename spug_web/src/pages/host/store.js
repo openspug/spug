@@ -27,12 +27,14 @@ class Store {
 
   @observable f_name;
   @observable f_host;
+  @observable f_status = '';
 
   @computed get dataSource() {
     let records = [];
     if (this.group.all_host_ids) records = this.records ? this.records.filter(x => this.group.all_host_ids.includes(x.id)) : [];
     if (this.f_name) records = records.filter(x => x.name.toLowerCase().includes(this.f_name.toLowerCase()));
     if (this.f_host) records = records.filter(x => x.hostname.toLowerCase().includes(this.f_host.toLowerCase()));
+    if (this.f_status !== '') records = records.filter(x => this.f_status === x.is_verified);
     return records
   }
 
