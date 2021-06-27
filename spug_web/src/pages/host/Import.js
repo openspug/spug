@@ -6,13 +6,12 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react';
 import { UploadOutlined } from '@ant-design/icons';
-import { Modal, Form, Input, Upload, Button, Tooltip, Alert, Cascader, message } from 'antd';
+import { Modal, Form, Upload, Button, Tooltip, Alert, Cascader, message } from 'antd';
 import http from 'libs/http';
 import store from './store';
 
 export default observer(function () {
   const [loading, setLoading] = useState(false);
-  const [password, setPassword] = useState('');
   const [fileList, setFileList] = useState([]);
   const [groupId, setGroupId] = useState([]);
 
@@ -22,7 +21,6 @@ export default observer(function () {
     const formData = new FormData();
     formData.append('file', fileList[0]);
     formData.append('group_id', groupId[groupId.length - 1]);
-    if (password) formData.append('password', password);
     http.post('/api/host/import/', formData, {timeout: 120000})
       .then(res => {
         Modal.info({
@@ -82,12 +80,6 @@ export default observer(function () {
             options={store.treeData}
             fieldNames={{label: 'title'}}
             placeholder="请选择"/>
-        </Form.Item>
-        <Form.Item label="默认密码" help="如果excel中密码为空则使用该密码">
-          <Input
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            placeholder="请输入默认主机密码"/>
         </Form.Item>
         <Form.Item required label="导入数据">
           <Upload
