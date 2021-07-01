@@ -38,6 +38,7 @@ export default observer(function () {
     const formData = form.getFieldsValue();
     formData['id'] = store.record.id;
     formData['host_ids'] = host_ids;
+    formData['type'] = store.record.type;
     formData['deploy_id'] = store.record.deploy_id;
     if (plan) formData.plan = plan.format('YYYY-MM-DD HH:mm:00');
     if (fileList.length > 0) formData['extra'] = lds.pick(fileList[0], ['path', 'name']);

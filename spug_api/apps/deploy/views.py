@@ -201,7 +201,7 @@ class RequestDetailView(View):
 def post_request_ext1(request):
     form, error = JsonParser(
         Argument('id', type=int, required=False),
-        Argument('name', help='请输申请标题'),
+        Argument('name', help='请输入申请标题'),
         Argument('repository_id', type=int, help='请选择发布版本'),
         Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
         Argument('type', default='1'),
@@ -238,6 +238,7 @@ def post_request_ext2(request):
         Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
         Argument('extra', type=dict, required=False),
         Argument('version', default=''),
+        Argument('type', default='1'),
         Argument('plan', required=False),
         Argument('desc', required=False),
     ).parse(request.body)
