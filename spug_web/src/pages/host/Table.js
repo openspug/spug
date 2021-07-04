@@ -6,7 +6,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Table, Modal, Dropdown, Button, Menu, Avatar, Tooltip, Space, Tag, Radio, message } from 'antd';
-import { PlusOutlined, DownOutlined } from '@ant-design/icons';
+import { PlusOutlined, DownOutlined, SyncOutlined } from '@ant-design/icons';
 import { Action, TableCard, AuthButton, AuthFragment } from 'components';
 import { http, hasPermission } from 'libs';
 import store from './store';
@@ -58,6 +58,11 @@ function ComTable() {
           type="primary"
           icon={<PlusOutlined/>}
           onClick={() => store.showForm()}>新建</AuthButton>,
+        <AuthButton
+          auth="host.host.add"
+          type="primary"
+          icon={<SyncOutlined/>}
+          onClick={() => store.showSync()}>批量验证</AuthButton>,
         <AuthFragment auth="host.host.import">
           <Dropdown overlay={(
             <Menu onClick={handleImport}>

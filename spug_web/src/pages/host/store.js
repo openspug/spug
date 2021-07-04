@@ -21,6 +21,7 @@ class Store {
   @observable isFetching = false;
   @observable formVisible = false;
   @observable importVisible = false;
+  @observable syncVisible = false;
   @observable cloudImport = null;
   @observable detailVisible = false;
   @observable selectorVisible = false;
@@ -92,6 +93,10 @@ class Store {
   showForm = (info = {}) => {
     this.formVisible = true;
     this.record = info
+  }
+
+  showSync = () => {
+    this.syncVisible = !this.syncVisible
   }
 
   showDetail = (info) => {

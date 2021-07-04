@@ -1,14 +1,18 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
+from django_redis import get_redis_connection
 from libs.helper import make_ali_request, make_tencent_request
 from libs.ssh import SSH, AuthenticationException
 from libs.utils import AttrDict, human_datetime
 from apps.host.models import HostExtend
+from apps.setting.utils import AppSetting
 from collections import defaultdict
 from datetime import datetime, timezone
+from concurrent import futures
 import ipaddress
 import json
+import os
 
 
 def check_os_type(os_name):
@@ -176,22 +180,6 @@ def fetch_tencent_instances(ak, ac, region_id, page_number=1):
     return data
 
 
-def sync_host_extend(host, private_key, public_key, password=None):
-    kwargs = host.to_dict(selects=('hostname', 'port', 'username'))
-    ssh = _get_ssh(kwargs, host.pkey, private_key, public_key, password)
-    form = AttrDict(fetch_host_extend(ssh))
-    form.disk = json.dumps(form.disk)
-    form.public_ip_address = json.dumps(form.public_ip_address)
-    form.private_ip_address = json.dumps(form.private_ip_address)
-    form.updated_at = human_datetime()
-    form.os_type = check_os_type(form.os_name)
-    if hasattr(host, 'hostextend'):
-        extend = host.hostextend
-        extend.update_by_dict(form)
-    else:
-        HostExtend.objects.create(host=host, **form)
-
-
 def fetch_host_extend(ssh):
     commands = [
         "lscpu | grep '^CPU(s)' | awk '{print $2}'",
@@ -223,6 +211,40 @@ def fetch_host_extend(ssh):
     return response
 
 
+def batch_sync_host(token, hosts, password, ):
+    private_key, public_key = AppSetting.get_ssh_key()
+    threads, latest_exception, rds = [], None, get_redis_connection()
+    max_workers = min(10, os.cpu_count() * 4)
+    with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for host in hosts:
+            t = executor.submit(_sync_host_extend, host, private_key, public_key, password)
+            t.h_id = host.id
+            threads.append(t)
+        for t in futures.as_completed(threads):
+            exception = t.exception()
+            if exception:
+                rds.rpush(token, json.dumps({'key': t.h_id, 'status': 'fail', 'message': f'{exception}'}))
+            else:
+                rds.rpush(token, json.dumps({'key': t.h_id, 'status': 'ok'}))
+        rds.expire(token, 60)
+
+
+def _sync_host_extend(host, private_key, public_key, password=None):
+    kwargs = host.to_dict(selects=('hostname', 'port', 'username'))
+    ssh = _get_ssh(kwargs, host.pkey, private_key, public_key, password)
+    form = AttrDict(fetch_host_extend(ssh))
+    form.disk = json.dumps(form.disk)
+    form.public_ip_address = json.dumps(form.public_ip_address)
+    form.private_ip_address = json.dumps(form.private_ip_address)
+    form.updated_at = human_datetime()
+    form.os_type = check_os_type(form.os_name)
+    if hasattr(host, 'hostextend'):
+        extend = host.hostextend
+        extend.update_by_dict(form)
+    else:
+        HostExtend.objects.create(host=host, **form)
+
+
 def _get_ssh(kwargs, pkey=None, private_key=None, public_key=None, password=None):
     try:
         if pkey:
@@ -233,6 +255,7 @@ def _get_ssh(kwargs, pkey=None, private_key=None, public_key=None, password=None
             ssh = SSH(password=str(password), **kwargs)
             ssh.add_public_key(public_key)
             return _get_ssh(kwargs, private_key)
-    except AuthenticationException:
+    except AuthenticationException as e:
         if password:
             return _get_ssh(kwargs, None, public_key, public_key, password)
+        raise e

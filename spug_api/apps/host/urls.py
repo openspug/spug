@@ -16,4 +16,5 @@ urlpatterns = [
     path('import/cloud/', cloud_import),
     path('import/region/', get_regions),
     path('parse/', post_parse),
+    path('valid/', batch_valid),
 ]

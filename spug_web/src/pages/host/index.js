@@ -13,6 +13,7 @@ import ComTable from './Table';
 import ComForm from './Form';
 import ComImport from './Import';
 import CloudImport from './CloudImport';
+import BatchSync from './BatchSync';
 import Detail from './Detail';
 import Selector from './Selector';
 import store from './store';
@@ -46,6 +47,7 @@ export default observer(function () {
       {store.formVisible && <ComForm/>}
       {store.importVisible && <ComImport/>}
       {store.cloudImport && <CloudImport/>}
+      {store.syncVisible && <BatchSync/>}
       {store.selectorVisible &&
       <Selector oneGroup={!store.addByCopy} onCancel={() => store.selectorVisible = false} onOk={store.updateGroup}/>}
     </AuthDiv>

@@ -8,12 +8,15 @@ from libs import json_response, JsonParser, Argument, AttrDict
 from apps.setting.utils import AppSetting
 from apps.account.utils import get_host_perms
 from apps.host.models import Host, Group
+from apps.host.utils import batch_sync_host
 from apps.app.models import Deploy
 from apps.schedule.models import Task
 from apps.monitor.models import Detection
 from libs.ssh import SSH, AuthenticationException
 from paramiko.ssh_exception import BadAuthenticationType
 from openpyxl import load_workbook
+from threading import Thread
+import uuid
 
 
 class HostView(View):
@@ -149,3 +152,19 @@ def post_parse(request):
         return json_response(data.decode())
     else:
         return HttpResponseBadRequest()
+
+
+def batch_valid(request):
+    form, error = JsonParser(
+        Argument('password', required=False),
+        Argument('range', filter=lambda x: x in ('1', '2'), help='参数错误')
+    ).parse(request.body)
+    if error is None:
+        if form.range == '1':  # all hosts
+            hosts = Host.objects.all()
+        else:
+            hosts = Host.objects.filter(is_verified=False).all()
+        token = uuid.uuid4().hex
+        Thread(target=batch_sync_host, args=(token, hosts, form.password)).start()
+        return json_response({'token': token, 'hosts': {x.id: {'name': x.name} for x in hosts}})
+    return json_response(error=error)

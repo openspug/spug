@@ -46,6 +46,8 @@ class ComConsumer(WebsocketConsumer):
             self.key = f'{settings.BUILD_KEY}:{token}'
         elif module == 'request':
             self.key = f'{settings.REQUEST_KEY}:{token}'
+        elif module == 'host':
+            self.key = token
         else:
             raise TypeError(f'unknown module for {module}')
         self.rds = get_redis_connection()
