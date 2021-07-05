@@ -52,6 +52,7 @@ export default observer(function () {
       .finally(() => setLoading(false))
   }
 
+  const helpUrl = store.cloudImport === 'ali' ? 'https://help.aliyun.com/document_detail/175967.html' : 'https://console.cloud.tencent.com/capi';
   return (
     <Modal
       visible
@@ -67,7 +68,9 @@ export default observer(function () {
         <Form.Item hidden={step === 1} required label="AccessKey ID">
           <Input value={ak} onChange={e => setAK(e.target.value)} placeholder="请输入"/>
         </Form.Item>
-        <Form.Item hidden={step === 1} required label="AccessKey Secret">
+        <Form.Item hidden={step === 1} required label="AccessKey Secret" extra={(
+          <a href={helpUrl} target="_blank" rel="noopener noreferrer">如何获取AccessKey ？</a>
+        )}>
           <Input value={ac} onChange={e => setAC(e.target.value)} placeholder="请输入"/>
         </Form.Item>
         <Form.Item hidden={step === 0} required label="选择区域" tooltip="选择导入指定区域的主机。">
