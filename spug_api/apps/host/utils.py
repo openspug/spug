@@ -218,14 +218,16 @@ def batch_sync_host(token, hosts, password, ):
     with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         for host in hosts:
             t = executor.submit(_sync_host_extend, host, private_key, public_key, password)
-            t.h_id = host.id
+            t.host = host
             threads.append(t)
         for t in futures.as_completed(threads):
             exception = t.exception()
             if exception:
-                rds.rpush(token, json.dumps({'key': t.h_id, 'status': 'fail', 'message': f'{exception}'}))
+                rds.rpush(token, json.dumps({'key': t.host.id, 'status': 'fail', 'message': f'{exception}'}))
             else:
-                rds.rpush(token, json.dumps({'key': t.h_id, 'status': 'ok'}))
+                rds.rpush(token, json.dumps({'key': t.host.id, 'status': 'ok'}))
+                t.host.is_verified = True
+                t.host.save()
         rds.expire(token, 60)
 
 

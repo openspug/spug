@@ -31,7 +31,10 @@ def cloud_import(request):
         Argument('ak', help='请输入AccessKey ID'),
         Argument('ac', help='请输入AccessKey Secret'),
         Argument('region_id', help='请选择区域'),
-        Argument('group_id', type=int, help='请选择分组')
+        Argument('group_id', type=int, help='请选择分组'),
+        Argument('username', help='请输入默认SSH用户名'),
+        Argument('port', type=int, help='请输入默认SSH端口号'),
+        Argument('host_type', filter=lambda x: x in ('public', 'private'), help='请选择连接地址'),
     ).parse(request.body)
     if error is None:
         group = Group.objects.filter(pk=form.group_id).first()
@@ -46,12 +49,23 @@ def cloud_import(request):
         for item in instances:
             instance_id = item['instance_id']
             host_name = item.pop('instance_name')
-            item['public_ip_address'] = json.dumps(item['public_ip_address'] or [])
-            item['private_ip_address'] = json.dumps(item['private_ip_address'] or [])
+            public_ips = item['public_ip_address'] or []
+            private_ips = item['private_ip_address'] or []
+            item['public_ip_address'] = json.dumps(public_ips)
+            item['private_ip_address'] = json.dumps(private_ips)
             if HostExtend.objects.filter(instance_id=instance_id).exists():
                 HostExtend.objects.filter(instance_id=instance_id).update(**item)
             else:
-                host = Host.objects.create(name=host_name, created_by=request.user)
+                if form.host_type == 'public':
+                    hostname = public_ips[0] if public_ips else None
+                else:
+                    hostname = private_ips[0] if private_ips else None
+                host = Host.objects.create(
+                    name=host_name,
+                    hostname=hostname,
+                    port=form.port,
+                    username=form.username,
+                    created_by=request.user)
                 HostExtend.objects.create(host=host, **item)
                 host_add_ids.append(host.id)
         if host_add_ids:
