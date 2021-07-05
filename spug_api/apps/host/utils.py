@@ -229,9 +229,10 @@ def batch_sync_host(token, hosts, password, ):
         rds.expire(token, 60)
 
 
-def _sync_host_extend(host, private_key, public_key, password=None):
-    kwargs = host.to_dict(selects=('hostname', 'port', 'username'))
-    ssh = _get_ssh(kwargs, host.pkey, private_key, public_key, password)
+def _sync_host_extend(host, private_key=None, public_key=None, password=None, ssh=None):
+    if not ssh:
+        kwargs = host.to_dict(selects=('hostname', 'port', 'username'))
+        ssh = _get_ssh(kwargs, host.pkey, private_key, public_key, password)
     form = AttrDict(fetch_host_extend(ssh))
     form.disk = json.dumps(form.disk)
     form.public_ip_address = json.dumps(form.public_ip_address)
@@ -242,7 +243,8 @@ def _sync_host_extend(host, private_key, public_key, password=None):
         extend = host.hostextend
         extend.update_by_dict(form)
     else:
-        HostExtend.objects.create(host=host, **form)
+        extend = HostExtend.objects.create(host=host, **form)
+    return extend
 
 
 def _get_ssh(kwargs, pkey=None, private_key=None, public_key=None, password=None):

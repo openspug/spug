@@ -8,7 +8,7 @@ from libs import json_response, JsonParser, Argument, AttrDict
 from apps.setting.utils import AppSetting
 from apps.account.utils import get_host_perms
 from apps.host.models import Host, Group
-from apps.host.utils import batch_sync_host
+from apps.host.utils import batch_sync_host, _sync_host_extend
 from apps.app.models import Deploy
 from apps.schedule.models import Task
 from apps.monitor.models import Detection
@@ -42,7 +42,22 @@ class HostView(View):
             Argument('password', required=False),
         ).parse(request.body)
         if error is None:
-            if not valid_ssh(form.hostname, form.port, form.username, password=form.pop('password'), pkey=form.pkey):
+            password = form.pop('password')
+            private_key, public_key = AppSetting.get_ssh_key()
+            try:
+                if form.pkey:
+                    private_key = form.pkey
+                elif password:
+                    ssh = SSH(form.hostname, form.port, form.username, password=password)
+                    ssh.add_public_key(public_key)
+
+                ssh = SSH(form.hostname, form.port, form.username, private_key)
+                ssh.ping()
+            except BadAuthenticationType:
+                return json_response(error='该主机不支持密钥认证，请参考官方文档，错误代码：E01')
+            except AuthenticationException:
+                if password:
+                    return json_response(error='密钥认证失败，请参考官方文档，错误代码：E02')
                 return json_response('auth fail')
 
             group_ids = form.pop('group_ids')
@@ -54,6 +69,10 @@ class HostView(View):
                 host = Host.objects.get(pk=form.id)
             else:
                 host = Host.objects.create(created_by=request.user, is_verified=True, **form)
+                try:
+                    _sync_host_extend(host, ssh=ssh)
+                except Exception:
+                    pass
             host.groups.set(group_ids)
             response = host.to_view()
             response['group_ids'] = group_ids
@@ -124,25 +143,6 @@ def post_import(request):
         host.groups.add(group_id)
         summary['success'].append(i)
     return json_response(summary)
-
-
-def valid_ssh(hostname, port, username, password=None, pkey=None):
-    private_key, public_key = AppSetting.get_ssh_key()
-    try:
-        if pkey:
-            private_key = pkey
-        elif password:
-            ssh = SSH(hostname, port, username, password=str(password))
-            ssh.add_public_key(public_key)
-
-        ssh = SSH(hostname, port, username, private_key)
-        ssh.ping()
-        return True
-    except BadAuthenticationType:
-        raise TypeError('该主机不支持密钥认证，请参考官方文档，错误代码：E01')
-    except AuthenticationException:
-        if password:
-            raise ValueError('密钥认证失败，请参考官方文档，错误代码：E02')
 
 
 def post_parse(request):
