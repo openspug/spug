@@ -6,6 +6,7 @@ from apps.setting.utils import AppSetting
 from apps.notify.models import Notify
 from libs.mail import Mail
 from libs.utils import human_datetime
+from threading import Thread
 import requests
 import json
 
@@ -154,10 +155,10 @@ class Notification:
     def dispatch(self, modes):
         for mode in modes:
             if mode == '1':
-                self._by_wx()
+                Thread(target=self._by_wx).start()
             elif mode == '3':
-                self._by_dd()
+                Thread(target=self._by_dd).start()
             elif mode == '4':
-                self._by_email()
+                Thread(target=self._by_email).start()
             elif mode == '5':
-                self._by_qy_wx()
+                Thread(target=self._by_qy_wx).start()
