@@ -24,6 +24,7 @@ class Worker:
 
     def run(self):
         logging.warning('Running worker')
+        self.rds.delete(EXEC_WORKER_KEY, MONITOR_WORKER_KEY, SCHEDULE_WORKER_KEY)
         while True:
             key, job = self.rds.blpop([EXEC_WORKER_KEY, SCHEDULE_WORKER_KEY, MONITOR_WORKER_KEY])
             key = key.decode()
