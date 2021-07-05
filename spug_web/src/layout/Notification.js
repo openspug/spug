@@ -1,12 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, List, Dropdown, Badge, Button, notification } from 'antd';
-import { CheckOutlined, NotificationOutlined } from '@ant-design/icons';
+import { NotificationOutlined, MonitorOutlined, FlagOutlined, ScheduleOutlined } from '@ant-design/icons';
 import { http, X_TOKEN } from 'libs';
 import moment from 'moment';
 import styles from './layout.module.less';
 
 let ws = {readyState: 3};
 let timer;
+
+
+function Icon(props) {
+  switch (props.type) {
+    case 'monitor':
+      return <MonitorOutlined style={{fontSize: 24, color: '#1890ff'}}/>
+    case 'schedule':
+      return <ScheduleOutlined style={{fontSize: 24, color: '#1890ff'}}/>
+    case 'flag':
+      return <FlagOutlined style={{fontSize: 24, color: '#1890ff'}}/>
+    default:
+      return null
+  }
+}
 
 export default function () {
   const [loading, setLoading] = useState(false);
@@ -63,7 +77,7 @@ export default function () {
     e.stopPropagation();
     if (reads.indexOf(item.id) === -1) {
       reads.push(item.id);
-      setReads(reads)
+      setReads([...reads])
       http.patch('/api/notify/', {ids: [item.id]})
     }
   }
@@ -88,7 +102,7 @@ export default function () {
                 <List.Item className={styles.item} onClick={e => handleRead(e, item)}>
                   <List.Item.Meta
                     style={{opacity: reads.includes(item.id) ? 0.4 : 1}}
-                    avatar={<CheckOutlined type={item.source} style={{fontSize: 24, color: '#1890ff'}}/>}
+                    avatar={<Icon type={item.source}/>}
                     title={<span style={{fontWeight: 400, color: '#404040'}}>{item.title}</span>}
                     description={[
                       <div key="1" style={{fontSize: 12}}>{item.content}</div>,
@@ -97,7 +111,7 @@ export default function () {
                 </List.Item>
               )}/>
             {notifies.length !== 0 && (
-              <div className={styles.footer} onClick={handleReadAll}>全部 已读</div>
+              <div className={styles.btn} onClick={handleReadAll}>全部 已读</div>
             )}
           </Menu.Item>
         </Menu>
