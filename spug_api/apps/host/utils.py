@@ -214,7 +214,7 @@ def fetch_host_extend(ssh):
 def batch_sync_host(token, hosts, password, ):
     private_key, public_key = AppSetting.get_ssh_key()
     threads, latest_exception, rds = [], None, get_redis_connection()
-    max_workers = min(10, os.cpu_count() * 4)
+    max_workers = max(10, os.cpu_count() * 5)
     with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         for host in hosts:
             t = executor.submit(_sync_host_extend, host, private_key, public_key, password)

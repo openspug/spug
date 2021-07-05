@@ -59,7 +59,7 @@ def _ext1_deploy(req, helper, env):
     extend = req.deploy.extend_obj
     env.update(SPUG_DST_DIR=extend.dst_dir)
     threads, latest_exception = [], None
-    max_workers = min(10, os.cpu_count() * 4) if req.deploy.is_parallel else 1
+    max_workers = max(10, os.cpu_count() * 5) if req.deploy.is_parallel else 1
     with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         for h_id in json.loads(req.host_ids):
             env = AttrDict(env.items())
@@ -124,7 +124,7 @@ def _ext2_deploy(req, helper, env):
             break
     if host_actions:
         threads, latest_exception = [], None
-        max_workers = min(10, os.cpu_count() * 4) if req.deploy.is_parallel else 1
+        max_workers = max(10, os.cpu_count() * 5) if req.deploy.is_parallel else 1
         with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
             for h_id in json.loads(req.host_ids):
                 env = AttrDict(env.items())

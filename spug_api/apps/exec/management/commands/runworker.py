@@ -9,6 +9,7 @@ from apps.schedule.executors import schedule_worker_handler
 from apps.monitor.executors import monitor_worker_handler
 from apps.exec.executors import exec_worker_handler
 import logging
+import os
 
 EXEC_WORKER_KEY = settings.EXEC_WORKER_KEY
 MONITOR_WORKER_KEY = settings.MONITOR_WORKER_KEY
@@ -20,7 +21,7 @@ logging.basicConfig(level=logging.WARNING, format='%(asctime)s %(message)s')
 class Worker:
     def __init__(self):
         self.rds = get_redis_connection()
-        self._executor = ThreadPoolExecutor(max_workers=1)
+        self._executor = ThreadPoolExecutor(max_workers=max(50, os.cpu_count() * 20))
 
     def run(self):
         logging.warning('Running worker')
