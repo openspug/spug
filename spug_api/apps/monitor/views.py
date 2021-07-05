@@ -14,7 +14,7 @@ class DetectionView(View):
     def get(self, request):
         detections = Detection.objects.all()
         groups = [x['group'] for x in detections.order_by('group').values('group').distinct()]
-        return json_response({'groups': groups, 'detections': [x.to_dict() for x in detections]})
+        return json_response({'groups': groups, 'detections': [x.to_view() for x in detections]})
 
     def post(self, request):
         form, error = JsonParser(
@@ -64,7 +64,7 @@ class DetectionView(View):
                 if form.is_active:
                     task = Detection.objects.filter(pk=form.id).first()
                     message = {'id': form.id, 'action': 'add'}
-                    message.update(task.to_dict(selects=('targets', 'extra', 'rate', 'type')))
+                    message.update(task.to_dict(selects=('targets', 'extra', 'rate', 'type', 'threshold', 'quiet')))
                 else:
                     message = {'id': form.id, 'action': 'remove'}
                 rds_cli = get_redis_connection()

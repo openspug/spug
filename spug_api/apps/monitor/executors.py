@@ -18,7 +18,7 @@ logging.captureWarnings(True)
 
 def site_check(url, limit):
     try:
-        res = requests.get(url, timeout=10, verify=False)
+        res = requests.get(url, timeout=10)
         if limit:
             duration = int(res.elapsed.total_seconds() * 1000)
             if duration > int(limit):

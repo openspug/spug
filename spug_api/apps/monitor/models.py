@@ -39,8 +39,8 @@ class Detection(models.Model, ModelMixin):
     updated_at = models.CharField(max_length=20, null=True)
     updated_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)
 
-    def to_dict(self, *args, **kwargs):
-        tmp = super().to_dict(*args, **kwargs)
+    def to_view(self):
+        tmp = self.to_dict()
         tmp['type_alias'] = self.get_type_display()
         tmp['notify_mode'] = json.loads(self.notify_mode)
         tmp['notify_grp'] = json.loads(self.notify_grp)
