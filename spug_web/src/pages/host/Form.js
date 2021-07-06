@@ -40,10 +40,10 @@ class ComForm extends React.Component {
     http.post('/api/host/', formData)
       .then(res => {
         if (res === 'auth fail') {
+          this.setState({loading: false});
           if (formData.pkey) {
             message.error('独立密钥认证失败')
           } else {
-            this.setState({loading: false});
             Modal.confirm({
               icon: 'exclamation-circle',
               title: '首次验证请输入密码',
