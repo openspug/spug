@@ -5,7 +5,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { Card, List, Modal, Form, Input, Switch, Divider, Typography } from 'antd';
-import { DownSquareOutlined, PlusOutlined, UpSquareOutlined, SoundOutlined } from '@ant-design/icons';
+import { DownSquareOutlined, PlusOutlined, UpSquareOutlined, SoundOutlined, DeleteOutlined } from '@ant-design/icons';
 import { AuthButton } from 'components';
 import { http } from 'libs';
 import styles from './index.module.less';
@@ -71,6 +71,15 @@ function NoticeIndex(props) {
     setNotice(null);
   }
 
+  function handleDelete(item) {
+    Modal.confirm({
+      title: '操作确认',
+      content: `确定要删除系统公告【${item.title}】？`,
+      onOk: () => http.delete('/api/home/notice/', {params: {id: item.id}})
+        .then(fetchRecords)
+    })
+  }
+
   return (
     <Card
       title="系统公告"
@@ -82,12 +91,13 @@ function NoticeIndex(props) {
         <List>
           <div className={styles.add} onClick={() => showForm({})}><PlusOutlined/>新建公告</div>
           {records.map(item => (
-            <List.Item key={item.id} onClick={() => showForm(item)}>
+            <List.Item key={item.id}>
               <div className={styles.item}>
                 <UpSquareOutlined onClick={e => handleSort(e, item, 'up')}/>
                 <Divider type="vertical"/>
                 <DownSquareOutlined onClick={e => handleSort(e, item, 'down')}/>
-                <span className={styles.title} style={{marginLeft: 24}}>{item.title}</span>
+                <div className={styles.title} style={{marginLeft: 24}} onClick={() => showForm(item)}>{item.title}</div>
+                <DeleteOutlined style={{color: 'red', marginLeft: 12}} onClick={() => handleDelete(item)}/>
               </div>
             </List.Item>
           ))}
@@ -109,7 +119,6 @@ function NoticeIndex(props) {
       <Modal
         title="编辑公告"
         visible={record}
-        afterClose={() => console.log('after close')}
         onCancel={() => setRecord(null)}
         confirmLoading={loading}
         onOk={handleSubmit}>

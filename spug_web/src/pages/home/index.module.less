@@ -36,7 +36,7 @@
     justify-content: center;
     align-items: center;
     margin-top: 8px;
-    height: 30px;
+    height: 35px;
     border-radius: 2px;
     border: 1px dashed #d9d9d9;
     font-size: 12px;
@@ -52,6 +52,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    display: flex;
+    width: 100%;
+    align-items: center;
 
     :global(.anticon) {
       cursor: pointer;
@@ -62,6 +65,10 @@
 
 .nav {
   margin-top: 12px;
+
+  button {
+    padding-right: 0;
+  }
 
   .add {
     cursor: pointer;
@@ -95,12 +102,29 @@
       -webkit-box-orient: vertical;
     }
   }
+
+  .icon {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 32px;
+    height: 32px;
+    padding: 8px;
+    font-size: 16px;
+    color: rgba(0, 0, 0, .45);
+    cursor: pointer;
+  }
+
+  .icon:hover {
+    color: #ff4d4f;
+  }
 }
 
 .minusIcon {
-    font-size: 26px;
-    color: #a6a6a6;
-  }
-  .minusIcon:hover {
-    color: #ff4d4f;
-  }
+  font-size: 26px;
+  color: #a6a6a6;
+}
+
+.minusIcon:hover {
+  color: #ff4d4f;
+}

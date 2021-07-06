@@ -4,8 +4,8 @@
  * Released under the AGPL-3.0 License.
  */
 import React, { useState, useEffect } from 'react';
-import { Avatar, Card, Col, Row } from 'antd';
-import { LeftSquareOutlined, RightSquareOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { Avatar, Card, Col, Row, Modal } from 'antd';
+import { LeftSquareOutlined, RightSquareOutlined, EditOutlined, PlusOutlined, CloseOutlined } from '@ant-design/icons';
 import { AuthButton } from 'components';
 import NavForm from './NavForm';
 import { http } from 'libs';
@@ -36,6 +36,15 @@ function NavIndex(props) {
       .then(() => fetchRecords())
   }
 
+  function handleDelete(item) {
+    Modal.confirm({
+      title: '操作确认',
+      content: `确定要删除【${item.title}】？`,
+      onOk: () => http.delete('/api/home/navigation/', {params: {id: item.id}})
+        .then(fetchRecords)
+    })
+  }
+
   return (
     <Card
       title="便捷导航"
@@ -64,6 +73,7 @@ function NavIndex(props) {
                   avatar={<Avatar src={item.logo}/>}
                   title={item.title}
                   description={item.desc}/>
+                <CloseOutlined className={styles.icon} onClick={() => handleDelete(item)}/>
               </Card>
             </Col>
           ))}
