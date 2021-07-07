@@ -76,7 +76,7 @@ class Notification:
     def _by_email(self):
         users = set(x.email for x in Contact.objects.filter(id__in=self.u_ids, email__isnull=False))
         if users:
-            mail_service = AppSetting.get_default('mail_service', '{}')
+            mail_service = AppSetting.get_default('mail_service', {})
             body = [
                 f'告警名称：{self.title}',
                 f'告警对象：{self.target}',
