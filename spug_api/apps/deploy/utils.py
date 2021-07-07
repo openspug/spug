@@ -105,7 +105,7 @@ def _ext1_deploy(req, helper, env):
         helper.local(f'cd {REPOS_DIR} && tar zcf {env.SPUG_VERSION}.tar.gz {exclude} {contain}')
         helper.send_step('local', 6, f'完成')
     threads, latest_exception = [], None
-    with futures.ThreadPoolExecutor(max_workers=min(10, os.cpu_count() + 5)) as executor:
+    with futures.ThreadPoolExecutor(max_workers=max(10, os.cpu_count() + 5)) as executor:
         for h_id in json.loads(req.host_ids):
             env = AttrDict(env.items())
             t = executor.submit(_deploy_ext1_host, helper, h_id, extend, env)
@@ -168,7 +168,7 @@ def _ext2_deploy(req, helper, env):
             break
     if host_actions:
         threads, latest_exception = [], None
-        with futures.ThreadPoolExecutor(max_workers=min(10, os.cpu_count() + 5)) as executor:
+        with futures.ThreadPoolExecutor(max_workers=max(10, os.cpu_count() + 5)) as executor:
             for h_id in json.loads(req.host_ids):
                 env = AttrDict(env.items())
                 t = executor.submit(_deploy_ext2_host, helper, h_id, host_actions, env)
