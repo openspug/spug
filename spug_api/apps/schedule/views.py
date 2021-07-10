@@ -150,7 +150,7 @@ def next_run_time(request):
     if error is None:
         try:
             minute, hour, day, month, week = form.rule.split()
-            week = Scheduler.week_map[week]
+            week = Scheduler.covert_week(week)
             trigger = CronTrigger(minute=minute, hour=hour, day=day, month=month, day_of_week=week,
                                   start_date=form.start, end_date=form.stop)
         except (ValueError, KeyError):
