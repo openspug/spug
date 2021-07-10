@@ -24,18 +24,17 @@ class About extends React.Component {
     http.get('/api/setting/about/')
       .then(res => this.setState({info: res}))
       .finally(() => this.setState({fetching: false}))
-    http.get('https://gitee.com/api/v5/repos/openspug/spug/releases/latest')
+    http.get(`https://api.spug.cc/apis/release/latest/?version=${VERSION}`)
       .then(res => {
-        if (res.tag_name && res.tag_name !== VERSION) {
-          const logs = res.body.replace(/- */g, '');
+        if (res.has_new) {
           notification.open({
             key: 'new_version',
             duration: 0,
             top: 88,
-            message: `发现新版本 ${res.tag_name}`,
+            message: `发现新版本 ${res.version}`,
             icon: <Icon type="smile" theme="twoTone"/>,
             btn: <a target="_blank" rel="noopener noreferrer" href="https://spug.dev/docs/update-version/">如何升级？</a>,
-            description: <pre style={{lineHeight: '30px'}}>{logs}</pre>
+            description: <pre style={{lineHeight: '30px'}}>{res.content}</pre>
           })
         }
       })
