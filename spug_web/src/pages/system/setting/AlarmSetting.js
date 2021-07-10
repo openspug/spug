@@ -65,7 +65,7 @@ class AlarmSetting extends React.Component {
   render() {
     const {getFieldDecorator} = this.props.form;
     const {mode, spug_key} = this.state;
-    const spugWx = <img src="http://image.qbangmang.com/spug-weixin.jpeg" alt='spug'/>;
+    const spugWx = <img src="https://cdn.spug.cc/img/spug-weixin.jpeg" alt='spug'/>;
     return (
       <React.Fragment>
         <div className={styles.title}>报警服务设置</div>

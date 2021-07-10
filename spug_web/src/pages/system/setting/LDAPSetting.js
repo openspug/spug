@@ -58,7 +58,7 @@ class LDAPSetting extends React.Component {
           <Form.Item required label="LDAP服务地址">
             {getFieldDecorator('server', {initialValue: this.setting['server'],
               rules: [{required: true, message: '请输入LDAP服务地址'}]})(
-              <Input placeholder="例如：ldap.spug.dev"/>
+              <Input placeholder="例如：ldap.spug.cc"/>
             )}
           </Form.Item>
           <Form.Item required label="LDAP服务端口">

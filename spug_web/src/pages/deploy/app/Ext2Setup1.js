@@ -52,7 +52,7 @@ export default observer(function Ext2Setup1() {
       <Form.Item label="消息通知" extra={<span>
         应用审核及发布成功或失败结果通知，
         <a target="_blank" rel="noopener noreferrer"
-           href="https://spug.dev/docs/install-error/#%E9%92%89%E9%92%89%E6%94%B6%E4%B8%8D%E5%88%B0%E9%80%9A%E7%9F%A5%EF%BC%9F">钉钉收不到通知？</a>
+           href="https://spug.cc/docs/install-error/#%E9%92%89%E9%92%89%E6%94%B6%E4%B8%8D%E5%88%B0%E9%80%9A%E7%9F%A5%EF%BC%9F">钉钉收不到通知？</a>
       </span>}>
         <Input addonBefore={(
           <Select disabled={store.isReadOnly}

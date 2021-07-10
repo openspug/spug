@@ -32,7 +32,7 @@ class Command(BaseCommand):
         # update web
         web_dir = os.path.join(settings.BASE_DIR, '../spug_web')
         commands = [
-            f'curl -o /tmp/spug_web.tar.gz http://cdn.spug.cc/spug/web_{version}.tar.gz',
+            f'curl -o /tmp/spug_web.tar.gz https://cdn.spug.cc/spug/web_{version}.tar.gz',
             f'rm -rf {web_dir}/build',
             f'tar xf /tmp/spug_web.tar.gz -C {web_dir}'
         ]

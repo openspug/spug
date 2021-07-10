@@ -47,7 +47,7 @@ class LoginIndex extends React.Component {
                 content: <div>
                   未能获取到访问者的真实IP，无法提供基于请求来源IP的合法性验证，详细信息请参考
                   <a target="_blank"
-                     href="https://spug.dev/docs/practice/#%E5%AE%89%E5%85%A8%E6%80%A7%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97"
+                     href="https://spug.cc/docs/practice/#%E5%AE%89%E5%85%A8%E6%80%A7%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97"
                      rel="noopener noreferrer">官方文档</a>。
                 </div>,
                 onOk: () => this.doLogin(data)
@@ -121,11 +121,11 @@ class LoginIndex extends React.Component {
 
         <div className={styles.footerZone}>
           <div className={styles.linksZone}>
-            <a className={styles.links} title="官网" href="https://www.spug.dev" target="_blank"
+            <a className={styles.links} title="官网" href="https://spug.cc" target="_blank"
                rel="noopener noreferrer">官网</a>
             <a className={styles.links} title="Github" href="https://github.com/openspug/spug" target="_blank"
                rel="noopener noreferrer"><Icon type="github"/></a>
-            <a title="文档" href="https://www.spug.dev/docs/about-spug/" target="_blank"
+            <a title="文档" href="https://spug.cc/docs/about-spug/" target="_blank"
                rel="noopener noreferrer">文档</a>
           </div>
           <div style={{color: 'rgba(0, 0, 0, .45)'}}>Copyright <Icon type="copyright"/> 2020 By OpenSpug</div>

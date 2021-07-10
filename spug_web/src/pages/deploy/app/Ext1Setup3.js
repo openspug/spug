@@ -24,7 +24,7 @@ class Ext1Setup3 extends React.Component {
       '2': <span>
         Spug 内置了一些全局变量，这些变量可以直接使用，请参考官方文档：
         <a target="_blank" rel="noopener noreferrer"
-           href="https://spug.dev/docs/deploy-config/#%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F">全局变量</a>
+           href="https://spug.cc/docs/deploy-config/#%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F">全局变量</a>
       </span>,
       '3': '在部署 Spug 的服务器上运行，可以执行任意自定义命令。',
       '4': '在部署 Spug 的服务器上运行，当前目录为检出后待发布的源代码目录，可执行任意自定义命令。',
