@@ -135,8 +135,9 @@ class FileManager extends React.Component {
       if (e.data === 'pong') {
         this.socket.send('ping')
       } else {
-        this.setState({percent: Number(e.data)});
-        if (Number(e.data) === 100) {
+        const percent = Number(e.data);
+        if (percent > this.state.percent) this.setState({percent});
+        if (percent === 100) {
           this.socket.close()
         }
       }
