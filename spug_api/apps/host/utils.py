@@ -211,7 +211,7 @@ def fetch_host_extend(ssh):
     return response
 
 
-def batch_sync_host(token, hosts, password, ):
+def batch_sync_host(token, hosts, password):
     private_key, public_key = AppSetting.get_ssh_key()
     threads, latest_exception, rds = [], None, get_redis_connection()
     max_workers = max(10, os.cpu_count() * 5)
@@ -251,15 +251,12 @@ def _sync_host_extend(host, private_key=None, public_key=None, password=None, ss
 
 def _get_ssh(kwargs, pkey=None, private_key=None, public_key=None, password=None):
     try:
-        if pkey:
-            ssh = SSH(pkey=pkey, **kwargs)
-            ssh.ping()
-            return ssh
-        else:
+        ssh = SSH(pkey=pkey or private_key, **kwargs)
+        ssh.ping()
+        return ssh
+    except AuthenticationException as e:
+        if password:
             ssh = SSH(password=str(password), **kwargs)
             ssh.add_public_key(public_key)
             return _get_ssh(kwargs, private_key)
-    except AuthenticationException as e:
-        if password:
-            return _get_ssh(kwargs, None, public_key, public_key, password)
         raise e
