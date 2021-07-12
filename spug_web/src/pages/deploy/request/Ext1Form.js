@@ -5,13 +5,26 @@
  */
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, Select, DatePicker, message, Button } from 'antd';
+import { Modal, Form, Input, Select, DatePicker, Button, message } from 'antd';
 import HostSelector from './HostSelector';
 import hostStore from 'pages/host/store';
-import http from 'libs/http';
+import { http, history } from 'libs';
 import store from './store';
 import lds from 'lodash';
 import moment from 'moment';
+
+function NoVersions() {
+  return (
+    <div>
+      <span>未找到符合条件的版本，</span>
+      <Button
+        type="link"
+        style={{padding: 0}}
+        onClick={() => history.push('/deploy/repository')}>
+        去构建新版本？</Button>
+    </div>
+  )
+}
 
 export default observer(function () {
   const [form] = Form.useForm();
@@ -63,7 +76,7 @@ export default observer(function () {
           <Input placeholder="请输入申请标题"/>
         </Form.Item>
         <Form.Item required name="repository_id" label={type === '2' ? '回滚版本' : '发布版本'}>
-          <Select placeholder="请选择">
+          <Select placeholder="请选择" notFoundContent={<NoVersions/>}>
             {versions.map(item => (
               <Select.Option key={item.id} value={item.id} disabled={type === '2' && item.id >= rb_id}>
                 <div style={{display: 'flex', justifyContent: 'space-between'}}>
