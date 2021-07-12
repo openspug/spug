@@ -3,6 +3,7 @@
 # Released under the AGPL-3.0 License.
 from git import Repo, RemoteReference, TagReference, InvalidGitRepositoryError, GitCommandError
 from tempfile import NamedTemporaryFile
+from datetime import datetime
 import shutil
 import os
 
@@ -31,12 +32,12 @@ class Git:
                 tags[ref.name] = {
                     'id': ref.tag.hexsha,
                     'author': ref.tag.tagger.name,
-                    'date': ref.tag.tagged_date,
+                    'date': self._format_date(ref.tag.tagged_date),
                     'message': ref.tag.message.strip()
                 } if ref.tag else {
                     'id': ref.commit.binsha.hex(),
                     'author': ref.commit.author.name,
-                    'date': ref.commit.authored_date,
+                    'date': self._format_date(ref.commit.authored_date),
                     'message': ref.commit.message.strip()
                 }
         tags = sorted(tags.items(), key=lambda x: x[1]['date'], reverse=True)
@@ -77,10 +78,16 @@ class Git:
             commits.append({
                 'id': commit.hexsha,
                 'author': commit.author.name,
-                'date': commit.committed_date,
+                'date': self._format_date(commit.committed_date),
                 'message': commit.message.strip()
             })
         return commits
+
+    def _format_date(self, timestamp):
+        if isinstance(timestamp, int):
+            date = datetime.fromtimestamp(timestamp)
+            return date.strftime('%Y-%m-%d %H:%M')
+        return timestamp
 
     def __enter__(self):
         if self.pkey:
