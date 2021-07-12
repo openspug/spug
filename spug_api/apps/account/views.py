@@ -43,7 +43,7 @@ class UserView(View):
             if form.id:
                 User.objects.filter(pk=form.id).update(**form)
             else:
-                User.objects.create(
+                user = User.objects.create(
                     password_hash=User.make_password(password),
                     created_by=request.user,
                     **form
