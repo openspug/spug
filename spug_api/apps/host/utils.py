@@ -187,7 +187,7 @@ def fetch_host_extend(ssh):
         "hostname -I",
         "cat /etc/os-release | grep PRETTY_NAME | awk -F \\\" '{print $2}'",
         "fdisk -l | grep '^Disk /' | awk '{print $5}'",
-        "fdisk -l | grep '^磁盘 /' | awk '{print $5}'"
+        "fdisk -l | grep '^磁盘 /' | awk '{print $4}' | awk -F'，' '{print $2}'"
     ]
     code, out = ssh.exec_command(';'.join(commands))
     if code != 0:
