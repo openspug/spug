@@ -5,11 +5,11 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Divider, Modal, message } from 'antd';
+import { Modal, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
+import { TableCard, AuthButton, Action } from 'components';
 import http from 'libs/http';
 import store from './store';
-import { LinkButton, TableCard, AuthButton } from "components";
 
 @observer
 class ComTable extends React.Component {
@@ -31,24 +31,20 @@ class ComTable extends React.Component {
     title: '操作',
     width: 400,
     render: info => (
-      <span>
-        <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton onClick={() => store.showPagePerm(info)}>功能权限</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton onClick={() => store.showDeployPerm(info)}>发布权限</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton onClick={() => store.showHostPerm(info)}>主机权限</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
-      </span>
+      <Action>
+        <Action.Button onClick={() => store.showForm(info)}>编辑</Action.Button>
+        <Action.Button onClick={() => store.showPagePerm(info)}>功能权限</Action.Button>
+        <Action.Button onClick={() => store.showDeployPerm(info)}>发布权限</Action.Button>
+        <Action.Button onClick={() => store.showHostPerm(info)}>主机权限</Action.Button>
+        <Action.Button danger onClick={() => this.handleDelete(info)}>删除</Action.Button>
+      </Action>
     )
   }];
 
   handleDelete = (text) => {
     Modal.confirm({
       title: '删除确认',
-      content: `确定要删除【${text['name']}】?`,
+      content: `确定要删除角色【${text['name']}】?`,
       onOk: () => {
         return http.delete('/api/account/role/', {params: {id: text.id}})
           .then(() => {

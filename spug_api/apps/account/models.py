@@ -18,8 +18,8 @@ class User(models.Model, ModelMixin):
     token_expired = models.IntegerField(null=True)
     last_login = models.CharField(max_length=20)
     last_ip = models.CharField(max_length=50)
-    role = models.ForeignKey('Role', on_delete=models.PROTECT, null=True)
     wx_token = models.CharField(max_length=50, null=True)
+    roles = models.ManyToManyField('Role', db_table='user_role_rel')
 
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey('User', models.PROTECT, related_name='+', null=True)
@@ -35,26 +35,32 @@ class User(models.Model, ModelMixin):
 
     @property
     def page_perms(self):
-        if self.role and self.role.page_perms:
-            data = []
-            perms = json.loads(self.role.page_perms)
-            for m, v in perms.items():
-                for p, d in v.items():
-                    data.extend(f'{m}.{p}.{x}' for x in d)
-            return data
-        else:
-            return []
+        data = set()
+        for item in self.roles.all():
+            if item.page_perms:
+                perms = json.loads(item.page_perms)
+                for m, v in perms.items():
+                    for p, d in v.items():
+                        data.update(f'{m}.{p}.{x}' for x in d)
+        return list(data)
 
     @property
     def deploy_perms(self):
-        perms = json.loads(self.role.deploy_perms) if self.role and self.role.deploy_perms else {}
-        perms.setdefault('apps', [])
-        perms.setdefault('envs', [])
-        return perms
+        data = {'apps': set(), 'envs': set()}
+        for item in self.roles.all():
+            if item.deploy_perms:
+                perms = json.loads(item.deploy_perms)
+                data['apps'].update(perms.get('apps', []))
+                data['envs'].update(perms.get('envs', []))
+        return data
 
     @property
     def group_perms(self):
-        return json.loads(self.role.group_perms) if self.role and self.role.group_perms else []
+        data = set()
+        for item in self.roles.all():
+            if item.group_perms:
+                data.update(json.loads(item.group_perms))
+        return list(data)
 
     def has_perms(self, codes):
         # return self.is_supper or self.role in codes

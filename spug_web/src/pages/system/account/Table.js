@@ -6,8 +6,8 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { Divider, Form, Radio, Modal, Button, Badge, message, Input } from 'antd';
-import { LinkButton, TableCard } from 'components';
+import { Form, Radio, Modal, Button, Badge, message, Input } from 'antd';
+import { TableCard, Action } from 'components';
 import http from 'libs/http';
 import store from './store';
 
@@ -31,9 +31,6 @@ class ComTable extends React.Component {
     title: '姓名',
     dataIndex: 'nickname',
   }, {
-    title: '角色',
-    dataIndex: 'role_name'
-  }, {
     title: '状态',
     render: text => text['is_active'] ? <Badge status="success" text="正常"/> : <Badge status="default" text="禁用"/>
   }, {
@@ -42,15 +39,12 @@ class ComTable extends React.Component {
   }, {
     title: '操作',
     render: info => (
-      <span>
-        <LinkButton onClick={() => this.handleActive(info)}>{info['is_active'] ? '禁用' : '启用'}</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton onClick={() => store.showForm(info)}>编辑</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton disabled={info['type'] === 'ldap'} onClick={() => this.handleReset(info)}>重置密码</LinkButton>
-        <Divider type="vertical"/>
-        <LinkButton onClick={() => this.handleDelete(info)}>删除</LinkButton>
-      </span>
+      <Action>
+        <Action.Button onClick={() => this.handleActive(info)}>{info['is_active'] ? '禁用' : '启用'}</Action.Button>
+        <Action.Button onClick={() => store.showForm(info)}>编辑</Action.Button>
+        <Action.Button disabled={info['type'] === 'ldap'} onClick={() => this.handleReset(info)}>重置密码</Action.Button>
+        <Action.Button danger onClick={() => this.handleDelete(info)}>删除</Action.Button>
+      </Action>
     )
   }];
 

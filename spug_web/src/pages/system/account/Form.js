@@ -24,18 +24,13 @@ export default observer(function () {
   function handleSubmit() {
     setLoading(true);
     const formData = form.getFieldsValue();
-    let request;
-    if (store.record.id) {
-      formData['id'] = store.record.id;
-      request = http.patch('/api/account/user/', formData)
-    } else {
-      request = http.post('/api/account/user/', formData)
-    }
-    request.then(() => {
-      message.success('操作成功');
-      store.formVisible = false;
-      store.fetchRecords()
-    }, () => setLoading(false))
+    formData.id = store.record.id;
+    http.post('/api/account/user/', formData)
+      .then(() => {
+        message.success('操作成功');
+        store.formVisible = false;
+        store.fetchRecords()
+      }, () => setLoading(false))
   }
 
   return (
@@ -54,14 +49,12 @@ export default observer(function () {
         <Form.Item required name="nickname" label="姓名">
           <Input placeholder="请输入姓名"/>
         </Form.Item>
-        {store.record.id === undefined && (
-          <Form.Item required name="password" label="密码">
-            <Input type="password" placeholder="请输入密码"/>
-          </Form.Item>
-        )}
-        <Form.Item hidden={store.record.is_supper} required label="角色" style={{marginBottom: 0}}>
-          <Form.Item name="role_id" style={{display: 'inline-block', width: '80%'}}>
-            <Select placeholder="请选择">
+        <Form.Item required hidden={store.record.id} name="password" label="密码">
+          <Input type="password" placeholder="请输入密码"/>
+        </Form.Item>
+        <Form.Item hidden={store.record.is_supper} label="角色" style={{marginBottom: 0}}>
+          <Form.Item name="role_ids" style={{display: 'inline-block', width: '80%'}}>
+            <Select mode="multiple" placeholder="请选择">
               {roleStore.records.map(item => (
                 <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
               ))}

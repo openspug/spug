@@ -3,7 +3,6 @@
 # Released under the AGPL-3.0 License.
 from django.core.cache import cache
 from django.views.generic import View
-from django.db.models import F
 from libs import JsonParser, Argument, human_datetime, json_response
 from libs.utils import get_request_real_ip, generate_random_str
 from libs.spug import send_login_wx_code
@@ -19,49 +18,54 @@ import json
 class UserView(View):
     def get(self, request):
         users = []
-        for u in User.objects.filter(deleted_by_id__isnull=True).annotate(role_name=F('role__name')):
+        for u in User.objects.filter(deleted_by_id__isnull=True):
             tmp = u.to_dict(excludes=('access_token', 'password_hash'))
-            tmp['role_name'] = u.role_name
+            tmp['role_ids'] = [x.id for x in u.roles.all()]
+            tmp['password'] = '******'
             users.append(tmp)
         return json_response(users)
 
     def post(self, request):
         form, error = JsonParser(
+            Argument('id', type=int, required=False),
             Argument('username', help='请输入登录名'),
             Argument('password', help='请输入密码'),
             Argument('nickname', help='请输入姓名'),
-            Argument('role_id', type=int, help='请选择角色'),
+            Argument('role_ids', type=list, default=[]),
             Argument('wx_token', required=False),
         ).parse(request.body)
         if error is None:
-            if User.objects.filter(username=form.username, deleted_by_id__isnull=True).exists():
+            user = User.objects.filter(username=form.username, deleted_by_id__isnull=True).first()
+            if user and (not form.id or form.id != user.id):
                 return json_response(error=f'已存在登录名为【{form.username}】的用户')
-            form.password_hash = User.make_password(form.pop('password'))
-            form.created_by = request.user
-            User.objects.create(**form)
+
+            role_ids, password = form.pop('role_ids'), form.pop('password')
+            if form.id:
+                User.objects.filter(pk=form.id).update(**form)
+            else:
+                User.objects.create(
+                    password_hash=User.make_password(password),
+                    created_by=request.user,
+                    **form
+                )
+            user.roles.set(role_ids)
         return json_response(error=error)
 
     def patch(self, request):
         form, error = JsonParser(
-            Argument('id', type=int, help='请指定操作对象'),
-            Argument('username', required=False),
+            Argument('id', type=int, help='参数错误'),
             Argument('password', required=False),
-            Argument('nickname', required=False),
-            Argument('role_id', required=False),
-            Argument('wx_token', required=False),
             Argument('is_active', type=bool, required=False),
-        ).parse(request.body, True)
+        ).parse(request.body)
         if error is None:
-            if form.get('password'):
-                form.token_expired = 0
-                form.password_hash = User.make_password(form.pop('password'))
-            if 'username' in form:
-                if User.objects.filter(username=form.username, deleted_by_id__isnull=True).exclude(id=form.id).exists():
-                    return json_response(error=f'已存在登录名为【{form.username}】的用户')
-            if 'is_active' in form:
-                user = User.objects.get(pk=form.id)
+            user = User.objects.get(pk=form.id)
+            if form.password:
+                user.token_expired = 0
+                user.password_hash = User.make_password(form.pop('password'))
+            if form.is_active is not None:
+                user.is_active = form.is_active
                 cache.delete(user.username)
-            User.objects.filter(pk=form.pop('id')).update(**form)
+            user.save()
         return json_response(error=error)
 
     def delete(self, request):
@@ -73,7 +77,7 @@ class UserView(View):
             if user:
                 if user.type == 'ldap':
                     return json_response(error='ldap账户无法删除，请使用禁用功能来禁止该账户访问系统')
-                user.role_id = None
+                user.is_active = True
                 user.deleted_at = human_datetime()
                 user.deleted_by = request.user
                 user.save()
@@ -124,9 +128,10 @@ class RoleView(View):
             Argument('id', type=int, help='参数错误')
         ).parse(request.GET)
         if error is None:
-            if User.objects.filter(role_id=form.id).exists():
+            role = Role.objects.get(pk=form.id)
+            if role.user_set.exists():
                 return json_response(error='已有用户使用了该角色，请解除关联后再尝试删除')
-            Role.objects.filter(pk=form.id).delete()
+            role.delete()
         return json_response(error=error)
 
 
