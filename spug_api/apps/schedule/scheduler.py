@@ -6,10 +6,10 @@ from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.cron import CronTrigger
-from apscheduler.events import EVENT_SCHEDULER_SHUTDOWN, EVENT_JOB_MAX_INSTANCES, EVENT_JOB_ERROR
+from apscheduler.events import EVENT_SCHEDULER_SHUTDOWN, EVENT_JOB_MAX_INSTANCES, EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 from django_redis import get_redis_connection
 from django.utils.functional import SimpleLazyObject
-from django.db import close_old_connections
+from django.db import connections
 from apps.schedule.models import Task, History
 from apps.schedule.utils import send_fail_notify
 from apps.notify.models import Notify
@@ -41,7 +41,7 @@ class Scheduler:
         self.scheduler = BackgroundScheduler(timezone=self.timezone, executors={'default': ThreadPoolExecutor(30)})
         self.scheduler.add_listener(
             self._handle_event,
-            EVENT_SCHEDULER_SHUTDOWN | EVENT_JOB_ERROR | EVENT_JOB_MAX_INSTANCES
+            EVENT_SCHEDULER_SHUTDOWN | EVENT_JOB_ERROR | EVENT_JOB_MAX_INSTANCES | EVENT_JOB_EXECUTED
         )
 
     @classmethod
@@ -64,7 +64,6 @@ class Scheduler:
             raise TypeError(f'unknown schedule policy: {trigger!r}')
 
     def _handle_event(self, event):
-        close_old_connections()
         obj = SimpleLazyObject(lambda: Task.objects.filter(pk=event.job_id).first())
         if event.code == EVENT_SCHEDULER_SHUTDOWN:
             logging.warning(f'EVENT_SCHEDULER_SHUTDOWN: {event}')
@@ -75,13 +74,13 @@ class Scheduler:
         elif event.code == EVENT_JOB_ERROR:
             logging.warning(f'EVENT_JOB_ERROR: job_id {event.job_id} exception: {event.exception}')
             send_fail_notify(obj, f'执行异常：{event.exception}')
+        connections.close_all()
 
     def _init_builtin_jobs(self):
         self.scheduler.add_job(auto_run_by_day, 'cron', hour=1, minute=20)
         self.scheduler.add_job(auto_run_by_minute, 'interval', minutes=1)
 
     def _dispatch(self, task_id, command, targets):
-        close_old_connections()
         output = {x: None for x in targets}
         history = History.objects.create(
             task_id=task_id,

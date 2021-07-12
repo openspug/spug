@@ -4,10 +4,10 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.triggers.interval import IntervalTrigger
-from apscheduler.events import EVENT_SCHEDULER_SHUTDOWN, EVENT_JOB_MAX_INSTANCES, EVENT_JOB_ERROR
+from apscheduler.events import EVENT_SCHEDULER_SHUTDOWN, EVENT_JOB_MAX_INSTANCES, EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 from django_redis import get_redis_connection
 from django.utils.functional import SimpleLazyObject
-from django.db import close_old_connections
+from django.db import connections
 from apps.monitor.models import Detection
 from apps.notify.models import Notify
 from django.conf import settings
@@ -27,11 +27,10 @@ class Scheduler:
         self.scheduler = BackgroundScheduler(timezone=self.timezone, executors={'default': ThreadPoolExecutor(30)})
         self.scheduler.add_listener(
             self._handle_event,
-            EVENT_SCHEDULER_SHUTDOWN | EVENT_JOB_ERROR | EVENT_JOB_MAX_INSTANCES
+            EVENT_SCHEDULER_SHUTDOWN | EVENT_JOB_ERROR | EVENT_JOB_MAX_INSTANCES | EVENT_JOB_EXECUTED
         )
 
     def _handle_event(self, event):
-        close_old_connections()
         obj = SimpleLazyObject(lambda: Detection.objects.filter(pk=event.job_id).first())
         if event.code == EVENT_SCHEDULER_SHUTDOWN:
             logging.warning(f'EVENT_SCHEDULER_SHUTDOWN: {event}')
@@ -42,9 +41,9 @@ class Scheduler:
         elif event.code == EVENT_JOB_ERROR:
             logging.warning(f'EVENT_JOB_ERROR: job_id {event.job_id} exception: {event.exception}')
             Notify.make_notify('monitor', '1', f'{obj.name} - 执行异常', f'{event.exception}')
+        connections.close_all()
 
     def _dispatch(self, task_id, tp, targets, extra, threshold, quiet):
-        close_old_connections()
         Detection.objects.filter(pk=task_id).update(latest_run_time=human_datetime())
         rds_cli = get_redis_connection()
         for t in json.loads(targets):

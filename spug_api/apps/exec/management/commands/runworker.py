@@ -3,6 +3,7 @@
 # Released under the AGPL-3.0 License.
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.db import connections
 from django_redis import get_redis_connection
 from concurrent.futures import ThreadPoolExecutor
 from apps.schedule.executors import schedule_worker_handler
@@ -23,6 +24,9 @@ class Worker:
         self.rds = get_redis_connection()
         self._executor = ThreadPoolExecutor(max_workers=max(50, os.cpu_count() * 20))
 
+    def job_done(self, future):
+        connections.close_all()
+
     def run(self):
         logging.warning('Running worker')
         self.rds.delete(EXEC_WORKER_KEY, MONITOR_WORKER_KEY, SCHEDULE_WORKER_KEY)
@@ -30,11 +34,12 @@ class Worker:
             key, job = self.rds.blpop([EXEC_WORKER_KEY, SCHEDULE_WORKER_KEY, MONITOR_WORKER_KEY])
             key = key.decode()
             if key == SCHEDULE_WORKER_KEY:
-                self._executor.submit(schedule_worker_handler, job)
+                future = self._executor.submit(schedule_worker_handler, job)
             elif key == MONITOR_WORKER_KEY:
-                self._executor.submit(monitor_worker_handler, job)
+                future = self._executor.submit(monitor_worker_handler, job)
             else:
-                self._executor.submit(exec_worker_handler, job)
+                future = self._executor.submit(exec_worker_handler, job)
+            future.add_done_callback(self.job_done)
 
 
 class Command(BaseCommand):

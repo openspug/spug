@@ -67,16 +67,18 @@ class Schedule(View):
             Argument('is_active', type=bool, required=False)
         ).parse(request.body, True)
         if error is None:
-            Task.objects.filter(pk=form.id).update(**form)
+            task = Task.objects.get(pk=form.id)
             if form.get('is_active') is not None:
+                task.is_active = form.is_active
+                task.latest_id = None
                 if form.is_active:
-                    task = Task.objects.filter(pk=form.id).first()
                     message = {'id': form.id, 'action': 'add'}
                     message.update(task.to_dict(selects=('trigger', 'trigger_args', 'command', 'targets')))
                 else:
                     message = {'id': form.id, 'action': 'remove'}
                 rds_cli = get_redis_connection()
                 rds_cli.lpush(settings.SCHEDULE_KEY, json.dumps(message))
+            task.save()
         return json_response(error=error)
 
     def delete(self, request):
