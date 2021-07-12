@@ -39,7 +39,7 @@ export default observer(function () {
       <Form form={form} initialValues={store.settings.ldap_service} style={{maxWidth: 400}} labelCol={{span: 8}}
             wrapperCol={{span: 16}}>
         <Form.Item required name="server" label="LDAP服务地址">
-          <Input placeholder="例如：ldap.spug.dev"/>
+          <Input placeholder="例如：ldap.spug.cc"/>
         </Form.Item>
         <Form.Item required name="port" label="LDAP服务端口">
           <Input placeholder="例如：389"/>
