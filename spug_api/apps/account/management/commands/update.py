@@ -17,20 +17,22 @@ class Command(BaseCommand):
         if res['error']:
             return self.stderr.write(self.style.ERROR(f'获取新版本失败：{res["error"]}'))
         if not res['data']['has_new']:
-            self.stdout.write(self.style.SUCCESS(''))
+            self.stdout.write(res['data']['extra'])
             is_repair = True
-            answer = input(f'当前已是最新版本，是否要进行修复性更新[y|n]？')
+            answer = input(f'\r\n当前已是最新版本，是否要进行修复性更新[y|n]？')
         else:
             version = res['data']['version']
             self.stdout.write(res['data']['content'])
-            answer = input(f'发现新版本 {version} 是否更新[y|n]？')
+            self.stdout.write('\r\n')
+            self.stdout.write(res['data']['extra'])
+            answer = input(f'\r\n发现新版本 {version} 是否更新[y|n]？')
         if answer.lower() != 'y':
             return
 
         # update web
         web_dir = os.path.join(settings.BASE_DIR, '../spug_web')
         commands = [
-            f'curl -o /tmp/spug_web.tar.gz http://cdn.spug.cc/spug/web_{version}.tar.gz',
+            f'curl -o /tmp/spug_web.tar.gz https://cdn.spug.cc/spug/web_{version}.tar.gz',
             f'rm -rf {web_dir}/build',
             f'tar xf /tmp/spug_web.tar.gz -C {web_dir}'
         ]
