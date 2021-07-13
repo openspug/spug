@@ -40,8 +40,6 @@ class AppView(View):
                 app = App.objects.create(created_by=request.user, **form)
                 app.sort_id = app.id
                 app.save()
-                if request.user.role:
-                    request.user.role.add_deploy_perm('apps', app.id)
         return json_response(error=error)
 
     def patch(self, request):

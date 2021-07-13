@@ -35,8 +35,6 @@ class EnvironmentView(View):
                 env = Environment.objects.create(created_by=request.user, **form)
                 env.sort_id = env.id
                 env.save()
-                if request.user.role:
-                    request.user.role.add_deploy_perm('envs', env.id)
         return json_response(error=error)
 
     def patch(self, request):

@@ -63,7 +63,7 @@ export default [{
     label: '应用管理',
     perms: [
       {key: 'view', label: '查看应用'},
-      {key: 'add', label: '新建应用'},
+      // {key: 'add', label: '新建应用'},
       {key: 'edit', label: '编辑应用'},
       {key: 'del', label: '删除应用'},
       {key: 'config', label: '查看配置'},
@@ -110,7 +110,7 @@ export default [{
     label: '环境管理',
     perms: [
       {key: 'view', label: '查看环境'},
-      {key: 'add', label: '新建环境'},
+      // {key: 'add', label: '新建环境'},
       {key: 'edit', label: '编辑环境'},
       {key: 'del', label: '删除环境'}
     ]
@@ -130,7 +130,7 @@ export default [{
     label: '应用管理',
     perms: [
       {key: 'view', label: '查看应用'},
-      {key: 'add', label: '新建应用'},
+      // {key: 'add', label: '新建应用'},
       {key: 'edit', label: '编辑应用'},
       {key: 'del', label: '删除应用'},
       {key: 'view_config', label: '查看配置'},
