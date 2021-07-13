@@ -92,6 +92,7 @@ function Header(props) {
           <ReloadOutlined onClick={props.onReload}/>
           <Popover
             arrowPointAtCenter
+            destroyTooltipOnHide={{keepParent: false}}
             title={[
               <Checkbox
                 key="1"
