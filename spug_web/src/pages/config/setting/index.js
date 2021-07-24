@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Menu, Input, Button, Select, PageHeader, Modal } from 'antd';
+import { Menu, Input, Button, PageHeader, Modal, Space, Radio } from 'antd';
 import {
   DiffOutlined,
   HistoryOutlined,
@@ -102,11 +102,11 @@ class Index extends React.Component {
           <div className={styles.right}>
             <SearchForm>
               <SearchForm.Item span={6} title="视图" style={{paddingLeft: 0}}>
-                <Select value={view} style={{width: '100%'}} onChange={v => this.setState({view: v})}>
-                  <Select.Option value="1"><TableOutlined style={{marginRight: 10}}/>表格</Select.Option>
-                  <Select.Option value="2"><UnorderedListOutlined style={{marginRight: 10}}/>文本</Select.Option>
-                  <Select.Option value="3"><NumberOutlined style={{marginRight: 10}}/>JSON</Select.Option>
-                </Select>
+                <Radio.Group value={view} onChange={e => this.setState({view: e.target.value})}>
+                  <Radio.Button value="1"><TableOutlined title="表格视图"/></Radio.Button>
+                  <Radio.Button value="2"><UnorderedListOutlined title="文本视图"/></Radio.Button>
+                  <Radio.Button value="3"><NumberOutlined title="JSON视图"/></Radio.Button>
+                </Radio.Group>
               </SearchForm.Item>
               <SearchForm.Item span={7} title="Key">
                 <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
@@ -114,14 +114,20 @@ class Index extends React.Component {
               <SearchForm.Item span={3}>
                 <Button type="primary" icon={<SyncOutlined/>} onClick={this.handleRefresh}>刷新</Button>
               </SearchForm.Item>
-              <SearchForm.Item span={4}>
-                <Button type="primary" style={{backgroundColor: 'orange', borderColor: 'orange'}}
-                        icon={<HistoryOutlined/>}
-                        onClick={store.showRecord}>更改历史</Button>
-              </SearchForm.Item>
-              <SearchForm.Item span={4} style={{textAlign: 'right'}}>
-                <AuthButton auth="config.app.edit_config|config.service.edit_config" disabled={view !== '1'}
-                            type="primary" icon={<PlusOutlined/>} onClick={() => store.showForm()}>新增配置</AuthButton>
+              <SearchForm.Item span={8} style={{textAlign: 'right', padding: 0}}>
+                <Space size="large">
+                  <AuthButton
+                    auth="config.app.edit_config|config.service.edit_config"
+                    disabled={view !== '1'}
+                    type="primary"
+                    icon={<PlusOutlined/>}
+                    onClick={() => store.showForm()}>新增配置</AuthButton>
+                  <Button
+                    type="primary"
+                    style={{backgroundColor: 'orange', borderColor: 'orange'}}
+                    icon={<HistoryOutlined/>}
+                    onClick={store.showRecord}>更改历史</Button>
+                </Space>
               </SearchForm.Item>
             </SearchForm>
 
