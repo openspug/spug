@@ -21,7 +21,6 @@ def auto_deploy(request, deploy_id, kind):
         if not body['ref'].startswith('refs/'):  # Compatible with gogs
             body['ref'] = 'refs/tags/' + body['ref']
 
-        body = json.loads(request.body)
         _, _kind, ref = body['ref'].split('/', 2)
         if kind == 'branch' and _kind == 'heads':
             commit_id = body['after']
