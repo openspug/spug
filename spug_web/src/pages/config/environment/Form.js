@@ -37,7 +37,7 @@ export default observer(function () {
         <Form.Item required name="name" label="环境名称">
           <Input placeholder="请输入环境名称，例如：开发环境"/>
         </Form.Item>
-        <Form.Item required name="key" label="唯一标识符">
+        <Form.Item required name="key" label="唯一标识符" tooltip="环境的唯一标识符，会在配置中心API中使用，具体请参考官方文档。">
           <Input placeholder="请输入唯一标识符，例如：dev"/>
         </Form.Item>
         <Form.Item name="desc" label="备注信息">
