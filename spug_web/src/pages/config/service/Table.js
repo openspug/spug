@@ -58,7 +58,6 @@ class ComTable extends React.Component {
           showTotal: total => `共 ${total} 条`,
           pageSizeOptions: ['10', '20', '50', '100']
         }}>
-        <Table.Column title="序号" key="series" render={(_, __, index) => index + 1}/>
         <Table.Column title="服务名称" dataIndex="name"/>
         <Table.Column title="标识符" dataIndex="key"/>
         <Table.Column ellipsis title="描述信息" dataIndex="desc"/>

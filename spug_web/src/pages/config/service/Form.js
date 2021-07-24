@@ -28,7 +28,6 @@ export default observer(function () {
   return (
     <Modal
       visible
-      width={800}
       maskClosable={false}
       title={store.record.id ? '编辑服务' : '新建服务'}
       onCancel={() => store.formVisible = false}

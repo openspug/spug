@@ -36,7 +36,7 @@ export default observer(function () {
   return (
     <Modal
       visible
-      width={800}
+      width={700}
       maskClosable={false}
       title={store.record.id ? '编辑账户' : '新建账户'}
       onCancel={() => store.formVisible = false}

@@ -28,7 +28,6 @@ export default observer(function () {
   return (
     <Modal
       visible
-      width={800}
       maskClosable={false}
       title={store.record.id ? '编辑环境' : '新建环境'}
       onCancel={() => store.formVisible = false}
