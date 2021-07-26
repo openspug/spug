@@ -15,7 +15,11 @@ export function updatePermissions() {
   X_TOKEN = localStorage.getItem('token');
   Permission.isReady = true;
   Permission.isSuper = localStorage.getItem('is_supper') === 'true';
-  Permission.permissions = JSON.parse(localStorage.getItem('permissions') || '[]');
+  try {
+    Permission.permissions = JSON.parse(localStorage.getItem('permissions') || '[]');
+  } catch (e) {
+
+  }
 }
 
 // 前端页面的权限判断(仅作为前端功能展示的控制，具体权限控制应在后端实现)

@@ -135,6 +135,9 @@ class ConfigView(View):
             form.updated_by = request.user
             envs = form.pop('envs')
             for env_id in envs:
+                cf = Config.objects.filter(o_id=form.o_id, type=form.type, env_id=env_id, key=form.key).first()
+                if cf:
+                    raise Exception(f'{cf.env.name} 中已存在该Key')
                 Config.objects.create(env_id=env_id, **form)
                 ConfigHistory.objects.create(action='1', env_id=env_id, **form)
         return json_response(error=error)
