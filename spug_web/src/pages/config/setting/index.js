@@ -5,20 +5,19 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Menu, Input, Button, PageHeader, Modal, Space, Radio } from 'antd';
+import { Menu, Input, Button, PageHeader, Modal, Space, Radio, Form } from 'antd';
 import {
   DiffOutlined,
   HistoryOutlined,
   NumberOutlined,
-  SyncOutlined,
   TableOutlined,
   UnorderedListOutlined,
-  PlusOutlined,
+  PlusOutlined
 } from '@ant-design/icons';
 import envStore from '../environment/store';
 import styles from './index.module.css';
 import history from 'libs/history';
-import { SearchForm, AuthDiv, AuthButton, Breadcrumb } from 'components';
+import { AuthDiv, AuthButton, Breadcrumb } from 'components';
 import DiffConfig from './DiffConfig';
 import TableView from './TableView';
 import TextView from './TextView';
@@ -100,36 +99,31 @@ class Index extends React.Component {
             </Menu>
           </div>
           <div className={styles.right}>
-            <SearchForm>
-              <SearchForm.Item span={6} title="视图" style={{paddingLeft: 0}}>
+            <Form layout="inline" style={{marginBottom: 16}}>
+              <Form.Item label="视图" style={{paddingLeft: 0}}>
                 <Radio.Group value={view} onChange={e => this.setState({view: e.target.value})}>
                   <Radio.Button value="1"><TableOutlined title="表格视图"/></Radio.Button>
                   <Radio.Button value="2"><UnorderedListOutlined title="文本视图"/></Radio.Button>
                   <Radio.Button value="3"><NumberOutlined title="JSON视图"/></Radio.Button>
                 </Radio.Group>
-              </SearchForm.Item>
-              <SearchForm.Item span={7} title="Key">
+              </Form.Item>
+              <Form.Item label="Key">
                 <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
-              </SearchForm.Item>
-              <SearchForm.Item span={3}>
-                <Button type="primary" icon={<SyncOutlined/>} onClick={this.handleRefresh}>刷新</Button>
-              </SearchForm.Item>
-              <SearchForm.Item span={8} style={{textAlign: 'right', padding: 0}}>
-                <Space size="large">
-                  <AuthButton
-                    auth="config.app.edit_config|config.service.edit_config"
-                    disabled={view !== '1'}
-                    type="primary"
-                    icon={<PlusOutlined/>}
-                    onClick={() => store.showForm()}>新增配置</AuthButton>
-                  <Button
-                    type="primary"
-                    style={{backgroundColor: 'orange', borderColor: 'orange'}}
-                    icon={<HistoryOutlined/>}
-                    onClick={store.showRecord}>更改历史</Button>
-                </Space>
-              </SearchForm.Item>
-            </SearchForm>
+              </Form.Item>
+              <Space style={{flex: 1, justifyContent: 'flex-end'}}>
+                <AuthButton
+                  auth="config.app.edit_config|config.service.edit_config"
+                  disabled={view !== '1'}
+                  type="primary"
+                  icon={<PlusOutlined/>}
+                  onClick={() => store.showForm()}>新增配置</AuthButton>
+                <Button
+                  type="primary"
+                  style={{backgroundColor: 'orange', borderColor: 'orange'}}
+                  icon={<HistoryOutlined/>}
+                  onClick={store.showRecord}>更改历史</Button>
+              </Space>
+            </Form>
 
             {view === '1' && <TableView/>}
             {view === '2' && <TextView ref={ref => this.textView = ref}/>}

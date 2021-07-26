@@ -15,7 +15,7 @@ import store from './store';
 @observer
 class TableView extends React.Component {
   lockIcon = <Tooltip title="私有配置应用专用，不会被其他应用获取到">
-    <LockOutlined style={{marginRight: 5}} />
+    <LockOutlined style={{marginRight: 5}}/>
   </Tooltip>;
 
   columns = [{
@@ -47,8 +47,10 @@ class TableView extends React.Component {
     render: info => (
       <Action>
         <Action.Button auth={`config.${store.type}.edit_config`} onClick={() => store.showForm(info)}>编辑</Action.Button>
-        <Action.Button auth={`config.${store.type}.edit_config`}
-                       onClick={() => this.handleDelete(info)}>删除</Action.Button>
+        <Action.Button
+          danger
+          auth={`config.${store.type}.edit_config`}
+          onClick={() => this.handleDelete(info)}>删除</Action.Button>
       </Action>
     )
   }];
