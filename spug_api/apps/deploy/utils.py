@@ -6,6 +6,7 @@ from django.conf import settings
 from libs.utils import AttrDict, human_time, human_datetime
 from apps.host.models import Host
 from apps.notify.models import Notify
+from apps.config.utils import compose_configs
 from concurrent import futures
 import requests
 import subprocess
@@ -40,6 +41,11 @@ def dispatch(req):
             SPUG_API_TOKEN=api_token,
             SPUG_REPOS_DIR=REPOS_DIR,
         )
+        # append configs
+        configs = compose_configs(req.deploy.app, req.deploy.env_id)
+        configs_env = {f'_SPUG_{k.upper()}': v for k, v in configs.items()}
+        env.update(configs_env)
+
         if req.deploy.extend == '1':
             _ext1_deploy(req, helper, env)
         else:

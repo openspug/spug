@@ -3,49 +3,26 @@
 # Released under the AGPL-3.0 License.
 from django.http.response import HttpResponse
 from django_redis import get_redis_connection
-from apps.config.models import Config, Service, Environment
-from apps.setting.utils import AppSetting
+from apps.config.models import Environment
 from apps.app.models import App
+from apps.setting.utils import AppSetting
+from apps.config.utils import compose_configs
 import json
 
 
 def get_configs(request):
-    data = {}
     app, env_id, no_prefix = _parse_params(request)
     if not app or not env_id:
         return HttpResponse('Invalid params', status=400)
-    # app own configs
-    for item in Config.objects.filter(type='app', o_id=app.id, env_id=env_id).only('key', 'value'):
-        key = item.key if no_prefix else f'{app.key}_{item.key}'
-        data[key] = item.value
 
-    # relation app public configs
-    if app.rel_apps:
-        app_ids = json.loads(app.rel_apps)
-        if app_ids:
-            id_key_map = {x.id: x.key for x in App.objects.filter(id__in=app_ids)}
-            for item in Config.objects.filter(type='app', o_id__in=app_ids, env_id=env_id, is_public=True) \
-                    .only('key', 'value'):
-                key = item.key if no_prefix else f'{id_key_map[item.o_id]}_{item.key}'
-                data[key] = item.value
-
-    # relation service configs
-    if app.rel_services:
-        src_ids = json.loads(app.rel_services)
-        if src_ids:
-            id_key_map = {x.id: x.key for x in Service.objects.filter(id__in=src_ids)}
-            for item in Config.objects.filter(type='src', o_id__in=src_ids, env_id=env_id).only('key', 'value'):
-                key = item.key if no_prefix else f'{id_key_map[item.o_id]}_{item.key}'
-                data[key] = item.value
-
-    # format
+    configs = compose_configs(app, env_id, no_prefix)
     fmt = request.GET.get('format', 'kv')
     if fmt == 'kv':
-        return _kv_response(data)
+        return _kv_response(configs)
     elif fmt == 'env':
-        return _env_response(data)
+        return _env_response(configs)
     elif fmt == 'json':
-        return _json_response(data)
+        return _json_response(configs)
     else:
         return HttpResponse('Unsupported output format', status=400)
 
