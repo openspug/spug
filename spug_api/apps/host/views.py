@@ -87,6 +87,8 @@ class HostView(View):
             Argument('is_copy', type=bool, help='参数错误'),
         ).parse(request.body)
         if error is None:
+            if form.t_group_id == form.s_group_id:
+                return json_response(error='不能选择本分组的主机')
             s_group = Group.objects.get(pk=form.s_group_id)
             t_group = Group.objects.get(pk=form.t_group_id)
             t_group.hosts.add(*form.host_ids)
