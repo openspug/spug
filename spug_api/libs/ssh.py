@@ -62,7 +62,7 @@ class SSH:
             chan.settimeout(timeout)
             chan.set_combine_stderr(True)
             if environment:
-                str_env = ' '.join(f"{k}='{self._handle_env(v)}'" for k, v in environment.items())
+                str_env = ' '.join(self._handle_env(k, v) for k, v in environment.items())
                 command = f'export {str_env} && {command}'
             chan.exec_command(command)
             stdout = chan.makefile("rb", -1)
@@ -75,7 +75,7 @@ class SSH:
             chan.settimeout(timeout)
             chan.set_combine_stderr(True)
             if environment:
-                str_env = ' '.join(f"{k}='{self._handle_env(v)}'" for k, v in environment.items())
+                str_env = ' '.join(self._handle_env(k, v) for k, v in environment.items())
                 command = f'export {str_env} && {command}'
             chan.exec_command(command)
             stdout = chan.makefile("rb", -1)
@@ -106,10 +106,11 @@ class SSH:
         except UnicodeDecodeError:
             return out.decode('GBK')
 
-    def _handle_env(self, value):
+    def _handle_env(self, key, value):
+        key = key.replace('-', '_')
         if isinstance(value, str):
             value = value.replace("'", "'\"'\"'")
-        return value
+        return f"{key}='{value}'"
 
     def __enter__(self):
         if self.client is not None:

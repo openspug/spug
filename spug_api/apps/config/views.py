@@ -7,6 +7,7 @@ from libs import json_response, JsonParser, Argument
 from apps.app.models import Deploy
 from apps.config.models import *
 import json
+import re
 
 
 class EnvironmentView(View):
@@ -25,7 +26,9 @@ class EnvironmentView(View):
             Argument('desc', required=False)
         ).parse(request.body)
         if error is None:
-            form.key = form.key.replace("'", '')
+            if not re.fullmatch(r'[-\w]+', form.key, re.ASCII):
+                return json_response(error='标识符必须为字母、数字、-和下划线的组合')
+
             env = Environment.objects.filter(key=form.key).first()
             if env and env.id != form.id:
                 return json_response(error=f'唯一标识符 {form.key} 已存在，请更改后重试')
@@ -83,6 +86,9 @@ class ServiceView(View):
             Argument('desc', required=False)
         ).parse(request.body)
         if error is None:
+            if not re.fullmatch(r'[-\w]+', form.key, re.ASCII):
+                return json_response(error='标识符必须为字母、数字、-和下划线的组合')
+
             service = Service.objects.filter(key=form.key).first()
             if service and service.id != form.id:
                 return json_response(error=f'唯一标识符 {form.key} 已存在，请更改后重试')

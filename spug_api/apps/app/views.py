@@ -12,6 +12,7 @@ from apps.setting.utils import AppSetting
 import subprocess
 import json
 import os
+import re
 
 
 class AppView(View):
@@ -30,7 +31,9 @@ class AppView(View):
             Argument('desc', required=False)
         ).parse(request.body)
         if error is None:
-            form.name = form.name.replace("'", '')
+            if not re.fullmatch(r'[-\w]+', form.key, re.ASCII):
+                return json_response(error='标识符必须为字母、数字、-和下划线的组合')
+
             app = App.objects.filter(key=form.key).first()
             if app and app.id != form.id:
                 return json_response(error=f'唯一标识符 {form.key} 已存在，请更改后重试')
