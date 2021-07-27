@@ -148,6 +148,7 @@ export default observer(function () {
   return (
     <Card
       title="分组列表"
+      style={{height: '100%'}}
       loading={store.grpFetching}
       extra={(
         <AuthFragment auth="admin">

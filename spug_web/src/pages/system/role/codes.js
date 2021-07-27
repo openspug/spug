@@ -22,7 +22,6 @@ export default [{
     perms: [
       {key: 'view', label: '查看主机'},
       {key: 'add', label: '新建主机'},
-      {key: 'import', label: '批量导入'},
       {key: 'edit', label: '编辑主机'},
       {key: 'del', label: '删除主机'},
     ]

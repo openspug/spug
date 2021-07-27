@@ -5,7 +5,7 @@
  */
 import { observable, computed } from 'mobx';
 import { message } from 'antd';
-import http from 'libs/http';
+import { http, includes } from 'libs';
 import lds from 'lodash';
 
 class Store {
@@ -26,15 +26,13 @@ class Store {
   @observable detailVisible = false;
   @observable selectorVisible = false;
 
-  @observable f_name;
-  @observable f_host;
+  @observable f_word;
   @observable f_status = '';
 
   @computed get dataSource() {
     let records = [];
     if (this.group.all_host_ids) records = this.records ? this.records.filter(x => this.group.all_host_ids.includes(x.id)) : [];
-    if (this.f_name) records = records.filter(x => x.name.toLowerCase().includes(this.f_name.toLowerCase()));
-    if (this.f_host) records = records.filter(x => x.hostname.toLowerCase().includes(this.f_host.toLowerCase()));
+    if (this.f_word) records = records.filter(x => includes(x.name, this.f_word) || includes(x.public_ip_address, this.f_word) || includes(x.private_ip_address, this.f_word));
     if (this.f_status !== '') records = records.filter(x => this.f_status === x.is_verified);
     return records
   }

@@ -5,8 +5,8 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Modal, Dropdown, Button, Menu, Avatar, Tooltip, Space, Tag, Radio, message } from 'antd';
-import { PlusOutlined, DownOutlined, SyncOutlined } from '@ant-design/icons';
+import { Table, Modal, Dropdown, Button, Menu, Avatar, Tooltip, Space, Tag, Radio, Input, message } from 'antd';
+import { PlusOutlined, DownOutlined, SyncOutlined, FormOutlined } from '@ant-design/icons';
 import { Action, TableCard, AuthButton, AuthFragment } from 'components';
 import { http, hasPermission } from 'libs';
 import store from './store';
@@ -30,6 +30,8 @@ function ComTable() {
   function handleImport(menu) {
     if (menu.key === 'excel') {
       store.importVisible = true
+    } else if (menu.key === 'form') {
+      store.showForm()
     } else {
       store.cloudImport = menu.key
     }
@@ -48,24 +50,20 @@ function ComTable() {
   return (
     <TableCard
       rowKey="id"
-      title={<TableCard.Search keys={['f_name/主机名称', 'f_host/连接地址']} onChange={(k, v) => store[k] = v}/>}
+      title={<Input placeholder="输入检索" style={{maxWidth: 250}} onChange={e => store.f_word = e.target.value}/>}
       loading={store.isFetching}
       dataSource={store.dataSource}
       onReload={store.fetchRecords}
       actions={[
-        <AuthButton
-          auth="host.host.add"
-          type="primary"
-          icon={<PlusOutlined/>}
-          onClick={() => store.showForm()}>新建</AuthButton>,
-        <AuthButton
-          auth="host.host.add"
-          type="primary"
-          icon={<SyncOutlined/>}
-          onClick={() => store.showSync()}>批量验证</AuthButton>,
-        <AuthFragment auth="host.host.import">
+        <AuthFragment auth="host.host.add">
           <Dropdown overlay={(
             <Menu onClick={handleImport}>
+              <Menu.Item key="form">
+                <Space>
+                  <FormOutlined style={{fontSize: 16, marginRight: 4, color: '#1890ff'}}/>
+                  <span>新建主机</span>
+                </Space>
+              </Menu.Item>
               <Menu.Item key="excel">
                 <Space>
                   <Avatar shape="square" size={20} src={icons.excel}/>
@@ -86,9 +84,14 @@ function ComTable() {
               </Menu.Item>
             </Menu>
           )}>
-            <Button type="primary">批量导入 <DownOutlined/></Button>
+            <Button type="primary" icon={<PlusOutlined/>}>新建 <DownOutlined/></Button>
           </Dropdown>
         </AuthFragment>,
+        <AuthButton
+          auth="host.host.add"
+          type="primary"
+          icon={<SyncOutlined/>}
+          onClick={() => store.showSync()}>验证</AuthButton>,
         <Radio.Group value={store.f_status} onChange={e => store.f_status = e.target.value}>
           <Radio.Button value="">全部</Radio.Button>
           <Radio.Button value={false}>未验证</Radio.Button>
