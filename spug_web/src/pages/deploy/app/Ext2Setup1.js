@@ -44,8 +44,8 @@ export default observer(function Ext2Setup1() {
         </Form.Item>
       </Form.Item>
       <Form.Item required label="目标主机">
-        {info.host_ids.length > 0 && `已选择 ${info.host_ids.length} 台`}
-        <Button type="link" onClick={() => setSelectorVisible(true)}>选择主机</Button>
+        {info.host_ids.length > 0 && <span style={{marginRight: 16}}>已选择 {info.host_ids.length} 台</span>}
+        <Button type="link" style={{padding: 0}} onClick={() => setSelectorVisible(true)}>选择主机</Button>
       </Form.Item>
       <Form.Item label="发布模式">
         <Radio.Group
