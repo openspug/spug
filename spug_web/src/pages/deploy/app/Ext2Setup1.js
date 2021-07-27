@@ -89,7 +89,7 @@ export default observer(function Ext2Setup1() {
       <Form.Item wrapperCol={{span: 14, offset: 6}}>
         <Button
           type="primary"
-          disabled={!info.env_id}
+          disabled={!(info.env_id && info.host_ids.length)}
           onClick={() => store.page += 1}>下一步</Button>
       </Form.Item>
       <Selector

@@ -11,16 +11,11 @@ import 'ace-builds/src-noconflict/mode-text';
 import 'ace-builds/src-noconflict/mode-sh';
 import 'ace-builds/src-noconflict/theme-tomorrow';
 import { http, cleanCommand } from 'libs';
+import Tips from './Tips';
 import store from './store';
 
 export default observer(function () {
   const [loading, setLoading] = useState(false);
-  const Tips = (
-    <a
-      target="_blank"
-      rel="noopener noreferrer"
-      href="https://spug.cc/docs/deploy-config/#%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F">内置全局变量</a>
-  )
 
   function handleSubmit() {
     const {dst_dir, dst_repo} = store.deploy;
@@ -60,7 +55,7 @@ export default observer(function () {
       <Form.Item
         label="应用发布前执行"
         tooltip="在发布的目标主机上运行，当前目录为目标主机上待发布的源代码目录，可执行任意自定义命令。"
-        help={<span>可使用 {Tips}，此时还未进行文件变更，可进行一些发布前置操作。</span>}>
+        help={<span>{Tips}，此时还未进行文件变更，可进行一些发布前置操作。</span>}>
         <Editor
           readOnly={store.isReadOnly}
           mode="sh"
@@ -76,7 +71,7 @@ export default observer(function () {
         label="应用发布后执行"
         style={{marginTop: 12, marginBottom: 24}}
         tooltip="在发布的目标主机上运行，当前目录为已发布的应用目录，可执行任意自定义命令。"
-        help={<span>可使用 {Tips}，可以在发布后进行重启服务等操作。</span>}>
+        help={<span>{Tips}，可以在发布后进行重启服务等操作。</span>}>
         <Editor
           readOnly={store.isReadOnly}
           mode="sh"

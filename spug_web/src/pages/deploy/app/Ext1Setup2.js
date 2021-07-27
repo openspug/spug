@@ -6,22 +6,16 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { Form, Radio, Button, Tooltip } from "antd";
+import { Form, Radio, Button, Tooltip } from 'antd';
 import { cleanCommand } from 'libs';
 import Editor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-text';
 import 'ace-builds/src-noconflict/mode-sh';
 import 'ace-builds/src-noconflict/theme-tomorrow';
+import Tips from './Tips';
 import store from './store';
 
 export default observer(function () {
-  const Tips = (
-    <a
-      target="_blank"
-      rel="noopener noreferrer"
-      href="https://spug.cc/docs/deploy-config/#%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F">内置全局变量</a>
-  )
-
   function handleNext() {
     store.page += 1
   }
@@ -66,7 +60,7 @@ export default observer(function () {
       <Form.Item
         label="代码检出前执行"
         tooltip="在运行 Spug 的服务器(或容器)上执行，当前目录为仓库源代码目录，可以执行任意自定义命令。"
-        help={<span>可使用 {Tips}，请避免在此修改已跟踪的文件，防止在检出代码时失败。</span>}>
+        help={<span>{Tips}，请避免在此修改已跟踪的文件，防止在检出代码时失败。</span>}>
         <Editor
           readOnly={store.isReadOnly}
           mode="sh"
@@ -82,7 +76,7 @@ export default observer(function () {
         label="代码检出后执行"
         style={{marginTop: 12, marginBottom: 24}}
         tooltip="在运行 Spug 的服务器(或容器)上执行，当前目录为检出后的源代码目录，可执行任意自定义命令。"
-        help={<span>可使用 {Tips}，大多数情况下在此进行构建操作。</span>}>
+        help={<span>{Tips}，大多数情况下在此进行构建操作。</span>}>
         <Editor
           readOnly={store.isReadOnly}
           mode="sh"
