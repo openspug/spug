@@ -14,7 +14,7 @@ import LoginActive from './LoginActive';
 class HomeIndex extends React.Component {
   render() {
     return (
-      <AuthDiv auth="home.home.view">
+      <AuthDiv auth="dashboard.dashboard.view">
         <StatisticsCard/>
         <AlarmTrend/>
         <Row style={{marginTop: 20}}>
