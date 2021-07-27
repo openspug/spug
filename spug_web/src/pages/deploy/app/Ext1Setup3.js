@@ -23,6 +23,10 @@ export default observer(function () {
   )
 
   function handleSubmit() {
+    const {dst_dir, dst_repo} = store.deploy;
+    if (dst_repo.includes(dst_dir.replace(/\/*$/, ''))) {
+      return message.error('存储路径不能位于部署路径内')
+    }
     setLoading(true);
     const info = store.deploy;
     info['app_id'] = store.app_id;
