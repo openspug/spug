@@ -37,7 +37,9 @@ def auto_deploy(request, deploy_id, kind):
 
 def _is_valid_token(request):
     api_key = AppSetting.get_default('api_key')
-    token = request.headers.get('X-Gitlab-Token') or request.headers.get('X-Gitee-Token')
+    token = request.headers.get('X-Gitlab-Token')
+    token = token or request.headers.get('X-Gitee-Token')
+    token = token or request.headers.get('X-Codeup-Token')
     if token:
         return token == api_key
     token = request.headers.get('X-Gogs-Signature')
