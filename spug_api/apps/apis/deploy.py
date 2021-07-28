@@ -45,6 +45,9 @@ def _is_valid_token(request):
     token = request.headers.get('X-Gogs-Signature')
     if token:
         return token == hmac.new(api_key.encode(), request.body, hashlib.sha256).hexdigest()
+    token = request.headers.get('X-Hub-Signature', '').split('=')[-1]
+    if token:
+        return token == hmac.new(api_key.encode(), request.body, hashlib.sha1).hexdigest()
     return False
 
 
