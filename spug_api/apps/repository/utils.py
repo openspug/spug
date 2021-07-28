@@ -7,6 +7,7 @@ from django.db import close_old_connections
 from libs.utils import AttrDict, human_time
 from apps.repository.models import Repository
 from apps.app.utils import fetch_repo
+from apps.config.utils import compose_configs
 import subprocess
 import json
 import uuid
@@ -40,6 +41,11 @@ def dispatch(rep: Repository):
             SPUG_API_TOKEN=api_token,
             SPUG_REPOS_DIR=REPOS_DIR,
         )
+        # append configs
+        configs = compose_configs(rep.app, rep.env_id)
+        configs_env = {f'_SPUG_{k.upper()}': v for k, v in configs.items()}
+        env.update(configs_env)
+
         _build(rep, helper, env)
         rep.status = '5'
     except Exception as e:
