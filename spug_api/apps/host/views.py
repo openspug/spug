@@ -125,7 +125,7 @@ def post_import(request):
     for i, row in enumerate(ws.rows):
         if i == 0:  # 第1行是表头 略过
             continue
-        if not all([row[x].value for x in range(5)]):
+        if not all([row[x].value for x in range(4)]):
             summary['invalid'].append(i)
             continue
         data = AttrDict(
