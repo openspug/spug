@@ -20,7 +20,7 @@ class AddSelect extends React.Component {
       is_audit: false,
       rst_notify: {mode: '0'},
       host_ids: [],
-      filter_rule: {type: 'contain', data: ''}
+      filter_rule: {type: 'exclude', data: ''}
     }
   };
 
