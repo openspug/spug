@@ -57,7 +57,7 @@ export default observer(function AutoDeploy() {
       title="Webhook"
       footer={null}
       onCancel={() => store.autoVisible = false}>
-      <Alert showIcon type="info" style={{width: 440, margin: '0 auto 24px'}} message="Webhook可以用来与Gitlab或Gitee结合实现触发后自动发布。"/>
+      <Alert showIcon type="info" style={{width: 440, margin: '0 auto 24px'}} message="Webhook可以用来与Git结合实现触发后自动发布。"/>
       <Form labelCol={{span: 6}} wrapperCol={{span: 16}}>
         <Form.Item required label="触发方式">
           <Radio.Group value={type} onChange={e => setType(e.target.value)}>
@@ -66,13 +66,13 @@ export default observer(function AutoDeploy() {
           </Radio.Group>
         </Form.Item>
         {store.deploy.extend === '1' ? (
-          <Form.Item required={!tagMode} label="选择分支" extra={<span>
+          <Form.Item hidden={tagMode} required={!tagMode} label="选择分支" extra={<span>
             根据你的网络情况，首次刷新可能会很慢，请耐心等待。
             <a target="_blank" rel="noopener noreferrer"
                href="https://spug.cc/docs/install-error/#%E6%96%B0%E5%BB%BA%E5%B8%B8%E8%A7%84%E5%8F%91%E5%B8%83%E7%94%B3%E8%AF%B7-git-clone-%E9%94%99%E8%AF%AF">刷新失败？</a>
           </span>}>
             <Form.Item style={{display: 'inline-block', marginBottom: 0, width: '246px'}}>
-              <Select disabled={tagMode} placeholder="仅指定分支的事件触发自动发布" value={branch} onChange={setBranch}>
+              <Select placeholder="仅指定分支的事件触发自动发布" value={branch} onChange={setBranch}>
                 {branches.map(item => (
                   <Select.Option key={item} value={item}>{item}</Select.Option>
                 ))}
@@ -86,9 +86,8 @@ export default observer(function AutoDeploy() {
             </Form.Item>
           </Form.Item>
         ) : (
-          <Form.Item label="指定分支">
+          <Form.Item required hidden={tagMode} label="指定分支">
             <Input
-              disabled={tagMode}
               value={branch}
               onChange={e => setBranch(e.target.value)}
               placeholder="仅指定分支的事件触发自动发布"/>
@@ -99,7 +98,7 @@ export default observer(function AutoDeploy() {
             <div style={{color: '#ff4d4f'}}>请指定分支名称。</div>
           </Form.Item>
         ) : (
-          <Form.Item label="Webhook URL" extra="点击复制链接，目前支持Gitee、Gitlab和Gogs。">
+          <Form.Item label="Webhook URL" extra="点击复制链接，目前支持Gitee、Github、Gitlab、Gogs和Codeup(阿里云)。">
             <div className={styles.webhook} onClick={() => copyToClipBoard(url)}>{url}</div>
           </Form.Item>
         )}
