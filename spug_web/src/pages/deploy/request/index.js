@@ -26,6 +26,7 @@ function Index() {
     store.fetchRecords()
     if (envStore.records.length === 0) envStore.fetchRecords()
     if (appStore.records.length === 0) appStore.fetchRecords()
+    return () => store.leaveConsole()
   }, [])
 
   function handleBatchDel() {

@@ -142,6 +142,12 @@ class Store {
       info = Object.assign({}, info, {mode: 'read'})
       this.tabs.push(info)
     }
+  };
+
+  leaveConsole = () => {
+    for (let item of this.tabs) {
+      item.mode = 'read'
+    }
   }
 }
 
