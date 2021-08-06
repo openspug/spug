@@ -270,8 +270,9 @@ class Helper:
             texts.insert(0, '## %s ## ' % '发布结果通知')
             if req.approve_at:
                 texts.append(f'**审核人员：** {req.approve_by.nickname}')
+            do_user = req.do_by.nickname if req.type != '3' else 'Webhook'
             texts.extend([
-                f'**执行人员：** {req.do_by.nickname}',
+                f'**执行人员：** {do_user}',
                 f'**发布结果：** <font color="{color}">{text}</font>',
                 f'**发布时间：** {human_datetime()}',
                 '> 来自 Spug运维平台'
@@ -316,8 +317,9 @@ class Helper:
             texts.insert(0, '## %s' % '发布结果通知')
             if req.approve_at:
                 texts.append(f'审核人员： {req.approve_by.nickname}')
+            do_user = req.do_by.nickname if req.type != '3' else 'Webhook'
             texts.extend([
-                f'执行人员： {req.do_by.nickname}',
+                f'执行人员： {do_user}',
                 f'发布结果： <font color="{color}">{text}</font>',
                 f'发布时间： {human_datetime()}',
                 '> 来自 Spug运维平台'
