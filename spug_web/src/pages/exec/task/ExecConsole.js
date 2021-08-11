@@ -14,9 +14,9 @@ import {
   FullscreenExitOutlined
 } from '@ant-design/icons';
 import { Modal, Collapse, Tooltip } from 'antd';
-import { X_TOKEN } from 'libs';
 import OutView from './OutView';
-import styles from './index.module.css';
+import { X_TOKEN } from 'libs';
+import styles from './index.module.less';
 import store from './store';
 
 
@@ -25,9 +25,11 @@ class ExecConsole extends React.Component {
   constructor(props) {
     super(props);
     this.socket = null;
-    this.elements = {};
+    this.terms = {};
+    this.outputs = {};
     this.state = {
-      data: {}
+      activeKey: Object.keys(store.outputs)[0],
+      isFullscreen: false
     }
   }
 
@@ -36,19 +38,31 @@ class ExecConsole extends React.Component {
     this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${store.token}/?x-token=${X_TOKEN}`);
     this.socket.onopen = () => {
       this.socket.send('ok');
-      for (let item of Object.values(store.outputs)) {
-        item['system'].push('### Waiting for schedule\n')
-      }
     };
     this.socket.onmessage = e => {
       if (e.data === 'pong') {
         this.socket.send('ping')
       } else {
-        const {key, data, type, status} = JSON.parse(e.data);
-        if (status !== undefined) {
-          store.outputs[key]['status'] = status
-        } else if (data) {
-          store.outputs[key][type].push(data);
+        const {key, data, status} = JSON.parse(e.data);
+        if (status !== undefined) store.outputs[key].status = status;
+        if (data) {
+          if (this.terms[key]) {
+            this.terms[key].write(data)
+          } else if (this.outputs[key]) {
+            this.outputs[key] += data
+          } else {
+            this.outputs[key] = data
+          }
+        }
+      }
+    };
+    this.socket.onerror = () => {
+      for (let key of Object.keys(store.outputs)) {
+        store.outputs[key]['status'] = 'websocket error'
+        if (this.terms[key]) {
+          this.terms[key].write('Websocket connection failed!')
+        } else {
+          this.outputs[key] = 'Websocket connection failed!'
         }
       }
     }
@@ -59,36 +73,37 @@ class ExecConsole extends React.Component {
     store.isFullscreen = false;
   }
 
-  genExtra = (outputs) => {
-    let latest, icon;
-    if (outputs['status'] === -2) {
+  genExtra = (status) => {
+    if (status === -2) {
       return <LoadingOutlined style={{fontSize: 20, color: '#108ee9'}}/>;
-    } else if (outputs['status'] === 0) {
-      latest = outputs['info'][outputs['info'].length - 1];
-      icon = <CheckCircleTwoTone style={{fontSize: 20}} twoToneColor="#52c41a"/>
+    } else if (status === 0) {
+      return <CheckCircleTwoTone style={{fontSize: 20}} twoToneColor="#52c41a"/>
     } else {
-      latest = outputs['error'][outputs['error'].length - 1]
-      icon = <Tooltip title={`退出状态码：${outputs['status']}`}>
-        <WarningTwoTone style={{fontSize: 20}} twoToneColor="red"/>
-      </Tooltip>
+      return (
+        <Tooltip title={`退出状态码：${status}`}>
+          <WarningTwoTone style={{fontSize: 20}} twoToneColor="red"/>
+        </Tooltip>
+      )
     }
-    return (
-      <div style={{display: 'flex', alignItems: 'center'}}>
-        <pre className={styles.header}>{latest}</pre>
-        {icon}
-      </div>
-    )
   };
 
+  handleUpdate = (data) => {
+    this.setState(data, () => {
+      const key = this.state.activeKey;
+      if (key && this.terms[key]) setTimeout(this.terms[key].fit)
+    })
+  }
+
   render() {
+    const {isFullscreen, activeKey} = this.state;
     return (
       <Modal
         visible
-        width={store.isFullscreen ? '100%' : 1000}
+        width={isFullscreen ? '100%' : 1000}
         title={[
           <span key="1">执行控制台</span>,
-          <div key="2" className={styles.fullscreen} onClick={() => store.isFullscreen = !store.isFullscreen}>
-            {store.isFullscreen ? <FullscreenExitOutlined/> : <FullscreenOutlined/>}
+          <div key="2" className={styles.fullscreen} onClick={() => this.handleUpdate({isFullscreen: !isFullscreen})}>
+            {isFullscreen ? <FullscreenExitOutlined/> : <FullscreenOutlined/>}
           </div>
         ]}
         footer={null}
@@ -97,15 +112,16 @@ class ExecConsole extends React.Component {
         maskClosable={false}>
         <Collapse
           accordion
-          defaultActiveKey={[0]}
           className={styles.collapse}
+          activeKey={activeKey}
+          onChange={key => this.handleUpdate({activeKey: key})}
           expandIcon={({isActive}) => <CaretRightOutlined style={{fontSize: 16}} rotate={isActive ? 90 : 0}/>}>
           {Object.entries(store.outputs).map(([key, item], index) => (
-            <Collapse.Panel
-              key={index}
-              header={<b>{item['title']}</b>}
-              extra={this.genExtra(item)}>
-              <OutView outputs={item}/>
+            <Collapse.Panel key={key} header={<b>{item['title']}</b>} extra={this.genExtra(item.status)}>
+              <OutView
+                isFullscreen={isFullscreen}
+                getOutput={() => this.outputs[key]}
+                setTerm={term => this.terms[key] = term}/>
             </Collapse.Panel>
           ))}
         </Collapse>

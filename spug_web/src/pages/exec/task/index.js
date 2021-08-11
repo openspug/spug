@@ -53,7 +53,7 @@ class TaskIndex extends React.Component {
               icon={<PlusOutlined/>}
               onClick={() => store.showHost = true}>从主机列表中选择</Button>
             <Form.Item label="执行命令">
-              <ACEditor mode="sh" value={body} height="300px" onChange={body => this.setState({body})}/>
+              <ACEditor mode="sh" value={body} height="300px" width="700px" onChange={body => this.setState({body})}/>
             </Form.Item>
             <Form.Item>
               <Button icon={<PlusOutlined/>} onClick={store.switchTemplate}>从执行模版中选择</Button>

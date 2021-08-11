@@ -10,7 +10,6 @@ class Store {
   @observable outputs = {};
   @observable host_ids = [];
   @observable token = null;
-  @observable isFullscreen = false;
   @observable showHost = false;
   @observable showConsole = false;
   @observable showTemplate = false;
@@ -33,9 +32,6 @@ class Store {
         const key = `${host.hostname}:${host.port}`;
         this.outputs[key] = {
           title: `${host.name}(${key})`,
-          system: ['### Establishing communication\n'],
-          info: [],
-          error: [],
           status: -2
         }
       }

@@ -3,36 +3,33 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React from 'react';
-import { toJS } from 'mobx';
-import { observer } from 'mobx-react';
-import styles from './index.module.css';
-import store from './store';
+import React, { useEffect, useRef } from 'react';
+import { FitAddon } from 'xterm-addon-fit';
+import { Terminal } from 'xterm';
 
-@observer
-class OutView extends React.Component {
-  constructor(props) {
-    super(props);
-    this.el = null;
-  }
+function OutView(props) {
+  const el = useRef()
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    setTimeout(() => {
-      if (this.el) this.el.scrollTop = this.el.scrollHeight
-    }, 100)
-  }
+  useEffect(() => {
+    const fitPlugin = new FitAddon()
+    const term = new Terminal({disableStdin: true})
+    term.loadAddon(fitPlugin)
+    term.setOption('theme', {background: '#fff', foreground: '#000', selection: '#999'})
+    term.open(el.current)
+    const data = props.getOutput()
+    if (data) term.write(data)
+    term.fit = () => {
+      const dimensions = fitPlugin.proposeDimensions()
+      if (dimensions.cols && dimensions.rows) fitPlugin.fit()
+    }
+    props.setTerm(term)
+    fitPlugin.fit()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  render() {
-    const outputs = toJS(this.props.outputs);
-    const maxHeight = store.isFullscreen ? 500 : 300;
-    return (
-      <div ref={ref => this.el = ref} className={styles.console} style={{maxHeight}}>
-        <pre style={{color: '#91d5ff'}}>{outputs['system']}</pre>
-        <pre>{outputs['info']}</pre>
-        <pre style={{color: '#ffa39e'}}>{outputs['error']}</pre>
-      </div>
-    )
-  }
+  return (
+    <div ref={el} style={{padding: '10px 15px'}}/>
+  )
 }
 
 export default OutView
