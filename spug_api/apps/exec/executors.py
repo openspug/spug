@@ -15,7 +15,7 @@ def exec_worker_handler(job):
 
 class Job:
     def __init__(self, hostname, port, username, pkey, command, token=None):
-        self.ssh_cli = SSH(hostname, port, username, pkey)
+        self.ssh = SSH(hostname, port, username, pkey)
         self.key = f'{hostname}:{port}'
         self.command = command
         self.token = token
@@ -29,15 +29,7 @@ class Job:
             self.rds_cli.expire(self.token, 300)
 
     def send(self, data):
-        message = {'key': self.key, 'type': 'info', 'data': data}
-        self._send(message)
-
-    def send_system(self, data):
-        message = {'key': self.key, 'type': 'system', 'data': data}
-        self._send(message)
-
-    def send_error(self, data):
-        message = {'key': self.key, 'type': 'error', 'data': data}
+        message = {'key': self.key, 'data': data}
         self._send(message)
 
     def send_status(self, code):
@@ -46,17 +38,19 @@ class Job:
 
     def run(self):
         if not self.token:
-            return self.ssh_cli.exec_command(self.command)
-        self.send_system('### Executing')
+            with self.ssh:
+                return self.ssh.exec_command_raw(self.command)
+        self.send('\x1b[36m### Executing ...\x1b[0m\r')
         code = -1
         try:
-            for code, out in self.ssh_cli.exec_command_with_stream(self.command):
-                self.send(out)
+            with self.ssh:
+                for code, out in self.ssh.exec_command_with_stream(self.command):
+                    self.send(out)
         except socket.timeout:
             code = 130
-            self.send_error('### Time out')
+            self.send('\r\n\x1b[31m### Time out\x1b[0m')
         except Exception as e:
             code = 131
-            self.send_error(f'{e}')
+            self.send(f'\r\n\x1b[31m### Exception {e}\x1b[0m')
         finally:
             self.send_status(code)

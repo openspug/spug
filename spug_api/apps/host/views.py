@@ -48,11 +48,11 @@ class HostView(View):
                 if form.pkey:
                     private_key = form.pkey
                 elif password:
-                    ssh = SSH(form.hostname, form.port, form.username, password=password)
-                    ssh.add_public_key(public_key)
+                    with SSH(form.hostname, form.port, form.username, password=password) as ssh:
+                        ssh.add_public_key(public_key)
 
-                ssh = SSH(form.hostname, form.port, form.username, private_key)
-                ssh.ping()
+                with SSH(form.hostname, form.port, form.username, private_key) as ssh:
+                    ssh.ping()
             except BadAuthenticationType:
                 return json_response(error='该主机不支持密钥认证，请参考官方文档，错误代码：E01')
             except AuthenticationException:

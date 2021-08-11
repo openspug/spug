@@ -5,7 +5,7 @@ from django.views.generic import View
 from django_redis import get_redis_connection
 from apps.host.models import Host
 from apps.account.utils import has_host_perm
-from apps.file.utils import FileResponseAfter, parse_sftp_attr
+from apps.file.utils import FileResponseAfter, FileResponse, parse_sftp_attr
 from libs import json_response, JsonParser, Argument
 from functools import partial
 import os
@@ -23,8 +23,8 @@ class FileView(View):
             host = Host.objects.get(pk=form.id)
             if not host:
                 return json_response(error='未找到指定主机')
-            cli = host.get_ssh()
-            objects = cli.list_dir_attr(form.path)
+            with host.get_ssh() as ssh:
+                objects = ssh.list_dir_attr(form.path)
             return json_response([parse_sftp_attr(x) for x in objects])
         return json_response(error=error)
 
@@ -42,10 +42,10 @@ class ObjectView(View):
             if not host:
                 return json_response(error='未找到指定主机')
             filename = os.path.basename(form.file)
-            cli = host.get_ssh().get_client()
-            sftp = cli.open_sftp()
+            ssh_cli = host.get_ssh().get_client()
+            sftp = ssh_cli.open_sftp()
             f = sftp.open(form.file)
-            return FileResponseAfter(cli.close, f, as_attachment=True, filename=filename)
+            return FileResponseAfter(ssh_cli.close, f, as_attachment=True, filename=filename)
         return json_response(error=error)
 
     def post(self, request):
@@ -63,10 +63,10 @@ class ObjectView(View):
             host = Host.objects.get(pk=form.id)
             if not host:
                 return json_response(error='未找到指定主机')
-            cli = host.get_ssh()
             rds_cli = get_redis_connection()
             callback = partial(self._compute_progress, rds_cli, form.token, file.size)
-            cli.put_file_by_fl(file, f'{form.path}/{file.name}', callback=callback)
+            with host.get_ssh() as ssh:
+                ssh.put_file_by_fl(file, f'{form.path}/{file.name}', callback=callback)
         return json_response(error=error)
 
     def delete(self, request):
@@ -80,8 +80,8 @@ class ObjectView(View):
             host = Host.objects.get(pk=form.id)
             if not host:
                 return json_response(error='未找到指定主机')
-            cli = host.get_ssh()
-            cli.remove_file(form.file)
+            with host.get_ssh() as ssh:
+                ssh.remove_file(form.file)
         return json_response(error=error)
 
     def _compute_progress(self, rds_cli, token, total, value, *args):
