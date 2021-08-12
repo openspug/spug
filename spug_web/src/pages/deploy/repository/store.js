@@ -10,7 +10,6 @@ class Store {
   @observable records = [];
   @observable record = {};
   @observable deploy = {};
-  @observable outputs = [];
   @observable isFetching = false;
   @observable formVisible = false;
   @observable addVisible = false;

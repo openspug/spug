@@ -142,12 +142,12 @@ class Helper:
         if env:
             env = dict(env.items())
             env.update(os.environ)
-        command = 'set -e\n' + command
         task = subprocess.Popen(command, env=env, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         while True:
             message = task.stdout.readline()
             if not message:
                 break
-            self.send_info('local', message.decode())
+            message = message.decode().rstrip('\r\n')
+            self.send_info('local', message + '\r\n')
         if task.wait() != 0:
             self.send_error('local', f'exit code: {task.returncode}')
