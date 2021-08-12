@@ -56,8 +56,8 @@ def ping_check(addr):
 
 def host_executor(host, command):
     try:
-        cli = host.get_ssh()
-        exit_code, out = cli.exec_command(command)
+        with host.get_ssh() as ssh:
+            exit_code, out = ssh.exec_command(command)
         if exit_code == 0:
             return True, out or '检测状态正常'
         else:

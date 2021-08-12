@@ -28,8 +28,8 @@ def local_executor(command):
 def host_executor(host, command):
     code, out, now = 1, None, time.time()
     try:
-        cli = host.get_ssh()
-        code, out = cli.exec_command(command)
+        with host.get_ssh() as ssh:
+            code, out = ssh.exec_command(command)
     except AuthenticationException:
         out = 'ssh authentication fail'
     except socket.error as e:

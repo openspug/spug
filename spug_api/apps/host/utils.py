@@ -189,7 +189,8 @@ def fetch_host_extend(ssh):
         "fdisk -l 2> /dev/null | grep '^Disk /' | awk '{print $5}'",
         "fdisk -l 2> /dev/null | grep '^磁盘 /' | awk '{print $4}' | awk -F'，' '{print $2}'"
     ]
-    code, out = ssh.exec_command(';'.join(commands))
+    with ssh:
+        code, out = ssh.exec_command_raw(';'.join(commands))
     if code != 0:
         raise Exception(out)
     response = {'disk': [], 'public_ip_address': [], 'private_ip_address': []}
@@ -252,11 +253,11 @@ def _sync_host_extend(host, private_key=None, public_key=None, password=None, ss
 def _get_ssh(kwargs, pkey=None, private_key=None, public_key=None, password=None):
     try:
         ssh = SSH(pkey=pkey or private_key, **kwargs)
-        ssh.ping()
+        ssh.get_client()
         return ssh
     except AuthenticationException as e:
         if password:
-            ssh = SSH(password=str(password), **kwargs)
-            ssh.add_public_key(public_key)
+            with SSH(password=str(password), **kwargs) as ssh:
+                ssh.add_public_key(public_key)
             return _get_ssh(kwargs, private_key)
         raise e

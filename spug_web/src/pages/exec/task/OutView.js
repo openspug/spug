@@ -18,17 +18,16 @@ function OutView(props) {
     term.open(el.current)
     const data = props.getOutput()
     if (data) term.write(data)
-    term.fit = () => {
-      const dimensions = fitPlugin.proposeDimensions()
-      if (dimensions.cols && dimensions.rows) fitPlugin.fit()
-    }
+    term.fit = () => fitPlugin.fit()
     props.setTerm(term)
     fitPlugin.fit()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
-    <div ref={el} style={{padding: '10px 15px'}}/>
+    <div style={{padding: '8px 0 0 15px'}}>
+      <div ref={el}/>
+    </div>
   )
 }
 

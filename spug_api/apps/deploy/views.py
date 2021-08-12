@@ -124,10 +124,10 @@ class RequestDetailView(View):
         if not req:
             return json_response(error='未找到指定发布申请')
         hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
-        outputs = {x.id: {'id': x.id, 'title': x.name, 'data': [f'{human_time()} 读取数据...        ']} for x in hosts}
+        outputs = {x.id: {'id': x.id, 'title': x.name, 'data': f'{human_time()} 读取数据...        '} for x in hosts}
         response = {'outputs': outputs, 'status': req.status}
         if req.deploy.extend == '2':
-            outputs['local'] = {'id': 'local', 'data': [f'{human_time()} 读取数据...        ']}
+            outputs['local'] = {'id': 'local', 'data': f'{human_time()} 读取数据...        '}
             response['s_actions'] = json.loads(req.deploy.extend_obj.server_actions)
             response['h_actions'] = json.loads(req.deploy.extend_obj.host_actions)
             if not response['h_actions']:
@@ -139,7 +139,7 @@ class RequestDetailView(View):
             for item in data:
                 item = json.loads(item.decode())
                 if 'data' in item:
-                    outputs[item['key']]['data'].append(item['data'])
+                    outputs[item['key']]['data'] += item['data']
                 if 'step' in item:
                     outputs[item['key']]['step'] = item['step']
                 if 'status' in item:
@@ -160,7 +160,7 @@ class RequestDetailView(View):
             return json_response(error='该申请单当前状态还不能执行发布')
         hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
         message = f'{human_time()} 等待调度...        '
-        outputs = {x.id: {'id': x.id, 'title': x.name, 'step': 0, 'data': [message]} for x in hosts}
+        outputs = {x.id: {'id': x.id, 'title': x.name, 'step': 0, 'data': message} for x in hosts}
         req.status = '2'
         req.do_at = human_datetime()
         req.do_by = request.user
@@ -168,7 +168,7 @@ class RequestDetailView(View):
         Thread(target=dispatch, args=(req,)).start()
         if req.deploy.extend == '2':
             message = f'{human_time()} 建立连接...        '
-            outputs['local'] = {'id': 'local', 'step': 0, 'data': [message]}
+            outputs['local'] = {'id': 'local', 'step': 0, 'data': message}
             s_actions = json.loads(req.deploy.extend_obj.server_actions)
             h_actions = json.loads(req.deploy.extend_obj.host_actions)
             if not h_actions:

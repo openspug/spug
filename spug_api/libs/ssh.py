@@ -10,13 +10,15 @@ import re
 
 
 class SSH:
-    def __init__(self, hostname, port=22, username='root', pkey=None, password=None, connect_timeout=10):
+    def __init__(self, hostname, port=22, username='root', pkey=None, password=None, default_env=None,
+                 connect_timeout=10):
         self.stdout = None
         self.client = None
         self.channel = None
         self.sftp = None
         self.eof = 'Spug EOF 2108111926'
-        self.regex = re.compile(r'Spug EOF 2108111926 \d+[\r\n]?$')
+        self.default_env = self._make_env_command(default_env)
+        self.regex = re.compile(r'Spug EOF 2108111926 -?\d+[\r\n]?$')
         self.arguments = {
             'hostname': hostname,
             'port': port,
@@ -36,22 +38,20 @@ class SSH:
     def get_client(self):
         if self.client is not None:
             return self.client
-        print('\n~~ ssh start ~~')
         self.client = SSHClient()
         self.client.set_missing_host_key_policy(AutoAddPolicy)
         self.client.connect(**self.arguments)
         return self.client
 
     def ping(self):
-        self.get_client()
         return True
 
     def add_public_key(self, public_key):
         command = f'mkdir -p -m 700 ~/.ssh && \
         echo {public_key!r} >> ~/.ssh/authorized_keys && \
         chmod 600 ~/.ssh/authorized_keys'
-        _, out, _ = self.client.exec_command(command)
-        if out.channel.recv_exit_status() != 0:
+        exit_code, out = self.exec_command_raw(command)
+        if exit_code != 0:
             raise Exception(f'add public key error: {out}')
 
     def exec_command_raw(self, command):
@@ -69,7 +69,7 @@ class SSH:
         channel.send(command)
         out, exit_code = '', -1
         for line in self.stdout:
-            if line.startswith(self.eof):
+            if self.regex.search(line):
                 exit_code = int(line.rsplit()[-1])
                 break
             out += line
@@ -91,10 +91,6 @@ class SSH:
             yield exit_code, line
         yield exit_code, line
 
-    def get_file(self, file):
-        sftp = self._get_sftp()
-        return sftp.open(file)
-
     def put_file(self, local_path, remote_path):
         sftp = self._get_sftp()
         sftp.put(local_path, remote_path)
@@ -115,13 +111,17 @@ class SSH:
         if self.channel:
             return self.channel
 
-        counter, data = 0, ''
+        counter = 0
         self.channel = self.client.invoke_shell()
-        self.channel.send(b'export PS1= && stty -echo && echo Spug execute start\n')
+        command = 'export PS1= && stty -echo'
+        if self.default_env:
+            command += f' && {self.default_env}'
+        command += f' && echo {self.eof} $?\n'
+        self.channel.send(command.encode())
         while True:
             if self.channel.recv_ready():
-                data += self.channel.recv(8196).decode()
-                if 'Spug execute start\r\n' in data:
+                line = self.channel.recv(8196).decode()
+                if self.regex.search(line):
                     self.stdout = self.channel.makefile('r')
                     break
             elif counter >= 100:
@@ -168,6 +168,5 @@ class SSH:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        print('close √')
         self.client.close()
         self.client = None

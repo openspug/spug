@@ -5,7 +5,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { observer, useLocalStore } from 'mobx-react';
-import { Card, Progress, Modal, Collapse, Steps } from 'antd';
+import { Card, Progress, Modal, Collapse, Steps, Skeleton } from 'antd';
 import { ShrinkOutlined, CaretRightOutlined, LoadingOutlined, CloseOutlined } from '@ant-design/icons';
 import OutView from './OutView';
 import { http, X_TOKEN } from 'libs';
@@ -13,9 +13,11 @@ import styles from './index.module.less';
 import store from './store';
 
 function Ext2Console(props) {
+  const terms = useLocalStore(() => ({}));
   const outputs = useLocalStore(() => ({local: {id: 'local'}}));
   const [sActions, setSActions] = useState([]);
   const [hActions, setHActions] = useState([]);
+  const [fetching, setFetching] = useState(true);
 
   useEffect(props.request.mode === 'read' ? readDeploy : doDeploy, [])
 
@@ -25,7 +27,8 @@ function Ext2Console(props) {
       .then(res => {
         setSActions(res.s_actions);
         setHActions(res.h_actions);
-        Object.assign(outputs, res.outputs)
+        Object.assign(outputs, res.outputs);
+        setTimeout(() => setFetching(false), 100)
         if (res.status === '2') {
           socket = _makeSocket()
         }
@@ -40,6 +43,7 @@ function Ext2Console(props) {
         setSActions(res.s_actions);
         setHActions(res.h_actions);
         Object.assign(outputs, res.outputs)
+        setTimeout(() => setFetching(false), 100)
         socket = _makeSocket()
       })
     return () => socket && socket.close()
@@ -57,7 +61,10 @@ function Ext2Console(props) {
       } else {
         index += 1;
         const {key, data, step, status} = JSON.parse(e.data);
-        if (data !== undefined) outputs[key].data.push(data);
+        if (data !== undefined) {
+          outputs[key].data += data
+          if (terms[key]) terms[key].write(data)
+        }
         if (step !== undefined) outputs[key].step = step;
         if (status !== undefined) outputs[key].status = status;
       }
@@ -78,6 +85,13 @@ function Ext2Console(props) {
   function switchMiniMode() {
     const value = store.tabModes[props.request.id];
     store.tabModes[props.request.id] = !value
+  }
+
+  function handleSetTerm(term, key) {
+    if (outputs[key] && outputs[key].data) {
+      term.write(outputs[key].data)
+    }
+    terms[key] = term
   }
 
   const hostOutputs = Object.values(outputs).filter(x => x.id !== 'local');
@@ -113,45 +127,48 @@ function Ext2Console(props) {
           <ShrinkOutlined/>
         </div>
       ]}>
-      <Collapse defaultActiveKey="0" className={styles.collapse}>
-        <Collapse.Panel header={(
-          <div className={styles.header}>
-            <b className={styles.title}/>
-            <Steps size="small" className={styles.step} current={outputs.local.step} status={outputs.local.status}>
-              <StepItem title="建立连接" item={outputs.local} step={0}/>
-              {sActions.map((item, index) => (
-                <StepItem key={index} title={item.title} item={outputs.local} step={index + 1}/>
-              ))}
-            </Steps>
-          </div>
-        )}>
-          <OutView records={outputs.local.data}/>
-        </Collapse.Panel>
-      </Collapse>
-      {hostOutputs.length > 0 && (
-        <Collapse
-          defaultActiveKey="0"
-          className={styles.collapse}
-          style={{marginTop: 24}}
-          expandIcon={({isActive}) => <CaretRightOutlined style={{fontSize: 16}} rotate={isActive ? 90 : 0}/>}>
-          {hostOutputs.map((item, index) => (
-            <Collapse.Panel
-              key={index}
-              header={
-                <div className={styles.header}>
-                  <b className={styles.title}>{item.title}</b>
-                  <Steps size="small" className={styles.step} current={item.step} status={item.status}>
-                    <StepItem title="等待调度" item={item} step={0}/>
-                    {hActions.map((action, index) => (
-                      <StepItem key={index} title={action.title} item={item} step={index + 1}/>
-                    ))}
-                  </Steps>
-                </div>}>
-              <OutView records={item.data}/>
-            </Collapse.Panel>
-          ))}
+      <Skeleton loading={fetching} active>
+        <Collapse defaultActiveKey={['0']} className={styles.collapse}>
+          <Collapse.Panel header={(
+            <div className={styles.header}>
+              <b className={styles.title}/>
+              <Steps size="small" className={styles.step} current={outputs.local.step} status={outputs.local.status}>
+                <StepItem title="建立连接" item={outputs.local} step={0}/>
+                {sActions.map((item, index) => (
+                  <StepItem key={index} title={item.title} item={outputs.local} step={index + 1}/>
+                ))}
+              </Steps>
+            </div>
+          )}>
+            <OutView setTerm={term => handleSetTerm(term, 'local')}/>
+          </Collapse.Panel>
         </Collapse>
-      )}
+        {hostOutputs.length > 0 && (
+          <Collapse
+            accordion
+            defaultActiveKey="0"
+            className={styles.collapse}
+            style={{marginTop: 24}}
+            expandIcon={({isActive}) => <CaretRightOutlined style={{fontSize: 16}} rotate={isActive ? 90 : 0}/>}>
+            {hostOutputs.map((item, index) => (
+              <Collapse.Panel
+                key={index}
+                header={
+                  <div className={styles.header}>
+                    <b className={styles.title}>{item.title}</b>
+                    <Steps size="small" className={styles.step} current={item.step} status={item.status}>
+                      <StepItem title="等待调度" item={item} step={0}/>
+                      {hActions.map((action, index) => (
+                        <StepItem key={index} title={action.title} item={item} step={index + 1}/>
+                      ))}
+                    </Steps>
+                  </div>}>
+                <OutView setTerm={term => handleSetTerm(term, item.id)}/>
+              </Collapse.Panel>
+            ))}
+          </Collapse>
+        )}
+      </Skeleton>
     </Modal>
   )
 }

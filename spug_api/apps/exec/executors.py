@@ -39,7 +39,7 @@ class Job:
     def run(self):
         if not self.token:
             with self.ssh:
-                return self.ssh.exec_command_raw(self.command)
+                return self.ssh.exec_command(self.command)
         self.send('\x1b[36m### Executing ...\x1b[0m\r')
         code = -1
         try:

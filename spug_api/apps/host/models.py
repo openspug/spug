@@ -24,9 +24,9 @@ class Host(models.Model, ModelMixin):
     def private_key(self):
         return self.pkey or AppSetting.get('private_key')
 
-    def get_ssh(self, pkey=None):
+    def get_ssh(self, pkey=None, default_env=None):
         pkey = pkey or self.private_key
-        return SSH(self.hostname, self.port, self.username, pkey)
+        return SSH(self.hostname, self.port, self.username, pkey, default_env=default_env)
 
     def to_view(self):
         tmp = self.to_dict()

@@ -3,9 +3,9 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { observer, useLocalStore } from 'mobx-react';
-import { Card, Progress, Modal, Collapse, Steps } from 'antd';
+import { Card, Progress, Modal, Collapse, Steps, Skeleton } from 'antd';
 import { ShrinkOutlined, CaretRightOutlined, LoadingOutlined, CloseOutlined } from '@ant-design/icons';
 import OutView from './OutView';
 import { http, X_TOKEN } from 'libs';
@@ -14,6 +14,8 @@ import store from './store';
 
 function Ext1Console(props) {
   const outputs = useLocalStore(() => ({}));
+  const terms = useLocalStore(() => ({}));
+  const [fetching, setFetching] = useState(true);
 
   useEffect(props.request.mode === 'read' ? readDeploy : doDeploy, [])
 
@@ -22,6 +24,7 @@ function Ext1Console(props) {
     http.get(`/api/deploy/request/${props.request.id}/`)
       .then(res => {
         Object.assign(outputs, res.outputs)
+        setTimeout(() => setFetching(false), 100)
         if (res.status === '2') {
           socket = _makeSocket()
         }
@@ -34,6 +37,7 @@ function Ext1Console(props) {
     http.post(`/api/deploy/request/${props.request.id}/`)
       .then(res => {
         Object.assign(outputs, res.outputs)
+        setTimeout(() => setFetching(false), 100)
         socket = _makeSocket()
         store.fetchRecords()
       })
@@ -52,7 +56,10 @@ function Ext1Console(props) {
       } else {
         index += 1;
         const {key, data, step, status} = JSON.parse(e.data);
-        if (data !== undefined) outputs[key].data.push(data);
+        if (data !== undefined) {
+          outputs[key].data += data
+          if (terms[key]) terms[key].write(data)
+        }
         if (step !== undefined) outputs[key].step = step;
         if (status !== undefined) outputs[key].status = status;
       }
@@ -71,6 +78,13 @@ function Ext1Console(props) {
   function switchMiniMode() {
     const value = store.tabModes[props.request.id];
     store.tabModes[props.request.id] = !value
+  }
+
+  function handleSetTerm(term, key) {
+    if (outputs[key] && outputs[key].data) {
+      term.write(outputs[key].data)
+    }
+    terms[key] = term
   }
 
   return store.tabModes[props.request.id] ? (
@@ -103,29 +117,30 @@ function Ext1Console(props) {
           <ShrinkOutlined/>
         </div>
       ]}>
-      <Collapse
-        defaultActiveKey={'0'}
-        className={styles.collapse}
-        expandIcon={({isActive}) => <CaretRightOutlined style={{fontSize: 16}} rotate={isActive ? 90 : 0}/>}>
-        {Object.values(outputs).map((item, index) => (
-          <Collapse.Panel
-            key={index}
-            header={
-              <div className={styles.header}>
-                <b className={styles.title}>{item.title}</b>
-                <Steps size="small" className={styles.step} current={item.step} status={item.status}>
-                  <StepItem title="等待调度" item={item} step={0}/>
-                  <StepItem title="数据准备" item={item} step={1}/>
-                  <StepItem title="发布前任务" item={item} step={2}/>
-                  <StepItem title="执行发布" item={item} step={3}/>
-                  <StepItem title="发布后任务" item={item} step={4}/>
-                </Steps>
-              </div>}>
-            <OutView records={item.data}/>
-          </Collapse.Panel>
-        ))}
-
-      </Collapse>
+      <Skeleton loading={fetching} active>
+        <Collapse
+          defaultActiveKey="0"
+          className={styles.collapse}
+          expandIcon={({isActive}) => <CaretRightOutlined style={{fontSize: 16}} rotate={isActive ? 90 : 0}/>}>
+          {Object.entries(outputs).map(([key, item], index) => (
+            <Collapse.Panel
+              key={index}
+              header={
+                <div className={styles.header}>
+                  <b className={styles.title}>{item.title}</b>
+                  <Steps size="small" className={styles.step} current={item.step} status={item.status}>
+                    <StepItem title="等待调度" item={item} step={0}/>
+                    <StepItem title="数据准备" item={item} step={1}/>
+                    <StepItem title="发布前任务" item={item} step={2}/>
+                    <StepItem title="执行发布" item={item} step={3}/>
+                    <StepItem title="发布后任务" item={item} step={4}/>
+                  </Steps>
+                </div>}>
+              <OutView setTerm={term => handleSetTerm(term, key)}/>
+            </Collapse.Panel>
+          ))}
+        </Collapse>
+      </Skeleton>
     </Modal>
   )
 }
