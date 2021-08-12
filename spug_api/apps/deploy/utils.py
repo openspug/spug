@@ -95,7 +95,7 @@ def _ext2_deploy(req, helper, env):
         helper.send_step('local', step, f'{human_time()} {action["title"]}...\r\n')
         helper.local(f'cd /tmp && {action["data"]}', env)
         step += 1
-    helper.send_step('local', 100, '\r\n')
+    helper.send_step('local', 100, '')
 
     tmp_transfer_file = None
     for action in host_actions:
@@ -405,7 +405,8 @@ class Helper:
             message = task.stdout.readline()
             if not message:
                 break
-            self.send_info('local', message.decode())
+            message = message.decode().rstrip('\r\n')
+            self.send_info('local', message + '\r\n')
         if task.wait() != 0:
             self.send_error('local', f'exit code: {task.returncode}')
 
