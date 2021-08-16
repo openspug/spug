@@ -89,7 +89,7 @@ export default observer(function (props) {
         </Col>
         <Col span={18}>
           <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: 12}}>
-            <Input style={{width: 260}} placeholder="输入检索" onChange={e => setFKey(e.target.value)}/>
+            <Input allowClear style={{width: 260}} placeholder="输入检索" onChange={e => setFKey(e.target.value)}/>
             <Space hidden={selectedRowKeys.length === 0}>
               <div>已选择 {selectedRowKeys.length} 台主机</div>
               <Button type="link" onClick={() => setSelectedRowKeys([])}>取消选择</Button>
