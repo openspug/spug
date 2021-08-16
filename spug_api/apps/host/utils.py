@@ -207,7 +207,7 @@ def fetch_host_extend(ssh):
                     response['private_ip_address'].append(ip)
         elif index == 3:
             response['os_name'] = line
-        else:
+        elif line:
             response['disk'].append(round(int(line) / 1024 / 1024 / 1024, 0))
     return response
 
