@@ -3,6 +3,7 @@
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
 from django.db.models import F
+from django.conf import settings
 from libs import json_response, JsonParser, Argument
 from apps.repository.models import Repository
 from apps.deploy.models import DeployRequest
@@ -10,6 +11,7 @@ from apps.repository.utils import dispatch
 from apps.app.models import Deploy
 from threading import Thread
 import json
+import os
 
 
 class RepositoryView(View):
@@ -70,6 +72,8 @@ class RepositoryView(View):
             if repository.deployrequest_set.exists():
                 return json_response(error='已关联发布申请无法删除')
             repository.delete()
+            build_file = f'{repository.spug_version}.tar.gz'
+            os.remove(os.path.join(settings.REPOS_DIR, 'build', build_file))
         return json_response(error=error)
 
 
