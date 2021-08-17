@@ -202,30 +202,45 @@ class RequestDetailView(View):
 def post_request_ext1(request):
     form, error = JsonParser(
         Argument('id', type=int, required=False),
+        Argument('deploy_id', type=int, help='参数错误'),
         Argument('name', help='请输入申请标题'),
-        Argument('repository_id', type=int, help='请选择发布版本'),
+        Argument('extra', type=list, help='请选择发布版本'),
         Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
         Argument('type', default='1'),
         Argument('plan', required=False),
         Argument('desc', required=False),
     ).parse(request.body)
     if error is None:
-        repository = Repository.objects.filter(pk=form.repository_id).first()
-        if not repository:
-            return json_response(error='未找到指定构建版本记录')
-        form.name = form.name.replace("'", '')
-        form.status = '0' if repository.deploy.is_audit else '1'
-        form.version = repository.version
-        form.spug_version = repository.spug_version
-        form.deploy_id = repository.deploy_id
+        deploy = Deploy.objects.get(pk=form.deploy_id)
+        form.spug_version = Repository.make_spug_version(deploy.id)
+        if form.extra[0] == 'tag':
+            if not form.extra[1]:
+                return json_response(error='请选择要发布的版本')
+            form.version = form.extra[1]
+        elif form.extra[0] == 'branch':
+            if not form.extra[2]:
+                return json_response(error='请选择要发布的分支及Commit ID')
+            form.version = f'{form.extra[1]}#{form.extra[2][:6]}'
+        elif form.extra[0] == 'repository':
+            if not form.extra[1]:
+                return json_response(error='请选择要发布的版本')
+            repository = Repository.objects.get(pk=form.extra[1])
+            form.repository_id = repository.id
+            form.version = repository.version
+            form.spug_version = repository.spug_version
+        else:
+            return json_response(error='参数错误')
+
+        form.extra = json.dumps(form.extra)
+        form.status = '0' if deploy.is_audit else '1'
         form.host_ids = json.dumps(sorted(form.host_ids))
         if form.id:
             req = DeployRequest.objects.get(pk=form.id)
-            is_required_notify = repository.deploy.is_audit and req.status == '-1'
+            is_required_notify = deploy.is_audit and req.status == '-1'
             DeployRequest.objects.filter(pk=form.id).update(created_by=request.user, reason=None, **form)
         else:
             req = DeployRequest.objects.create(created_by=request.user, **form)
-            is_required_notify = repository.deploy.is_audit
+            is_required_notify = deploy.is_audit
         if is_required_notify:
             Thread(target=Helper.send_deploy_notify, args=(req, 'approve_req')).start()
     return json_response(error=error)

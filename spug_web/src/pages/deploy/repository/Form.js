@@ -42,6 +42,7 @@ export default observer(function () {
       setExtra2(commit)
     } else {
       setExtra1(lds.get(Object.keys(tags), 0))
+      setExtra2(null)
     }
   }
 

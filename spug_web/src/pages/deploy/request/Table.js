@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { BranchesOutlined, BuildOutlined, TagOutlined, PlusOutlined } from '@ant-design/icons';
+import { BranchesOutlined, BuildOutlined, TagOutlined, PlusOutlined, TagsOutlined } from '@ant-design/icons';
 import { Radio, Modal, Popover, Tag, Popconfirm, Tooltip, message } from 'antd';
 import { http, hasPermission } from 'libs';
 import { Action, AuthButton, TableCard } from 'components';
@@ -33,17 +33,18 @@ function ComTable() {
     title: '版本',
     render: info => {
       if (info['app_extend'] === '1') {
-        const [ext1] = info.rep_extra;
-        return (
-          <React.Fragment>
-            {ext1 === 'branch' ? <BranchesOutlined/> : <TagOutlined/>} {info.version}
-          </React.Fragment>
-        )
+        const [ext1] = info.extra || info.rep_extra;
+        switch (ext1) {
+          case 'branch':
+            return <div><BranchesOutlined/> {info.version}</div>
+          case 'tag':
+            return <div><TagOutlined/> {info.version}</div>
+          default:
+            return <div><TagsOutlined/> {info.version}</div>
+        }
       } else {
         return (
-          <React.Fragment>
-            <BuildOutlined/> {info.version}
-          </React.Fragment>
+          <div><BuildOutlined/> {info.version}</div>
         )
       }
     }
