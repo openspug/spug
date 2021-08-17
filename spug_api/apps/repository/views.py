@@ -4,7 +4,7 @@
 from django.views.generic import View
 from django.db.models import F
 from django.conf import settings
-from libs import json_response, JsonParser, Argument
+from libs import json_response, JsonParser, Argument, AttrDict
 from apps.repository.models import Repository
 from apps.deploy.models import DeployRequest
 from apps.repository.utils import dispatch
@@ -23,7 +23,17 @@ class RepositoryView(View):
             created_by_user=F('created_by__nickname'))
         if deploy_id:
             data = data.filter(deploy_id=deploy_id, status='5')
-        return json_response([x.to_view() for x in data])
+            return json_response([x.to_view() for x in data])
+
+        response = dict()
+        for item in data:
+            if item.app_id in response:
+                response[item.app_id]['child'].append(item.to_view())
+            else:
+                tmp = item.to_view()
+                tmp['child'] = [item.to_view()]
+                response[item.app_id] = tmp
+        return json_response(list(response.values()))
 
     def post(self, request):
         form, error = JsonParser(
@@ -73,7 +83,10 @@ class RepositoryView(View):
                 return json_response(error='已关联发布申请无法删除')
             repository.delete()
             build_file = f'{repository.spug_version}.tar.gz'
-            os.remove(os.path.join(settings.REPOS_DIR, 'build', build_file))
+            try:
+                os.remove(os.path.join(settings.REPOS_DIR, 'build', build_file))
+            except FileNotFoundError:
+                pass
         return json_response(error=error)
 
 
