@@ -35,6 +35,31 @@ function ComTable() {
       .finally(() => setLoading(null))
   }
 
+  function expandedRowRender(record) {
+    return (
+      <Table rowKey="id" dataSource={record.child} pagination={false}>
+        <Table.Column title="版本" render={info => (
+          <div style={{color: '#1890ff', cursor: 'pointer'}} onClick={() => store.showDetail(info)}>{info.version}</div>
+        )}/>
+        <Table.Column title="环境" dataIndex="env_name"/>
+        <Table.Column title="构建时间" dataIndex="created_at"/>
+        <Table.Column title="备注" dataIndex="remarks"/>
+        <Table.Column title="状态" render={info => <Tag color={statusColorMap[info.status]}>{info.status_alias}</Tag>}/>
+        {hasPermission('deploy.repository.detail|deploy.repository.build|deploy.repository.log') && (
+          <Table.Column width={180} title="操作" render={info => (
+            <Action>
+              <Action.Button
+                auth="deploy.repository.build"
+                loading={loading === info.id}
+                onClick={() => handleRebuild(info)}>构建</Action.Button>
+              <Action.Button auth="deploy.repository.build" onClick={() => store.showConsole(info)}>日志</Action.Button>
+            </Action>
+          )}/>
+        )}
+      </Table>
+    )
+  }
+
   const statusColorMap = {'0': 'cyan', '1': 'blue', '2': 'red', '5': 'green'};
   return (
     <TableCard
@@ -50,6 +75,7 @@ function ComTable() {
           icon={<PlusOutlined/>}
           onClick={store.showForm}>新建</AuthButton>
       ]}
+      expandable={{expandedRowRender, expandRowByClick: true}}
       pagination={{
         showSizeChanger: true,
         showLessItems: true,
@@ -58,25 +84,12 @@ function ComTable() {
         pageSizeOptions: ['10', '20', '50', '100']
       }}>
       <Table.Column title="应用" dataIndex="app_name"/>
-      <Table.Column title="环境" dataIndex="env_name"/>
-      <Table.Column title="版本" dataIndex="version"/>
-      <Table.Column title="备注" dataIndex="remarks"/>
-      <Table.Column hide title="构建时间" dataIndex="created_at"/>
-      <Table.Column hide title="构建人" dataIndex="created_by_user"/>
+      <Table.Column title="最新版本" render={info => `${info.version}（${info.env_name}）`}/>
+      <Table.Column title="构建时间" dataIndex="created_at"/>
+      <Table.Column title="构建人" dataIndex="created_by_user"/>
       <Table.Column width={100} title="状态"
                     render={info => <Tag color={statusColorMap[info.status]}>{info.status_alias}</Tag>}/>
-      {hasPermission('deploy.repository.detail|deploy.repository.build|deploy.repository.log') && (
-        <Table.Column width={180} title="操作" render={info => (
-          <Action>
-            <Action.Button auth="deploy.repository.view" onClick={() => store.showDetail(info)}>详情</Action.Button>
-            <Action.Button
-              auth="deploy.repository.build"
-              loading={loading === info.id}
-              onClick={() => handleRebuild(info)}>构建</Action.Button>
-            <Action.Button auth="deploy.repository.build" onClick={() => store.showConsole(info)}>日志</Action.Button>
-          </Action>
-        )}/>
-      )}
+
     </TableCard>
   )
 }

@@ -94,9 +94,8 @@ export default observer(function () {
     http.post('/api/repository/', formData)
       .then(res => {
         message.success('操作成功');
-        store.record = res;
         store.formVisible = false;
-        store.fetchRecords()
+        store.showConsole(res)
       }, () => setLoading(false))
   }
 
