@@ -26,7 +26,7 @@ function Ext1Console(props) {
         Object.assign(outputs, res.outputs)
         setTimeout(() => setFetching(false), 100)
         if (res.status === '2') {
-          socket = _makeSocket()
+          socket = _makeSocket(res.index)
         }
       })
     return () => socket && socket.close()
@@ -44,8 +44,7 @@ function Ext1Console(props) {
     return () => socket && socket.close()
   }
 
-  function _makeSocket() {
-    let index = 0;
+  function _makeSocket(index = 0) {
     const token = props.request.id;
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/request/${token}/?x-token=${X_TOKEN}`);

@@ -135,8 +135,8 @@ class RequestDetailView(View):
         rds, key, counter = get_redis_connection(), f'{settings.REQUEST_KEY}:{r_id}', 0
         data = rds.lrange(key, counter, counter + 9)
         while data:
-            counter += 10
             for item in data:
+                counter += 1
                 item = json.loads(item.decode())
                 if 'data' in item:
                     outputs[item['key']]['data'] += item['data']
@@ -145,6 +145,7 @@ class RequestDetailView(View):
                 if 'status' in item:
                     outputs[item['key']]['status'] = item['status']
             data = rds.lrange(key, counter, counter + 9)
+        response['index'] = counter
         return json_response(response)
 
     def post(self, request, r_id):
