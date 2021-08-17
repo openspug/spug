@@ -8,21 +8,35 @@ import { observer } from 'mobx-react';
 import { FullscreenOutlined, FullscreenExitOutlined, LoadingOutlined } from '@ant-design/icons';
 import { FitAddon } from 'xterm-addon-fit';
 import { Terminal } from 'xterm';
-import { Modal, Steps } from 'antd';
-import { X_TOKEN, human_time } from 'libs';
+import { Modal, Steps, Spin } from 'antd';
+import { X_TOKEN, http } from 'libs';
 import styles from './index.module.less';
 import store from './store';
 
 export default observer(function Console() {
   const el = useRef()
+  const [term] = useState(new Terminal({disableStdin: true}))
   const [fullscreen, setFullscreen] = useState(false);
   const [step, setStep] = useState(0);
-  const [status, setStatus] = useState('process')
+  const [status, setStatus] = useState('process');
+  const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
-    const term = initialTerm()
-    term.write(`${human_time()} 建立连接...        `)
-    let index = 0;
+    let socket;
+    initialTerm()
+    http.get(`/api/repository/${store.record.id}/`)
+      .then(res => {
+        term.write(res.data)
+        setStep(res.step)
+        setStatus(res.status)
+        socket = _makeSocket(res.index)
+      })
+      .finally(() => setFetching(false))
+    return () => socket && socket.close()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function _makeSocket(index = 0) {
     const token = store.record.spug_version;
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/build/${token}/?x-token=${X_TOKEN}`);
@@ -38,17 +52,21 @@ export default observer(function Console() {
         if (status !== undefined) setStatus(status);
       }
     }
-    return () => socket.close();
-  }, [])
+    return socket
+  }
+
+  useEffect(() => {
+    term.fit && term.fit()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fullscreen])
 
   function initialTerm() {
     const fitPlugin = new FitAddon()
-    const term = new Terminal({disableStdin: true})
     term.loadAddon(fitPlugin)
     term.setOption('theme', {background: '#fafafa', foreground: '#000', selection: '#999'})
     term.open(el.current)
+    term.fit = () => fitPlugin.fit()
     fitPlugin.fit()
-    return term
   }
 
   function handleClose() {
@@ -85,9 +103,11 @@ export default observer(function Console() {
         <StepItem title="检出后任务" step={3}/>
         <StepItem title="执行打包" step={4}/>
       </Steps>
-      <div className={styles.out}>
-        <div ref={el}/>
-      </div>
+      <Spin spinning={fetching}>
+        <div className={styles.out}>
+          <div ref={el}/>
+        </div>
+      </Spin>
     </Modal>
   )
 })

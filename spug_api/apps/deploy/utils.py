@@ -165,7 +165,7 @@ def _deploy_ext1_host(req, helper, h_id, env):
             helper.send_error(host.id, f'检测到该主机的发布目录 {extend.dst_dir!r} 已存在，为了数据安全请自行备份后删除该目录，Spug 将会创建并接管该目录。')
         # clean
         clean_command = f'ls -d {extend.deploy_id}_* 2> /dev/null | sort -t _ -rnk2 | tail -n +{extend.versions + 1} | xargs rm -rf'
-        helper.remote_raw(host.id, ssh, f'cd {extend.dst_repo} && rm -rf {req.spug_version} && {clean_command}')
+        helper.remote_raw(host.id, ssh, f'cd {extend.dst_repo} && {clean_command}')
         # transfer files
         tar_gz_file = f'{req.spug_version}.tar.gz'
         try:
@@ -173,7 +173,7 @@ def _deploy_ext1_host(req, helper, h_id, env):
         except Exception as e:
             helper.send_error(host.id, f'exception: {e}')
 
-        command = f'cd {extend.dst_repo} && tar xf {tar_gz_file} && rm -f {req.deploy_id}_*.tar.gz'
+        command = f'cd {extend.dst_repo} && rm -rf {req.spug_version} && tar xf {tar_gz_file} && rm -f {req.deploy_id}_*.tar.gz'
         helper.remote_raw(host.id, ssh, command)
         helper.send_step(h_id, 1, '完成\r\n')
 

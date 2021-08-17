@@ -79,7 +79,10 @@ class AttrDict(dict):
         self.__setitem__(key, value)
 
     def __getattr__(self, item):
-        return self.__getitem__(item)
+        try:
+            return self.__getitem__(item)
+        except KeyError:
+            raise AttributeError(item)
 
     def __delattr__(self, item):
         self.__delitem__(item)
