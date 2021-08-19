@@ -8,7 +8,7 @@ from libs.utils import AttrDict, human_time
 from apps.repository.models import Repository
 from apps.app.utils import fetch_repo
 from apps.config.utils import compose_configs
-import subprocess
+from apps.deploy.helper import Helper
 import json
 import uuid
 import os
@@ -16,20 +16,18 @@ import os
 REPOS_DIR = settings.REPOS_DIR
 
 
-class SpugError(Exception):
-    pass
-
-
-def dispatch(rep: Repository):
-    rds = get_redis_connection()
-    rds_key = f'{settings.BUILD_KEY}:{rep.spug_version}'
+def dispatch(rep: Repository, helper=None):
     rep.status = '1'
-    rep.save()
-    helper = Helper(rds, rds_key)
+    alone_build = helper is None
+    if not helper:
+        rds = get_redis_connection()
+        rds_key = f'{settings.BUILD_KEY}:{rep.spug_version}'
+        helper = Helper(rds, rds_key)
+        rep.save()
     try:
         api_token = uuid.uuid4().hex
-        rds.setex(api_token, 60 * 60, f'{rep.app_id},{rep.env_id}')
-        helper.send_info('local', f'完成\r\n{human_time()} 构建准备...        ')
+        helper.rds.setex(api_token, 60 * 60, f'{rep.app_id},{rep.env_id}')
+        helper.send_info('local', f'\033[32m完成√\033[0m\r\n{human_time()} 构建准备...        ')
         env = AttrDict(
             SPUG_APP_NAME=rep.app.name,
             SPUG_APP_ID=str(rep.app_id),
@@ -54,11 +52,11 @@ def dispatch(rep: Repository):
     finally:
         helper.local(f'cd {REPOS_DIR} && rm -rf {rep.spug_version}')
         close_old_connections()
-        # save the build log for two weeks
-        rds.expire(rds_key, 14 * 24 * 60 * 60)
-        rds.close()
-        rep.save()
-        return rep
+        if alone_build:
+            helper.clear()
+            rep.save()
+        elif rep.status == '5':
+            rep.save()
 
 
 def _build(rep: Repository, helper, env):
@@ -75,7 +73,7 @@ def _build(rep: Repository, helper, env):
         tree_ish = extras[1]
         env.update(SPUG_GIT_TAG=extras[1])
     fetch_repo(rep.deploy_id, extend.git_repo)
-    helper.send_info('local', '完成\r\n')
+    helper.send_info('local', '\033[32m完成√\033[0m\r\n')
 
     if extend.hook_pre_server:
         helper.send_step('local', 1, f'{human_time()} 检出前任务...\r\n')
@@ -84,7 +82,7 @@ def _build(rep: Repository, helper, env):
     helper.send_step('local', 2, f'{human_time()} 执行检出...        ')
     command = f'cd {git_dir} && git archive --prefix={rep.spug_version}/ {tree_ish} | (cd .. && tar xf -)'
     helper.local(command)
-    helper.send_info('local', '完成\r\n')
+    helper.send_info('local', '\033[32m完成√\033[0m\r\n')
 
     if extend.hook_post_server:
         helper.send_step('local', 3, f'{human_time()} 检出后任务...\r\n')
@@ -105,49 +103,5 @@ def _build(rep: Repository, helper, env):
         else:
             contain = ' '.join(f'{rep.spug_version}/{x}' for x in files)
     helper.local(f'cd {REPOS_DIR} && tar zcf {tar_file} {exclude} {contain}')
-    helper.send_step('local', 5, f'完成')
-
-
-class Helper:
-    def __init__(self, rds, key):
-        self.rds = rds
-        self.key = key
-        self.rds.delete(self.key)
-
-    def parse_filter_rule(self, data: str, sep='\n'):
-        data, files = data.strip(), []
-        if data:
-            for line in data.split(sep):
-                line = line.strip()
-                if line and not line.startswith('#'):
-                    files.append(line)
-        return files
-
-    def _send(self, message):
-        self.rds.rpush(self.key, json.dumps(message))
-
-    def send_info(self, key, message):
-        self._send({'key': key, 'data': message})
-
-    def send_error(self, key, message, with_break=True):
-        message = '\r\n' + message
-        self._send({'key': key, 'status': 'error', 'data': message})
-        if with_break:
-            raise SpugError
-
-    def send_step(self, key, step, data):
-        self._send({'key': key, 'step': step, 'data': data})
-
-    def local(self, command, env=None):
-        if env:
-            env = dict(env.items())
-            env.update(os.environ)
-        task = subprocess.Popen(command, env=env, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        while True:
-            message = task.stdout.readline()
-            if not message:
-                break
-            message = message.decode().rstrip('\r\n')
-            self.send_info('local', message + '\r\n')
-        if task.wait() != 0:
-            self.send_error('local', f'exit code: {task.returncode}')
+    helper.send_step('local', 5, f'\033[32m完成√\033[0m')
+    helper.send_step('local', 100, f'\r\n\r\n{human_time()} ** \033[32m构建成功\033[0m **')

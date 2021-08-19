@@ -86,6 +86,7 @@ function Ext1Console(props) {
     terms[key] = term
   }
 
+  let {local, ...hosts} = outputs;
   return store.tabModes[props.request.id] ? (
     <Card
       className={styles.item}
@@ -95,7 +96,12 @@ function Ext1Console(props) {
         <div className={styles.title}>{props.request.name}</div>
         <CloseOutlined onClick={() => store.showConsole(props.request, true)}/>
       </div>
-      {Object.values(outputs).map(item => (
+      {local && (
+        <Progress
+          percent={(local.step + 1) * 18}
+          status={local.step === 100 ? 'success' : outputs.local.status === 'error' ? 'exception' : 'active'}/>
+      )}
+      {Object.values(hosts).map(item => (
         <Progress
           key={item.id}
           percent={(item.step + 1) * 18}
@@ -117,11 +123,30 @@ function Ext1Console(props) {
         </div>
       ]}>
       <Skeleton loading={fetching} active>
+        {local && (
+          <Collapse defaultActiveKey={['0']} className={styles.collapse} style={{marginBottom: 24}}>
+            <Collapse.Panel header={(
+              <div className={styles.header}>
+                <b className={styles.title}/>
+                <Steps size="small" className={styles.step} current={local.step} status={local.status}>
+                  <StepItem title="构建准备" item={local} step={0}/>
+                  <StepItem title="检出前任务" item={local} step={1}/>
+                  <StepItem title="执行检出" item={local} step={2}/>
+                  <StepItem title="检出后任务" item={local} step={3}/>
+                  <StepItem title="执行打包" item={local} step={4}/>
+                </Steps>
+              </div>
+            )}>
+              <OutView setTerm={term => handleSetTerm(term, 'local')}/>
+            </Collapse.Panel>
+          </Collapse>
+        )}
+
         <Collapse
           defaultActiveKey="0"
           className={styles.collapse}
           expandIcon={({isActive}) => <CaretRightOutlined style={{fontSize: 16}} rotate={isActive ? 90 : 0}/>}>
-          {Object.entries(outputs).map(([key, item], index) => (
+          {Object.entries(hosts).map(([key, item], index) => (
             <Collapse.Panel
               key={index}
               header={

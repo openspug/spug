@@ -6,6 +6,7 @@ from libs import ModelMixin, human_datetime
 from apps.account.models import User
 from apps.app.models import Deploy
 from apps.repository.models import Repository
+import json
 
 
 class DeployRequest(models.Model, ModelMixin):
@@ -41,6 +42,13 @@ class DeployRequest(models.Model, ModelMixin):
     approve_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)
     do_at = models.CharField(max_length=20, null=True)
     do_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)
+
+    @property
+    def is_quick_deploy(self):
+        if self.extra:
+            extra = json.loads(self.extra)
+            return extra[0] in ('branch', 'tag')
+        return False
 
     def __repr__(self):
         return f'<DeployRequest name={self.name}>'

@@ -126,12 +126,15 @@ class RequestDetailView(View):
         hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
         outputs = {x.id: {'id': x.id, 'title': x.name, 'data': f'{human_time()} 读取数据...        '} for x in hosts}
         response = {'outputs': outputs, 'status': req.status}
+        if req.is_quick_deploy:
+            outputs['local'] = {'id': 'local', 'data': ''}
         if req.deploy.extend == '2':
             outputs['local'] = {'id': 'local', 'data': f'{human_time()} 读取数据...        '}
-            response['s_actions'] = json.loads(req.deploy.extend_obj.server_actions)
-            response['h_actions'] = json.loads(req.deploy.extend_obj.host_actions)
-            if not response['h_actions']:
-                response['outputs'] = {'local': outputs['local']}
+            if req.deploy.extend == '2':
+                response['s_actions'] = json.loads(req.deploy.extend_obj.server_actions)
+                response['h_actions'] = json.loads(req.deploy.extend_obj.host_actions)
+                if not response['h_actions']:
+                    response['outputs'] = {'local': outputs['local']}
         rds, key, counter = get_redis_connection(), f'{settings.REQUEST_KEY}:{r_id}', 0
         data = rds.lrange(key, counter, counter + 9)
         while data:
@@ -146,6 +149,11 @@ class RequestDetailView(View):
                     outputs[item['key']]['status'] = item['status']
             data = rds.lrange(key, counter, counter + 9)
         response['index'] = counter
+        if req.is_quick_deploy:
+            if outputs['local']['data']:
+                outputs['local']['data'] = f'{human_time()} 读取数据...        ' + outputs['local']['data']
+            else:
+                outputs['local'].update(step=100, data=f'{human_time()} 已构建完成忽略执行。')
         return json_response(response)
 
     def post(self, request, r_id):
@@ -167,14 +175,19 @@ class RequestDetailView(View):
         req.do_by = request.user
         req.save()
         Thread(target=dispatch, args=(req,)).start()
+        if req.is_quick_deploy:
+            if req.repository_id:
+                outputs['local'] = {'id': 'local', 'step': 100, 'data': f'{human_time()} 已构建完成忽略执行。'}
+            else:
+                outputs['local'] = {'id': 'local', 'step': 0, 'data': f'{human_time()} 建立连接...        '}
         if req.deploy.extend == '2':
-            message = f'{human_time()} 建立连接...        '
-            outputs['local'] = {'id': 'local', 'step': 0, 'data': message}
-            s_actions = json.loads(req.deploy.extend_obj.server_actions)
-            h_actions = json.loads(req.deploy.extend_obj.host_actions)
-            if not h_actions:
-                outputs = {'local': outputs['local']}
-            return json_response({'s_actions': s_actions, 'h_actions': h_actions, 'outputs': outputs})
+            outputs['local'] = {'id': 'local', 'step': 0, 'data': f'{human_time()} 建立连接...        '}
+            if req.deploy.extend == '2':
+                s_actions = json.loads(req.deploy.extend_obj.server_actions)
+                h_actions = json.loads(req.deploy.extend_obj.host_actions)
+                if not h_actions:
+                    outputs = {'local': outputs['local']}
+                return json_response({'s_actions': s_actions, 'h_actions': h_actions, 'outputs': outputs})
         return json_response({'outputs': outputs})
 
     def patch(self, request, r_id):
