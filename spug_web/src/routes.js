@@ -25,8 +25,6 @@ import ExecTemplate from './pages/exec/template';
 import DeployApp from './pages/deploy/app';
 import DeployRepository from './pages/deploy/repository';
 import DeployRequest from './pages/deploy/request';
-import DoExt1Index from './pages/deploy/do/Ext1Index';
-import DoExt2Index from './pages/deploy/do/Ext2Index';
 import ScheduleIndex from './pages/schedule';
 import ConfigEnvironment from './pages/config/environment';
 import ConfigService from './pages/config/service';
@@ -63,10 +61,6 @@ export default [
       {title: '应用管理', auth: 'deploy.app.view', path: '/deploy/app', component: DeployApp},
       {title: '构建仓库', auth: 'deploy.repository.view', path: '/deploy/repository', component: DeployRepository},
       {title: '发布申请', auth: 'deploy.request.view', path: '/deploy/request', component: DeployRequest},
-      {path: '/deploy/do/ext1/:id', component: DoExt1Index},
-      {path: '/deploy/do/ext2/:id', component: DoExt2Index},
-      {path: '/deploy/do/ext1/:id/:log', component: DoExt1Index},
-      {path: '/deploy/do/ext2/:id/:log', component: DoExt2Index},
     ]
   },
   {
