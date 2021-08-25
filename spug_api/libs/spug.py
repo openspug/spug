@@ -64,7 +64,7 @@ class Notification:
             data = {
                 'token': self.spug_key,
                 'event': self.event,
-                'subject': self.title,
+                'subject': f'{self.title} >> {self.target}',
                 'desc': self.message,
                 'remark': f'故障持续{self.duration}' if self.event == '2' else None,
                 'users': list(users)
