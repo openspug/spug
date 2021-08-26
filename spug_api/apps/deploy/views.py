@@ -141,12 +141,13 @@ class RequestDetailView(View):
             for item in data:
                 counter += 1
                 item = json.loads(item.decode())
-                if 'data' in item:
-                    outputs[item['key']]['data'] += item['data']
-                if 'step' in item:
-                    outputs[item['key']]['step'] = item['step']
-                if 'status' in item:
-                    outputs[item['key']]['status'] = item['status']
+                if item['key'] in outputs:
+                    if 'data' in item:
+                        outputs[item['key']]['data'] += item['data']
+                    if 'step' in item:
+                        outputs[item['key']]['step'] = item['step']
+                    if 'status' in item:
+                        outputs[item['key']]['status'] = item['status']
             data = rds.lrange(key, counter, counter + 9)
         response['index'] = counter
         if req.is_quick_deploy:
