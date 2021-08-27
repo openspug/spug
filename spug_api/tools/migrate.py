@@ -9,34 +9,15 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "spug.settings")
 django.setup()
 
 from django.conf import settings
-from apps.app.models import App
+import shutil
 import sys
-
-
-class Version:
-    def __init__(self, version):
-        self.version = version.lstrip('vV').split('.')
-
-    def __gt__(self, other):
-        if not isinstance(other, Version):
-            raise TypeError('required type Version')
-        for v1, v2 in zip(self.version, other.version):
-            if int(v1) == int(v2):
-                continue
-            elif int(v1) > int(v2):
-                return True
-            else:
-                return False
-        return False
+import os
 
 
 if __name__ == '__main__':
-    old_version = Version(sys.argv[1])
-    now_version = Version(settings.SPUG_VERSION)
-    if old_version < Version('v2.3.14'):
-        app = App.objects.first()
-        if app and hasattr(app, 'sort_id') and app.sort_id == 0:
-            print('执行v2.3.14数据初始化')
-            for app in App.objects.all():
-                app.sort_id = app.id
-                app.save()
+    version = sys.argv[1]
+    if version < 'v3.0.1-beta.8':
+        print('执行 v3.0.1-beta.8 repos目录迁移')
+        old_path = os.path.join(settings.BASE_DIR, 'repos')
+        new_path = os.path.join(settings.REPOS_DIR)
+        shutil.move(old_path, new_path)

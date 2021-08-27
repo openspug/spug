@@ -14,6 +14,7 @@ import uuid
 import os
 
 REPOS_DIR = settings.REPOS_DIR
+BUILD_DIR = settings.BUILD_DIR
 
 
 def dispatch(rep: Repository, helper=None):
@@ -65,7 +66,7 @@ def _build(rep: Repository, helper, env):
     extras = json.loads(rep.extra)
     git_dir = os.path.join(REPOS_DIR, str(rep.deploy_id))
     build_dir = os.path.join(REPOS_DIR, rep.spug_version)
-    tar_file = os.path.join(REPOS_DIR, 'build', f'{rep.spug_version}.tar.gz')
+    tar_file = os.path.join(BUILD_DIR, f'{rep.spug_version}.tar.gz')
     env.update(SPUG_DST_DIR=extend.dst_dir)
     if extras[0] == 'branch':
         tree_ish = extras[2]

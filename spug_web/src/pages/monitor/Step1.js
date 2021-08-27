@@ -132,7 +132,7 @@ export default observer(function () {
       </Form.Item>
       <Form.Item required label="监控主机" style={getStyle(['3', '4'])}>
         {store.record.targets?.length > 0 && `已选择 ${store.record.targets.length} 台`}
-        <Button type="link" onClick={() => setShowSelector(true)}>选择主机</Button>
+        <Button type="link" style={{padding: 0}} onClick={() => setShowSelector(true)}>选择主机</Button>
       </Form.Item>
       <Form.Item label="响应时间" style={getStyle(['1'])}>
         <Input suffix="ms" value={extra} placeholder="最长响应时间（毫秒），不设置则默认10秒超时"
