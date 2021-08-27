@@ -12,7 +12,6 @@ from apps.repository.utils import dispatch
 from apps.app.models import Deploy
 from threading import Thread
 import json
-import os
 
 
 class RepositoryView(View):
@@ -83,11 +82,6 @@ class RepositoryView(View):
             if repository.deployrequest_set.exists():
                 return json_response(error='已关联发布申请无法删除')
             repository.delete()
-            build_file = f'{repository.spug_version}.tar.gz'
-            try:
-                os.remove(os.path.join(settings.REPOS_DIR, 'build', build_file))
-            except FileNotFoundError:
-                pass
         return json_response(error=error)
 
 

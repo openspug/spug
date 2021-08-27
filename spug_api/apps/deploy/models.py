@@ -2,11 +2,13 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.db import models
+from django.conf import settings
 from libs import ModelMixin, human_datetime
 from apps.account.models import User
 from apps.app.models import Deploy
 from apps.repository.models import Repository
 import json
+import os
 
 
 class DeployRequest(models.Model, ModelMixin):
@@ -49,6 +51,17 @@ class DeployRequest(models.Model, ModelMixin):
             extra = json.loads(self.extra)
             return extra[0] in ('branch', 'tag')
         return False
+
+    def delete(self, using=None, keep_parents=False):
+        super().delete(using, keep_parents)
+        if self.repository_id:
+            if not DeployRequest.objects.filter(repository=self.repository).exists():
+                self.repository.delete()
+        if self.deploy.extend == '2':
+            try:
+                os.remove(os.path.join(settings.REPOS_DIR, str(self.deploy_id), self.spug_version))
+            except FileNotFoundError:
+                pass
 
     def __repr__(self):
         return f'<DeployRequest name={self.name}>'

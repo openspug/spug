@@ -3,15 +3,12 @@
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
 from django.db.models import F
-from django.conf import settings
 from libs import JsonParser, Argument, json_response
 from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
 from apps.config.models import Config
 from apps.app.utils import fetch_versions, remove_repo
 from apps.setting.utils import AppSetting
-import subprocess
 import json
-import os
 import re
 
 
@@ -164,11 +161,11 @@ class DeployView(View):
         ).parse(request.GET)
         if error is None:
             deploy = Deploy.objects.get(pk=form.id)
-            if deploy.repository_set.exists():
-                return json_response(error='已存在关联的构建版本，请删除关联的构建版本后再尝试删除发布配置')
+            if deploy.deployrequest_set.exists():
+                return json_response(error='已存在关联的发布记录，请删除关联的发布记录后再尝试删除发布配置')
+            for item in deploy.repository_set.all():
+                item.delete()
             deploy.delete()
-            repo_dir = os.path.join(settings.REPOS_DIR, str(form.id))
-            subprocess.Popen(f'rm -rf {repo_dir} {repo_dir + "_*"}', shell=True)
         return json_response(error=error)
 
 

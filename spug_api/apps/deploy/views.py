@@ -85,36 +85,37 @@ class RequestView(View):
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
-            Argument('expire', required=False),
-            Argument('count', type=int, required=False, help='请输入数字')
+            Argument('mode', filter=lambda x: x in ('count', 'expire', 'deploy'), required=False, help='参数错误'),
+            Argument('value', required=False),
         ).parse(request.GET)
         if error is None:
-            rds = get_redis_connection()
             if form.id:
-                DeployRequest.objects.filter(pk=form.id, status__in=('0', '1', '-1')).delete()
+                deploy = DeployRequest.objects.filter(pk=form.id).first()
+                if not deploy or deploy.status not in ('0', '1', '-1'):
+                    return json_response(error='未找到指定发布申请或当前状态不允许删除')
+                deploy.delete()
                 return json_response()
-            elif form.count:
-                if form.count < 1:
+
+            count = 0
+            if form.mode == 'count':
+                if not str(form.value).isdigit() or int(form.value) < 1:
                     return json_response(error='请输入正确的保留数量')
-                counter, ids = defaultdict(int), []
+                counter, form.value = defaultdict(int), int(form.value)
                 for item in DeployRequest.objects.all():
-                    if counter[item.deploy_id] == form.count:
-                        ids.append(item.id)
-                    else:
-                        counter[item.deploy_id] += 1
-                count, _ = DeployRequest.objects.filter(id__in=ids).delete()
-                if ids:
-                    rds.delete(*(f'{settings.REQUEST_KEY}:{x}' for x in ids))
-                return json_response(count)
-            elif form.expire:
-                requests = DeployRequest.objects.filter(created_at__lt=form.expire)
-                ids = [x.id for x in requests]
-                count, _ = requests.delete()
-                if ids:
-                    rds.delete(*(f'{settings.REQUEST_KEY}:{x}' for x in ids))
-                return json_response(count)
-            else:
-                return json_response(error='请至少使用一个删除条件')
+                    counter[item.deploy_id] += 1
+                    if counter[item.deploy_id] > form.value:
+                        count += 1
+                        item.delete()
+            elif form.mode == 'expire':
+                for item in DeployRequest.objects.filter(created_at__lt=form.value):
+                    count += 1
+                    item.delete()
+            elif form.mode == 'deploy':
+                app_id, env_id = str(form.value).split(',')
+                for item in DeployRequest.objects.filter(deploy__app_id=app_id, deploy__env_id=env_id):
+                    count += 1
+                    item.delete()
+            return json_response(count)
         return json_response(error=error)
 
 

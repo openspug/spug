@@ -2,11 +2,13 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.db import models
+from django.conf import settings
 from libs.mixins import ModelMixin
 from apps.app.models import App, Environment, Deploy
 from apps.account.models import User
 from datetime import datetime
 import json
+import os
 
 
 class Repository(models.Model, ModelMixin):
@@ -43,7 +45,14 @@ class Repository(models.Model, ModelMixin):
             tmp['created_by_user'] = self.created_by_user
         return tmp
 
+    def delete(self, using=None, keep_parents=False):
+        super().delete(using, keep_parents)
+        try:
+            build_file = f'{self.spug_version}.tar.gz'
+            os.remove(os.path.join(settings.BUILD_DIR, build_file))
+        except FileNotFoundError:
+            pass
+
     class Meta:
         db_table = 'repositories'
         ordering = ('-id',)
-

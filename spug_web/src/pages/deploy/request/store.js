@@ -19,6 +19,7 @@ class Store {
   @observable addVisible = false;
   @observable ext1Visible = false;
   @observable ext2Visible = false;
+  @observable batchVisible = false;
   @observable approveVisible = false;
 
   @observable f_status = 'all';
