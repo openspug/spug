@@ -66,10 +66,10 @@ def _dispatch(deploy_id, ref, commit_id=None):
 def _deploy_extend_1(deploy, ref, commit_id=None):
     if commit_id:
         extra = ['branch', ref, commit_id]
-        version = f'#_b_{commit_id[:6]}'
+        version = f'{ref}#{commit_id[:6]}'
     else:
         extra = ['tag', ref, None]
-        version = f'#_t_{ref}'
+        version = ref
     rep = Repository.objects.create(
         deploy=deploy,
         app_id=deploy.app_id,
@@ -83,7 +83,7 @@ def _deploy_extend_1(deploy, ref, commit_id=None):
     if rep.status == '5':
         req = DeployRequest.objects.create(
             type='3',
-            status='2',
+            status='0' if deploy.is_audit else '2',
             deploy=deploy,
             repository=rep,
             name=rep.version,
@@ -92,15 +92,15 @@ def _deploy_extend_1(deploy, ref, commit_id=None):
             host_ids=deploy.host_ids,
             created_by=deploy.created_by
         )
-        deploy_dispatch(req)
+        if req.status == '2':
+            deploy_dispatch(req)
 
 
 def _deploy_extend_2(deploy, ref, commit_id=None):
-    # 创建 环境变量 分支  commit-id tag
-    version = f'#_b_{commit_id[:6]}' if commit_id else f'#_t_{ref}'
+    version = f'{ref}#{commit_id[:6]}' if commit_id else ref
     req = DeployRequest.objects.create(
         type='3',
-        status='2',
+        status='0' if deploy.is_audit else '2',
         deploy=deploy,
         name=version,
         version=version,
@@ -108,4 +108,5 @@ def _deploy_extend_2(deploy, ref, commit_id=None):
         host_ids=deploy.host_ids,
         created_by=deploy.created_by
     )
-    deploy_dispatch(req)
+    if req.status == '2':
+        deploy_dispatch(req)
