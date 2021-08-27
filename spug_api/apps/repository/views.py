@@ -104,19 +104,24 @@ def get_detail(request, r_id):
     if not repository:
         return json_response(error='未找到指定构建记录')
     rds, counter = get_redis_connection(), 0
-    key = f'{settings.BUILD_KEY}:{repository.spug_version}'
+    if repository.remarks == 'SPUG AUTO MAKE':
+        req = repository.deployrequest_set.last()
+        key = f'{settings.REQUEST_KEY}:{req.id}'
+    else:
+        key = f'{settings.BUILD_KEY}:{repository.spug_version}'
     data = rds.lrange(key, counter, counter + 9)
     response = AttrDict(data='', step=0, s_status='process', status=repository.status)
     while data:
         for item in data:
             counter += 1
             item = json.loads(item.decode())
-            if 'data' in item:
-                response.data += item['data']
-            if 'step' in item:
-                response.step = item['step']
-            if 'status' in item:
-                response.status = item['status']
+            if item['key'] == 'local':
+                if 'data' in item:
+                    response.data += item['data']
+                if 'step' in item:
+                    response.step = item['step']
+                if 'status' in item:
+                    response.status = item['status']
         data = rds.lrange(key, counter, counter + 9)
     response.index = counter
     if repository.status in ('0', '1'):

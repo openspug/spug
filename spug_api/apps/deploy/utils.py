@@ -67,6 +67,7 @@ def _ext1_deploy(req, helper, env):
             version=req.version,
             spug_version=req.spug_version,
             extra=req.extra,
+            remarks='SPUG AUTO MAKE',
             created_by_id=req.created_by_id
         )
         build_repository(rep, helper)
