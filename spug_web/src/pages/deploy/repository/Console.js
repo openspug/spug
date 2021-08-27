@@ -28,8 +28,11 @@ export default observer(function Console() {
       .then(res => {
         term.write(res.data)
         setStep(res.step)
-        setStatus(res.status)
-        socket = _makeSocket(res.index)
+        if (res.status === '1') {
+          socket = _makeSocket(res.index)
+        } else {
+          setStatus('wait')
+        }
       })
       .finally(() => setFetching(false))
     return () => socket && socket.close()
