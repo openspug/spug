@@ -51,6 +51,7 @@ function ComTable() {
               <Action.Button
                 auth="deploy.repository.build"
                 loading={loading === info.id}
+                disabled={info.remarks === 'SPUG AUTO MAKE'}
                 onClick={() => handleRebuild(info)}>构建</Action.Button>
               <Action.Button auth="deploy.repository.build" onClick={() => store.showConsole(info)}>日志</Action.Button>
             </Action>

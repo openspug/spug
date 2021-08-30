@@ -181,7 +181,7 @@ def _deploy_ext1_host(req, helper, h_id, env):
         try:
             ssh.put_file(os.path.join(REPOS_DIR, 'build', tar_gz_file), os.path.join(extend.dst_repo, tar_gz_file))
         except Exception as e:
-            helper.send_error(host.id, f'exception: {e}')
+            helper.send_error(host.id, f'Exception: {e}')
 
         command = f'cd {extend.dst_repo} && rm -rf {req.spug_version} && tar xf {tar_gz_file} && rm -f {req.deploy_id}_*.tar.gz'
         helper.remote_raw(host.id, ssh, command)
@@ -222,7 +222,7 @@ def _deploy_ext2_host(helper, h_id, actions, env, spug_version):
                     try:
                         ssh.put_file(os.path.join(REPOS_DIR, env.SPUG_DEPLOY_ID, spug_version), action['dst'])
                     except Exception as e:
-                        helper.send_error(host.id, f'exception: {e}')
+                        helper.send_error(host.id, f'Exception: {e}')
                     helper.send_info(host.id, 'transfer completed\r\n')
                     continue
                 else:
@@ -231,7 +231,7 @@ def _deploy_ext2_host(helper, h_id, actions, env, spug_version):
                     try:
                         ssh.put_file(os.path.join(sp_dir, tar_gz_file), f'/tmp/{tar_gz_file}')
                     except Exception as e:
-                        helper.send_error(host.id, f'exception: {e}')
+                        helper.send_error(host.id, f'Exception: {e}')
 
                     command = f'mkdir -p /tmp/{spug_version} && tar xf /tmp/{tar_gz_file} -C /tmp/{spug_version}/ '
                     command += f'&& rm -rf {action["dst"]} && mv /tmp/{spug_version}/{sd_dst} {action["dst"]} '

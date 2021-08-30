@@ -68,6 +68,16 @@ function Ext2Console(props) {
         if (status !== undefined) outputs[key].status = status;
       }
     }
+    socket.onerror = () => {
+      for (let key of Object.keys(outputs)) {
+        outputs[key]['status'] = 'error'
+        outputs[key].data = '\u001b[31mWebsocket connection failed!\u001b[0m'
+        if (terms[key]) {
+          terms[key].reset()
+          terms[key].write('\u001b[31mWebsocket connection failed!\u001b[0m')
+        }
+      }
+    }
     return socket
   }
 

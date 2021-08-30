@@ -60,9 +60,9 @@ class ExecConsole extends React.Component {
       for (let key of Object.keys(store.outputs)) {
         store.outputs[key]['status'] = 'websocket error'
         if (this.terms[key]) {
-          this.terms[key].write('Websocket connection failed!')
+          this.terms[key].write('\u001b[31mWebsocket connection failed!\u001b[0m')
         } else {
-          this.outputs[key] = 'Websocket connection failed!'
+          this.outputs[key] = '\u001b[31mWebsocket connection failed!\u001b[0m'
         }
       }
     }

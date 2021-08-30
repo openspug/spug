@@ -55,6 +55,11 @@ export default observer(function Console() {
         if (status !== undefined) setStatus(status);
       }
     }
+    socket.onerror = () => {
+      setStatus('error')
+      term.reset()
+      term.write('\u001b[31mWebsocket connection failed!\u001b[0m')
+    }
     return socket
   }
 

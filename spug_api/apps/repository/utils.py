@@ -104,6 +104,6 @@ def _build(rep: Repository, helper, env):
             exclude = ' '.join(excludes)
         else:
             contain = ' '.join(f'{rep.spug_version}/{x}' for x in files)
-    helper.local(f'cd {REPOS_DIR} && tar zcf {tar_file} {exclude} {contain}')
+    helper.local(f'mkdir -p {BUILD_DIR} && cd {REPOS_DIR} && tar zcf {tar_file} {exclude} {contain}')
     helper.send_step('local', 5, f'\033[32m完成√\033[0m')
     helper.send_step('local', 100, f'\r\n\r\n{human_time()} ** \033[32m构建成功\033[0m **')
