@@ -92,18 +92,16 @@ function ComTable() {
             <Popconfirm title="确认要执行该发布申请？" onConfirm={e => handleDeploy(e, info)}>
               <Action.Button auth="deploy.request.do">发布</Action.Button>
             </Popconfirm>
-            <Action.Button
-              auth="deploy.request.do"
-              disabled={info.type === '2'}
-              onClick={() => store.rollback(info)}>回滚</Action.Button>
+            {info.visible_rollback && (
+              <Action.Button auth="deploy.request.do" onClick={() => store.rollback(info)}>回滚</Action.Button>
+            )}
           </Action>;
         case '3':
           return <Action>
             <Action.Button auth="deploy.request.do" onClick={() => store.readConsole(info)}>查看</Action.Button>
-            <Action.Button
-              auth="deploy.request.do"
-              disabled={info.type === '2'}
-              onClick={() => store.rollback(info)}>回滚</Action.Button>
+            {info.visible_rollback && (
+              <Action.Button auth="deploy.request.do" onClick={() => store.rollback(info)}>回滚</Action.Button>
+            )}
           </Action>;
         case '-1':
           return <Action>

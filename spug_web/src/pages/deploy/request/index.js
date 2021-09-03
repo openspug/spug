@@ -15,6 +15,7 @@ import ComTable from './Table';
 import Ext1Console from './Ext1Console';
 import Ext2Console from './Ext2Console';
 import BatchDelete from './BatchDelete';
+import Rollback from './Rollback';
 import { includes } from 'libs';
 import envStore from 'pages/config/environment/store';
 import appStore from 'pages/config/app/store';
@@ -86,6 +87,7 @@ function Index() {
       {store.ext2Visible && <Ext2Form/>}
       {store.batchVisible && <BatchDelete/>}
       {store.approveVisible && <Approve/>}
+      {store.rollbackVisible && <Rollback/>}
       {store.tabs.length > 0 && (
         <Space className={styles.miniConsole}>
           {store.tabs.map(item => (

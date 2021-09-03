@@ -22,7 +22,7 @@ import os
 
 class RequestView(View):
     def get(self, request):
-        data, query = [], {}
+        data, query, counter = [], {}, {}
         if not request.user.is_supper:
             perms = request.user.deploy_perms
             query['deploy__app_id__in'] = perms['apps']
@@ -48,6 +48,9 @@ class RequestView(View):
             tmp['app_host_ids'] = json.loads(item.app_host_ids)
             tmp['status_alias'] = item.get_status_display()
             tmp['created_by_user'] = item.created_by_user
+            if item.app_extend == '1':
+                tmp['visible_rollback'] = item.deploy_id not in counter
+                counter[item.deploy_id] = True
             data.append(tmp)
         return json_response(data)
 
@@ -258,6 +261,37 @@ def post_request_ext1(request):
             is_required_notify = deploy.is_audit
         if is_required_notify:
             Thread(target=Helper.send_deploy_notify, args=(req, 'approve_req')).start()
+    return json_response(error=error)
+
+
+def post_request_ext1_rollback(request):
+    form, error = JsonParser(
+        Argument('request_id', type=int, help='参数错误'),
+        Argument('name', help='请输入申请标题'),
+        Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
+        Argument('desc', required=False),
+    ).parse(request.body)
+    if error is None:
+        req = DeployRequest.objects.get(pk=form.pop('request_id'))
+        requests = DeployRequest.objects.filter(deploy=req.deploy, status__in=('3', '-3'))
+        versions = list({x.spug_version: 1 for x in requests}.keys())
+        if req.spug_version not in versions[:req.deploy.extend_obj.versions + 1]:
+            return json_response(error='选择的版本超出了发布配置中设置的版本数量，无法快速回滚，可通过新建发布申请选择构建仓库里的该版本再次发布。')
+
+        form.status = '0' if req.deploy.is_audit else '1'
+        form.host_ids = json.dumps(sorted(form.host_ids))
+        new_req = DeployRequest.objects.create(
+            deploy_id=req.deploy_id,
+            repository_id=req.repository_id,
+            type='2',
+            extra=req.extra,
+            version=req.version,
+            spug_version=req.spug_version,
+            created_by=request.user,
+            **form
+        )
+        if req.deploy.is_audit:
+            Thread(target=Helper.send_deploy_notify, args=(new_req, 'approve_req')).start()
     return json_response(error=error)
 
 

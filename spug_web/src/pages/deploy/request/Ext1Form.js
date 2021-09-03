@@ -192,7 +192,7 @@ export default observer(function () {
                   repositories.map(item => (
                     <Select.Option key={item.id} value={item.id} disabled={type === '2' && item.id >= rb_id}>
                       <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <span>{item.remarks ? `${item.version} (${item.remarks})` : item.version}</span>
+                        <span>{item.version}</span>
                         <span style={{color: '#999', fontSize: 12}}>构建于 {moment(item.created_at).fromNow()}</span>
                       </div>
                     </Select.Option>

@@ -21,6 +21,7 @@ class Store {
   @observable ext2Visible = false;
   @observable batchVisible = false;
   @observable approveVisible = false;
+  @observable rollbackVisible = false;
 
   @observable f_status = 'all';
   @observable f_app_id;
@@ -96,15 +97,10 @@ class Store {
   };
 
   rollback = (info) => {
-    this.record = lds.pick(info, ['deploy_id', 'app_host_ids', 'host_ids']);
-    this.record.type = '2';
-    this.record.rb_id = info.repository_id;
+    this.record = lds.pick(info, ['deploy_id', 'host_ids']);
+    this.record.app_host_ids = info.host_ids;
     this.record.name = `${info.name} - 回滚`;
-    if (info.app_extend === '1') {
-      this.ext1Visible = true
-    } else {
-      this.ext2Visible = true
-    }
+    this.rollbackVisible = true
   }
 
   showForm = (info) => {
