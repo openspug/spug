@@ -173,25 +173,28 @@ def _deploy_ext1_host(req, helper, h_id, env):
             f'mkdir -p {extend.dst_repo} && [ -e {extend.dst_dir} ] && [ ! -L {extend.dst_dir} ]')
         if code == 0:
             helper.send_error(host.id, f'检测到该主机的发布目录 {extend.dst_dir!r} 已存在，为了数据安全请自行备份后删除该目录，Spug 将会创建并接管该目录。')
-        # clean
-        clean_command = f'ls -d {extend.deploy_id}_* 2> /dev/null | sort -t _ -rnk2 | tail -n +{extend.versions + 1} | xargs rm -rf'
-        helper.remote_raw(host.id, ssh, f'cd {extend.dst_repo} && {clean_command}')
-        # transfer files
-        tar_gz_file = f'{req.spug_version}.tar.gz'
-        try:
-            ssh.put_file(os.path.join(REPOS_DIR, 'build', tar_gz_file), os.path.join(extend.dst_repo, tar_gz_file))
-        except Exception as e:
-            helper.send_error(host.id, f'Exception: {e}')
+        if req.type == '1':
+            # clean
+            clean_command = f'ls -d {extend.deploy_id}_* 2> /dev/null | sort -t _ -rnk2 | tail -n +{extend.versions + 1} | xargs rm -rf'
+            helper.remote_raw(host.id, ssh, f'cd {extend.dst_repo} && {clean_command}')
+            # transfer files
+            tar_gz_file = f'{req.spug_version}.tar.gz'
+            try:
+                ssh.put_file(os.path.join(REPOS_DIR, 'build', tar_gz_file), os.path.join(extend.dst_repo, tar_gz_file))
+            except Exception as e:
+                helper.send_error(host.id, f'Exception: {e}')
 
-        command = f'cd {extend.dst_repo} && rm -rf {req.spug_version} && tar xf {tar_gz_file} && rm -f {req.deploy_id}_*.tar.gz'
-        helper.remote_raw(host.id, ssh, command)
-        helper.send_step(h_id, 1, '\033[32m完成√\033[0m\r\n')
+            command = f'cd {extend.dst_repo} && rm -rf {req.spug_version} && tar xf {tar_gz_file} && rm -f {req.deploy_id}_*.tar.gz'
+            helper.remote_raw(host.id, ssh, command)
+            helper.send_step(h_id, 1, '\033[32m完成√\033[0m\r\n')
+        else:
+            helper.send_step(h_id, 1, '\033[33m跳过√\033[0m\r\n')
 
         # pre host
         repo_dir = os.path.join(extend.dst_repo, req.spug_version)
         if extend.hook_pre_host:
             helper.send_step(h_id, 2, f'{human_time()} 发布前任务...       \r\n')
-            command = f'cd {repo_dir} ; {extend.hook_pre_host}'
+            command = f'cd {repo_dir} && {extend.hook_pre_host}'
             helper.remote(host.id, ssh, command)
 
         # do deploy
@@ -202,7 +205,7 @@ def _deploy_ext1_host(req, helper, h_id, env):
         # post host
         if extend.hook_post_host:
             helper.send_step(h_id, 4, f'{human_time()} 发布后任务...       \r\n')
-            command = f'cd {extend.dst_dir} ; {extend.hook_post_host}'
+            command = f'cd {extend.dst_dir} && {extend.hook_post_host}'
             helper.remote(host.id, ssh, command)
 
         helper.send_step(h_id, 100, f'\r\n{human_time()} ** \033[32m发布成功\033[0m **')
@@ -237,7 +240,7 @@ def _deploy_ext2_host(helper, h_id, actions, env, spug_version):
                     command += f'&& rm -rf {action["dst"]} && mv /tmp/{spug_version}/{sd_dst} {action["dst"]} '
                     command += f'&& rm -rf /tmp/{spug_version}* && echo "transfer completed"'
             else:
-                command = f'cd /tmp ; {action["data"]}'
+                command = f'cd /tmp && {action["data"]}'
             helper.remote(host.id, ssh, command)
 
     helper.send_step(h_id, 100, f'\r\n{human_time()} ** \033[32m发布成功\033[0m **')

@@ -9,7 +9,6 @@ import { BranchesOutlined, BuildOutlined, TagOutlined, PlusOutlined, TagsOutline
 import { Radio, Modal, Popover, Tag, Popconfirm, Tooltip, message } from 'antd';
 import { http, hasPermission } from 'libs';
 import { Action, AuthButton, TableCard } from 'components';
-import styles from './index.module.less';
 import store from './store';
 
 function ComTable() {
@@ -146,18 +145,7 @@ function ComTable() {
   }
 
   function handleDeploy(e, info) {
-    const right = document.body.clientWidth - 25 - e.target.getBoundingClientRect().x;
-    const bottom = document.body.clientHeight - 40 - e.target.getBoundingClientRect().y;
-    store.box.setAttribute('style', `display: block; bottom: ${bottom}px; right: ${right}px;`);
-    setTimeout(() => {
-      store.box.setAttribute('class', `${styles.floatBox} ${styles.floatBoxAnimate}`)
-    }, 10);
-    setTimeout(() => {
-      store.showConsole(info);
-      store.box.setAttribute('style', 'display: none');
-      store.box.setAttribute('class', styles.floatBox)
-    }, 300)
-
+    store.showConsole(info);
   }
 
   return (

@@ -90,16 +90,14 @@ function Index() {
       {store.rollbackVisible && <Rollback/>}
       {store.tabs.length > 0 && (
         <Space className={styles.miniConsole}>
-          {store.tabs.map(item => (
+          {store.tabs.map(item => item.id ?
             item.app_extend === '1' ? (
               <Ext1Console key={item.id} request={item}/>
             ) : (
               <Ext2Console key={item.id} request={item}/>
-            )
-          ))}
+            ) : null)}
         </Space>
       )}
-      <div ref={el => store.box = el} id='floatBox' className={styles.floatBox}/>
     </AuthDiv>
   )
 }

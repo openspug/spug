@@ -12,9 +12,7 @@ class Store {
   @observable records = [];
   @observable record = {};
   @observable counter = {};
-  @observable box = null;
   @observable tabs = [];
-  @observable tabModes = {};
   @observable isFetching = false;
   @observable addVisible = false;
   @observable ext1Visible = false;
@@ -54,6 +52,19 @@ class Store {
       .then(this._updateCounter)
       .finally(() => this.isFetching = false)
   };
+
+  fetchInfo = (id) => {
+    http.get('/api/deploy/request/info/', {params: {id}})
+      .then(res => {
+        for (let item of this.records) {
+          if (item.id === id) {
+            Object.assign(item, res)
+            break
+          }
+        }
+      })
+      .then(this._updateCounter)
+  }
 
   _updateCounter = () => {
     const counter = {'all': 0, '-3': 0, '0': 0, '1': 0, '3': 0, '99': 0};
@@ -122,18 +133,15 @@ class Store {
     const index = lds.findIndex(this.tabs, x => x.id === info.id);
     if (isClose) {
       if (index !== -1) {
-        this.tabs.splice(index, 1)
-        delete this.tabModes[info.id]
+        this.tabs[index] = {}
       }
-      this.fetchRecords()
+      this.fetchInfo(info.id)
     } else if (index === -1) {
-      this.tabModes[info.id] = true
       this.tabs.push(info)
     }
   };
 
   readConsole = (info) => {
-    this.tabModes[info.id] = false
     const index = lds.findIndex(this.tabs, x => x.id === info.id);
     if (index === -1) {
       info = Object.assign({}, info, {mode: 'read'})
@@ -142,9 +150,7 @@ class Store {
   };
 
   leaveConsole = () => {
-    for (let item of this.tabs) {
-      item.mode = 'read'
-    }
+    this.tabs = []
   }
 }
 

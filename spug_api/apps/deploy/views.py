@@ -334,6 +334,18 @@ def post_request_ext2(request):
     return json_response(error=error)
 
 
+def get_request_info(request):
+    form, error = JsonParser(
+        Argument('id', type=int, help='参数错误')
+    ).parse(request.GET)
+    if error is None:
+        req = DeployRequest.objects.get(pk=form.id)
+        response = req.to_dict(selects=('status', 'reason'))
+        response['status_alias'] = req.get_status_display()
+        return json_response(response)
+    return json_response(error=error)
+
+
 def do_upload(request):
     repos_dir = settings.REPOS_DIR
     file = request.FILES['file']
