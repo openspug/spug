@@ -266,7 +266,7 @@ def post_request_ext1(request):
 
 def post_request_ext1_rollback(request):
     form, error = JsonParser(
-        Argument('request_id', type=int, help='参数错误'),
+        Argument('request_id', type=int, help='请选择要回滚的版本'),
         Argument('name', help='请输入申请标题'),
         Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
         Argument('desc', required=False),
