@@ -82,6 +82,8 @@ class SSH:
         exit_code, line = -1, ''
         while True:
             line = channel.recv(8196).decode()
+            if not line:
+                break
             match = self.regex.search(line)
             if match:
                 exit_code = int(line.rsplit()[-1])
