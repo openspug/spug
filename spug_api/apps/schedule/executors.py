@@ -29,7 +29,7 @@ def host_executor(host, command):
     code, out, now = 1, None, time.time()
     try:
         with host.get_ssh() as ssh:
-            code, out = ssh.exec_command(command)
+            code, out = ssh.exec_command_raw(command)
     except AuthenticationException:
         out = 'ssh authentication fail'
     except socket.error as e:
