@@ -57,6 +57,7 @@ def do_task(request):
         for host in Host.objects.filter(id__in=form.host_ids):
             data = dict(
                 key=host.id,
+                name=host.name,
                 token=token,
                 hostname=host.hostname,
                 port=host.port,

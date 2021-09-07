@@ -14,12 +14,19 @@ def exec_worker_handler(job):
 
 
 class Job:
-    def __init__(self, key, hostname, port, username, pkey, command, token=None):
+    def __init__(self, key, name, hostname, port, username, pkey, command, token=None):
         self.ssh = SSH(hostname, port, username, pkey)
         self.key = key
         self.command = command
         self.token = token
         self.rds_cli = None
+        self.env = dict(
+            SPUG_HOST_ID=str(self.key),
+            SPUG_HOST_NAME=name,
+            SPUG_HOST_HOSTNAME=hostname,
+            SPUG_SSH_PORT=str(port),
+            SPUG_SSH_USERNAME=username,
+        )
 
     def _send(self, message, with_expire=False):
         if self.rds_cli is None:
@@ -39,12 +46,12 @@ class Job:
     def run(self):
         if not self.token:
             with self.ssh:
-                return self.ssh.exec_command(self.command)
+                return self.ssh.exec_command(self.command, self.env)
         self.send('\x1b[36m### Executing ...\x1b[0m\r\n')
         code = -1
         try:
             with self.ssh:
-                for code, out in self.ssh.exec_command_with_stream(self.command):
+                for code, out in self.ssh.exec_command_with_stream(self.command, self.env):
                     self.send(out)
         except socket.timeout:
             code = 130
@@ -52,5 +59,6 @@ class Job:
         except Exception as e:
             code = 131
             self.send(f'\r\n\x1b[31m### Exception {e}\x1b[0m')
+            raise e
         finally:
             self.send_status(code)
