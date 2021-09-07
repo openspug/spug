@@ -56,12 +56,14 @@ class SSH:
 
     def exec_command_raw(self, command):
         channel = self.client.get_transport().open_session()
+        channel.set_combine_stderr(True)
+        channel.exec_command(command)
+        code, output = channel.recv_exit_status(), channel.recv(-1)
         try:
-            channel.set_combine_stderr(True)
-            channel.exec_command(command)
-            return channel.recv_exit_status(), channel.recv(-1).decode()
-        finally:
-            channel.close()
+            output = output.decode()
+        except UnicodeDecodeError:
+            output = output.decode(encoding='GBK')
+        return code, output
 
     def exec_command(self, command, environment=None):
         channel = self._get_channel()
@@ -74,6 +76,18 @@ class SSH:
                 break
             out += line
         return exit_code, out
+
+    def _win_exec_command_with_stream(self, command):
+        chan = self.client.get_transport().open_session()
+        chan.set_combine_stderr(True)
+        chan.get_pty(width=102)
+        chan.exec_command(command)
+        stdout = chan.makefile("rb", -1)
+        out = stdout.readline()
+        while out:
+            yield chan.exit_status, out.decode()
+            out = stdout.readline()
+        yield chan.recv_exit_status(), out.decode()
 
     def exec_command_with_stream(self, command, environment=None):
         channel = self._get_channel()
@@ -166,6 +180,10 @@ class SSH:
 
     def __enter__(self):
         self.get_client()
+        transport = self.client.get_transport()
+        if 'windows' in transport.remote_version.lower():
+            self.exec_command = self.exec_command_raw
+            self.exec_command_with_stream = self._win_exec_command_with_stream
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
