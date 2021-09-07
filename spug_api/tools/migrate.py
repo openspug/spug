@@ -17,7 +17,7 @@ import os
 
 if __name__ == '__main__':
     version = sys.argv[1]
-    if version <= 'v3.0.1-beta.8':
+    if version <= 'v3.0.2':
         old_path = os.path.join(settings.BASE_DIR, 'repos')
         new_path = os.path.join(settings.REPOS_DIR)
         if not os.path.exists(new_path):

@@ -76,4 +76,6 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('''升级成功，请自行重启服务，如果通过官方文档安装一般重启命令为
         Docker: docker restart spug
         Centos: systemctl restart supervisord 
-        Ubuntu: systemctl restart supervisor'''))
+        Ubuntu: systemctl restart supervisor
+        '''))
+        self.stderr.write(self.style.WARNING(f'最后别忘了刷新浏览器，确保系统设置/关于里的api与web版本一致哦～'))
