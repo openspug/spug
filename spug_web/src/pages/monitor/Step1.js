@@ -131,7 +131,9 @@ export default observer(function () {
           notFoundContent={null}/>
       </Form.Item>
       <Form.Item required label="监控主机" style={getStyle(['3', '4'])}>
-        {store.record.targets?.length > 0 && `已选择 ${store.record.targets.length} 台`}
+        {store.record.targets?.length > 0 && (
+          <span style={{marginRight: 16}}>已选择 {store.record.targets.length} 台</span>
+        )}
         <Button type="link" style={{padding: 0}} onClick={() => setShowSelector(true)}>选择主机</Button>
       </Form.Item>
       <Form.Item label="响应时间" style={getStyle(['1'])}>

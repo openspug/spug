@@ -226,8 +226,10 @@ export default observer(function () {
           </Form.Item>
         )}
         <Form.Item required label="目标主机" tooltip="可以通过创建多个发布申请单，选择主机分批发布。">
-          {host_ids.length > 0 && `已选择 ${host_ids.length} 台（可选${app_host_ids.length}）`}
-          <Button type="link" onClick={() => setVisible(true)}>选择主机</Button>
+          {host_ids.length > 0 && (
+            <span style={{marginRight: 16}}>已选择 {host_ids.length} 台（可选{app_host_ids.length}）</span>
+          )}
+          <Button type="link" style={{padding: 0}} onClick={() => setVisible(true)}>选择主机</Button>
         </Form.Item>
         <Form.Item name="desc" label="备注信息">
           <Input placeholder="请输入备注信息"/>
