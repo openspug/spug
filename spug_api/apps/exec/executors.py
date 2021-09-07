@@ -14,9 +14,9 @@ def exec_worker_handler(job):
 
 
 class Job:
-    def __init__(self, hostname, port, username, pkey, command, token=None):
+    def __init__(self, key, hostname, port, username, pkey, command, token=None):
         self.ssh = SSH(hostname, port, username, pkey)
-        self.key = f'{hostname}:{port}'
+        self.key = key
         self.command = command
         self.token = token
         self.rds_cli = None

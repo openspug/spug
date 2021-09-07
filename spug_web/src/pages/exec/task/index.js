@@ -24,6 +24,10 @@ class TaskIndex extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    store.host_ids = []
+  }
+
   handleSubmit = () => {
     this.setState({loading: true});
     const host_ids = store.host_ids;

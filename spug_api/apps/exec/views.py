@@ -56,6 +56,7 @@ def do_task(request):
         token, rds = uuid.uuid4().hex, get_redis_connection()
         for host in Host.objects.filter(id__in=form.host_ids):
             data = dict(
+                key=host.id,
                 token=token,
                 hostname=host.hostname,
                 port=host.port,

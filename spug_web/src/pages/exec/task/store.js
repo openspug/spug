@@ -29,9 +29,8 @@ class Store {
     } else {
       for (let id of this.host_ids) {
         const host = hostStore.idMap[id];
-        const key = `${host.hostname}:${host.port}`;
-        this.outputs[key] = {
-          title: `${host.name}(${key})`,
+        this.outputs[host.id] = {
+          title: `${host.name}(${host.hostname}:${host.port})`,
           status: -2
         }
       }

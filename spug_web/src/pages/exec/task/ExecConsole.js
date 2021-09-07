@@ -37,6 +37,9 @@ class ExecConsole extends React.Component {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${store.token}/?x-token=${X_TOKEN}`);
     this.socket.onopen = () => {
+      for (let key of Object.keys(store.outputs)) {
+        this.handleWrite(key, '\x1b[36m### Waiting for scheduling ...\x1b[0m\r\n')
+      }
       this.socket.send('ok');
     };
     this.socket.onmessage = e => {
@@ -46,13 +49,7 @@ class ExecConsole extends React.Component {
         const {key, data, status} = JSON.parse(e.data);
         if (status !== undefined) store.outputs[key].status = status;
         if (data) {
-          if (this.terms[key]) {
-            this.terms[key].write(data)
-          } else if (this.outputs[key]) {
-            this.outputs[key] += data
-          } else {
-            this.outputs[key] = data
-          }
+          this.handleWrite(key, data)
         }
       }
     };
@@ -60,9 +57,9 @@ class ExecConsole extends React.Component {
       for (let key of Object.keys(store.outputs)) {
         store.outputs[key]['status'] = 'websocket error'
         if (this.terms[key]) {
-          this.terms[key].write('\u001b[31mWebsocket connection failed!\u001b[0m')
+          this.terms[key].write('\x1b[31mWebsocket connection failed!\x1b[0m')
         } else {
-          this.outputs[key] = '\u001b[31mWebsocket connection failed!\u001b[0m'
+          this.outputs[key] = '\x1b[31mWebsocket connection failed!\x1b[0m'
         }
       }
     }
@@ -71,6 +68,16 @@ class ExecConsole extends React.Component {
   componentWillUnmount() {
     this.socket.close();
     store.isFullscreen = false;
+  }
+
+  handleWrite = (key, data) => {
+    if (this.terms[key]) {
+      this.terms[key].write(data)
+    } else if (this.outputs[key]) {
+      this.outputs[key] += data
+    } else {
+      this.outputs[key] = data
+    }
   }
 
   genExtra = (status) => {
