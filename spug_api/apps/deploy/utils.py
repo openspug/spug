@@ -173,7 +173,9 @@ def _deploy_ext1_host(req, helper, h_id, env):
             f'mkdir -p {extend.dst_repo} && [ -e {extend.dst_dir} ] && [ ! -L {extend.dst_dir} ]')
         if code == 0:
             helper.send_error(host.id, f'检测到该主机的发布目录 {extend.dst_dir!r} 已存在，为了数据安全请自行备份后删除该目录，Spug 将会创建并接管该目录。')
-        if req.type == '1':
+        if req.type == '2':
+            helper.send_step(h_id, 1, '\033[33m跳过√\033[0m\r\n')
+        else:
             # clean
             clean_command = f'ls -d {extend.deploy_id}_* 2> /dev/null | sort -t _ -rnk2 | tail -n +{extend.versions + 1} | xargs rm -rf'
             helper.remote_raw(host.id, ssh, f'cd {extend.dst_repo} && {clean_command}')
@@ -187,8 +189,6 @@ def _deploy_ext1_host(req, helper, h_id, env):
             command = f'cd {extend.dst_repo} && rm -rf {req.spug_version} && tar xf {tar_gz_file} && rm -f {req.deploy_id}_*.tar.gz'
             helper.remote_raw(host.id, ssh, command)
             helper.send_step(h_id, 1, '\033[32m完成√\033[0m\r\n')
-        else:
-            helper.send_step(h_id, 1, '\033[33m跳过√\033[0m\r\n')
 
         # pre host
         repo_dir = os.path.join(extend.dst_repo, req.spug_version)
