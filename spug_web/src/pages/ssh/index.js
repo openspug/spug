@@ -116,7 +116,9 @@ function WebSSH(props) {
             </Tabs.TabPane>
           ))}
         </Tabs>
-        <pre className={styles.fig}>{spug_web_terminal}</pre>
+        {hosts.length === 0 && (
+          <pre className={styles.fig}>{spug_web_terminal}</pre>
+        )}
       </div>
       <FileManager id={activeId} visible={visible} onClose={() => setVisible(false)}/>
     </div>
