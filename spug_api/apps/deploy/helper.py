@@ -21,7 +21,6 @@ class Helper:
         self.rds = rds
         self.key = key
         self.rds.delete(self.key)
-        self.by_deploy = key.startswith(settings.REQUEST_KEY)
 
     @classmethod
     def _make_dd_notify(cls, action, req, version, host_str):
