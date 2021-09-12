@@ -57,9 +57,9 @@ def cloud_import(request):
                 HostExtend.objects.filter(instance_id=instance_id).update(**item)
             else:
                 if form.host_type == 'public':
-                    hostname = public_ips[0] if public_ips else None
+                    hostname = public_ips[0] if public_ips else ''
                 else:
-                    hostname = private_ips[0] if private_ips else None
+                    hostname = private_ips[0] if private_ips else ''
                 host = Host.objects.create(
                     name=host_name,
                     hostname=hostname,
