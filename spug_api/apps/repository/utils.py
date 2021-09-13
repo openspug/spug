@@ -56,9 +56,9 @@ def dispatch(rep: Repository, helper=None):
         if alone_build:
             helper.clear()
             rep.save()
+            return rep
         elif rep.status == '5':
             rep.save()
-        return rep
 
 
 def _build(rep: Repository, helper, env):
