@@ -27,6 +27,7 @@ def dispatch(req):
         rds.setex(api_token, 60 * 60, f'{req.deploy.app_id},{req.deploy.env_id}')
         env = AttrDict(
             SPUG_APP_NAME=req.deploy.app.name,
+            SPUG_APP_KEY=req.deploy.app.key,
             SPUG_APP_ID=str(req.deploy.app_id),
             SPUG_REQUEST_NAME=req.name,
             SPUG_DEPLOY_ID=str(req.deploy.id),
