@@ -208,4 +208,4 @@ class Helper:
     def remote_raw(self, key, ssh, command):
         code, out = ssh.exec_command_raw(command)
         if code != 0:
-            self.send_error(key, f'exit code: {code}')
+            self.send_error(key, f'exit code: {code}, {out}')
