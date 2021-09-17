@@ -22,6 +22,7 @@ function WebSSH(props) {
   const [treeData, setTreeData] = useState([]);
   const [hosts, setHosts] = useState([]);
   const [activeId, setActiveId] = useState();
+  const [hostId, setHostId] = useState();
 
   useEffect(() => {
     window.document.title = 'Spug web terminal'
@@ -38,26 +39,35 @@ function WebSSH(props) {
 
   function handleSelect(e) {
     if (e.nativeEvent.detail > 1 && e.node.isLeaf) {
-      if (!lds.find(hosts, x => x.id === e.node.id)) {
-        hosts.push(e.node);
-        setHosts(lds.cloneDeep(hosts))
-      }
-      setActiveId(String(e.node.id))
+      e.node.vId = String(new Date().getTime())
+      hosts.push(e.node);
+      setHosts(lds.cloneDeep(hosts))
+      setActiveId(e.node.vId)
     }
   }
 
   function handleRemove(key, action) {
     if (action === 'remove') {
-      const index = lds.findIndex(hosts, x => String(x.id) === key);
+      const index = lds.findIndex(hosts, x => x.vId === key);
       if (index !== -1) {
         hosts.splice(index, 1);
         setHosts(lds.cloneDeep(hosts));
         if (hosts.length > index) {
-          setActiveId(String(hosts[index].id))
+          setActiveId(hosts[index].vId)
         } else if (hosts.length) {
-          setActiveId(String(hosts[index - 1].id))
+          setActiveId(hosts[index - 1].vId)
+        } else {
+          setActiveId(undefined)
         }
       }
+    }
+  }
+
+  function handleOpenFileManager() {
+    const index = lds.findIndex(hosts, x => x.vId === activeId);
+    if (index !== -1) {
+      setHostId(hosts[index].id)
+      setVisible(true)
     }
   }
 
@@ -108,11 +118,11 @@ function WebSSH(props) {
             type="primary"
             disabled={!activeId}
             style={{marginRight: 5}}
-            onClick={() => setVisible(true)}
+            onClick={handleOpenFileManager}
             icon={<FolderOpenOutlined/>}>文件管理器</AuthButton>}>
           {hosts.map(item => (
-            <Tabs.TabPane key={item.id} tab={item.title}>
-              <Terminal id={item.id} activeId={activeId}/>
+            <Tabs.TabPane key={item.vId} tab={item.title}>
+              <Terminal id={item.id} vId={item.vId} activeId={activeId}/>
             </Tabs.TabPane>
           ))}
         </Tabs>
@@ -120,7 +130,7 @@ function WebSSH(props) {
           <pre className={styles.fig}>{spug_web_terminal}</pre>
         )}
       </div>
-      <FileManager id={activeId} visible={visible} onClose={() => setVisible(false)}/>
+      <FileManager id={hostId} visible={visible} onClose={() => setVisible(false)}/>
     </div>
   ) : (
     <div style={{height: '100vh'}}>

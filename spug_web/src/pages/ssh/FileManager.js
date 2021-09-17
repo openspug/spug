@@ -155,11 +155,10 @@ class FileManager extends React.Component {
   handleDownload = (name) => {
     const file = `/${this.state.pwd.join('/')}/${name}`;
     const link = document.createElement('a');
+    link.download = name;
     link.href = `/api/file/object/?id=${this.props.id}&file=${file}&x-token=${X_TOKEN}`;
     document.body.appendChild(link);
-    const evt = document.createEvent("MouseEvents");
-    evt.initEvent("click", false, false);
-    link.dispatchEvent(evt);
+    link.click();
     document.body.removeChild(link);
     message.warning('即将开始下载，请勿重复点击。')
   };

@@ -42,7 +42,7 @@ function WebSSH(props) {
   }, [])
 
   useEffect(() => {
-    if (String(props.id) === props.activeId) {
+    if (props.vId === props.activeId) {
       setTimeout(() => term.focus())
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
