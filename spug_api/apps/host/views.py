@@ -98,22 +98,30 @@ class HostView(View):
 
     def delete(self, request):
         form, error = JsonParser(
-            Argument('id', type=int, help='请指定操作对象')
+            Argument('id', type=int, required=False),
+            Argument('group_id', type=int, required=False),
         ).parse(request.GET)
         if error is None:
-            deploy = Deploy.objects.filter(host_ids__regex=fr'[^0-9]{form.id}[^0-9]').annotate(
-                app_name=F('app__name'),
-                env_name=F('env__name')
-            ).first()
-            if deploy:
-                return json_response(error=f'应用【{deploy.app_name}】在【{deploy.env_name}】的发布配置关联了该主机，请解除关联后再尝试删除该主机')
-            task = Task.objects.filter(targets__regex=fr'[^0-9]{form.id}[^0-9]').first()
-            if task:
-                return json_response(error=f'任务计划中的任务【{task.name}】关联了该主机，请解除关联后再尝试删除该主机')
-            detection = Detection.objects.filter(type__in=('3', '4'), targets__regex=fr'[^0-9]{form.id}[^0-9]').first()
-            if detection:
-                return json_response(error=f'监控中心的任务【{detection.name}】关联了该主机，请解除关联后再尝试删除该主机')
-            Host.objects.filter(pk=form.id).delete()
+            if form.id:
+                host_ids = [form.id]
+            elif form.group_id:
+                group = Group.objects.get(pk=form.group_id)
+                host_ids = [x.id for x in group.hosts.all()]
+            else:
+                return json_response(error='参数错误')
+            for host_id in host_ids:
+                regex = fr'[^0-9]{host_id}[^0-9]'
+                deploy = Deploy.objects.filter(host_ids__regex=regex) \
+                    .annotate(app_name=F('app__name'), env_name=F('env__name')).first()
+                if deploy:
+                    return json_response(error=f'应用【{deploy.app_name}】在【{deploy.env_name}】的发布配置关联了该主机，请解除关联后再尝试删除该主机')
+                task = Task.objects.filter(targets__regex=fr'[^0-9]{form.id}[^0-9]').first()
+                if task:
+                    return json_response(error=f'任务计划中的任务【{task.name}】关联了该主机，请解除关联后再尝试删除该主机')
+                detection = Detection.objects.filter(type__in=('3', '4'), targets__regex=regex).first()
+                if detection:
+                    return json_response(error=f'监控中心的任务【{detection.name}】关联了该主机，请解除关联后再尝试删除该主机')
+            Host.objects.filter(id__in=host_ids).delete()
         return json_response(error=error)
 
 

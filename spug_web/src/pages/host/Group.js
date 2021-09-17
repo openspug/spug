@@ -5,13 +5,14 @@
  */
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Input, Card, Tree, Dropdown, Menu, Switch, Tooltip, message } from 'antd';
+import { Input, Card, Tree, Dropdown, Menu, Switch, Tooltip, Modal } from 'antd';
 import {
   FolderOutlined,
   FolderAddOutlined,
   EditOutlined,
   DeleteOutlined,
   CopyOutlined,
+  CloseOutlined,
   ScissorOutlined,
   LoadingOutlined,
   QuestionCircleOutlined
@@ -50,19 +51,32 @@ export default observer(function () {
       <Menu.Item key="3" icon={<CopyOutlined/>} onClick={() => store.showSelector(true)}>添加至分组</Menu.Item>
       <Menu.Item key="4" icon={<ScissorOutlined/>} onClick={() => store.showSelector(false)}>移动至分组</Menu.Item>
       <Menu.Divider/>
-      <Menu.Item key="5" icon={<DeleteOutlined/>} danger onClick={handleRemove}>删除此分组</Menu.Item>
+      <Menu.Item key="5" icon={<CloseOutlined/>} danger onClick={handleRemoveHosts}>删除主机</Menu.Item>
+      <Menu.Item key="6" icon={<DeleteOutlined/>} danger onClick={handleRemove}>删除此分组</Menu.Item>
     </Menu>
   )
 
   function handleSubmit() {
-    if (!store.group.title) {
-      return message.error('请输入分组名称')
+    if (store.group.title) {
+      setLoading(true);
+      const {key, parent_id, title} = store.group;
+      http.post('/api/host/group/', {id: key || undefined, parent_id, name: title})
+        .then(() => setAction(''))
+        .finally(() => setLoading(false))
+    } else {
+      if (store.group.key === 0) store.treeData = bakTreeData
+      setAction('')
     }
-    setLoading(true);
-    const {key, parent_id, title} = store.group;
-    http.post('/api/host/group/', {id: key || undefined, parent_id, name: title})
-      .then(() => setAction(''))
-      .finally(() => setLoading(false))
+  }
+
+  function handleRemoveHosts() {
+    const group = store.group;
+    Modal.confirm({
+      title: '操作确认',
+      content: `批量删除【${group.title}】分组内的 ${group.all_host_ids.length} 个主机？`,
+      onOk: () => http.delete('/api/host/', {params: {group_id: group.key}})
+        .then(store.initial)
+    })
   }
 
   function handleRemove() {
@@ -102,13 +116,6 @@ export default observer(function () {
       .then(() => setLoading(false))
   }
 
-  function handleBlur() {
-    if (store.group.key === 0) {
-      store.treeData = bakTreeData
-    }
-    setAction('')
-  }
-
   function handleRightClick(v) {
     if (hasPermission('admin')) {
       store.group = v.node;
@@ -131,7 +138,7 @@ export default observer(function () {
         defaultValue={nodeData.title}
         suffix={loading ? <LoadingOutlined/> : <span/>}
         onClick={e => e.stopPropagation()}
-        onBlur={handleBlur}
+        onBlur={handleSubmit}
         onChange={e => store.group.title = e.target.value}
         onPressEnter={handleSubmit}/>
     } else if (action === 'del' && nodeData.key === store.group.key) {
