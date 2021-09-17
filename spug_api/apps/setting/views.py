@@ -5,12 +5,12 @@ import django
 from django.views.generic import View
 from django.conf import settings
 from libs import JsonParser, Argument, json_response
+from libs.mail import Mail
 from apps.account.models import User
 from apps.setting.utils import AppSetting
 from apps.setting.models import Setting
 import platform
 import ldap
-import smtplib
 
 
 class SettingView(View):
@@ -55,13 +55,10 @@ def email_test(request):
     ).parse(request.body)
     if error is None:
         try:
-            if form.port == 465:
-                server = smtplib.SMTP_SSL(form.server, form.port, timeout=3)
-            else:
-                server = smtplib.SMTP(form.server, form.port, timeout=3)
-            server.login(form.username, form.password)
+            mail = Mail(**form)
+            server = mail.get_server()
+            server.quit()
             return json_response()
-
         except Exception as e:
             error = f'{e}'
     return json_response(error=error)
