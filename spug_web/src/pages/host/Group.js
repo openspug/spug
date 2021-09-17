@@ -137,14 +137,16 @@ export default observer(function () {
     } else if (action === 'del' && nodeData.key === store.group.key) {
       return <LoadingOutlined style={{marginLeft: '4px'}}/>
     } else {
+      const extend = nodeData.all_host_ids && nodeData.all_host_ids.length ? `（${nodeData.all_host_ids.length}）` : null
       return (
-        <span style={{lineHeight: '24px'}}>
-          {nodeData.title}{nodeData.all_host_ids && nodeData.all_host_ids.length ? `（${nodeData.all_host_ids.length}）` : null}
-        </span>
+        <div style={{display: 'inline-block', lineHeight: '24px'}}>
+          <span>{nodeData.title}{extend}</span>
+        </div>
       )
     }
   }
 
+  const treeData = store.treeData;
   return (
     <Card
       title="分组列表"
@@ -157,7 +159,9 @@ export default observer(function () {
             onChange={setDraggable}
             checkedChildren="排版"
             unCheckedChildren="浏览"/>
-          <Tooltip title="右键点击分组进行编辑，开启排版模式后可通过拖拽分组进行快速排序。"><QuestionCircleOutlined style={{marginLeft: 8, color: '#999'}}/></Tooltip>
+          <Tooltip title="右键点击分组进行编辑，开启排版模式后可通过拖拽分组进行快速排序。">
+            <QuestionCircleOutlined style={{marginLeft: 8, color: '#999'}}/>
+          </Tooltip>
         </AuthFragment>)}>
       <Dropdown
         overlay={menus}
@@ -168,7 +172,7 @@ export default observer(function () {
           autoExpandParent
           expandAction="doubleClick"
           draggable={draggable}
-          treeData={store.treeData}
+          treeData={treeData}
           titleRender={treeRender}
           expandedKeys={expands}
           selectedKeys={[store.group.key]}
@@ -178,7 +182,10 @@ export default observer(function () {
           onRightClick={handleRightClick}
         />
       </Dropdown>
-      {store.records && store.treeData.length === 0 && (
+      {treeData.length === 1 && treeData[0].children.length === 0 && (
+        <div style={{color: '#999', marginTop: 20, textAlign: 'center'}}>右键点击分组进行分组管理哦~</div>
+      )}
+      {store.records && treeData.length === 0 && (
         <div style={{color: '#999'}}>你还没有可访问的主机分组，请联系管理员分配主机权限。</div>
       )}
     </Card>
