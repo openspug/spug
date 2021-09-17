@@ -176,7 +176,7 @@ class SSH:
         return f'export {str_envs}'
 
     def _handle_command(self, command, environment):
-        commands = command.strip('\n').splitlines()
+        commands = command.strip().splitlines()
         commands.insert(0, self._make_env_command(environment))
         commands.append(f'echo {self.eof} $?\n')
         return ';'.join(x for x in commands if x).encode()
