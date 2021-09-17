@@ -19,7 +19,9 @@ export default observer(function () {
 
   function handleSubmit() {
     const {dst_dir, dst_repo} = store.deploy;
-    if (dst_repo.includes(dst_dir.replace(/\/*$/, ''))) {
+    const t_dst_dir = dst_dir.replace(/\/*$/, '/');
+    const t_dst_repo = dst_repo.replace(/\/*$/, '/');
+    if (t_dst_repo.includes(t_dst_dir)) {
       return message.error('存储路径不能位于部署路径内')
     }
     setLoading(true);
