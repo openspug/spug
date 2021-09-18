@@ -5,6 +5,7 @@ from django_redis import get_redis_connection
 from libs.helper import make_ali_request, make_tencent_request
 from libs.ssh import SSH, AuthenticationException
 from libs.utils import AttrDict, human_datetime
+from libs.validators import ip_validator
 from apps.host.models import HostExtend
 from apps.setting.utils import AppSetting
 from collections import defaultdict
@@ -12,6 +13,7 @@ from datetime import datetime, timezone
 from concurrent import futures
 import ipaddress
 import json
+import math
 import os
 
 
@@ -181,35 +183,56 @@ def fetch_tencent_instances(ak, ac, region_id, page_number=1):
 
 
 def fetch_host_extend(ssh):
-    commands = [
-        "lscpu | grep '^CPU(s)' | awk '{print $2}'",
-        "free -m | awk 'NR==2{print $2}'",
-        "hostname -I",
-        "cat /etc/os-release | grep PRETTY_NAME | awk -F \\\" '{print $2}'",
-        "fdisk -l 2> /dev/null | grep '^Disk /' | awk '{print $5}'",
-        "fdisk -l 2> /dev/null | grep '^磁盘 /' | awk '{print $4}' | awk -F'，' '{print $2}'"
-    ]
+    public_ip_address = set()
+    private_ip_address = set()
+    response = {'disk': []}
     with ssh:
-        code, out = ssh.exec_command_raw(';'.join(commands))
-    if code != 0:
-        raise Exception(out)
-    response = {'disk': [], 'public_ip_address': [], 'private_ip_address': []}
-    for index, line in enumerate(out.strip().split('\n')):
-        if index == 0:
-            response['cpu'] = int(line)
-        elif index == 1:
-            response['memory'] = round(int(line) / 1000, 1)
-        elif index == 2:
-            for ip in line.split():
+        code, out = ssh.exec_command_raw('nproc')
+        if code != 0:
+            code, out = ssh.exec_command_raw("grep -c 'model name' /proc/cpuinfo")
+        if code == 0:
+            response['cpu'] = int(out.strip())
+
+        code, out = ssh.exec_command_raw("cat /etc/os-release | grep PRETTY_NAME | awk -F \\\" '{print $2}'")
+        if code == 0:
+            response['os_name'] = out.strip()
+
+        code, out = ssh.exec_command_raw('hostname -I')
+        if code == 0:
+            for ip in out.strip().split():
                 if ipaddress.ip_address(ip).is_global:
-                    response['public_ip_address'].append(ip)
+                    public_ip_address.add(ip)
                 else:
-                    response['private_ip_address'].append(ip)
-        elif index == 3:
-            response['os_name'] = line
-        elif line:
-            response['disk'].append(round(int(line) / 1024 / 1024 / 1024, 0))
-    return response
+                    private_ip_address.add(ip)
+
+        ssh_hostname = ssh.arguments.get('hostname')
+        if ip_validator(ssh_hostname):
+            if ipaddress.ip_address(ssh_hostname).is_global:
+                public_ip_address.add(ssh_hostname)
+            else:
+                private_ip_address.add(ssh_hostname)
+
+        code, out = ssh.exec_command_raw('lsblk -dbn -o SIZE -e 11 2> /dev/null')
+        if code == 0:
+            for item in out.strip().splitlines():
+                item = item.strip()
+                response['disk'].append(math.ceil(int(item) / 1024 / 1024 / 1024))
+
+        code, out = ssh.exec_command_raw("dmidecode -t 17 | grep -E 'Size: [0-9]+' | awk '{s+=$2} END {print s,$3}'")
+        if code == 0:
+            size, unit = out.strip().split()
+            if unit == 'GB':
+                response['memory'] = size
+            else:
+                response['memory'] = round(int(size) / 1024, 0)
+        else:
+            code, out = ssh.exec_command_raw("free -m | awk 'NR==2{print $2}'")
+            if code == 0:
+                response['memory'] = math.ceil(int(out) / 1024)
+
+        response['public_ip_address'] = list(public_ip_address)
+        response['private_ip_address'] = list(private_ip_address)
+        return response
 
 
 def batch_sync_host(token, hosts, password):
