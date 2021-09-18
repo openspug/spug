@@ -132,10 +132,10 @@ class SSH:
 
         counter = 0
         self.channel = self.client.invoke_shell()
-        command = 'export PS1= && stty -echo'
+        command = 'export PS1= && stty -echo\n'
         if self.default_env:
-            command += f' && {self.default_env}'
-        command += f' && echo {self.eof} $?\n'
+            command += f'{self.default_env}\n'
+        command += f'echo {self.eof} $?\n'
         self.channel.send(command.encode())
         while True:
             if self.channel.recv_ready():
