@@ -220,12 +220,14 @@ def fetch_host_extend(ssh):
 
         code, out = ssh.exec_command_raw("dmidecode -t 17 | grep -E 'Size: [0-9]+' | awk '{s+=$2} END {print s,$3}'")
         if code == 0:
-            size, unit = out.strip().split()
-            if unit == 'GB':
-                response['memory'] = size
-            else:
-                response['memory'] = round(int(size) / 1024, 0)
-        else:
+            fields = out.strip().split()
+            if len(fields) == 2 and fields[1] in ('GB', 'MB'):
+                size, unit = out.strip().split()
+                if unit == 'GB':
+                    response['memory'] = size
+                else:
+                    response['memory'] = round(int(size) / 1024, 0)
+        if 'memory' not in response:
             code, out = ssh.exec_command_raw("free -m | awk 'NR==2{print $2}'")
             if code == 0:
                 response['memory'] = math.ceil(int(out) / 1024)
