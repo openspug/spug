@@ -75,22 +75,35 @@ def _ext1_deploy(req, helper, env):
         req.repository = rep
     extend = req.deploy.extend_obj
     env.update(SPUG_DST_DIR=extend.dst_dir)
-    threads, latest_exception = [], None
-    max_workers = max(10, os.cpu_count() * 5) if req.deploy.is_parallel else 1
-    with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        for h_id in json.loads(req.host_ids):
-            env = AttrDict(env.items())
-            t = executor.submit(_deploy_ext1_host, req, helper, h_id, env)
-            t.h_id = h_id
-            threads.append(t)
-        for t in futures.as_completed(threads):
-            exception = t.exception()
-            if exception:
-                latest_exception = exception
-                if not isinstance(exception, SpugError):
-                    helper.send_error(t.h_id, f'Exception: {exception}', False)
-    if latest_exception:
-        raise latest_exception
+    if req.deploy.is_parallel:
+        threads, latest_exception = [], None
+        max_workers = max(10, os.cpu_count() * 5)
+        with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            for h_id in json.loads(req.host_ids):
+                new_env = AttrDict(env.items())
+                t = executor.submit(_deploy_ext1_host, req, helper, h_id, new_env)
+                t.h_id = h_id
+                threads.append(t)
+            for t in futures.as_completed(threads):
+                exception = t.exception()
+                if exception:
+                    latest_exception = exception
+                    if not isinstance(exception, SpugError):
+                        helper.send_error(t.h_id, f'Exception: {exception}', False)
+        if latest_exception:
+            raise latest_exception
+    else:
+        host_ids = sorted(json.loads(req.host_ids), reverse=True)
+        while host_ids:
+            h_id = host_ids.pop()
+            new_env = AttrDict(env.items())
+            try:
+                _deploy_ext1_host(req, helper, h_id, new_env)
+            except Exception as e:
+                helper.send_error(h_id,  f'Exception: {e}', False)
+                for h_id in host_ids:
+                    helper.send_error(h_id, '终止发布', False)
+                raise e
 
 
 def _ext2_deploy(req, helper, env):
@@ -140,24 +153,37 @@ def _ext2_deploy(req, helper, env):
             tmp_transfer_file = os.path.join(sp_dir, tar_gz_file)
             break
     if host_actions:
-        threads, latest_exception = [], None
-        max_workers = max(10, os.cpu_count() * 5) if req.deploy.is_parallel else 1
-        with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            for h_id in json.loads(req.host_ids):
-                env = AttrDict(env.items())
-                t = executor.submit(_deploy_ext2_host, helper, h_id, host_actions, env, req.spug_version)
-                t.h_id = h_id
-                threads.append(t)
-            for t in futures.as_completed(threads):
-                exception = t.exception()
-                if exception:
-                    latest_exception = exception
-                    if not isinstance(exception, SpugError):
-                        helper.send_error(t.h_id, f'Exception: {exception}', False)
-            if tmp_transfer_file:
-                os.remove(tmp_transfer_file)
-        if latest_exception:
-            raise latest_exception
+        if req.deploy.is_parallel:
+            threads, latest_exception = [], None
+            max_workers = max(10, os.cpu_count() * 5)
+            with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+                for h_id in json.loads(req.host_ids):
+                    new_env = AttrDict(env.items())
+                    t = executor.submit(_deploy_ext2_host, helper, h_id, host_actions, new_env, req.spug_version)
+                    t.h_id = h_id
+                    threads.append(t)
+                for t in futures.as_completed(threads):
+                    exception = t.exception()
+                    if exception:
+                        latest_exception = exception
+                        if not isinstance(exception, SpugError):
+                            helper.send_error(t.h_id, f'Exception: {exception}', False)
+                if tmp_transfer_file:
+                    os.remove(tmp_transfer_file)
+            if latest_exception:
+                raise latest_exception
+        else:
+            host_ids = sorted(json.loads(req.host_ids), reverse=True)
+            while host_ids:
+                h_id = host_ids.pop()
+                new_env = AttrDict(env.items())
+                try:
+                    _deploy_ext2_host(helper, h_id, host_actions, new_env, req.spug_version)
+                except Exception as e:
+                    helper.send_error(h_id, f'Exception: {e}', False)
+                    for h_id in host_ids:
+                        helper.send_error(h_id, '终止发布', False)
+                    raise e
     else:
         helper.send_step('local', 100, f'\r\n{human_time()} ** 发布成功 **')
 
