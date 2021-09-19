@@ -18,7 +18,7 @@ class SSH:
         self.sftp = None
         self.eof = 'Spug EOF 2108111926'
         self.default_env = self._make_env_command(default_env)
-        self.regex = re.compile(r'Spug EOF 2108111926 -?\d+[\r\n]?$')
+        self.regex = re.compile(r'Spug EOF 2108111926 (-?\d+)[\r\n]?')
         self.arguments = {
             'hostname': hostname,
             'port': port,
@@ -104,7 +104,7 @@ class SSH:
                 break
             match = self.regex.search(line)
             if match:
-                exit_code = int(line.rsplit()[-1])
+                exit_code = int(match.group(1))
                 line = line[:match.start()]
                 break
             yield exit_code, line
@@ -132,7 +132,7 @@ class SSH:
 
         counter = 0
         self.channel = self.client.invoke_shell()
-        command = 'export PS1= && stty -echo\n'
+        command = 'export PS1= && stty -echo; unsetopt zle\n'
         if self.default_env:
             command += f'{self.default_env}\n'
         command += f'echo {self.eof} $?\n'
