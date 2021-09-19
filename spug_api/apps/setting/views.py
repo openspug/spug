@@ -2,11 +2,13 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 import django
+from django.core.cache import cache
 from django.views.generic import View
 from django.conf import settings
 from libs import JsonParser, Argument, json_response
+from libs.utils import generate_random_str
 from libs.mail import Mail
-from apps.account.models import User
+from libs.spug import send_login_wx_code
 from apps.setting.utils import AppSetting
 from apps.setting.models import Setting
 import platform
@@ -25,6 +27,37 @@ class SettingView(View):
         if error is None:
             for item in form.data:
                 AppSetting.set(**item)
+        return json_response(error=error)
+
+
+class MFAView(View):
+    def get(self, request):
+        if not request.user.wx_token:
+            return json_response(error='检测到当前账户未配置微信Token，请配置后再尝试启用MFA认证，否则可能造成系统无法正常登录。')
+        code = generate_random_str(6)
+        send_login_wx_code(request.user.wx_token, code)
+        cache.set(f'{request.user.username}:code', code, 300)
+        return json_response()
+
+    def post(self, request):
+        form, error = JsonParser(
+            Argument('enable', type=bool, help='参数错误'),
+            Argument('code', required=False)
+        ).parse(request.body)
+        if error is None:
+            if form.enable:
+                if not form.code:
+                    return json_response(error='请输入验证码')
+                key = f'{request.user.username}:code'
+                code = cache.get(key)
+                if not code:
+                    return json_response(error='验证码已失效，请重新获取')
+                if code != form.code:
+                    ttl = cache.ttl(key)
+                    cache.expire(key, ttl - 100)
+                    return json_response(error='验证码错误')
+                cache.delete(key)
+            AppSetting.set('MFA', {'enable': form.enable})
         return json_response(error=error)
 
 
@@ -65,9 +98,11 @@ def email_test(request):
 
 
 def mfa_test(request):
-    for user in User.objects.filter(is_supper=True):
-        if not user.wx_token:
-            return json_response(error=f'检测到管理员账户 {user.nickname} 未配置微信Token，请配置后再尝试启用MFA认证，否则可能造成系统无法正常登录。')
+    if not request.user.wx_token:
+        return json_response(error='检测到当前账户未配置微信Token，请配置后再尝试启用MFA认证，否则可能造成系统无法正常登录。')
+    code = generate_random_str(6)
+    send_login_wx_code(request.user.wx_token, code)
+    cache.set(f'{request.user.username}:code', code, 300)
     return json_response()
 
 
