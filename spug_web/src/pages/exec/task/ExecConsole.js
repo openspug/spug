@@ -24,6 +24,7 @@ import store from './store';
 class ExecConsole extends React.Component {
   constructor(props) {
     super(props);
+    this.lastOutputs = {};
     this.socket = null;
     this.terms = {};
     this.outputs = {};
@@ -49,6 +50,7 @@ class ExecConsole extends React.Component {
         const {key, data, status} = JSON.parse(e.data);
         if (status !== undefined) store.outputs[key].status = status;
         if (data) {
+          if (data.replace(/\r\n/g, '')) this.lastOutputs[key] = data.trim()
           this.handleWrite(key, data)
         }
       }
@@ -80,16 +82,24 @@ class ExecConsole extends React.Component {
     }
   }
 
-  genExtra = (status) => {
+  genExtra = (status, key) => {
     if (status === -2) {
       return <LoadingOutlined style={{fontSize: 20, color: '#108ee9'}}/>;
     } else if (status === 0) {
-      return <CheckCircleTwoTone style={{fontSize: 20}} twoToneColor="#52c41a"/>
+      return (
+        <div style={{display: 'flex', alignItems: 'center'}}>
+          <pre className={styles.header2}>{this.lastOutputs[key]}</pre>
+          <CheckCircleTwoTone style={{fontSize: 20}} twoToneColor="#52c41a"/>
+        </div>
+      )
     } else {
       return (
-        <Tooltip title={`退出状态码：${status}`}>
-          <WarningTwoTone style={{fontSize: 20}} twoToneColor="red"/>
-        </Tooltip>
+        <div style={{display: 'flex', alignItems: 'center'}}>
+          <pre className={styles.header2}>{this.lastOutputs[key]}</pre>
+          <Tooltip title={`退出状态码：${status}`}>
+            <WarningTwoTone style={{fontSize: 20}} twoToneColor="red"/>
+          </Tooltip>
+        </div>
       )
     }
   };
@@ -124,7 +134,10 @@ class ExecConsole extends React.Component {
           onChange={key => this.handleUpdate({activeKey: key})}
           expandIcon={({isActive}) => <CaretRightOutlined style={{fontSize: 16}} rotate={isActive ? 90 : 0}/>}>
           {Object.entries(store.outputs).map(([key, item], index) => (
-            <Collapse.Panel key={key} header={<b>{item['title']}</b>} extra={this.genExtra(item.status)}>
+            <Collapse.Panel
+              key={key}
+              header={<div className={styles.header1}>{item['title']}</div>}
+              extra={this.genExtra(item.status, key)}>
               <OutView
                 isFullscreen={isFullscreen}
                 getOutput={() => this.outputs[key]}
