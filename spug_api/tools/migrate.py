@@ -13,11 +13,30 @@ import subprocess
 import shutil
 import sys
 import os
+import re
+
+
+class Version:
+    def __init__(self, version):
+        self.version = re.sub('[^0-9.]', '', version).split('.')
+
+    def __gt__(self, other):
+        if not isinstance(other, Version):
+            raise TypeError('required type Version')
+        for v1, v2 in zip(self.version, other.version):
+            if int(v1) == int(v2):
+                continue
+            elif int(v1) > int(v2):
+                return True
+            else:
+                return False
+        return False
 
 
 if __name__ == '__main__':
-    version = sys.argv[1]
-    if version <= 'v3.0.2':
+    old_version = Version(sys.argv[1])
+    now_version = Version(settings.SPUG_VERSION)
+    if old_version <= Version('v3.0.2'):
         old_path = os.path.join(settings.BASE_DIR, 'repos')
         new_path = os.path.join(settings.REPOS_DIR)
         if not os.path.exists(new_path):
