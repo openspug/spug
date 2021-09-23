@@ -5,6 +5,7 @@ from paramiko.client import SSHClient, AutoAddPolicy
 from paramiko.rsakey import RSAKey
 from paramiko.ssh_exception import AuthenticationException
 from io import StringIO
+import base64
 import time
 import re
 
@@ -132,7 +133,7 @@ class SSH:
 
         counter = 0
         self.channel = self.client.invoke_shell()
-        command = 'export PS1= && stty -echo; unsetopt zle\n'
+        command = 'export PS1= && stty -echo; unsetopt zle; set -e\n'
         if self.default_env:
             command += f'{self.default_env}\n'
         command += f'echo {self.eof} $?\n'
@@ -176,10 +177,17 @@ class SSH:
         return f'export {str_envs}'
 
     def _handle_command(self, command, environment):
-        commands = command.strip().splitlines()
-        commands.insert(0, self._make_env_command(environment))
-        commands.append(f'echo {self.eof} $?\n')
-        return ';'.join(x for x in commands if x).encode()
+        new_command = f'trap \'echo {self.eof} $?; rm -f $SPUG_EXEC_FILE\' EXIT\n'
+        env_command = self._make_env_command(environment)
+        if env_command:
+            new_command += f'{env_command}\n'
+        new_command += command
+        b64_command = base64.standard_b64encode(new_command.encode())
+
+        commands = 'export SPUG_EXEC_FILE=$(mktemp)\n'
+        commands += f'echo {b64_command.decode()} | base64 -d > $SPUG_EXEC_FILE\n'
+        commands += 'bash $SPUG_EXEC_FILE\n'
+        return commands
 
     def __enter__(self):
         self.get_client()
