@@ -196,8 +196,9 @@ def _deploy_ext1_host(req, helper, h_id, env):
         helper.send_error(h_id, 'no such host')
     env.update({'SPUG_HOST_ID': h_id, 'SPUG_HOST_NAME': host.hostname})
     with host.get_ssh(default_env=env) as ssh:
+        base_dst_dir = os.path.dirname(extend.dst_dir)
         code, _ = ssh.exec_command_raw(
-            f'mkdir -p {extend.dst_repo} && [ -e {extend.dst_dir} ] && [ ! -L {extend.dst_dir} ]')
+            f'mkdir -p {extend.dst_repo} {base_dst_dir} && [ -e {extend.dst_dir} ] && [ ! -L {extend.dst_dir} ]')
         if code == 0:
             helper.send_error(host.id, f'检测到该主机的发布目录 {extend.dst_dir!r} 已存在，为了数据安全请自行备份后删除该目录，Spug 将会创建并接管该目录。')
         if req.type == '2':

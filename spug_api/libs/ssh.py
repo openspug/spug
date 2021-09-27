@@ -74,8 +74,11 @@ class SSH:
         channel.send(command)
         out, exit_code = '', -1
         for line in self.stdout:
-            if self.regex.search(line):
-                exit_code = int(line.rsplit()[-1])
+            match = self.regex.search(line)
+            if match:
+                exit_code = int(match.group(1))
+                line = line[:match.start()]
+                out += line
                 break
             out += line
         return exit_code, out
