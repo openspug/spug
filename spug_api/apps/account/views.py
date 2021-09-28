@@ -41,7 +41,8 @@ class UserView(View):
 
             role_ids, password = form.pop('role_ids'), form.pop('password')
             if form.id:
-                User.objects.filter(pk=form.id).update(**form)
+                user = User.objects.get(pk=form.id)
+                user.update_by_dict(form)
             else:
                 user = User.objects.create(
                     password_hash=User.make_password(password),
