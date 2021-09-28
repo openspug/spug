@@ -9,6 +9,7 @@ import { ExclamationCircleOutlined, UploadOutlined } from '@ant-design/icons';
 import { Modal, Form, Input, TreeSelect, Button, Upload, Alert, message } from 'antd';
 import { http, X_TOKEN } from 'libs';
 import store from './store';
+import styles from './index.module.less';
 
 export default observer(function () {
   const [form] = Form.useForm();
@@ -126,13 +127,13 @@ export default observer(function () {
           <Input placeholder="请输入主机名称"/>
         </Form.Item>
         <Form.Item required label="连接地址" style={{marginBottom: 0}}>
-          <Form.Item name="username" style={{display: 'inline-block', width: 'calc(30%)'}}>
+          <Form.Item name="username" className={styles.formAddress1} style={{width: 'calc(30%)'}}>
             <Input addonBefore="ssh" placeholder="用户名"/>
           </Form.Item>
-          <Form.Item name="hostname" style={{display: 'inline-block', width: 'calc(40%)'}}>
+          <Form.Item name="hostname" className={styles.formAddress2} style={{width: 'calc(40%)'}}>
             <Input addonBefore="@" placeholder="主机名/IP"/>
           </Form.Item>
-          <Form.Item name="port" style={{display: 'inline-block', width: 'calc(30%)'}}>
+          <Form.Item name="port" className={styles.formAddress3} style={{width: 'calc(30%)'}}>
             <Input addonBefore="-p" placeholder="端口"/>
           </Form.Item>
         </Form.Item>
@@ -146,7 +147,7 @@ export default observer(function () {
           <Input.TextArea placeholder="请输入主机备注信息"/>
         </Form.Item>
         <Form.Item wrapperCol={{span: 17, offset: 5}}>
-          <Alert showIcon type="info" message="首次验证时需要输入登录用户名对应的密码，该密码会用于配置密钥连接，不会存储该密码。" />
+          <Alert showIcon type="info" message="首次验证时需要输入登录用户名对应的密码，该密码会用于配置密钥连接，不会存储该密码。"/>
         </Form.Item>
       </Form>
     </Modal>
