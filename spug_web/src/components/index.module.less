@@ -173,19 +173,38 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 24px;
     color: rgba(0, 0, 0, .85);
     font-weight: 500;
     font-size: 20px;
     line-height: 28px;
   }
 
-  .appBlock {
-    margin-top: 20px;
-    width: 165px;
-    height: 60px;
-    font-size: 18px;
-    margin-right: 20px;
+  .appItem {
+    width: 560px;
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    background: #fafafa;
+    border-radius: 2px;
+
+    :global(.anticon) {
+      color: #1890ff;
+      margin-right: 16px;
+    }
+
+    .body {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .appItem:hover {
+    cursor: pointer;
+    background: #e6f7ff;
   }
 
   .tips {

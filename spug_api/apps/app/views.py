@@ -90,7 +90,9 @@ class DeployView(View):
             perms = request.user.deploy_perms
             form.app_id__in = perms['apps']
             form.env_id__in = perms['envs']
-        deploys = Deploy.objects.filter(**form).annotate(app_name=F('app__name')).order_by('-app__sort_id')
+        deploys = Deploy.objects.filter(**form) \
+            .annotate(app_name=F('app__name'), app_key=F('app__key')) \
+            .order_by('-app__sort_id')
         return json_response(deploys)
 
     def post(self, request):

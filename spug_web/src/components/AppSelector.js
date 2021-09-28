@@ -6,8 +6,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react';
-import { Modal, Button, Menu, Spin, Input, Tooltip } from 'antd';
-import { OrderedListOutlined, BuildOutlined } from '@ant-design/icons';
+import { Modal, Menu, Spin, Input } from 'antd';
+import { OrderedListOutlined, BuildOutlined, SearchOutlined } from '@ant-design/icons';
 import { includes, http } from 'libs';
 import styles from './index.module.less';
 import envStore from 'pages/config/environment/store';
@@ -15,7 +15,6 @@ import lds from 'lodash';
 
 export default observer(function AppSelector(props) {
   const [fetching, setFetching] = useState(false);
-  const [refs, setRefs] = useState({});
   const [env_id, setEnvId] = useState();
   const [search, setSearch] = useState();
   const [deploys, setDeploys] = useState([]);
@@ -38,17 +37,8 @@ export default observer(function AppSelector(props) {
     }
   }
 
-  function handleRef(el, id) {
-    if (el && !refs.hasOwnProperty(id)) {
-      setTimeout(() => {
-        refs[id] = el.scrollWidth > el.clientWidth;
-        setRefs({...refs})
-      }, 200)
-    }
-  }
-
   let records = deploys.filter(x => x.env_id === Number(env_id));
-  if (search) records = records.filter(x => includes(x['app_name'], search));
+  if (search) records = records.filter(x => includes(x['app_name'], search) || includes(x['app_key'], search));
   if (props.filter) records = records.filter(x => props.filter(x));
   return (
     <Modal
@@ -76,25 +66,24 @@ export default observer(function AppSelector(props) {
           <Spin spinning={fetching}>
             <div className={styles.title}>
               <div>{lds.get(envStore.idMap, `${env_id}.name`)}</div>
-              <Input.Search
+              <Input
                 allowClear
                 style={{width: 200}}
-                placeholder="请输入快速搜应用"
+                placeholder="请输入快速检索应用"
+                prefix={<SearchOutlined style={{color: 'rgba(0, 0, 0, 0.25)'}}/>}
                 onChange={e => setSearch(e.target.value)}/>
             </div>
-            {records.map(item => (
-              <Tooltip key={item.id} title={refs[item.id] ? item['app_name'] : null}>
-                <Button type="primary" className={styles.appBlock} onClick={() => props.onSelect(item)}>
-                  <div ref={el => handleRef(el, item.id)}
-                       style={{width: 135, overflow: 'hidden', textOverflow: 'ellipsis'}}>
-                    {item.extend === '1' ? <OrderedListOutlined/> : <BuildOutlined/>}
-                    <span style={{marginLeft: 8}}>{item.app_name}</span>
-                  </div>
-                </Button>
-              </Tooltip>
-            ))}
-            {records.length === 0 &&
-            <div className={styles.tips}>该环境下还没有可发布或构建的应用哦，快去<Link to="/deploy/app">应用管理</Link>创建应用发布配置吧。</div>}
+            <div style={{height: 540, overflow: 'auto'}}>
+              {records.map(item => (
+                <div key={item.id} className={styles.appItem} onClick={() => props.onSelect(item)}>
+                  {item.extend === '1' ? <OrderedListOutlined/> : <BuildOutlined/>}
+                  <div className={styles.body}>{item.app_name}</div>
+                  <div style={{color: '#999'}}>{item.app_key}</div>
+                </div>
+              ))}
+              {records.length === 0 &&
+              <div className={styles.tips}>该环境下还没有可发布或构建的应用哦，快去<Link to="/deploy/app">应用管理</Link>创建应用发布配置吧。</div>}
+            </div>
           </Spin>
         </div>
       </div>
