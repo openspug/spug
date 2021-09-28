@@ -3,6 +3,7 @@
 # Released under the AGPL-3.0 License.
 from git import Repo, RemoteReference, TagReference, InvalidGitRepositoryError, GitCommandError
 from tempfile import NamedTemporaryFile
+from datetime import datetime
 import shutil
 import os
 
@@ -21,7 +22,7 @@ class Git:
             self.repo.archive(f, commit)
 
     def fetch_branches_tags(self):
-        self._fetch()
+        self.fetch()
         branches, tags = {}, {}
         for ref in self.repo.references:
             if isinstance(ref, RemoteReference):
@@ -31,23 +32,23 @@ class Git:
                 tags[ref.name] = {
                     'id': ref.tag.hexsha,
                     'author': ref.tag.tagger.name,
-                    'date': ref.tag.tagged_date,
+                    'date': self._format_date(ref.tag.tagged_date),
                     'message': ref.tag.message.strip()
                 } if ref.tag else {
                     'id': ref.commit.binsha.hex(),
                     'author': ref.commit.author.name,
-                    'date': ref.commit.authored_date,
+                    'date': self._format_date(ref.commit.authored_date),
                     'message': ref.commit.message.strip()
                 }
         tags = sorted(tags.items(), key=lambda x: x[1]['date'], reverse=True)
         return branches, dict(tags)
 
-    def _fetch(self):
+    def fetch(self):
         try:
-            self.repo.remotes.origin.fetch(p=True, P=True)
+            self.repo.remotes.origin.fetch(f=True, p=True, P=True)
         except GitCommandError as e:
             if self.env:
-                self.repo.remotes.origin.fetch(env=self.env, p=True, P=True)
+                self.repo.remotes.origin.fetch(env=self.env, f=True, p=True, P=True)
             else:
                 raise e
 
@@ -77,10 +78,16 @@ class Git:
             commits.append({
                 'id': commit.hexsha,
                 'author': commit.author.name,
-                'date': commit.committed_date,
+                'date': self._format_date(commit.committed_date),
                 'message': commit.message.strip()
             })
         return commits
+
+    def _format_date(self, timestamp):
+        if isinstance(timestamp, int):
+            date = datetime.fromtimestamp(timestamp)
+            return date.strftime('%Y-%m-%d %H:%M')
+        return timestamp
 
     def __enter__(self):
         if self.pkey:
