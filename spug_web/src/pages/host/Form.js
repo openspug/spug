@@ -45,10 +45,9 @@ export default observer(function () {
             })
           }
         } else {
-          message.success('操作成功');
+          message.success('验证成功');
           store.formVisible = false;
           store.fetchRecords();
-          if (!store.record.id) handleNext(res)
         }
       }, () => setLoading(false))
   }
@@ -59,21 +58,9 @@ export default observer(function () {
         message.success('验证成功');
         store.formVisible = false;
         store.fetchRecords();
-        if (!store.record.id) handleNext(res)
       })
     }
     message.error('请输入授权密码')
-  }
-
-  function handleNext(res) {
-    Modal.confirm({
-      title: '提示信息',
-      content: '是否继续完善主机的扩展信息？',
-      onOk: () => {
-        store.record = res;
-        store.detailVisible = true
-      }
-    })
   }
 
   const ConfirmForm = (props) => (
