@@ -69,7 +69,6 @@ export default observer(function (props) {
     if (props.oneGroup) setSelectedRowKeys([])
   }
 
-  console.log(JSON.stringify(group))
   return (
     <Modal
       visible={[undefined, true].includes(props.visible)}

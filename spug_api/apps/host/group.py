@@ -5,6 +5,7 @@ from django.views.generic import View
 from django.db.models import F
 from libs import json_response, JsonParser, Argument
 from apps.host.models import Group
+from apps.account.models import Role
 
 
 def fetch_children(data, with_hosts):
@@ -113,5 +114,8 @@ class GroupView(View):
                 return json_response(error='请移除分组下的主机后再尝试删除')
             if not Group.objects.exclude(pk=form.id).exists():
                 return json_response(error='请至少保留一个分组')
+            role = Role.objects.filter(group_perms__regex=fr'[^0-9]{form.id}[^0-9]').first()
+            if role:
+                return json_response(error=f'账户角色【{role.name}】的主机权限关联该分组，请解除关联后再尝试删除')
             group.delete()
         return json_response(error=error)
