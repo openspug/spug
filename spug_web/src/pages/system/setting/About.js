@@ -6,7 +6,7 @@
 import React from 'react';
 import styles from './index.module.css';
 import { SmileTwoTone } from '@ant-design/icons';
-import { Descriptions, Spin, Button, notification } from 'antd';
+import { Descriptions, Spin, Button, Alert, notification } from 'antd';
 import { observer } from 'mobx-react'
 import { http, VERSION } from 'libs';
 
@@ -33,7 +33,7 @@ class About extends React.Component {
             duration: 0,
             top: 88,
             message: `发现新版本 ${res.version}`,
-            icon: <SmileTwoTone />,
+            icon: <SmileTwoTone/>,
             btn: <a target="_blank" rel="noopener noreferrer" href="https://spug.cc/docs/update-version/">如何升级？</a>,
             description: <pre style={{lineHeight: '30px'}}>{res.content}<br/>{res.extra}</pre>
           })
@@ -43,7 +43,7 @@ class About extends React.Component {
             duration: 0,
             top: 88,
             message: `已是最新版本`,
-            icon: <SmileTwoTone />,
+            icon: <SmileTwoTone/>,
             btn: <Button type="link" onClick={() => notification.close('new_version')}>知道了</Button>,
             description: <pre style={{lineHeight: '30px'}}>{res.extra}</pre>
           })
@@ -71,6 +71,9 @@ class About extends React.Component {
                rel="noopener noreferrer">https://spug.cc/docs/change-log/</a>
           </Descriptions.Item>
         </Descriptions>
+        {info['spug_version'] !== VERSION && (
+          <Alert showIcon style={{width: 500}} type="warning" message="Spug API版本与Web版本不匹配，请尝试刷新浏览器后再次查看。"/>
+        )}
       </Spin>
     )
   }
