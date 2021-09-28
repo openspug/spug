@@ -20,9 +20,9 @@ export default observer(function (props) {
   useEffect(() => {
     if (!store.treeData.length) {
       store.initial()
-        .then(() => setGroup(store.treeData[0]))
+        .then(() => setGroup(store.treeData[0] || {}))
     } else {
-      setGroup(store.treeData[0])
+      setGroup(store.treeData[0] || {})
     }
   }, [])
 
@@ -69,6 +69,7 @@ export default observer(function (props) {
     if (props.oneGroup) setSelectedRowKeys([])
   }
 
+  console.log(JSON.stringify(group))
   return (
     <Modal
       visible={[undefined, true].includes(props.visible)}
