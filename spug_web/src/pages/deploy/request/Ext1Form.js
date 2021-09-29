@@ -161,7 +161,14 @@ class Ext1Form extends React.Component {
                     Object.keys(branches || {}).map(b => <Select.Option key={b} value={b}>{b}</Select.Option>)
                   ) : (
                     Object.entries(tags || {}).map(([tag, info]) => (
-                      <Select.Option key={tag} value={tag}>{`${tag} ${info.author} ${info.message}`}</Select.Option>
+                      <Select.Option key={tag} value={tag}>
+                        <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                          <span style={{width: 200, overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                            {`${tag} ${info.author} ${info.message}`}
+                          </span>
+                          <span style={{color: '#999', fontSize: 12}}>{info['date']} </span>
+                        </div>
+                      </Select.Option>
                     ))
                   )}
                 </Select>
@@ -177,8 +184,14 @@ class Ext1Form extends React.Component {
             <Form.Item required label="选择Commit ID">
               <Select value={extra2} placeholder="请选择" onChange={v => this.setState({extra2: v})}>
                 {extra1 && branches ? branches[extra1].map(item => (
-                  <Select.Option
-                    key={item.id}>{item.id.substr(0, 6)} {item['date']} {item['author']} {item['message']}</Select.Option>
+                  <Select.Option key={item.id}>
+                    <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                      <span style={{width: 400, overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: 'Courier'}}>
+                        {item.id.substr(0, 6)} {item['author']} {item['message']}
+                      </span>
+                      <span style={{color: '#999', fontSize: 12}}>{item['date']} </span>
+                    </div>
+                  </Select.Option>
                 )) : null}
               </Select>
             </Form.Item>

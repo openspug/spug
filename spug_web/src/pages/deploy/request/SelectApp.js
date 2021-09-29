@@ -52,12 +52,6 @@ class SelectApp extends React.Component {
     store.addVisible = false
   };
 
-  handleRef = (el, id) => {
-    if (el && !store.refs.hasOwnProperty(id)) {
-      setTimeout(() => store.refs[id] = el.scrollWidth > el.clientWidth, 200)
-    }
-  };
-
   render() {
     const {env_id} = this.state;
     let records = store.deploys.filter(x => x.env_id === Number(env_id));
