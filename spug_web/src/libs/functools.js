@@ -36,6 +36,18 @@ export function hasHostPermission(id) {
   return isSuper || hostPerms.includes(id)
 }
 
+export function includes(s, key) {
+  key = key.toLowerCase();
+  if (Array.isArray(s)) {
+    for (let i of s) {
+      if (i && i.toLowerCase().includes(key)) return true
+    }
+    return false
+  } else {
+    return s && s.toLowerCase().includes(key)
+  }
+}
+
 // 清理输入的命令中包含的\r符号
 export function cleanCommand(text) {
   return text ? text.replace(/\r\n/g, '\n') : ''

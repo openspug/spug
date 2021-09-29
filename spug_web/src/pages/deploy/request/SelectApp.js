@@ -6,7 +6,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react';
-import { Modal, Button, Menu, Spin, Icon, Input, Tooltip } from 'antd';
+import { Modal, Menu, Spin, Icon, Input } from 'antd';
+import { includes } from 'libs';
 import store from './store';
 import styles from './index.module.css';
 import envStore from 'pages/config/environment/store';
@@ -61,7 +62,7 @@ class SelectApp extends React.Component {
     const {env_id} = this.state;
     let records = store.deploys.filter(x => x.env_id === Number(env_id));
     if (this.state.search) {
-      records = records.filter(x => x['app_name'].toLowerCase().includes(this.state.search.toLowerCase()))
+      records = records.filter(x => includes(x['app_name'], this.state.search) || includes(x['app_key'], this.state.search))
     }
     return (
       <Modal
@@ -89,25 +90,24 @@ class SelectApp extends React.Component {
             <Spin spinning={store.isLoading}>
               <div className={styles.title}>
                 <div>{lds.get(envStore.idMap, `${env_id}.name`)}</div>
-                <Input.Search
+                <Input
                   allowClear
                   style={{width: 200}}
-                  placeholder="请输入快速搜应用"
+                  placeholder="请输入快速检索应用"
+                  prefix={<Icon type="search" style={{color: 'rgba(0, 0, 0, 0.25)'}}/>}
                   onChange={e => this.setState({search: e.target.value})}/>
               </div>
-              {records.map(item => (
-                <Tooltip key={item.id} title={store.refs[item.id] ? item['app_name'] : null}>
-                  <Button type="primary" className={styles.appBlock} onClick={() => this.handleClick(item)}>
-                    <div ref={el => this.handleRef(el, item.id)}
-                         style={{width: 135, overflow: 'hidden', textOverflow: 'ellipsis'}}>
-                      <Icon type={item.extend === '1' ? 'ordered-list' : 'build'}
-                            style={{marginRight: 10}}/>{item['app_name']}
-                    </div>
-                  </Button>
-                </Tooltip>
-              ))}
-              {records.length === 0 &&
-              <div className={styles.tips}>该环境下还没有可发布的应用哦，快去<Link to="/deploy/app">应用管理</Link>创建应用发布配置吧。</div>}
+              <div style={{height: 540, overflow: 'auto'}}>
+                {records.map(item => (
+                  <div key={item.id} className={styles.appItem} onClick={() => this.handleClick(item)}>
+                    {item.extend === '1' ? <Icon type="ordered-list"/> : <Icon type="build"/>}
+                    <div className={styles.body}>{item.app_name}</div>
+                    <div style={{color: '#999'}}>{item.app_key}</div>
+                  </div>
+                ))}
+                {records.length === 0 &&
+                <div className={styles.tips}>该环境下还没有可发布或构建的应用哦，快去<Link to="/deploy/app">应用管理</Link>创建应用发布配置吧。</div>}
+              </div>
             </Spin>
           </div>
         </div>
