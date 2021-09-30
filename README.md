@@ -6,10 +6,10 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
 
 </div>
 
-- 官网地址：https://www.spug.dev
-- 使用文档：https://www.spug.dev/docs/about-spug/
-- 更新日志：https://www.spug.dev/docs/change-log/
-- 常见问题：https://www.spug.dev/docs/faq/
+- 官网地址：https://spug.cc
+- 使用文档：https://spug.cc/docs/about-spug/
+- 更新日志：https://spug.cc/docs/change-log/
+- 常见问题：https://spug.cc/docs/faq/
 
 ## 演示环境
 
