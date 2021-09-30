@@ -188,7 +188,7 @@ class SSH:
         b64_command = base64.standard_b64encode(new_command.encode())
 
         commands = 'export SPUG_EXEC_FILE=$(mktemp)\n'
-        commands += f'echo {b64_command.decode()} | base64 -d > $SPUG_EXEC_FILE\n'
+        commands += f'echo {b64_command.decode()} | base64 -di > $SPUG_EXEC_FILE\n'
         commands += 'bash $SPUG_EXEC_FILE\n'
         return commands
 

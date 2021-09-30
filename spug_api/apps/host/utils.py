@@ -194,6 +194,8 @@ def fetch_host_extend(ssh):
             response['cpu'] = int(out.strip())
 
         code, out = ssh.exec_command_raw("cat /etc/os-release | grep PRETTY_NAME | awk -F \\\" '{print $2}'")
+        if '/etc/os-release' in out:
+            code, out = ssh.exec_command_raw("cat /etc/issue | head -1 | awk '{print $1,$2,$3}'")
         if code == 0:
             response['os_name'] = out.strip()
 
