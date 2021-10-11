@@ -44,8 +44,8 @@ export default observer(function () {
 
   function handleSubmit() {
     setLoading(true)
-    if (host.created_time) host.created_time = moment(host.created_time).format('YYYY-MM-DD HH:mm:ss')
-    if (host.expired_time) host.expired_time = moment(host.expired_time).format('YYYY-MM-DD HH:mm:ss')
+    if (host.created_time) host.created_time = moment(host.created_time).format('YYYY-MM-DD')
+    if (host.expired_time) host.expired_time = moment(host.expired_time).format('YYYY-MM-DD')
     http.post('/api/host/extend/', {host_id: host.id, ...host})
       .then(res => {
         Object.assign(host, res);
@@ -68,7 +68,11 @@ export default observer(function () {
   }
 
   function handleChange(e, key) {
+    console.log(e)
     host[key] = e && e.target ? e.target.value : e;
+    if (['created_time', 'expired_time'].includes(key) && e) {
+      host[key] = e.format('YYYY-MM-DD')
+    }
     setHost({...host})
   }
 
