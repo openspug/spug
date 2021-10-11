@@ -81,7 +81,7 @@ export default observer(function () {
             fieldNames={{label: 'title'}}
             placeholder="请选择"/>
         </Form.Item>
-        <Form.Item required label="导入数据">
+        <Form.Item required label="导入数据" extra="导入完成后可通过验证功能进行批量验证。">
           <Upload
             name="file"
             accept=".xls, .xlsx"
