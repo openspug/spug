@@ -31,6 +31,7 @@ def dispatch(rep: Repository, helper=None):
         helper.send_info('local', f'\033[32m完成√\033[0m\r\n{human_time()} 构建准备...        ')
         env = AttrDict(
             SPUG_APP_NAME=rep.app.name,
+            SPUG_APP_KEY=rep.app.key,
             SPUG_APP_ID=str(rep.app_id),
             SPUG_DEPLOY_ID=str(rep.deploy_id),
             SPUG_BUILD_ID=str(rep.id),
