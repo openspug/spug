@@ -27,6 +27,7 @@ class SSH:
             'password': password,
             'pkey': RSAKey.from_private_key(StringIO(pkey)) if isinstance(pkey, str) else pkey,
             'timeout': connect_timeout,
+            'banner_timeout': 30
         }
 
     @staticmethod
