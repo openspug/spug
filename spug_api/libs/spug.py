@@ -121,6 +121,9 @@ class Notification:
                 'markdown': {
                     'title': '监控告警通知',
                     'text': '\n\n'.join(texts) + '\n\n> ###### 来自 Spug运维平台'
+                },
+                'at': {
+                    'isAtAll': True
                 }
             }
             for url in users:

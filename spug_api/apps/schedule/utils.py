@@ -31,9 +31,11 @@ def _do_notify(task, mode, url, msg):
             'markdown': {
                 'title': '任务执行失败通知',
                 'text': '\n\n'.join(texts)
+            },
+            'at': {
+                'isAtAll': True
             }
         }
-        requests.post(url, json=data)
     elif mode == '2':
         data = {
             'task_id': task.id,
@@ -42,7 +44,6 @@ def _do_notify(task, mode, url, msg):
             'message': msg or '请在任务计划执行历史中查看详情',
             'created_at': human_datetime()
         }
-        requests.post(url, json=data)
     elif mode == '3':
         texts = [
             '## <font color="warning">任务执行失败通知</font>',
@@ -58,10 +59,12 @@ def _do_notify(task, mode, url, msg):
                 'content': '\n'.join(texts)
             }
         }
-        res = requests.post(url, json=data)
-        if res.status_code != 200:
-            Notify.make_notify('schedule', '1', '任务执行通知发送失败', f'返回状态码：{res.status_code}, 请求URL：{url}')
-        if mode in ['1', '3']:
-            res = res.json()
-            if res.get('errcode') != 0:
-                Notify.make_notify('schedule', '1', '任务执行通知发送失败', f'返回数据：{res}')
+    else:
+        return
+    res = requests.post(url, json=data)
+    if res.status_code != 200:
+        Notify.make_notify('schedule', '1', '任务执行通知发送失败', f'返回状态码：{res.status_code}, 请求URL：{url}')
+    if mode in ['1', '3']:
+        res = res.json()
+        if res.get('errcode') != 0:
+            Notify.make_notify('schedule', '1', '任务执行通知发送失败', f'返回数据：{res}')
