@@ -43,6 +43,21 @@ export default observer(function () {
     Object.assign(store.record, form.getFieldsValue(), {command: cleanCommand(command)})
   }
 
+  let modePlaceholder;
+  switch (store.record.rst_notify.mode) {
+    case '0':
+      modePlaceholder = '已关闭'
+      break
+    case '1':
+      modePlaceholder = 'https://oapi.dingtalk.com/robot/send?access_token=xxx'
+      break
+    case '3':
+      modePlaceholder = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx'
+      break
+    default:
+      modePlaceholder = '请输入'
+  }
+
   return (
     <Form form={form} initialValues={store.record} labelCol={{span: 6}} wrapperCol={{span: 14}}>
       <Form.Item required label="任务类型" style={{marginBottom: 0}}>
@@ -82,7 +97,7 @@ export default observer(function () {
             </Select>
           )}
           disabled={store.record.rst_notify.mode === '0'}
-          placeholder="请输入"/>
+          placeholder={modePlaceholder}/>
       </Form.Item>
       <Form.Item name="desc" label="备注信息">
         <Input.TextArea placeholder="请输入模板备注信息"/>

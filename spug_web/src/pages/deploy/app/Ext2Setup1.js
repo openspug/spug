@@ -29,6 +29,20 @@ export default observer(function Ext2Setup1() {
   }, [])
 
   const info = store.deploy;
+  let modePlaceholder;
+  switch (info['rst_notify']['mode']) {
+    case '0':
+      modePlaceholder = '已关闭'
+      break
+    case '1':
+      modePlaceholder = 'https://oapi.dingtalk.com/robot/send?access_token=xxx'
+      break
+    case '3':
+      modePlaceholder = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx'
+      break
+    default:
+      modePlaceholder = '请输入'
+  }
   return (
     <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
       <Form.Item required label="发布环境" style={{marginBottom: 0}}>
@@ -84,7 +98,7 @@ export default observer(function Ext2Setup1() {
           disabled={store.isReadOnly || info['rst_notify']['mode'] === '0'}
           value={info['rst_notify']['value']}
           onChange={e => info['rst_notify']['value'] = e.target.value}
-          placeholder="请输入"/>
+          placeholder={modePlaceholder}/>
       </Form.Item>
       <Form.Item wrapperCol={{span: 14, offset: 6}}>
         <Button
