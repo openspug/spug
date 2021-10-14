@@ -40,6 +40,9 @@ export default observer(function Ext2Setup1() {
     case '3':
       modePlaceholder = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx'
       break
+    case '4':
+      modePlaceholder = 'https://open.feishu.cn/open-apis/bot/v2/hook/xxx'
+      break
     default:
       modePlaceholder = '请输入'
   }
@@ -91,6 +94,7 @@ export default observer(function Ext2Setup1() {
                     onChange={v => info['rst_notify']['mode'] = v}>
               <Select.Option value="0">关闭</Select.Option>
               <Select.Option value="1">钉钉</Select.Option>
+              <Select.Option value="4">飞书</Select.Option>
               <Select.Option value="3">企业微信</Select.Option>
               <Select.Option value="2">Webhook</Select.Option>
             </Select>
