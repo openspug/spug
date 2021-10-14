@@ -1,10 +1,9 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
-from apps.notify.models import Notify
 from libs.utils import human_datetime
+from libs.spug import Notification
 from threading import Thread
-import requests
 import json
 
 
@@ -36,6 +35,7 @@ def _do_notify(task, mode, url, msg):
                 'isAtAll': True
             }
         }
+        Notification.handle_request(url, data, 'dd')
     elif mode == '2':
         data = {
             'task_id': task.id,
@@ -44,6 +44,7 @@ def _do_notify(task, mode, url, msg):
             'message': msg or '请在任务计划执行历史中查看详情',
             'created_at': human_datetime()
         }
+        Notification.handle_request(url, data)
     elif mode == '3':
         texts = [
             '## <font color="warning">任务执行失败通知</font>',
@@ -59,12 +60,23 @@ def _do_notify(task, mode, url, msg):
                 'content': '\n'.join(texts)
             }
         }
-    else:
-        return
-    res = requests.post(url, json=data)
-    if res.status_code != 200:
-        Notify.make_notify('schedule', '1', '任务执行通知发送失败', f'返回状态码：{res.status_code}, 请求URL：{url}')
-    if mode in ['1', '3']:
-        res = res.json()
-        if res.get('errcode') != 0:
-            Notify.make_notify('schedule', '1', '任务执行通知发送失败', f'返回数据：{res}')
+        Notification.handle_request(url, data, 'wx')
+    elif mode == '4':
+        data = {
+            'msg_type': 'post',
+            'content': {
+                'post': {
+                    'zh_cn': {
+                        'title': '任务执行失败通知',
+                        'content': [
+                            [{'tag': 'text', 'text': f'任务名称： {task.name}'}],
+                            [{'tag': 'text', 'text': f'任务类型： {task.type}'}],
+                            [{'tag': 'text', 'text': f'描述信息： {msg or "请在任务计划执行历史中查看详情"}'}],
+                            [{'tag': 'text', 'text': f'发生时间： {human_datetime()}'}],
+                            [{'tag': 'at', 'user_id': 'all'}],
+                        ]
+                    }
+                }
+            }
+        }
+        Notification.handle_request(url, data, 'fs')

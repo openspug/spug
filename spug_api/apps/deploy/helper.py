@@ -4,9 +4,8 @@
 from django_redis import get_redis_connection
 from django.conf import settings
 from libs.utils import human_datetime
+from libs.spug import Notification
 from apps.host.models import Host
-from apps.notify.models import Notify
-import requests
 import subprocess
 import json
 import os
@@ -23,7 +22,7 @@ class Helper:
         self.rds.delete(self.key)
 
     @classmethod
-    def _make_dd_notify(cls, action, req, version, host_str):
+    def _make_dd_notify(cls, url, action, req, version, host_str):
         texts = [
             f'**申请标题：** {req.name}',
             f'**应用名称：** {req.deploy.app.name}',
@@ -60,16 +59,17 @@ class Helper:
                 f'**发布时间：** {human_datetime()}',
                 '> 来自 Spug运维平台'
             ])
-        return {
+        data = {
             'msgtype': 'markdown',
             'markdown': {
                 'title': 'Spug 发布消息通知',
                 'text': '\n\n'.join(texts)
             }
         }
+        Notification.handle_request(url, data, 'dd')
 
     @classmethod
-    def _make_wx_notify(cls, action, req, version, host_str):
+    def _make_wx_notify(cls, url, action, req, version, host_str):
         texts = [
             f'申请标题： {req.name}',
             f'应用名称： {req.deploy.app.name}',
@@ -107,25 +107,76 @@ class Helper:
                 f'发布时间： {human_datetime()}',
                 '> 来自 Spug运维平台'
             ])
-        return {
+        data = {
             'msgtype': 'markdown',
             'markdown': {
                 'content': '\n'.join(texts)
             }
         }
+        Notification.handle_request(url, data, 'wx')
+
+    @classmethod
+    def _make_fs_notify(cls, url, action, req, version, host_str):
+        texts = [
+            f'申请标题： {req.name}',
+            f'应用名称： {req.deploy.app.name}',
+            f'应用版本： {version}',
+            f'发布环境： {req.deploy.env.name}',
+            f'发布主机： {host_str}',
+        ]
+
+        if action == 'approve_req':
+            title = '发布审核申请'
+            texts.extend([
+                f'申请人员： {req.created_by.nickname}',
+                f'申请时间： {human_datetime()}',
+            ])
+        elif action == 'approve_rst':
+            title = '发布审核结果'
+            text = '通过' if req.status == '1' else '驳回'
+            texts.extend([
+                f'审核人员： {req.approve_by.nickname}',
+                f'审核结果： {text}',
+                f'审核意见： {req.reason or ""}',
+                f'审核时间： {human_datetime()}',
+            ])
+        else:
+            title = '发布结果通知'
+            text = '成功 ✅' if req.status == '3' else '失败 ❗'
+            if req.approve_at:
+                texts.append(f'审核人员： {req.approve_by.nickname}')
+            do_user = req.do_by.nickname if req.type != '3' else 'Webhook'
+            texts.extend([
+                f'执行人员： {do_user}',
+                f'发布结果： {text}',
+                f'发布时间： {human_datetime()}',
+            ])
+        data = {
+            'msg_type': 'post',
+            'content': {
+                'post': {
+                    'zh_cn': {
+                        'title': title,
+                        'content': [[{'tag': 'text', 'text': x}] for x in texts] + [[{'tag': 'at', 'user_id': 'all'}]]
+                    }
+                }
+            }
+        }
+        Notification.handle_request(url, data, 'fs')
 
     @classmethod
     def send_deploy_notify(cls, req, action=None):
         rst_notify = json.loads(req.deploy.rst_notify)
         host_ids = json.loads(req.host_ids)
         if rst_notify['mode'] != '0' and rst_notify.get('value'):
+            url = rst_notify['value']
             version = req.version
             hosts = [{'id': x.id, 'name': x.name} for x in Host.objects.filter(id__in=host_ids)]
             host_str = ', '.join(x['name'] for x in hosts[:2])
             if len(hosts) > 2:
                 host_str += f'等{len(hosts)}台主机'
             if rst_notify['mode'] == '1':
-                data = cls._make_dd_notify(action, req, version, host_str)
+                cls._make_dd_notify(url, action, req, version, host_str)
             elif rst_notify['mode'] == '2':
                 data = {
                     'action': action,
@@ -142,17 +193,13 @@ class Helper:
                     'is_success': req.status == '3',
                     'created_at': human_datetime()
                 }
+                Notification.handle_request(url, data)
             elif rst_notify['mode'] == '3':
-                data = cls._make_wx_notify(action, req, version, host_str)
+                cls._make_wx_notify(url, action, req, version, host_str)
+            elif rst_notify['mode'] == '4':
+                cls._make_fs_notify(url, action, req, version, host_str)
             else:
                 raise NotImplementedError
-            res = requests.post(rst_notify['value'], json=data)
-            if res.status_code != 200:
-                Notify.make_notify('flag', '1', '发布通知发送失败', f'返回状态码：{res.status_code}, 请求URL：{res.url}')
-            if rst_notify['mode'] in ['1', '3']:
-                res = res.json()
-                if res.get('errcode') != 0:
-                    Notify.make_notify('flag', '1', '发布通知发送失败', f'返回数据：{res}')
 
     def parse_filter_rule(self, data: str, sep='\n'):
         data, files = data.strip(), []

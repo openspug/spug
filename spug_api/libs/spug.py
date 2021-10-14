@@ -38,22 +38,27 @@ class Notification:
         spug_key = AppSetting.get_default('spug_key')
         return spug_key, sum([json.loads(x.contacts) for x in Group.objects.filter(id__in=grp)], [])
 
-    def _handle_request(self, mode, url, data):
+    @staticmethod
+    def handle_request(url, data, mode=None):
         try:
             res = requests.post(url, json=data, timeout=30)
         except Exception as e:
-            Notify.make_notify(notify_source, '1', '告警通知发送失败', f'接口调用异常：{e}')
+            Notify.make_notify(notify_source, '1', '通知发送失败', f'接口调用异常：{e}')
             return
         if res.status_code != 200:
-            Notify.make_notify(notify_source, '1', '告警通知发送失败', f'返回状态码：{res.status_code}, 请求URL：{res.url}')
+            Notify.make_notify(notify_source, '1', '通知发送失败', f'返回状态码：{res.status_code}, 请求URL：{res.url}')
         if mode in ['dd', 'wx']:
             res = res.json()
             if res.get('errcode') != 0:
-                Notify.make_notify(notify_source, '1', '告警通知发送失败', f'返回数据：{res}')
-        if mode == 'spug':
+                Notify.make_notify(notify_source, '1', '通知发送失败', f'返回数据：{res}')
+        elif mode == 'spug':
             res = res.json()
             if res.get('error'):
-                Notify.make_notify(notify_source, '1', '告警通知发送失败', f'错误信息：{res}')
+                Notify.make_notify(notify_source, '1', '通知发送失败', f'错误信息：{res}')
+        elif mode == 'fs':
+            res = res.json()
+            if res.get('StatusCode') != 0:
+                Notify.make_notify(notify_source, '1', '通知发送失败', f'错误信息：{res}')
 
     def _by_wx(self):
         if not self.spug_key:
@@ -69,7 +74,7 @@ class Notification:
                 'remark': f'故障持续{self.duration}' if self.event == '2' else None,
                 'users': list(users)
             }
-            self._handle_request('spug', f'{spug_server}/apis/notify/wx/', data)
+            self.handle_request(f'{spug_server}/apis/notify/wx/', data, 'spug')
         else:
             Notify.make_notify(notify_source, '1', '发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的微信Token。')
 
@@ -98,7 +103,7 @@ class Notification:
                     'body': '\r\n'.join(body),
                     'users': list(users)
                 }
-                self._handle_request('spug', f'{spug_server}/apis/notify/mail/', data)
+                self.handle_request(f'{spug_server}/apis/notify/mail/', data, 'spug')
             else:
                 Notify.make_notify(notify_source, '1', '发送报警信息失败', '未配置报警服务调用凭据，请在系统管理/系统设置/报警服务设置中配置。')
         else:
@@ -127,7 +132,7 @@ class Notification:
                 }
             }
             for url in users:
-                self._handle_request('dd', url, data)
+                self.handle_request(url, data, 'dd')
         else:
             Notify.make_notify(notify_source, '1', '发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的钉钉。')
 
@@ -151,7 +156,7 @@ class Notification:
                 }
             }
             for url in users:
-                self._handle_request('wx', url, data)
+                self.handle_request(url, data, 'wx')
         else:
             Notify.make_notify(notify_source, '1', '发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的企业微信。')
 
