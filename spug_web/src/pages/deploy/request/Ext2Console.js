@@ -142,27 +142,31 @@ function Ext2Console(props) {
           </div>
         ]}>
         <Skeleton loading={fetching} active>
-          <Collapse defaultActiveKey={['0']} className={styles.collapse}>
-            <Collapse.Panel header={(
-              <div className={styles.header}>
-                <b className={styles.title}/>
-                <Steps size="small" className={styles.step} current={outputs.local.step} status={outputs.local.status}>
-                  <StepItem title="建立连接" item={outputs.local} step={0}/>
-                  {sActions.map((item, index) => (
-                    <StepItem key={index} title={item.title} item={outputs.local} step={index + 1}/>
-                  ))}
-                </Steps>
-              </div>
-            )}>
-              <OutView setTerm={term => handleSetTerm(term, 'local')}/>
-            </Collapse.Panel>
-          </Collapse>
+          {sActions.length > 0 && (
+            <Collapse defaultActiveKey={['0']} className={styles.collapse}>
+              <Collapse.Panel header={(
+                <div className={styles.header}>
+                  <b className={styles.title}/>
+                  <Steps size="small" className={styles.step} current={outputs.local.step}
+                         status={outputs.local.status}>
+                    <StepItem title="建立连接" item={outputs.local} step={0}/>
+                    {sActions.map((item, index) => (
+                      <StepItem key={index} title={item.title} item={outputs.local} step={index + 1}/>
+                    ))}
+                  </Steps>
+                </div>
+              )}>
+                <OutView setTerm={term => handleSetTerm(term, 'local')}/>
+              </Collapse.Panel>
+            </Collapse>
+          )}
+
           {hostOutputs.length > 0 && (
             <Collapse
               accordion
               defaultActiveKey="0"
               className={styles.collapse}
-              style={{marginTop: 24}}
+              style={{marginTop: sActions.length > 0 ? 24 : 0}}
               expandIcon={({isActive}) => <CaretRightOutlined style={{fontSize: 16}} rotate={isActive ? 90 : 0}/>}>
               {hostOutputs.map((item, index) => (
                 <Collapse.Panel
