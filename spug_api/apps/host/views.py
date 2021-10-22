@@ -69,10 +69,7 @@ class HostView(View):
                 host = Host.objects.get(pk=form.id)
             else:
                 host = Host.objects.create(created_by=request.user, is_verified=True, **form)
-                try:
-                    _sync_host_extend(host, ssh=ssh)
-                except Exception:
-                    pass
+                _sync_host_extend(host, ssh=ssh)
             host.groups.set(group_ids)
             response = host.to_view()
             response['group_ids'] = group_ids
