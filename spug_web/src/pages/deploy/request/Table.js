@@ -78,6 +78,10 @@ function ComTable() {
     sorter: (a, b) => a['created_at'].localeCompare(b['created_at']),
     hide: true
   }, {
+    title: '发布时间',
+    dataIndex: 'do_at',
+    hide: true
+  }, {
     title: '备注',
     dataIndex: 'desc',
   }, {

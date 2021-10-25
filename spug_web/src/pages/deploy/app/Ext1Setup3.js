@@ -50,7 +50,7 @@ export default observer(function () {
         </Col>
         <Col span={10}>
           <Form.Item required label="版本数量" tooltip="早于指定数量的历史版本会被删除，以释放磁盘空间。">
-            <Input value={info['versions']} onChange={e => info['versions'] = e.target.value} placeholder="请输入部署目标路径"/>
+            <Input value={info['versions']} onChange={e => info['versions'] = e.target.value} placeholder="请输入保存的版本数量"/>
           </Form.Item>
         </Col>
       </Row>
