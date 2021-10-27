@@ -78,6 +78,8 @@ class UserView(View):
             if user:
                 if user.type == 'ldap':
                     return json_response(error='ldap账户无法删除，请使用禁用功能来禁止该账户访问系统')
+                if user.id == request.user.id:
+                    return json_response(error='无法删除当前登录账户')
                 user.is_active = True
                 user.deleted_at = human_datetime()
                 user.deleted_by = request.user
