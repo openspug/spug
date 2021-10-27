@@ -5,12 +5,12 @@
  */
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Tabs, Tree, Spin } from 'antd';
-import { FolderOutlined, FolderOpenOutlined, CloudServerOutlined } from '@ant-design/icons';
+import { Tabs, Tree, Input, Spin } from 'antd';
+import { FolderOutlined, FolderOpenOutlined, CloudServerOutlined, SearchOutlined } from '@ant-design/icons';
 import { NotFound, AuthButton } from 'components';
 import Terminal from './Terminal';
 import FileManager from './FileManager';
-import { http, hasPermission } from 'libs';
+import { http, hasPermission, includes } from 'libs';
 import styles from './index.module.less';
 import LogoSpugText from 'layout/logo-spug-txt.png';
 import lds from 'lodash';
@@ -19,7 +19,9 @@ import lds from 'lodash';
 function WebSSH(props) {
   const [visible, setVisible] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [rawTreeData, setRawTreeData] = useState([]);
   const [treeData, setTreeData] = useState([]);
+  const [searchValue, setSearchValue] = useState();
   const [hosts, setHosts] = useState([]);
   const [activeId, setActiveId] = useState();
   const [hostId, setHostId] = useState();
@@ -28,10 +30,29 @@ function WebSSH(props) {
     window.document.title = 'Spug web terminal'
     window.addEventListener('beforeunload', leaveTips)
     http.get('/api/host/group/?with_hosts=1')
-      .then(res => setTreeData(res.treeData))
+      .then(res => setRawTreeData(res.treeData))
       .finally(() => setFetching(false))
     return () => window.removeEventListener('beforeunload', leaveTips)
   }, [])
+
+  useEffect(() => {
+    if (searchValue) {
+      const newTreeData = []
+      const loop = (data) => {
+        for (let item of data) {
+          if (item.children) {
+            loop(item.children)
+          } else if (item.isLeaf && includes(item.title, searchValue)) {
+            newTreeData.push(item)
+          }
+        }
+      }
+      loop(rawTreeData)
+      setTreeData(newTreeData)
+    } else {
+      setTreeData(rawTreeData)
+    }
+  }, [rawTreeData, searchValue])
 
   function leaveTips(e) {
     e.returnValue = '确定要离开页面？'
@@ -97,6 +118,8 @@ function WebSSH(props) {
         </div>
         <div className={styles.hosts}>
           <Spin spinning={fetching}>
+            <Input allowClear className={styles.search} prefix={<SearchOutlined style={{color: '#999'}}/>}
+                   placeholder="输入检索" onChange={e => setSearchValue(e.target.value)}/>
             <Tree.DirectoryTree
               defaultExpandAll
               expandAction="doubleClick"
