@@ -27,7 +27,7 @@ class Git:
         for ref in self.repo.references:
             if isinstance(ref, RemoteReference):
                 if ref.remote_head != 'HEAD':
-                    branches[ref.remote_head] = self._get_commits(f'origin/{ref.remote_head}')
+                    branches[ref.remote_head] = self._get_commits(f'origin/{ref.remote_head}', 30)
             elif isinstance(ref, TagReference):
                 tags[ref.name] = {
                     'id': ref.tag.hexsha,
