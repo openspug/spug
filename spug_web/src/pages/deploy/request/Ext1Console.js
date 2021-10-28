@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { observer, useLocalStore } from 'mobx-react';
 import { Card, Progress, Modal, Collapse, Steps, Skeleton } from 'antd';
-import { ShrinkOutlined, CaretRightOutlined, LoadingOutlined, CloseOutlined } from '@ant-design/icons';
+import { ShrinkOutlined, CaretRightOutlined, LoadingOutlined, CloseOutlined, CodeOutlined } from '@ant-design/icons';
 import OutView from './OutView';
 import { http, X_TOKEN } from 'libs';
 import styles from './index.module.less';
@@ -98,6 +98,11 @@ function Ext1Console(props) {
     terms[key] = term
   }
 
+  function openTerminal(e, item) {
+    e.stopPropagation()
+    window.open(`/ssh?id=${item.id}`)
+  }
+
   let {local, ...hosts} = outputs;
   return (
     <div>
@@ -173,6 +178,7 @@ function Ext1Console(props) {
                       <StepItem title="执行发布" item={item} step={3}/>
                       <StepItem title="发布后任务" item={item} step={4}/>
                     </Steps>
+                    <CodeOutlined className={styles.codeIcon} onClick={e => openTerminal(e, item)}/>
                   </div>}>
                 <OutView setTerm={term => handleSetTerm(term, key)}/>
               </Collapse.Panel>

@@ -20,6 +20,7 @@ function WebSSH(props) {
   const [visible, setVisible] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [rawTreeData, setRawTreeData] = useState([]);
+  const [rawHostList, setRawHostList] = useState([]);
   const [treeData, setTreeData] = useState([]);
   const [searchValue, setSearchValue] = useState();
   const [hosts, setHosts] = useState([]);
@@ -30,40 +31,57 @@ function WebSSH(props) {
     window.document.title = 'Spug web terminal'
     window.addEventListener('beforeunload', leaveTips)
     http.get('/api/host/group/?with_hosts=1')
-      .then(res => setRawTreeData(res.treeData))
+      .then(res => {
+        const tmp = {}
+        setRawTreeData(res.treeData)
+        setTreeData(res.treeData)
+        const loop = (data) => {
+          for (let item of data) {
+            if (item.children) {
+              loop(item.children)
+            } else if (item.isLeaf) {
+              tmp[item.id] = item
+            }
+          }
+        }
+        loop(res.treeData)
+        setRawHostList(Object.values(tmp))
+        const query = new URLSearchParams(props.location.search);
+        const id = query.get('id');
+        if (id) {
+          const node = lds.find(Object.values(tmp), {id: Number(id)})
+          if (node) _openNode(node)
+        }
+      })
       .finally(() => setFetching(false))
     return () => window.removeEventListener('beforeunload', leaveTips)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
     if (searchValue) {
-      const newTreeData = []
-      const loop = (data) => {
-        for (let item of data) {
-          if (item.children) {
-            loop(item.children)
-          } else if (item.isLeaf && includes(item.title, searchValue)) {
-            newTreeData.push(item)
-          }
-        }
-      }
-      loop(rawTreeData)
+      const newTreeData = rawHostList.filter(x => includes(x.title, searchValue))
       setTreeData(newTreeData)
     } else {
       setTreeData(rawTreeData)
     }
-  }, [rawTreeData, searchValue])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchValue])
 
   function leaveTips(e) {
     e.returnValue = '确定要离开页面？'
   }
 
+  function _openNode(node) {
+    node.vId = String(new Date().getTime())
+    hosts.push(node);
+    setHosts(lds.cloneDeep(hosts))
+    setActiveId(node.vId)
+  }
+
   function handleSelect(e) {
     if (e.nativeEvent.detail > 1 && e.node.isLeaf) {
-      e.node.vId = String(new Date().getTime())
-      hosts.push(e.node);
-      setHosts(lds.cloneDeep(hosts))
-      setActiveId(e.node.vId)
+      _openNode(e.node)
     }
   }
 

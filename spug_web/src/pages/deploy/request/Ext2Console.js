@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { observer, useLocalStore } from 'mobx-react';
 import { Card, Progress, Modal, Collapse, Steps, Skeleton } from 'antd';
-import { ShrinkOutlined, CaretRightOutlined, LoadingOutlined, CloseOutlined } from '@ant-design/icons';
+import { ShrinkOutlined, CaretRightOutlined, LoadingOutlined, CloseOutlined, CodeOutlined } from '@ant-design/icons';
 import OutView from './OutView';
 import { http, X_TOKEN } from 'libs';
 import styles from './index.module.less';
@@ -106,6 +106,11 @@ function Ext2Console(props) {
     terms[key] = term
   }
 
+  function openTerminal(e, item) {
+    e.stopPropagation()
+    window.open(`/ssh?id=${item.id}`)
+  }
+
   const hostOutputs = Object.values(outputs).filter(x => x.id !== 'local');
   return (
     <div>
@@ -180,6 +185,7 @@ function Ext2Console(props) {
                           <StepItem key={index} title={action.title} item={item} step={index + 1}/>
                         ))}
                       </Steps>
+                      <CodeOutlined className={styles.codeIcon} onClick={e => openTerminal(e, item)}/>
                     </div>}>
                   <OutView setTerm={term => handleSetTerm(term, item.id)}/>
                 </Collapse.Panel>
