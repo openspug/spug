@@ -75,6 +75,13 @@ def _ext1_deploy(req, helper, env):
         req.repository = rep
     extend = req.deploy.extend_obj
     env.update(SPUG_DST_DIR=extend.dst_dir)
+    extras = json.loads(req.extra)
+    if extras[0] == 'repository':
+        extras = extras[1:]
+    if extras[0] == 'branch':
+        env.update(SPUG_GIT_BRANCH=extras[1], SPUG_GIT_COMMIT_ID=extras[2])
+    else:
+        env.update(SPUG_GIT_TAG=extras[1])
     if req.deploy.is_parallel:
         threads, latest_exception = [], None
         max_workers = max(10, os.cpu_count() * 5)

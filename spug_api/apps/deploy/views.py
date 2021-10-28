@@ -245,6 +245,7 @@ def post_request_ext1(request):
             form.repository_id = repository.id
             form.version = repository.version
             form.spug_version = repository.spug_version
+            form.extra = ['repository'] + json.loads(repository.extra)
         else:
             return json_response(error='参数错误')
 
