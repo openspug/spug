@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { observer, useLocalStore } from 'mobx-react';
 import { Card, Progress, Modal, Collapse, Steps, Skeleton } from 'antd';
-import { ShrinkOutlined, CaretRightOutlined, LoadingOutlined, CloseOutlined, CodeOutlined } from '@ant-design/icons';
+import { ShrinkOutlined, LoadingOutlined, CloseOutlined, CodeOutlined } from '@ant-design/icons';
 import OutView from './OutView';
 import { http, X_TOKEN } from 'libs';
 import styles from './index.module.less';
@@ -161,10 +161,7 @@ function Ext1Console(props) {
             </Collapse>
           )}
 
-          <Collapse
-            defaultActiveKey="0"
-            className={styles.collapse}
-            expandIcon={({isActive}) => <CaretRightOutlined style={{fontSize: 16}} rotate={isActive ? 90 : 0}/>}>
+          <Collapse defaultActiveKey="0" className={styles.collapse}>
             {Object.entries(hosts).map(([key, item], index) => (
               <Collapse.Panel
                 key={index}

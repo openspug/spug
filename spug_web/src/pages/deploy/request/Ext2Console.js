@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { observer, useLocalStore } from 'mobx-react';
 import { Card, Progress, Modal, Collapse, Steps, Skeleton } from 'antd';
-import { ShrinkOutlined, CaretRightOutlined, LoadingOutlined, CloseOutlined, CodeOutlined } from '@ant-design/icons';
+import { ShrinkOutlined, LoadingOutlined, CloseOutlined, CodeOutlined } from '@ant-design/icons';
 import OutView from './OutView';
 import { http, X_TOKEN } from 'libs';
 import styles from './index.module.less';
@@ -171,8 +171,7 @@ function Ext2Console(props) {
               accordion
               defaultActiveKey="0"
               className={styles.collapse}
-              style={{marginTop: sActions.length > 0 ? 24 : 0}}
-              expandIcon={({isActive}) => <CaretRightOutlined style={{fontSize: 16}} rotate={isActive ? 90 : 0}/>}>
+              style={{marginTop: sActions.length > 0 ? 24 : 0}}>
               {hostOutputs.map((item, index) => (
                 <Collapse.Panel
                   key={index}

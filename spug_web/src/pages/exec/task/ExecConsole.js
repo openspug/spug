@@ -6,12 +6,12 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import {
-  CaretRightOutlined,
   CheckCircleTwoTone,
   LoadingOutlined,
   WarningTwoTone,
   FullscreenOutlined,
-  FullscreenExitOutlined
+  FullscreenExitOutlined,
+  CodeOutlined
 } from '@ant-design/icons';
 import { Modal, Collapse, Tooltip } from 'antd';
 import OutView from './OutView';
@@ -82,33 +82,37 @@ class ExecConsole extends React.Component {
     }
   }
 
-  genExtra = (status, key) => {
-    if (status === -2) {
-      return <LoadingOutlined style={{fontSize: 20, color: '#108ee9'}}/>;
-    } else if (status === 0) {
-      return (
-        <div style={{display: 'flex', alignItems: 'center'}}>
-          <pre className={styles.header2}>{this.lastOutputs[key]}</pre>
-          <CheckCircleTwoTone style={{fontSize: 20}} twoToneColor="#52c41a"/>
-        </div>
-      )
-    } else {
-      return (
-        <div style={{display: 'flex', alignItems: 'center'}}>
-          <pre className={styles.header2}>{this.lastOutputs[key]}</pre>
-          <Tooltip title={`退出状态码：${status}`}>
-            <WarningTwoTone style={{fontSize: 20}} twoToneColor="red"/>
-          </Tooltip>
-        </div>
-      )
-    }
-  };
+  StatusExtra = (props) => (
+    <div style={{display: 'flex', alignItems: 'center'}}>
+      {props.status === -2 ? (
+        <LoadingOutlined style={{fontSize: 22, color: '#108ee9'}}/>
+      ) : (
+        <>
+          <pre className={styles.header2}>{this.lastOutputs[props.id]}</pre>
+          {props.status === 0 ? (
+            <CheckCircleTwoTone style={{fontSize: 22}} twoToneColor="#52c41a"/>
+          ) : (
+            <Tooltip title={`退出状态码：${props.status}`}>
+              <WarningTwoTone style={{fontSize: 22}} twoToneColor="red"/>
+            </Tooltip>
+          )}
+        </>
+      )}
+      <CodeOutlined style={{fontSize: 22, color: '#1890ff', marginLeft: 16}}
+                    onClick={e => this.openTerminal(e, props.id)}/>
+    </div>
+  )
 
   handleUpdate = (data) => {
     this.setState(data, () => {
       const key = this.state.activeKey;
       if (key && this.terms[key]) setTimeout(this.terms[key].fit)
     })
+  }
+
+  openTerminal = (e, key) => {
+    e.stopPropagation()
+    window.open(`/ssh?id=${key}`)
   }
 
   render() {
@@ -131,13 +135,12 @@ class ExecConsole extends React.Component {
           accordion
           className={styles.collapse}
           activeKey={activeKey}
-          onChange={key => this.handleUpdate({activeKey: key})}
-          expandIcon={({isActive}) => <CaretRightOutlined style={{fontSize: 16}} rotate={isActive ? 90 : 0}/>}>
+          onChange={key => this.handleUpdate({activeKey: key})}>
           {Object.entries(store.outputs).map(([key, item], index) => (
             <Collapse.Panel
               key={key}
-              header={<div className={styles.header1}>{item['title']}</div>}
-              extra={this.genExtra(item.status, key)}>
+              header={<div className={styles.header1}>{item.title}</div>}
+              extra={<this.StatusExtra status={item.status} id={key}/>}>
               <OutView
                 isFullscreen={isFullscreen}
                 getOutput={() => this.outputs[key]}
