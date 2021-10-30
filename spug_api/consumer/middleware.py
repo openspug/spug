@@ -20,9 +20,11 @@ class AuthMiddleware:
                 "You cannot use AuthMiddleware on a non-WebSocket connection"
             )
         headers = dict(scope.get('headers', []))
-        if self.verify_user(scope, headers):
+        is_ok, message = self.verify_user(scope, headers)
+        if is_ok:
             return self.application(scope)
         else:
+            print(message)
             return WebsocketDenier(scope)
 
     def get_real_ip(self, headers):
@@ -41,4 +43,6 @@ class AuthMiddleware:
             user = User.objects.filter(access_token=token).first()
             if user and x_real_ip == user.last_ip and user.token_expired >= time.time() and user.is_active:
                 scope['user'] = user
-                return True
+                return True, None
+            return False, f'IP verify failed: {x_real_ip} <> {user.last_ip}'
+        return False, 'Token is invalid'
