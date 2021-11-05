@@ -8,6 +8,9 @@ import { Table, Space, Divider, Popover, Checkbox, Button, Input, Select } from 
 import { ReloadOutlined, SettingOutlined, FullscreenOutlined, SearchOutlined } from '@ant-design/icons';
 import styles from './index.module.less';
 
+let TableFields = localStorage.getItem('TableFields')
+TableFields = TableFields ? JSON.parse(TableFields) : {}
+
 function Search(props) {
   let keys = props.keys || [''];
   keys = keys.map(x => x.split('/'));
@@ -135,13 +138,31 @@ function TableCard(props) {
         _columns = [props.children.props]
       }
     }
+    let hideFields = _columns.filter(x => x.hide).map(x => x.title)
+    if (props.tKey) {
+      if (TableFields[props.tKey]) {
+        hideFields = TableFields[props.tKey]
+      } else {
+        TableFields[props.tKey] = hideFields
+        localStorage.setItem('TableFields', JSON.stringify(TableFields))
+      }
+    }
     for (let [index, item] of _columns.entries()) {
-      if (!item.hide) _fields.push(index)
+      if (!hideFields.includes(item.title)) _fields.push(index)
     }
     setFields(_fields);
     setColumns(_columns);
     setDefaultFields(_fields);
-  }, [props.columns, props.children])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function handleFieldsChange(fields) {
+    setFields(fields)
+    if (props.tKey) {
+      TableFields[props.tKey] = columns.filter((_, index) => !fields.includes(index)).map(x => x.title)
+      localStorage.setItem('TableFields', JSON.stringify(TableFields))
+    }
+  }
 
   return (
     <div ref={rootRef} className={styles.tableCard}>
@@ -152,7 +173,7 @@ function TableCard(props) {
         fields={fields}
         rootRef={rootRef}
         defaultFields={defaultFields}
-        onFieldsChange={setFields}
+        onFieldsChange={handleFieldsChange}
         onReload={props.onReload}/>
       <Table
         rowKey={props.rowKey}

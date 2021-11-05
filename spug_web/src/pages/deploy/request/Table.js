@@ -154,6 +154,7 @@ function ComTable() {
 
   return (
     <TableCard
+      tKey="dr"
       rowKey="id"
       title="申请列表"
       columns={columns}

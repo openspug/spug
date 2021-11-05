@@ -118,6 +118,7 @@ function ComTable() {
 
   return (
     <TableCard
+      tKey="da"
       title="应用列表"
       rowKey="id"
       loading={store.isFetching}

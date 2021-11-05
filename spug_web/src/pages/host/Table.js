@@ -49,6 +49,7 @@ function ComTable() {
 
   return (
     <TableCard
+      tKey="hi"
       rowKey="id"
       title={<Input placeholder="输入检索" style={{maxWidth: 250}} onChange={e => store.f_word = e.target.value}/>}
       loading={store.isFetching}

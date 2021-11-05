@@ -71,6 +71,7 @@ class ComTable extends React.Component {
   render() {
     return (
       <TableCard
+        tKey="mi"
         rowKey="id"
         title="监控任务"
         loading={store.isFetching}

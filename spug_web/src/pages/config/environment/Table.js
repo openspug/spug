@@ -38,6 +38,7 @@ function ComTable() {
 
   return (
     <TableCard
+      tKey="ce"
       rowKey="id"
       title="环境列表"
       loading={store.isFetching}

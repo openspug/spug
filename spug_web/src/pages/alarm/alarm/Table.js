@@ -67,6 +67,7 @@ class ComTable extends React.Component {
   render() {
     return (
       <TableCard
+        tKey="aa"
         rowKey="id"
         title="报警历史记录"
         loading={store.isFetching}

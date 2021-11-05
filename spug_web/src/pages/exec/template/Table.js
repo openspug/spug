@@ -41,6 +41,7 @@ class ComTable extends React.Component {
     }
     return (
       <TableCard
+        tKey="et"
         title="模板列表"
         rowKey="id"
         loading={store.isFetching}

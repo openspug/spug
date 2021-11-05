@@ -34,6 +34,7 @@ class ComTable extends React.Component {
   render() {
     return (
       <TableCard
+        tKey="ac"
         rowKey="id"
         title="报警联系人"
         loading={store.isFetching}

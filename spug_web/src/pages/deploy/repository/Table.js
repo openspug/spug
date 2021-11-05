@@ -64,6 +64,7 @@ function ComTable() {
   const statusColorMap = {'0': 'cyan', '1': 'blue', '2': 'red', '5': 'green'};
   return (
     <TableCard
+      tKey="dre"
       rowKey="id"
       title="构建版本列表"
       loading={store.isFetching}
