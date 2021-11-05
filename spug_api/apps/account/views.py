@@ -83,6 +83,7 @@ class UserView(View):
                 user.is_active = True
                 user.deleted_at = human_datetime()
                 user.deleted_by = request.user
+                user.roles.clear()
                 user.save()
         return json_response(error=error)
 
