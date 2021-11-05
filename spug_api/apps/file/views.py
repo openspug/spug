@@ -5,7 +5,7 @@ from django.views.generic import View
 from django_redis import get_redis_connection
 from apps.host.models import Host
 from apps.account.utils import has_host_perm
-from apps.file.utils import FileResponseAfter, FileResponse, parse_sftp_attr
+from apps.file.utils import FileResponseAfter, fetch_dir_list
 from libs import json_response, JsonParser, Argument
 from functools import partial
 import os
@@ -23,9 +23,8 @@ class FileView(View):
             host = Host.objects.get(pk=form.id)
             if not host:
                 return json_response(error='未找到指定主机')
-            with host.get_ssh() as ssh:
-                objects = ssh.list_dir_attr(form.path)
-            return json_response([parse_sftp_attr(x) for x in objects])
+            objects = fetch_dir_list(host, form.path)
+            return json_response(objects)
         return json_response(error=error)
 
 

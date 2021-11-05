@@ -39,8 +39,8 @@ class FileManager extends React.Component {
     key: 'name',
     render: info => info.kind === 'd' ? (
       <div onClick={() => this.handleChdir(info.name, '1')} style={{cursor: 'pointer'}}>
-        <FolderOutlined style={{color: '#1890ff'}}/>
-        <span style={{color: '#1890ff', paddingLeft: 5}}>{info.name}</span>
+        <FolderOutlined style={{color: info.is_link ? '#008b8b' : '#1890ff'}}/>
+        <span style={{color: info.is_link ? '#008b8b' : '#1890ff', paddingLeft: 5}}>{info.name}</span>
       </div>
     ) : (
       <React.Fragment>
@@ -61,8 +61,7 @@ class FileManager extends React.Component {
     width: 190
   }, {
     title: '属性',
-    key: 'attr',
-    render: info => `${info.kind}${info.code}`,
+    dataIndex: 'code',
     width: 110
   }, {
     title: '操作',

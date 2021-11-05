@@ -4,6 +4,7 @@
 from django.http import FileResponse
 import stat
 import time
+import os
 
 KB = 1024
 MB = 1024 * 1024
@@ -25,21 +26,21 @@ def parse_mode(obj):
     if obj.st_mode:
         mt = stat.S_IFMT(obj.st_mode)
         if mt == stat.S_IFIFO:
-            kind = "p"
+            kind = 'p'
         elif mt == stat.S_IFCHR:
-            kind = "c"
+            kind = 'c'
         elif mt == stat.S_IFDIR:
-            kind = "d"
+            kind = 'd'
         elif mt == stat.S_IFBLK:
-            kind = "b"
+            kind = 'b'
         elif mt == stat.S_IFREG:
-            kind = "-"
+            kind = '-'
         elif mt == stat.S_IFLNK:
-            kind = "l"
+            kind = 'l'
         elif mt == stat.S_IFSOCK:
-            kind = "s"
+            kind = 's'
         else:
-            kind = "?"
+            kind = '?'
         code = obj._rwx(
             (obj.st_mode & 448) >> 6, obj.st_mode & stat.S_ISUID
         )
@@ -49,10 +50,9 @@ def parse_mode(obj):
         code += obj._rwx(
             obj.st_mode & 7, obj.st_mode & stat.S_ISVTX, True
         )
+        return kind + code
     else:
-        kind = "?"
-        code = '---------'
-    return kind, code
+        return '?---------'
 
 
 def format_size(size):
@@ -70,18 +70,32 @@ def format_size(size):
         return ''
 
 
-def parse_sftp_attr(obj):
-    if (obj.st_mtime is None) or (obj.st_mtime == int(0xffffffff)):
-        date = "(unknown date)"
-    else:
-        date = time.strftime('%Y/%m/%d %H:%M:%S', time.localtime(obj.st_mtime))
-    kind, code = parse_mode(obj)
-    is_dir = stat.S_ISDIR(obj.st_mode) if obj.st_mode else False
-    size = obj.st_size or ''
-    return {
-        'name': getattr(obj, 'filename', '?'),
-        'size': '' if is_dir else format_size(size),
-        'date': date,
-        'kind': kind,
-        'code': code
-    }
+def fetch_dir_list(host, path):
+    with host.get_ssh() as ssh:
+        objects = []
+        for item in ssh.list_dir_attr(path):
+            code = parse_mode(item)
+            kind, is_link, name = '?', False, getattr(item, 'filename', '?')
+            if stat.S_ISLNK(item.st_mode):
+                is_link = True
+                try:
+                    item = ssh.sftp_stat(os.path.join(path, name))
+                except FileNotFoundError:
+                    pass
+            if stat.S_ISREG(item.st_mode):
+                kind = '-'
+            elif stat.S_ISDIR(item.st_mode):
+                kind = 'd'
+            if (item.st_mtime is None) or (item.st_mtime == int(0xffffffff)):
+                date = '(unknown date)'
+            else:
+                date = time.strftime('%Y/%m/%d %H:%M:%S', time.localtime(item.st_mtime))
+            objects.append({
+                'name': name,
+                'size': '' if kind == 'd' else format_size(item.st_size or ''),
+                'date': date,
+                'kind': kind,
+                'code': code,
+                'is_link': is_link
+            })
+    return objects
