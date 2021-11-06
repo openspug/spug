@@ -25,6 +25,7 @@ SCHEDULE_WORKER_KEY = settings.SCHEDULE_WORKER_KEY
 class Scheduler:
     timezone = settings.TIME_ZONE
     week_map = {
+        '/': '/',
         '-': '-',
         '*': '*',
         '7': '6',
