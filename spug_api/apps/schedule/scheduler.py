@@ -27,6 +27,7 @@ import json
 class Scheduler:
     timezone = settings.TIME_ZONE
     week_map = {
+        '/': '/',
         '-': '-',
         '*': '*',
         '7': '6',
