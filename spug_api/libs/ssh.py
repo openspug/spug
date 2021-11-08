@@ -18,6 +18,7 @@ class SSH:
         self.channel = None
         self.sftp = None
         self.eof = 'Spug EOF 2108111926'
+        self.already_init = False
         self.default_env = self._make_env_command(default_env)
         self.regex = re.compile(r'Spug EOF 2108111926 (-?\d+)[\r\n]?')
         self.arguments = {
@@ -63,11 +64,7 @@ class SSH:
         channel.set_combine_stderr(True)
         channel.exec_command(command)
         code, output = channel.recv_exit_status(), channel.recv(-1)
-        try:
-            output = output.decode()
-        except UnicodeDecodeError:
-            output = output.decode(encoding='GBK')
-        return code, output
+        return code, self._decode(output)
 
     def exec_command(self, command, environment=None):
         channel = self._get_channel()
@@ -94,9 +91,9 @@ class SSH:
         stdout = channel.makefile("rb", -1)
         out = stdout.readline()
         while out:
-            yield channel.exit_status, out.decode()
+            yield channel.exit_status, self._decode(out)
             out = stdout.readline()
-        yield channel.recv_exit_status(), out.decode()
+        yield channel.recv_exit_status(), self._decode(out)
 
     def exec_command_with_stream(self, command, environment=None):
         channel = self._get_channel()
@@ -104,7 +101,7 @@ class SSH:
         channel.send(command)
         exit_code, line = -1, ''
         while True:
-            line = channel.recv(8196).decode()
+            line = self._decode(channel.recv(8196))
             if not line:
                 break
             match = self.regex.search(line)
@@ -127,6 +124,10 @@ class SSH:
         sftp = self._get_sftp()
         return sftp.listdir_attr(path)
 
+    def sftp_stat(self, path):
+        sftp = self._get_sftp()
+        return sftp.stat(path)
+
     def remove_file(self, path):
         sftp = self._get_sftp()
         sftp.remove(path)
@@ -137,14 +138,14 @@ class SSH:
 
         counter = 0
         self.channel = self.client.invoke_shell()
-        command = 'export PS1= && stty -echo; unsetopt zle; set -e\n'
+        command = 'set +o zle\nset -o no_nomatch\nexport PS1= && stty -echo\n'
         if self.default_env:
             command += f'{self.default_env}\n'
         command += f'echo {self.eof} $?\n'
         self.channel.send(command.encode())
         while True:
             if self.channel.recv_ready():
-                line = self.channel.recv(8196).decode()
+                line = self._decode(self.channel.recv(8196))
                 if self.regex.search(line):
                     self.stdout = self.channel.makefile('r')
                     break
@@ -163,11 +164,6 @@ class SSH:
         self.sftp = self.client.open_sftp()
         return self.sftp
 
-    def _break(self):
-        time.sleep(5)
-        command = f'\x03 echo {self.eof} -1\n'
-        self.channel.send(command.encode())
-
     def _make_env_command(self, environment):
         if not environment:
             return None
@@ -181,17 +177,28 @@ class SSH:
         return f'export {str_envs}'
 
     def _handle_command(self, command, environment):
-        new_command = f'trap \'echo {self.eof} $?; rm -f $SPUG_EXEC_FILE\' EXIT\n'
+        new_command = commands = ''
+        if not self.already_init:
+            commands = 'export SPUG_EXEC_FILE=$(mktemp)\n'
+            commands += 'trap \'rm -f $SPUG_EXEC_FILE\' EXIT\n'
+            self.already_init = True
+
         env_command = self._make_env_command(environment)
         if env_command:
             new_command += f'{env_command}\n'
         new_command += command
+        new_command += f'\necho {self.eof} $?\n'
         b64_command = base64.standard_b64encode(new_command.encode())
-
-        commands = 'export SPUG_EXEC_FILE=$(mktemp)\n'
         commands += f'echo {b64_command.decode()} | base64 -di > $SPUG_EXEC_FILE\n'
-        commands += 'bash $SPUG_EXEC_FILE\n'
+        commands += 'source $SPUG_EXEC_FILE\n'
         return commands
+
+    def _decode(self, content):
+        try:
+            content = content.decode()
+        except UnicodeDecodeError:
+            content = content.decode(encoding='GBK', errors='ignore')
+        return content
 
     def __enter__(self):
         self.get_client()
