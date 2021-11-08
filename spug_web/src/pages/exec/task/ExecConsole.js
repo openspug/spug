@@ -50,7 +50,10 @@ class ExecConsole extends React.Component {
         const {key, data, status} = JSON.parse(e.data);
         if (status !== undefined) store.outputs[key].status = status;
         if (data) {
-          if (data.replace(/\r\n/g, '')) this.lastOutputs[key] = data.trim()
+          if (data.replace(/\r\n/g, '')) {
+            const fields = data.trim().split('\r\n')
+            this.lastOutputs[key] = fields.slice(-1)
+          }
           this.handleWrite(key, data)
         }
       }
