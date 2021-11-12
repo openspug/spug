@@ -197,7 +197,7 @@ def fetch_host_extend(ssh):
         if '/etc/os-release' in out:
             code, out = ssh.exec_command_raw("cat /etc/issue | head -1 | awk '{print $1,$2,$3}'")
         if code == 0:
-            response['os_name'] = out.strip()
+            response['os_name'] = out.strip()[:50]
 
         code, out = ssh.exec_command_raw('hostname -I')
         if code == 0:
