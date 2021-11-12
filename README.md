@@ -14,10 +14,6 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
 ## 演示环境
 
 演示地址：https://demo.spug.dev
-```
-演示账号: admin 
-演示密码：spug
-```
 
 
 ## 特性
@@ -111,13 +107,7 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
   </thead>
 </table>
 
-## 开发者群
-#### QQ群号: 122194636
-<div >
-   <img src="https://cdn.spug.cc/img/spug-qq-2.png" width = "300" height = "300" alt="spug-qq" align=center />
-<div>
-
-#### 微信：关注Spug运维公众号加微信群、获取最新产品动态
+#### 关注Spug运维公众号加微信群、QQ群、获取最新产品动态
 <div >
    <img src="https://cdn.spug.cc/img/spug-weixin.jpeg" width = "300" height = "300" alt="spug-qq" align=center />
 <div>
