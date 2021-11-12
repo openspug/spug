@@ -107,6 +107,7 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
   </thead>
 </table>
 
+## 开发者群
 #### 关注Spug运维公众号加微信群、QQ群、获取最新产品动态
 <div >
    <img src="https://cdn.spug.cc/img/spug-club.jpg" width = "300" height = "300" alt="spug-qq" align=center />
