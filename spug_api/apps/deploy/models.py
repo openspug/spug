@@ -47,7 +47,7 @@ class DeployRequest(models.Model, ModelMixin):
 
     @property
     def is_quick_deploy(self):
-        if self.type == '1' and self.deploy.extend == '1' and self.extra:
+        if self.type in ('1', '3') and self.deploy.extend == '1' and self.extra:
             extra = json.loads(self.extra)
             return extra[0] in ('branch', 'tag')
         return False

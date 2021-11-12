@@ -70,30 +70,20 @@ def _deploy_extend_1(deploy, ref, commit_id=None):
     else:
         extra = ['tag', ref, None]
         version = ref
-    rep = Repository.objects.create(
+
+    req = DeployRequest.objects.create(
+        type='3',
+        status='0' if deploy.is_audit else '2',
         deploy=deploy,
-        app_id=deploy.app_id,
-        env_id=deploy.env_id,
-        version=version,
-        status='1',
+        name=version,
         extra=json.dumps(extra),
+        version=version,
         spug_version=Repository.make_spug_version(deploy.id),
-        created_by=deploy.created_by)
-    rep = build_dispatch(rep)
-    if rep.status == '5':
-        req = DeployRequest.objects.create(
-            type='3',
-            status='0' if deploy.is_audit else '2',
-            deploy=deploy,
-            repository=rep,
-            name=rep.version,
-            version=rep.version,
-            spug_version=rep.spug_version,
-            host_ids=deploy.host_ids,
-            created_by=deploy.created_by
-        )
-        if req.status == '2':
-            deploy_dispatch(req)
+        host_ids=deploy.host_ids,
+        created_by=deploy.created_by
+    )
+    if req.status == '2':
+        deploy_dispatch(req)
 
 
 def _deploy_extend_2(deploy, ref, commit_id=None):
