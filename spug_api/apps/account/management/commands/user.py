@@ -67,6 +67,7 @@ class Command(BaseCommand):
                 return self.echo_error(f'未找到登录名为【{options["u"]}】的账户')
             user.password_hash = User.make_password(options['p'])
             user.save()
+            cache.delete(user.username)
             self.echo_success('账户密码已重置')
         else:
             self.echo_error('未识别的操作')
