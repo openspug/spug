@@ -1,0 +1,7 @@
+#!/bin/bash
+#
+set -e
+set -u
+
+python3 /data/spug/spug_api/manage.py updatedb
+python3 /data/spug/spug_api/manage.py user add -u $1 -p $2 -n 管理员 -s
