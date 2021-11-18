@@ -65,7 +65,7 @@ export default observer(function AppSelector(props) {
         <div className={styles.right}>
           <Spin spinning={fetching}>
             <div className={styles.title}>
-              <div>{lds.get(envStore.idMap, `${env_id}.name`)}</div>
+              <div className={styles.text}>{lds.get(envStore.idMap, `${env_id}.name`)}</div>
               <Input
                 allowClear
                 style={{width: 200}}
