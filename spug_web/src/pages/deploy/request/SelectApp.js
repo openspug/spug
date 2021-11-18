@@ -83,7 +83,7 @@ class SelectApp extends React.Component {
           <div className={styles.right}>
             <Spin spinning={store.isLoading}>
               <div className={styles.title}>
-                <div>{lds.get(envStore.idMap, `${env_id}.name`)}</div>
+                <div className={styles.titleText}>{lds.get(envStore.idMap, `${env_id}.name`)}</div>
                 <Input
                   allowClear
                   style={{width: 200}}
