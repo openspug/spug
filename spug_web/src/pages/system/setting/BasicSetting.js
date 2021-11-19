@@ -34,7 +34,7 @@ export default observer(function () {
           help={<span>如需要使用Spug的邮件、微信和MFA等内置服务，请关注公众号
               <span style={{color: '#008dff', cursor: 'pointer'}}>
                   <Popover content={spugWx}>
-                    <span>Spug运维</span>
+                    <span>Spug</span>
                   </Popover>
               </span>
               在【我的】页面获取调用凭据，否则请留空。</span>}>
