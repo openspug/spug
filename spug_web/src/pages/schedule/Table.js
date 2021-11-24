@@ -22,7 +22,7 @@ class ComTable extends React.Component {
   moreMenus = (info) => (
     <Menu>
       <Menu.Item>
-        <LinkButton onClick={() => this.handleTest(info)}>执行测试</LinkButton>
+        <LinkButton auth="schedule.schedule.edit" onClick={() => this.handleTest(info)}>执行测试</LinkButton>
       </Menu.Item>
       <Menu.Item>
         <LinkButton

@@ -3,7 +3,7 @@
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
 from django.db.models import F
-from libs import JsonParser, Argument, json_response
+from libs import JsonParser, Argument, json_response, auth
 from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
 from apps.config.models import Config
 from apps.app.utils import fetch_versions, remove_repo
@@ -13,6 +13,7 @@ import re
 
 
 class AppView(View):
+    @auth('deploy.app.view|deploy.repository.view|deploy.request.view|config.app.view')
     def get(self, request):
         query = {}
         if not request.user.is_supper:
@@ -20,6 +21,7 @@ class AppView(View):
         apps = App.objects.filter(**query)
         return json_response(apps)
 
+    @auth('deploy.app.edit|config.app.add|config.app.edit')
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
@@ -42,6 +44,7 @@ class AppView(View):
                 app.save()
         return json_response(error=error)
 
+    @auth('deploy.app.edit|config.app.edit_config')
     def patch(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='参数错误'),
@@ -68,6 +71,7 @@ class AppView(View):
             app.save()
         return json_response(error=error)
 
+    @auth('deploy.app.del|config.app.del')
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='请指定操作对象')
@@ -82,6 +86,7 @@ class AppView(View):
 
 
 class DeployView(View):
+    @auth('deploy.app.view|deploy.request.view')
     def get(self, request):
         form, error = JsonParser(
             Argument('app_id', type=int, required=False)
@@ -95,6 +100,7 @@ class DeployView(View):
             .order_by('-app__sort_id')
         return json_response(deploys)
 
+    @auth('deploy.app.edit')
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
@@ -157,6 +163,7 @@ class DeployView(View):
                     DeployExtend2.objects.create(deploy=deploy, **extend_form)
         return json_response(error=error)
 
+    @auth('deploy.app.del')
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='请指定操作对象')
@@ -171,6 +178,7 @@ class DeployView(View):
         return json_response(error=error)
 
 
+@auth('deploy.app.config')
 def get_versions(request, d_id):
     deploy = Deploy.objects.filter(pk=d_id).first()
     if not deploy:
@@ -181,6 +189,7 @@ def get_versions(request, d_id):
     return json_response({'branches': branches, 'tags': tags})
 
 
+@auth('deploy.app.config')
 def kit_key(request):
     api_key = AppSetting.get_default('api_key')
     return json_response(api_key)

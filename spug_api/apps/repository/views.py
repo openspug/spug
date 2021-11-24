@@ -5,7 +5,7 @@ from django.views.generic import View
 from django.db.models import F
 from django.conf import settings
 from django_redis import get_redis_connection
-from libs import json_response, JsonParser, Argument, human_time, AttrDict
+from libs import json_response, JsonParser, Argument, human_time, AttrDict, auth
 from apps.repository.models import Repository
 from apps.deploy.models import DeployRequest
 from apps.repository.utils import dispatch
@@ -15,6 +15,7 @@ import json
 
 
 class RepositoryView(View):
+    @auth('deploy.repository.view')
     def get(self, request):
         deploy_id = request.GET.get('deploy_id')
         data = Repository.objects.annotate(
@@ -35,6 +36,7 @@ class RepositoryView(View):
                 response[item.app_id] = tmp
         return json_response(list(response.values()))
 
+    @auth('deploy.repository.add')
     def post(self, request):
         form, error = JsonParser(
             Argument('deploy_id', type=int, help='参数错误'),
@@ -57,6 +59,7 @@ class RepositoryView(View):
             return json_response(rep.to_view())
         return json_response(error=error)
 
+    @auth('deploy.repository.add|deploy.repository.build')
     def patch(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='参数错误'),
@@ -71,6 +74,7 @@ class RepositoryView(View):
                 return json_response(rep.to_view())
         return json_response(error=error)
 
+    @auth('deploy.repository.del')
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='请指定操作对象')
@@ -85,6 +89,7 @@ class RepositoryView(View):
         return json_response(error=error)
 
 
+@auth('deploy.repository.view')
 def get_requests(request):
     form, error = JsonParser(
         Argument('repository_id', type=int, help='参数错误')
@@ -99,6 +104,7 @@ def get_requests(request):
         return json_response(requests)
 
 
+@auth('deploy.repository.view')
 def get_detail(request, r_id):
     repository = Repository.objects.filter(pk=r_id).first()
     if not repository:

@@ -3,19 +3,19 @@
 # Released under the AGPL-3.0 License.
 import django
 from django.core.cache import cache
-from django.views.generic import View
 from django.conf import settings
-from libs import JsonParser, Argument, json_response
+from libs import JsonParser, Argument, json_response, auth
 from libs.utils import generate_random_str
 from libs.mail import Mail
 from libs.spug import send_login_wx_code
+from libs.mixins import AdminView
 from apps.setting.utils import AppSetting
 from apps.setting.models import Setting
 import platform
 import ldap
 
 
-class SettingView(View):
+class SettingView(AdminView):
     def get(self, request):
         data = Setting.objects.all()
         return json_response([x.to_view() for x in data])
@@ -30,7 +30,7 @@ class SettingView(View):
         return json_response(error=error)
 
 
-class MFAView(View):
+class MFAView(AdminView):
     def get(self, request):
         if not request.user.wx_token:
             return json_response(error='检测到当前账户未配置微信Token，请配置后再尝试启用MFA认证，否则可能造成系统无法正常登录。')
@@ -61,6 +61,7 @@ class MFAView(View):
         return json_response(error=error)
 
 
+@auth('admin')
 def ldap_test(request):
     form, error = JsonParser(
         Argument('server'),
@@ -79,6 +80,7 @@ def ldap_test(request):
     return json_response(error=error)
 
 
+@auth('admin')
 def email_test(request):
     form, error = JsonParser(
         Argument('server', help='请输入邮件服务地址'),
@@ -97,6 +99,7 @@ def email_test(request):
     return json_response(error=error)
 
 
+@auth('admin')
 def mfa_test(request):
     if not request.user.wx_token:
         return json_response(error='检测到当前账户未配置微信Token，请配置后再尝试启用MFA认证，否则可能造成系统无法正常登录。')
@@ -106,6 +109,7 @@ def mfa_test(request):
     return json_response()
 
 
+@auth('admin')
 def get_about(request):
     return json_response({
         'python_version': platform.python_version(),

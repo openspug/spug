@@ -2,13 +2,14 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
-from libs import json_response, JsonParser, Argument, human_datetime
+from libs import json_response, JsonParser, Argument, human_datetime, auth
 from apps.host.models import Host, HostExtend
 from apps.host.utils import check_os_type, fetch_host_extend
 import json
 
 
 class ExtendView(View):
+    @auth('host.host.add|host.host.edit')
     def get(self, request):
         form, error = JsonParser(
             Argument('host_id', type=int, help='参数错误')
@@ -24,6 +25,7 @@ class ExtendView(View):
             return json_response(response)
         return json_response(error=error)
 
+    @auth('host.host.add|host.host.edit')
     def post(self, request):
         form, error = JsonParser(
             Argument('host_id', type=int, help='参数错误'),

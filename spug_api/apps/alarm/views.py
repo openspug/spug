@@ -2,23 +2,26 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
-from libs import json_response, JsonParser, Argument
+from libs import json_response, JsonParser, Argument, auth
 from apps.alarm.models import Alarm, Group, Contact
 from apps.monitor.models import Detection
 import json
 
 
 class AlarmView(View):
+    @auth('alarm.alarm.view')
     def get(self, request):
         alarms = Alarm.objects.all()
         return json_response(alarms)
 
 
 class GroupView(View):
+    @auth('alarm.group.view|monitor.monitor.add|monitor.monitor.edit|alarm.alarm.view')
     def get(self, request):
         groups = Group.objects.all()
         return json_response(groups)
 
+    @auth('alarm.group.add|alarm.group.edit')
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
@@ -35,6 +38,7 @@ class GroupView(View):
                 Group.objects.create(**form)
         return json_response(error=error)
 
+    @auth('alarm.group.del')
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='请指定操作对象')
@@ -48,10 +52,12 @@ class GroupView(View):
 
 
 class ContactView(View):
+    @auth('alarm.contact.view|alarm.group.view')
     def get(self, request):
         contacts = Contact.objects.all()
         return json_response(contacts)
 
+    @auth('alarm.contact.add|alarm.contact.edit')
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
@@ -70,6 +76,7 @@ class ContactView(View):
                 Contact.objects.create(**form)
         return json_response(error=error)
 
+    @auth('alarm.contact.del')
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='请指定操作对象')

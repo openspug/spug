@@ -3,7 +3,7 @@
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
 from django.db.models import F
-from libs import json_response, JsonParser, Argument
+from libs import json_response, JsonParser, Argument, auth
 from apps.app.models import Deploy
 from apps.config.models import *
 import json
@@ -11,6 +11,7 @@ import re
 
 
 class EnvironmentView(View):
+    @auth('deploy.repository.view|deploy.request.view|config.env.view')
     def get(self, request):
         query = {}
         if not request.user.is_supper:
@@ -18,6 +19,7 @@ class EnvironmentView(View):
         envs = Environment.objects.filter(**query)
         return json_response(envs)
 
+    @auth('config.env.add|config.env.edit')
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
@@ -40,6 +42,7 @@ class EnvironmentView(View):
                 env.save()
         return json_response(error=error)
 
+    @auth('config.env.edit')
     def patch(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='参数错误'),
@@ -60,6 +63,7 @@ class EnvironmentView(View):
             env.save()
         return json_response(error=error)
 
+    @auth('config.env.del')
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='请指定操作对象')
@@ -74,10 +78,12 @@ class EnvironmentView(View):
 
 
 class ServiceView(View):
+    @auth('config.src.view')
     def get(self, request):
         services = Service.objects.all()
         return json_response(services)
 
+    @auth('config.src.add|config.src.edit')
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
@@ -98,6 +104,7 @@ class ServiceView(View):
                 Service.objects.create(created_by=request.user, **form)
         return json_response(error=error)
 
+    @auth('config.src.del')
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='请指定操作对象')
@@ -110,6 +117,7 @@ class ServiceView(View):
 
 
 class ConfigView(View):
+    @auth('config.src.view_config|config.app.view_config')
     def get(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='未指定操作对象'),
@@ -125,6 +133,7 @@ class ConfigView(View):
             return json_response(data)
         return json_response(error=error)
 
+    @auth('config.src.edit_config|config.app.edit_config')
     def post(self, request):
         form, error = JsonParser(
             Argument('o_id', type=int, help='缺少必要参数'),
@@ -148,6 +157,7 @@ class ConfigView(View):
                 ConfigHistory.objects.create(action='1', env_id=env_id, **form)
         return json_response(error=error)
 
+    @auth('config.src.edit_config|config.app.edit_config')
     def patch(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='缺少必要参数'),
@@ -174,6 +184,7 @@ class ConfigView(View):
             config.save()
         return json_response(error=error)
 
+    @auth('config.src.edit_config|config.app.edit_config')
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='未指定操作对象')
@@ -194,6 +205,7 @@ class ConfigView(View):
 
 
 class HistoryView(View):
+    @auth('config.src.view_config|config.app.view_config')
     def post(self, request):
         form, error = JsonParser(
             Argument('o_id', type=int, help='缺少必要参数'),
@@ -211,6 +223,7 @@ class HistoryView(View):
         return json_response(error=error)
 
 
+@auth('config.src.view_config|config.app.view_config')
 def post_diff(request):
     form, error = JsonParser(
         Argument('o_id', type=int, help='缺少必要参数'),
@@ -228,6 +241,7 @@ def post_diff(request):
     return json_response(error=error)
 
 
+@auth('config.src.edit_config|config.app.edit_config')
 def parse_json(request):
     form, error = JsonParser(
         Argument('o_id', type=int, help='缺少必要参数'),
@@ -241,6 +255,7 @@ def parse_json(request):
     return json_response(error=error)
 
 
+@auth('config.src.edit_config|config.app.edit_config')
 def parse_text(request):
     form, error = JsonParser(
         Argument('o_id', type=int, help='缺少必要参数'),

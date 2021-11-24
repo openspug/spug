@@ -3,7 +3,7 @@
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
 from django.db.models import F
-from libs import json_response, JsonParser, Argument
+from libs import json_response, JsonParser, Argument, auth
 from apps.host.models import Group
 from apps.account.models import Role
 
@@ -39,6 +39,7 @@ def filter_by_perm(data, result, ids):
 
 
 class GroupView(View):
+    @auth('host.host.view|host.console.view|exec.task.do')
     def get(self, request):
         with_hosts = request.GET.get('with_hosts')
         data, data2 = dict(), dict()
@@ -56,6 +57,7 @@ class GroupView(View):
         merge_children(data2, '', tree_data)
         return json_response({'treeData': tree_data, 'groups': data2})
 
+    @auth('admin')
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
@@ -71,6 +73,7 @@ class GroupView(View):
                 group.save()
         return json_response(error=error)
 
+    @auth('admin')
     def patch(self, request):
         form, error = JsonParser(
             Argument('s_id', type=int, help='参数错误'),
@@ -100,6 +103,7 @@ class GroupView(View):
             src.save()
         return json_response(error=error)
 
+    @auth('admin')
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='参数错误')

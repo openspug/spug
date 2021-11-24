@@ -1,12 +1,13 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
-from libs import json_response, JsonParser, Argument
+from libs import json_response, JsonParser, Argument, auth
 from apps.host.models import Host, HostExtend, Group
 from apps.host import utils
 import json
 
 
+@auth('host.host.add')
 def get_regions(request):
     form, error = JsonParser(
         Argument('type', filter=lambda x: x in ('ali', 'tencent'), help='参数错误'),
@@ -25,6 +26,7 @@ def get_regions(request):
     return json_response(error=error)
 
 
+@auth('host.host.add')
 def cloud_import(request):
     form, error = JsonParser(
         Argument('type', filter=lambda x: x in ('ali', 'tencent'), help='参数错误'),

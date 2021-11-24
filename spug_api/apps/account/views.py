@@ -2,7 +2,7 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.core.cache import cache
-from django.views.generic import View
+from libs.mixins import AdminView, View
 from libs import JsonParser, Argument, human_datetime, json_response
 from libs.utils import get_request_real_ip, generate_random_str
 from libs.spug import send_login_wx_code
@@ -15,7 +15,7 @@ import uuid
 import json
 
 
-class UserView(View):
+class UserView(AdminView):
     def get(self, request):
         users = []
         for u in User.objects.filter(deleted_by_id__isnull=True):
@@ -50,6 +50,7 @@ class UserView(View):
                     **form
                 )
             user.roles.set(role_ids)
+            user.set_perms_cache()
         return json_response(error=error)
 
     def patch(self, request):
@@ -88,7 +89,7 @@ class UserView(View):
         return json_response(error=error)
 
 
-class RoleView(View):
+class RoleView(AdminView):
     def get(self, request):
         roles = Role.objects.all()
         return json_response(roles)
@@ -119,6 +120,7 @@ class RoleView(View):
                 return json_response(error='未找到指定角色')
             if form.page_perms is not None:
                 role.page_perms = json.dumps(form.page_perms)
+                role.clear_perms_cache()
             if form.deploy_perms is not None:
                 role.deploy_perms = json.dumps(form.deploy_perms)
             if form.group_perms is not None:
@@ -240,7 +242,7 @@ def handle_user_info(request, user, captcha):
         'nickname': user.nickname,
         'is_supper': user.is_supper,
         'has_real_ip': x_real_ip and ipaddress.ip_address(x_real_ip).is_global if verify_ip else True,
-        'permissions': [] if user.is_supper else user.page_perms
+        'permissions': [] if user.is_supper else list(user.page_perms)
     })
 
 

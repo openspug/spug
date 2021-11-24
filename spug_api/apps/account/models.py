@@ -2,6 +2,7 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.db import models
+from django.core.cache import cache
 from libs import ModelMixin, human_datetime
 from django.contrib.auth.hashers import make_password, check_password
 import json
@@ -33,16 +34,25 @@ class User(models.Model, ModelMixin):
     def verify_password(self, plain_password: str) -> bool:
         return check_password(plain_password, self.password_hash)
 
+    def get_perms_cache(self):
+        return cache.get(f'perms_{self.id}', set())
+
+    def set_perms_cache(self, value=None):
+        cache.set(f'perms_{self.id}', value or set())
+
     @property
     def page_perms(self):
-        data = set()
+        data = self.get_perms_cache()
+        if data:
+            return data
         for item in self.roles.all():
             if item.page_perms:
                 perms = json.loads(item.page_perms)
                 for m, v in perms.items():
                     for p, d in v.items():
                         data.update(f'{m}.{p}.{x}' for x in d)
-        return list(data)
+        self.set_perms_cache(data)
+        return data
 
     @property
     def deploy_perms(self):
@@ -63,8 +73,9 @@ class User(models.Model, ModelMixin):
         return list(data)
 
     def has_perms(self, codes):
-        # return self.is_supper or self.role in codes
-        return self.is_supper
+        if self.is_supper:
+            return True
+        return self.page_perms.intersection(codes)
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -98,6 +109,10 @@ class Role(models.Model, ModelMixin):
         perms[target].append(value)
         self.deploy_perms = json.dumps(perms)
         self.save()
+
+    def clear_perms_cache(self):
+        for item in self.user_set.all():
+            item.set_perms_cache()
 
     def __repr__(self):
         return '<Role name=%r>' % self.name

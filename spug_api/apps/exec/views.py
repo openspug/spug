@@ -4,7 +4,7 @@
 from django.views.generic import View
 from django_redis import get_redis_connection
 from django.conf import settings
-from libs import json_response, JsonParser, Argument, human_datetime
+from libs import json_response, JsonParser, Argument, human_datetime, auth
 from apps.exec.models import ExecTemplate
 from apps.host.models import Host
 from apps.account.utils import has_host_perm
@@ -13,11 +13,13 @@ import json
 
 
 class TemplateView(View):
+    @auth('exec.template.view')
     def get(self, request):
         templates = ExecTemplate.objects.all()
         types = [x['type'] for x in templates.order_by('type').values('type').distinct()]
         return json_response({'types': types, 'templates': [x.to_dict() for x in templates]})
 
+    @auth('exec.template.add|exec.template.edit')
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
@@ -36,6 +38,7 @@ class TemplateView(View):
                 ExecTemplate.objects.create(**form)
         return json_response(error=error)
 
+    @auth('exec.template.del')
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='请指定操作对象')
@@ -45,6 +48,7 @@ class TemplateView(View):
         return json_response(error=error)
 
 
+@auth('exec.task.do')
 def do_task(request):
     form, error = JsonParser(
         Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择执行主机'),

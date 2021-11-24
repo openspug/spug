@@ -9,36 +9,13 @@ import { Table, Modal, Radio, Tag, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { Action, AuthButton, TableCard } from 'components';
 import { http, hasPermission } from 'libs';
-import groupStore from '../alarm/group/store';
-import hostStore from '../host/store';
 import store from './store';
 
 @observer
 class ComTable extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      hosts: {}
-    }
-  }
-
   componentDidMount() {
     store.fetchRecords();
-    if (groupStore.records.length === 0) groupStore.fetchRecords();
-    if (!hostStore.records || hostStore.records.length === 0) {
-      hostStore.fetchRecords().then(this._handleHosts)
-    } else {
-      this._handleHosts()
-    }
   }
-
-  _handleHosts = () => {
-    const tmp = {};
-    for (let item of hostStore.records) {
-      tmp[item.id] = item
-    }
-    this.setState({hosts: tmp})
-  };
 
   handleActive = (text) => {
     Modal.confirm({

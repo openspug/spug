@@ -10,16 +10,18 @@ from apps.schedule.models import Task, History
 from apps.schedule.executors import local_executor, host_executor
 from apps.host.models import Host
 from django.conf import settings
-from libs import json_response, JsonParser, Argument, human_datetime
+from libs import json_response, JsonParser, Argument, human_datetime, auth
 import json
 
 
 class Schedule(View):
+    @auth('schedule.schedule.view')
     def get(self, request):
         tasks = Task.objects.all()
         types = [x['type'] for x in tasks.order_by('type').values('type').distinct()]
         return json_response({'types': types, 'tasks': [x.to_dict() for x in tasks]})
 
+    @auth('schedule.schedule.add|schedule.schedule.edit')
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
@@ -61,6 +63,7 @@ class Schedule(View):
                 Task.objects.create(created_by=request.user, **form)
         return json_response(error=error)
 
+    @auth('schedule.schedule.edit')
     def patch(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='请指定操作对象'),
@@ -81,6 +84,7 @@ class Schedule(View):
             task.save()
         return json_response(error=error)
 
+    @auth('schedule.schedule.del')
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='请指定操作对象')
@@ -96,6 +100,7 @@ class Schedule(View):
 
 
 class HistoryView(View):
+    @auth('schedule.schedule.view')
     def get(self, request, t_id):
         task = Task.objects.filter(pk=t_id).first()
         if not task:
@@ -108,6 +113,7 @@ class HistoryView(View):
         histories = History.objects.filter(task_id=t_id)
         return json_response([x.to_list() for x in histories])
 
+    @auth('schedule.schedule.edit')
     def post(self, request, t_id):
         task = Task.objects.filter(pk=t_id).first()
         if not task:
@@ -156,6 +162,7 @@ class HistoryView(View):
         return data
 
 
+@auth('schedule.schedule.add|schedule.schedule.edit')
 def next_run_time(request):
     form, error = JsonParser(
         Argument('rule', help='参数错误'),

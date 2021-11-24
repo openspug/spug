@@ -11,10 +11,12 @@ from apps.deploy.models import Deploy, DeployRequest
 from apps.account.utils import get_host_perms
 from libs.utils import json_response, human_date, parse_time
 from libs.parser import JsonParser, Argument
+from libs.decorators import auth
 from datetime import datetime, timedelta
 import json
 
 
+@auth('dashboard.dashboard.view')
 def get_statistic(request):
     if request.user.is_supper:
         app = App.objects.count()
@@ -32,6 +34,7 @@ def get_statistic(request):
     return json_response(data)
 
 
+@auth('dashboard.dashboard.view')
 def get_alarm(request):
     form, error = JsonParser(
         Argument('type', required=False),
@@ -49,6 +52,7 @@ def get_alarm(request):
     return json_response(error=error)
 
 
+@auth('dashboard.dashboard.view')
 def get_request(request):
     form, error = JsonParser(
         Argument('duration', type=list, help='参数错误')
@@ -64,6 +68,7 @@ def get_request(request):
     return json_response(error=error)
 
 
+@auth('dashboard.dashboard.view')
 def get_deploy(request):
     host = Host.objects.filter(deleted_at__isnull=True).count()
     data = {x.id: {'name': x.name, 'count': 0} for x in App.objects.all()}
@@ -71,4 +76,3 @@ def get_deploy(request):
         data[dep.app_id]['count'] += len(json.loads(dep.host_ids))
     data = filter(lambda x: x['count'], data.values())
     return json_response({'host': host, 'res': list(data)})
-

@@ -4,7 +4,7 @@
 from django.views.generic import View
 from django.db.models import F
 from django.http.response import HttpResponseBadRequest
-from libs import json_response, JsonParser, Argument, AttrDict
+from libs import json_response, JsonParser, Argument, AttrDict, auth
 from apps.setting.utils import AppSetting
 from apps.account.utils import get_host_perms
 from apps.host.models import Host, Group
@@ -20,6 +20,7 @@ import uuid
 
 
 class HostView(View):
+    @auth('host.host.view|exec.task.do')
     def get(self, request):
         hosts = Host.objects.select_related('hostextend')
         if not request.user.is_supper:
@@ -29,6 +30,7 @@ class HostView(View):
             hosts[rel.host_id]['group_ids'].append(rel.group_id)
         return json_response(list(hosts.values()))
 
+    @auth('host.host.add|host.host.edit')
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
@@ -76,6 +78,7 @@ class HostView(View):
             return json_response(response)
         return json_response(error=error)
 
+    @auth('admin')
     def patch(self, request):
         form, error = JsonParser(
             Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择主机'),
@@ -93,6 +96,7 @@ class HostView(View):
                 s_group.hosts.remove(*form.host_ids)
         return json_response(error=error)
 
+    @auth('host.host.del')
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
@@ -122,6 +126,7 @@ class HostView(View):
         return json_response(error=error)
 
 
+@auth('host.host.add')
 def post_import(request):
     group_id = request.POST.get('group_id')
     file = request.FILES['file']
@@ -152,6 +157,7 @@ def post_import(request):
     return json_response(summary)
 
 
+@auth('host.host.add')
 def post_parse(request):
     file = request.FILES['file']
     if file:
@@ -161,6 +167,7 @@ def post_parse(request):
         return HttpResponseBadRequest()
 
 
+@auth('host.host.add')
 def batch_valid(request):
     form, error = JsonParser(
         Argument('password', required=False),

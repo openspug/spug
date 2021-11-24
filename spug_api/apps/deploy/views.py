@@ -6,7 +6,7 @@ from django.db.models import F
 from django.conf import settings
 from django.http.response import HttpResponseBadRequest
 from django_redis import get_redis_connection
-from libs import json_response, JsonParser, Argument, human_datetime, human_time
+from libs import json_response, JsonParser, Argument, human_datetime, human_time, auth
 from apps.deploy.models import DeployRequest
 from apps.app.models import Deploy, DeployExtend2
 from apps.repository.models import Repository
@@ -21,6 +21,7 @@ import os
 
 
 class RequestView(View):
+    @auth('deploy.request.view')
     def get(self, request):
         data, query, counter = [], {}, {}
         if not request.user.is_supper:
@@ -54,37 +55,7 @@ class RequestView(View):
             data.append(tmp)
         return json_response(data)
 
-    def put(self, request):
-        form, error = JsonParser(
-            Argument('id', type=int, help='缺少必要参数'),
-            Argument('action', filter=lambda x: x in ('check', 'do'), help='参数错误')
-        ).parse(request.body)
-        if error is None:
-            req = DeployRequest.objects.filter(pk=form.id).first()
-            if not req:
-                return json_response(error='未找到指定发布申请')
-            pre_req = DeployRequest.objects.filter(
-                deploy_id=req.deploy_id,
-                type='1',
-                id__lt=req.id,
-                version__isnull=False).first()
-            if not pre_req:
-                return json_response(error='未找到该应用可以用于回滚的版本')
-            if form.action == 'check':
-                return json_response({'date': pre_req.created_at, 'name': pre_req.name})
-            DeployRequest.objects.create(
-                deploy_id=req.deploy_id,
-                name=f'{req.name} - 回滚',
-                type='2',
-                extra=pre_req.extra,
-                host_ids=req.host_ids,
-                status='0' if pre_req.deploy.is_audit else '1',
-                desc='自动回滚至该应用的上个版本',
-                version=pre_req.version,
-                created_by=request.user
-            )
-        return json_response(error=error)
-
+    @auth('deploy.request.del')
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
@@ -123,6 +94,7 @@ class RequestView(View):
 
 
 class RequestDetailView(View):
+    @auth('deploy.request.view')
     def get(self, request, r_id):
         req = DeployRequest.objects.filter(pk=r_id).first()
         if not req:
@@ -160,6 +132,7 @@ class RequestDetailView(View):
                 outputs['local'].update(step=100, data=f'{human_time()} 已构建完成忽略执行。')
         return json_response(response)
 
+    @auth('deploy.request.do')
     def post(self, request, r_id):
         query = {'pk': r_id}
         if not request.user.is_supper:
@@ -194,6 +167,7 @@ class RequestDetailView(View):
                 return json_response({'s_actions': s_actions, 'h_actions': h_actions, 'outputs': outputs})
         return json_response({'outputs': outputs})
 
+    @auth('deploy.request.approve')
     def patch(self, request, r_id):
         form, error = JsonParser(
             Argument('reason', required=False),
@@ -216,6 +190,7 @@ class RequestDetailView(View):
         return json_response(error=error)
 
 
+@auth('deploy.request.add|deploy.request.edit')
 def post_request_ext1(request):
     form, error = JsonParser(
         Argument('id', type=int, required=False),
@@ -264,6 +239,7 @@ def post_request_ext1(request):
     return json_response(error=error)
 
 
+@auth('deploy.request.do')
 def post_request_ext1_rollback(request):
     form, error = JsonParser(
         Argument('request_id', type=int, help='请选择要回滚的版本'),
@@ -295,6 +271,7 @@ def post_request_ext1_rollback(request):
     return json_response(error=error)
 
 
+@auth('deploy.request.add|deploy.request.edit')
 def post_request_ext2(request):
     form, error = JsonParser(
         Argument('id', type=int, required=False),
@@ -334,6 +311,7 @@ def post_request_ext2(request):
     return json_response(error=error)
 
 
+@auth('deploy.request.view')
 def get_request_info(request):
     form, error = JsonParser(
         Argument('id', type=int, help='参数错误')
@@ -346,6 +324,7 @@ def get_request_info(request):
     return json_response(error=error)
 
 
+@auth('deploy.request.add')
 def do_upload(request):
     repos_dir = settings.REPOS_DIR
     file = request.FILES['file']

@@ -2,7 +2,7 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
-from libs import json_response, JsonParser, Argument, human_datetime
+from libs import json_response, JsonParser, Argument, human_datetime, auth
 from apps.monitor.models import Detection
 from django_redis import get_redis_connection
 from django.conf import settings
@@ -11,11 +11,13 @@ import json
 
 
 class DetectionView(View):
+    @auth('dashboard.dashboard.view|monitor.monitor.view')
     def get(self, request):
         detections = Detection.objects.all()
         groups = [x['group'] for x in detections.order_by('group').values('group').distinct()]
         return json_response({'groups': groups, 'detections': [x.to_view() for x in detections]})
 
+    @auth('monitor.monitor.add|monitor.monitor.edit')
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
@@ -53,6 +55,7 @@ class DetectionView(View):
                 rds_cli.lpush(settings.MONITOR_KEY, json.dumps(form))
         return json_response(error=error)
 
+    @auth('monitor.monitor.edit')
     def patch(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='请指定操作对象'),
@@ -71,6 +74,7 @@ class DetectionView(View):
                 rds_cli.lpush(settings.MONITOR_KEY, json.dumps(message))
         return json_response(error=error)
 
+    @auth('monitor.monitor.del')
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='请指定操作对象')
@@ -84,6 +88,7 @@ class DetectionView(View):
         return json_response(error=error)
 
 
+@auth('monitor.monitor.add|monitor.monitor.edit')
 def run_test(request):
     form, error = JsonParser(
         Argument('type', help='请选择监控类型'),

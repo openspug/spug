@@ -6,12 +6,13 @@ from django_redis import get_redis_connection
 from apps.host.models import Host
 from apps.account.utils import has_host_perm
 from apps.file.utils import FileResponseAfter, fetch_dir_list
-from libs import json_response, JsonParser, Argument
+from libs import json_response, JsonParser, Argument, auth
 from functools import partial
 import os
 
 
 class FileView(View):
+    @auth('host.console.list')
     def get(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='参数错误'),
@@ -29,6 +30,7 @@ class FileView(View):
 
 
 class ObjectView(View):
+    @auth('host.console.list')
     def get(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='参数错误'),
@@ -47,6 +49,7 @@ class ObjectView(View):
             return FileResponseAfter(ssh_cli.close, f, as_attachment=True, filename=filename)
         return json_response(error=error)
 
+    @auth('host.console.upload')
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='参数错误'),
@@ -68,6 +71,7 @@ class ObjectView(View):
                 ssh.put_file_by_fl(file, f'{form.path}/{file.name}', callback=callback)
         return json_response(error=error)
 
+    @auth('host.console.del')
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='参数错误'),
