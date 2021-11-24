@@ -216,7 +216,7 @@ def fetch_host_extend(ssh):
 
         code, out = ssh.exec_command_raw('lsblk -dbn -o SIZE -e 11 2> /dev/null')
         if code == 0:
-            for item in out.strip().splitlines():
+            for item in out.strip().splitlines()[:10]:
                 item = item.strip()
                 response['disk'].append(math.ceil(int(item) / 1024 / 1024 / 1024))
 
