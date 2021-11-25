@@ -11,6 +11,7 @@ from apps.repository.models import Repository
 from apps.repository.utils import dispatch as build_repository
 from apps.deploy.helper import Helper, SpugError
 from concurrent import futures
+from functools import partial
 import json
 import uuid
 import os
@@ -128,7 +129,6 @@ def _ext2_deploy(req, helper, env):
         step += 1
     helper.send_step('local', 100, '')
 
-    tmp_transfer_file = None
     for action in host_actions:
         if action.get('type') == 'transfer':
             if action.get('src_mode') == '1':
@@ -157,7 +157,7 @@ def _ext2_deploy(req, helper, env):
             tar_gz_file = f'{req.spug_version}.tar.gz'
             helper.local(f'cd {sp_dir} && tar -zcf {tar_gz_file} {exclude} {contain}')
             helper.send_info('local', f'{human_time()} \033[32m完成√\033[0m\r\n')
-            tmp_transfer_file = os.path.join(sp_dir, tar_gz_file)
+            helper.add_callback(partial(os.remove, os.path.join(sp_dir, tar_gz_file)))
             break
     if host_actions:
         if req.deploy.is_parallel:
@@ -175,8 +175,6 @@ def _ext2_deploy(req, helper, env):
                         latest_exception = exception
                         if not isinstance(exception, SpugError):
                             helper.send_error(t.h_id, f'Exception: {exception}', False)
-                if tmp_transfer_file:
-                    os.remove(tmp_transfer_file)
             if latest_exception:
                 raise latest_exception
         else:

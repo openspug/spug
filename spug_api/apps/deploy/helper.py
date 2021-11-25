@@ -20,6 +20,7 @@ class Helper:
         self.rds = rds
         self.key = key
         self.rds.delete(self.key)
+        self.callback = []
 
     @classmethod
     def _make_dd_notify(cls, url, action, req, version, host_str):
@@ -201,6 +202,9 @@ class Helper:
             else:
                 raise NotImplementedError
 
+    def add_callback(self, func):
+        self.callback.append(func)
+
     def parse_filter_rule(self, data: str, sep='\n'):
         data, files = data.strip(), []
         if data:
@@ -230,6 +234,9 @@ class Helper:
         # save logs for two weeks
         self.rds.expire(self.key, 14 * 24 * 60 * 60)
         self.rds.close()
+        # callback
+        for func in self.callback:
+            func()
 
     def local(self, command, env=None):
         if env:
