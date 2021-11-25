@@ -97,7 +97,7 @@ class SSHConsumer(WebsocketConsumer):
 
     def receive(self, text_data=None, bytes_data=None):
         data = text_data or bytes_data
-        if data:
+        if data and self.chan:
             data = json.loads(data)
             # print('write: {!r}'.format(data))
             resize = data.get('resize')

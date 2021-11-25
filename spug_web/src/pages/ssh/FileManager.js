@@ -125,7 +125,7 @@ class FileManager extends React.Component {
       formData.append('token', token);
       formData.append('path', '/' + this.state.pwd.join('/'));
       this.input.value = '';
-      http.post('/api/file/object/', formData, {timeout: 600000})
+      http.post('/api/file/object/', formData, {timeout: 600000, onUploadProgress: this._updateLocal})
         .then(() => {
           this.setState({uploadStatus: 'success'});
           this.fetchFiles()
@@ -133,6 +133,11 @@ class FileManager extends React.Component {
         .finally(() => setTimeout(() => this.setState({uploading: false}), 2000))
     }
   };
+
+  _updateLocal = (e) => {
+    const percent = e.loaded / e.total * 100 / 2
+    this.setState({percent: Number(percent.toFixed(1))})
+  }
 
   _updatePercent = token => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -142,8 +147,8 @@ class FileManager extends React.Component {
       if (e.data === 'pong') {
         this.socket.send('ping')
       } else {
-        const percent = Number(e.data);
-        if (percent > this.state.percent) this.setState({percent});
+        const percent = this.state.percent + Number(e.data) / 2;
+        if (percent > this.state.percent) this.setState({percent: Number(percent.toFixed(1))});
         if (percent === 100) {
           this.socket.close()
         }
