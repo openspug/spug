@@ -5,7 +5,6 @@ from django.http.response import HttpResponseBadRequest, HttpResponseForbidden, 
 from apps.setting.utils import AppSetting
 from apps.deploy.models import Deploy, DeployRequest
 from apps.repository.models import Repository
-from apps.repository.utils import dispatch as build_dispatch
 from apps.deploy.utils import dispatch as deploy_dispatch
 from threading import Thread
 import hashlib

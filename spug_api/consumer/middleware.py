@@ -44,5 +44,5 @@ class AuthMiddleware:
             if user and x_real_ip == user.last_ip and user.token_expired >= time.time() and user.is_active:
                 scope['user'] = user
                 return True, None
-            return False, f'IP verify failed: {x_real_ip} <> {user.last_ip}'
+            return False, f'Verify failed: {x_real_ip} <> {user.last_ip}'
         return False, 'Token is invalid'
