@@ -18,11 +18,13 @@ function WebSSH(props) {
   useEffect(() => {
     const fitPlugin = new FitAddon();
     term.loadAddon(fitPlugin);
+    term.open(container.current);
+    term.write('WebSocket connecting ... ');
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/ssh/${props.id}/?x-token=${X_TOKEN}`);
     socket.onmessage = e => _read_as_text(e.data);
     socket.onopen = () => {
-      term.open(container.current);
+      term.write('ok')
       term.focus();
       fitPlugin.fit();
     };

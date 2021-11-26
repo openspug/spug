@@ -119,7 +119,7 @@ class SSHConsumer(WebsocketConsumer):
             self.close()
 
     def _init(self):
-        self.send(bytes_data=b'Connecting ...\r\n')
+        self.send(bytes_data=b'\r\33[KConnecting ...\r')
         host = Host.objects.filter(pk=self.id).first()
         if not host:
             self.send(text_data='Unknown host\r\n')
