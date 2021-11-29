@@ -27,10 +27,12 @@ export default class extends React.Component {
         <Breadcrumb>
           {this.props.children}
         </Breadcrumb>
-        <div className={styles.title}>
-          <span>{title}</span>
-          {this.props.extra}
-        </div>
+        {this.props.extra ? (
+          <div className={styles.title}>
+            <span>{title}</span>
+            {this.props.extra}
+          </div>
+        ) : null}
       </div>
     )
   }
