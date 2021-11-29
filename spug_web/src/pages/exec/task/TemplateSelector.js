@@ -32,7 +32,8 @@ class TemplateSelector extends React.Component {
 
   handleSubmit = () => {
     if (this.state.selectedRows.length > 0) {
-      this.props.onOk(this.state.selectedRows[0].body)
+      const {body, interpreter} = this.state.selectedRows[0]
+      this.props.onOk(body, interpreter)
     }
     this.props.onCancel()
   };

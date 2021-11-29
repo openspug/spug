@@ -42,3 +42,80 @@
 pre {
   margin: 0;
 }
+
+.hisBlock {
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  background-color: #fafafa;
+  padding: 24px;
+  overflow: auto;
+
+  .title {
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+
+  .inner {
+    max-height: 700px;
+    overflow: auto;
+  }
+
+  .item {
+    display: flex;
+    align-items: center;
+    border-radius: 2px;
+    padding: 8px 12px;
+    cursor: pointer;
+    margin-bottom: 12px;
+
+    .sh {
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      text-align: center;
+      color: #fff;
+      font-weight: 500;
+      border-radius: 2px;
+      background-color: #1890ff;
+    }
+
+    .python {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      width: 20px;
+      height: 20px;
+      font-weight: 500;
+      border-radius: 2px;
+      background-color: #dca900;
+    }
+
+    .number {
+      width: 24px;
+      text-align: center;
+      margin-left: 12px;
+      border-radius: 2px;
+      font-weight: 500;
+      background-color:#dfdfdf;
+    }
+
+    .command {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin: 0 12px;
+    }
+
+    .desc {
+      color: #999;
+    }
+  }
+
+  .item:hover {
+    border-color: #1890ff;
+    background-color: #e6f7ff;
+  }
+}

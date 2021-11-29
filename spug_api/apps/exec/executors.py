@@ -14,10 +14,10 @@ def exec_worker_handler(job):
 
 
 class Job:
-    def __init__(self, key, name, hostname, port, username, pkey, command, token=None):
+    def __init__(self, key, name, hostname, port, username, pkey, command, interpreter, token=None):
         self.ssh = SSH(hostname, port, username, pkey)
         self.key = key
-        self.command = command
+        self.command = self._handle_command(command, interpreter)
         self.token = token
         self.rds_cli = None
         self.env = dict(
@@ -34,6 +34,11 @@ class Job:
         self.rds_cli.lpush(self.token, json.dumps(message))
         if with_expire:
             self.rds_cli.expire(self.token, 300)
+
+    def _handle_command(self, command, interpreter):
+        if interpreter == 'python':
+            return f'python << EOF\n{command}\nEOF'
+        return command
 
     def send(self, data):
         message = {'key': self.key, 'data': data}

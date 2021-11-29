@@ -5,9 +5,10 @@ from django.views.generic import View
 from django_redis import get_redis_connection
 from django.conf import settings
 from libs import json_response, JsonParser, Argument, human_datetime, auth
-from apps.exec.models import ExecTemplate
+from apps.exec.models import ExecTemplate, ExecHistory
 from apps.host.models import Host
 from apps.account.utils import has_host_perm
+import hashlib
 import uuid
 import json
 
@@ -26,6 +27,7 @@ class TemplateView(View):
             Argument('name', help='请输入模版名称'),
             Argument('type', help='请选择模版类型'),
             Argument('body', help='请输入模版内容'),
+            Argument('interpreter', default='sh'),
             Argument('desc', required=False)
         ).parse(request.body)
         if error is None:
@@ -52,7 +54,8 @@ class TemplateView(View):
 def do_task(request):
     form, error = JsonParser(
         Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择执行主机'),
-        Argument('command', help='请输入执行命令内容')
+        Argument('command', help='请输入执行命令内容'),
+        Argument('interpreter', default='sh')
     ).parse(request.body)
     if error is None:
         if not has_host_perm(request.user, form.host_ids):
@@ -63,6 +66,7 @@ def do_task(request):
                 key=host.id,
                 name=host.name,
                 token=token,
+                interpreter=form.interpreter,
                 hostname=host.hostname,
                 port=host.port,
                 username=host.username,
@@ -70,5 +74,26 @@ def do_task(request):
                 pkey=host.private_key,
             )
             rds.rpush(settings.EXEC_WORKER_KEY, json.dumps(data))
+        form.host_ids.sort()
+        host_ids = json.dumps(form.host_ids)
+        tmp_str = f'{form.interpreter},{host_ids},{form.command}'
+        digest = hashlib.md5(tmp_str.encode()).hexdigest()
+        record = ExecHistory.objects.filter(digest=digest).first()
+        if record:
+            record.updated_at = human_datetime()
+            record.save()
+        else:
+            ExecHistory.objects.create(
+                digest=digest,
+                interpreter=form.interpreter,
+                command=form.command,
+                host_ids=json.dumps(form.host_ids),
+            )
         return json_response(token)
     return json_response(error=error)
+
+
+@auth('exec.task.do')
+def get_histories(request):
+    records = ExecHistory.objects.all()
+    return json_response([x.to_view() for x in records])

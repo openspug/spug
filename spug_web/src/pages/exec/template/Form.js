@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { Modal, Form, Input, Select, Button, message } from 'antd';
+import { Modal, Form, Input, Select, Button, Radio, message } from 'antd';
 import { ACEditor } from 'components';
 import { http, cleanCommand } from 'libs';
 import store from './store';
@@ -76,12 +76,20 @@ export default observer(function () {
         <Form.Item required name="name" label="模板名称">
           <Input placeholder="请输入模板名称"/>
         </Form.Item>
-        <Form.Item required label="模板内容">
-          <ACEditor
-            mode="sh"
-            value={body}
-            onChange={val => setBody(val)}
-            height="300px"/>
+        <Form.Item required name="interpreter" label="脚本语言">
+          <Radio.Group>
+            <Radio.Button value="sh">Shell</Radio.Button>
+            <Radio.Button value="python">Python</Radio.Button>
+          </Radio.Group>
+        </Form.Item>
+        <Form.Item required label="模板内容" shouldUpdate={(p, c) => p.interpreter !== c.interpreter}>
+          {({getFieldValue}) => (
+            <ACEditor
+              mode={getFieldValue('interpreter')}
+              value={body}
+              onChange={val => setBody(val)}
+              height="300px"/>
+          )}
         </Form.Item>
         <Form.Item name="desc" label="备注信息">
           <Input.TextArea placeholder="请输入模板备注信息"/>

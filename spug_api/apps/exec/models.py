@@ -4,12 +4,14 @@
 from django.db import models
 from libs import ModelMixin, human_datetime
 from apps.account.models import User
+import json
 
 
 class ExecTemplate(models.Model, ModelMixin):
     name = models.CharField(max_length=50)
     type = models.CharField(max_length=50)
     body = models.TextField()
+    interpreter = models.CharField(max_length=20)
     desc = models.CharField(max_length=255, null=True)
 
     created_at = models.CharField(max_length=20, default=human_datetime)
@@ -22,4 +24,21 @@ class ExecTemplate(models.Model, ModelMixin):
 
     class Meta:
         db_table = 'exec_templates'
+        ordering = ('-id',)
+
+
+class ExecHistory(models.Model, ModelMixin):
+    digest = models.CharField(max_length=32, unique=True)
+    interpreter = models.CharField(max_length=20)
+    command = models.TextField()
+    host_ids = models.TextField()
+    updated_at = models.CharField(max_length=20, default=human_datetime)
+
+    def to_view(self):
+        tmp = self.to_dict()
+        tmp['host_ids'] = json.loads(self.host_ids)
+        return tmp
+
+    class Meta:
+        db_table = 'exec_histories'
         ordering = ('-id',)
