@@ -66,7 +66,7 @@ function TaskIndex() {
             style={{marginBottom: 24}}
             icon={<PlusOutlined/>}
             onClick={() => store.showHost = true}>从主机列表中选择</Button>
-          <Form.Item required label="执行命令">
+          <Form.Item required label="执行命令" style={{position: 'relative'}}>
             <Radio.Group
               buttonStyle="solid"
               style={{marginBottom: 12}}
@@ -75,6 +75,7 @@ function TaskIndex() {
               <Radio.Button value="sh">Shell</Radio.Button>
               <Radio.Button value="python">Python</Radio.Button>
             </Radio.Group>
+            <a href="https://spug.cc/docs/batch-exec" target="_blank" className={style.tips}>全局变量</a>
             <ACEditor mode={interpreter} value={command} height="350px" width="100%" onChange={setCommand}/>
           </Form.Item>
           <Form.Item>

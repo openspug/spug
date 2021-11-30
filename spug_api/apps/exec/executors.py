@@ -26,6 +26,7 @@ class Job:
             SPUG_HOST_HOSTNAME=hostname,
             SPUG_SSH_PORT=str(port),
             SPUG_SSH_USERNAME=username,
+            SPUG_INTERPRETER=interpreter
         )
 
     def _send(self, message, with_expire=False):
