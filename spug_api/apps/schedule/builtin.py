@@ -6,6 +6,7 @@ from apps.account.models import History
 from apps.alarm.models import Alarm
 from apps.schedule.models import Task
 from apps.deploy.models import DeployRequest
+from apps.exec.models import ExecHistory
 from apps.deploy.utils import dispatch
 from libs.utils import parse_time, human_datetime
 from datetime import datetime, timedelta
@@ -17,6 +18,11 @@ def auto_run_by_day():
     date = datetime.now() - timedelta(days=30)
     History.objects.filter(created_at__lt=date.strftime('%Y-%m-%d')).delete()
     Alarm.objects.filter(created_at__lt=date.strftime('%Y-%m-%d')).delete()
+    try:
+        record = ExecHistory.objects.all()[50]
+        ExecHistory.objects.filter(id__lt=record.id).delete()
+    except IndexError:
+        pass
     for task in Task.objects.all():
         try:
             record = History.objects.filter(task_id=task.id)[50]

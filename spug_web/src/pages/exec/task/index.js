@@ -23,9 +23,11 @@ function TaskIndex() {
   const [histories, setHistories] = useState([])
 
   useEffect(() => {
-    http.get('/api/exec/history/')
-      .then(res => setHistories(res))
-  }, [])
+    if (!loading) {
+      http.get('/api/exec/history/')
+        .then(res => setHistories(res))
+    }
+  }, [loading])
 
   function handleSubmit() {
     setLoading(true)
