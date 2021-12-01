@@ -6,11 +6,11 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { PlusOutlined, ThunderboltOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Form, Button, Card, Alert, Radio, Tooltip } from 'antd';
+import { Form, Button, Alert, Radio, Tooltip } from 'antd';
 import { ACEditor, AuthDiv, Breadcrumb } from 'components';
 import Selector from 'pages/host/Selector';
 import TemplateSelector from './TemplateSelector';
-import ExecConsole from './ExecConsole';
+import Output from './Output';
 import { http, cleanCommand } from 'libs';
 import moment from 'moment';
 import store from './store';
@@ -55,8 +55,8 @@ function TaskIndex() {
         <Breadcrumb.Item>批量执行</Breadcrumb.Item>
         <Breadcrumb.Item>执行任务</Breadcrumb.Item>
       </Breadcrumb>
-      <Card bodyStyle={{display: 'flex', padding: 0}}>
-        <Form layout="vertical" style={{padding: 24, width: '60%'}}>
+      <div className={style.index} hidden={store.showConsole}>
+        <Form layout="vertical" className={style.left}>
           <Form.Item required label="目标主机">
             {store.host_ids.length > 0 && (
               <Alert style={{width: 200}} type="info" message={`已选择 ${store.host_ids.length} 台主机`}/>
@@ -75,18 +75,20 @@ function TaskIndex() {
               <Radio.Button value="sh">Shell</Radio.Button>
               <Radio.Button value="python">Python</Radio.Button>
             </Radio.Group>
-            <a href="https://spug.cc/docs/batch-exec" target="_blank" className={style.tips}>全局变量</a>
-            <ACEditor mode={interpreter} value={command} height="350px" width="100%" onChange={setCommand}/>
+            <a href="https://spug.cc/docs/batch-exec" target="_blank" rel="noopener noreferrer"
+               className={style.tips}>全局变量</a>
+            <ACEditor className={style.editor} mode={interpreter} value={command} width="100%" onChange={setCommand}/>
           </Form.Item>
           <Form.Item>
             <Button icon={<PlusOutlined/>} onClick={store.switchTemplate}>从执行模版中选择</Button>
           </Form.Item>
           <Button loading={loading} icon={<ThunderboltOutlined/>} type="primary" onClick={handleSubmit}>开始执行</Button>
         </Form>
-        <div className={style.hisBlock}>
+
+        <div className={style.right}>
           <div className={style.title}>
             执行记录
-            <Tooltip title="每天自动清理，保留最近50条记录。">
+            <Tooltip title="多次相同的执行记录将会合并展示，每天自动清理，保留最近50条记录。">
               <QuestionCircleOutlined style={{color: '#999', marginLeft: 8}}/>
             </Tooltip>
           </div>
@@ -101,10 +103,10 @@ function TaskIndex() {
             ))}
           </div>
         </div>
-      </Card>
+      </div>
       {store.showTemplate &&
       <TemplateSelector onCancel={store.switchTemplate} onOk={handleTemplate}/>}
-      {store.showConsole && <ExecConsole onCancel={store.switchConsole}/>}
+      {store.showConsole && <Output onBack={store.switchConsole}/>}
       <Selector
         visible={store.showHost}
         selectedRowKeys={[...store.host_ids]}

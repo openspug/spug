@@ -78,12 +78,13 @@ def do_task(request):
         host_ids = json.dumps(form.host_ids)
         tmp_str = f'{form.interpreter},{host_ids},{form.command}'
         digest = hashlib.md5(tmp_str.encode()).hexdigest()
-        record = ExecHistory.objects.filter(digest=digest).first()
+        record = ExecHistory.objects.filter(user=request.user, digest=digest).first()
         if record:
             record.updated_at = human_datetime()
             record.save()
         else:
             ExecHistory.objects.create(
+                user=request.user,
                 digest=digest,
                 interpreter=form.interpreter,
                 command=form.command,
@@ -95,5 +96,5 @@ def do_task(request):
 
 @auth('exec.task.do')
 def get_histories(request):
-    records = ExecHistory.objects.all()
+    records = ExecHistory.objects.filter(user=request.user)
     return json_response([x.to_view() for x in records])

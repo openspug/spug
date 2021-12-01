@@ -28,7 +28,8 @@ class ExecTemplate(models.Model, ModelMixin):
 
 
 class ExecHistory(models.Model, ModelMixin):
-    digest = models.CharField(max_length=32, unique=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    digest = models.CharField(max_length=32, db_index=True)
     interpreter = models.CharField(max_length=20)
     command = models.TextField()
     host_ids = models.TextField()
@@ -41,4 +42,4 @@ class ExecHistory(models.Model, ModelMixin):
 
     class Meta:
         db_table = 'exec_histories'
-        ordering = ('-id',)
+        ordering = ('-updated_at',)
