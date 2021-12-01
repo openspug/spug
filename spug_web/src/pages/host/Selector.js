@@ -14,7 +14,7 @@ export default observer(function (props) {
   const [loading, setLoading] = useState(false);
   const [group, setGroup] = useState({});
   const [dataSource, setDataSource] = useState([]);
-  const [selectedRowKeys, setSelectedRowKeys] = useState(props.selectedRowKeys || []);
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [fKey, setFKey] = useState();
 
   useEffect(() => {
@@ -25,6 +25,10 @@ export default observer(function (props) {
       setGroup(store.treeData[0] || {})
     }
   }, [])
+
+  useEffect(() => {
+    setSelectedRowKeys(props.selectedRowKeys || [])
+  }, [props.selectedRowKeys])
 
   useEffect(() => {
     let records = store.records;
