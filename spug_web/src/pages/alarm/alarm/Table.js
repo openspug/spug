@@ -5,7 +5,8 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Radio, Tag } from 'antd';
+import { Radio, Tag, Tooltip } from 'antd';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import { TableCard } from 'components';
 import store from './store';
 import groupStore from '../group/store';
@@ -69,7 +70,14 @@ class ComTable extends React.Component {
       <TableCard
         tKey="aa"
         rowKey="id"
-        title="报警历史记录"
+        title={(
+          <div style={{display: 'flex', alignItems: 'center'}}>
+            <div>报警历史记录</div>
+            <Tooltip title="每天自动清理，仅保留最近30天的报警记录。">
+              <QuestionCircleOutlined style={{color: '#999', marginLeft: 8}}/>
+            </Tooltip>
+          </div>
+        )}
         loading={store.isFetching}
         dataSource={store.dataSource}
         onReload={store.fetchRecords}
