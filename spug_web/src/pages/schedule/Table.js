@@ -35,7 +35,7 @@ class ComTable extends React.Component {
       </Menu.Item>
       <Menu.Divider/>
       <Menu.Item>
-        <LinkButton auth="schedule.schedule.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
+        <LinkButton danger auth="schedule.schedule.del" onClick={() => this.handleDelete(info)}>删除</LinkButton>
       </Menu.Item>
     </Menu>
   );

@@ -73,13 +73,13 @@ class ComTable extends React.Component {
           showTotal: total => `共 ${total} 条`,
           pageSizeOptions: ['10', '20', '50', '100']
         }}>
-        <Table.Column title="监控分组" dataIndex="group" />
+        <Table.Column title="监控分组" dataIndex="group"/>
         <Table.Column title="监控名称" dataIndex="name"/>
         <Table.Column title="类型" dataIndex="type_alias"/>
         <Table.Column title="频率" dataIndex="rate" render={value => `${value}分钟`}/>
         <Table.Column title="状态" render={info => {
           if (info.is_active) {
-              return <Tag color="blue">已激活</Tag>
+            return <Tag color="blue">已激活</Tag>
           } else {
             return <Tag color="red">未激活</Tag>
           }
@@ -93,7 +93,8 @@ class ComTable extends React.Component {
               <Action.Button auth="monitor.monitor.edit"
                              onClick={() => this.handleActive(info)}>{info['is_active'] ? '禁用' : '启用'}</Action.Button>
               <Action.Button auth="monitor.monitor.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-              <Action.Button auth="monitor.monitor.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+              <Action.Button danger auth="monitor.monitor.del"
+                             onClick={() => this.handleDelete(info)}>删除</Action.Button>
             </Action>
           )}/>
         )}
