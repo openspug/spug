@@ -5,7 +5,7 @@ from django.views.generic import View
 from django.db.models import F
 from libs import JsonParser, Argument, json_response, auth
 from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
-from apps.config.models import Config
+from apps.config.models import Config, ConfigHistory
 from apps.app.utils import fetch_versions, remove_repo
 from apps.setting.utils import AppSetting
 import json
@@ -79,8 +79,15 @@ class AppView(View):
         if error is None:
             if Deploy.objects.filter(app_id=form.id).exists():
                 return json_response(error='该应用在应用发布中已存在关联的发布配置，请删除相关发布配置后再尝试删除')
-            if Config.objects.filter(type='app', o_id=form.id).exists():
-                return json_response(error='该应用在配置中心已存在关联的配置信息，请删除相关配置后再尝试删除')
+            # auto delete configs
+            Config.objects.filter(type='app', o_id=form.id).delete()
+            ConfigHistory.objects.filter(type='app', o_id=form.id).delete()
+            for app in App.objects.filter(rel_apps__isnull=False):
+                rel_apps = json.loads(app.rel_apps)
+                if form.id in rel_apps:
+                    rel_apps.remove(form.id)
+                    app.rel_apps = json.dumps(rel_apps)
+                    app.save()
             App.objects.filter(pk=form.id).delete()
         return json_response(error=error)
 
