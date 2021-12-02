@@ -69,10 +69,11 @@ class EnvironmentView(View):
             Argument('id', type=int, help='请指定操作对象')
         ).parse(request.GET)
         if error is None:
-            if Config.objects.filter(env_id=form.id).exists():
-                return json_response(error='该环境已存在关联的配置信息，请删除相关配置后再尝试删除')
             if Deploy.objects.filter(env_id=form.id).exists():
                 return json_response(error='该环境已关联了发布配置，请删除相关发布配置后再尝试删除')
+            # auto delete configs
+            Config.objects.filter(env_id=form.id).delete()
+            ConfigHistory.objects.filter(env_id=form.id).delete()
             Environment.objects.filter(pk=form.id).delete()
         return json_response(error=error)
 
