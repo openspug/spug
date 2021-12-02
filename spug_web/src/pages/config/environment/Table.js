@@ -76,7 +76,7 @@ function ComTable() {
         <Table.Column title="操作" render={info => (
           <Action>
             <Action.Button auth="config.env.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-            <Action.Button auth="config.env.del" onClick={() => handleDelete(info)}>删除</Action.Button>
+            <Action.Button danger auth="config.env.del" onClick={() => handleDelete(info)}>删除</Action.Button>
           </Action>
         )}/>
       )}

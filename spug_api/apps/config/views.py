@@ -4,7 +4,7 @@
 from django.views.generic import View
 from django.db.models import F
 from libs import json_response, JsonParser, Argument, auth
-from apps.app.models import Deploy
+from apps.app.models import Deploy, App
 from apps.config.models import *
 import json
 import re
@@ -111,8 +111,16 @@ class ServiceView(View):
             Argument('id', type=int, help='请指定操作对象')
         ).parse(request.GET)
         if error is None:
-            if Config.objects.filter(type='src', o_id=form.id).exists():
-                return json_response(error='该服务已存在关联的配置信息，请删除相关配置后再尝试删除')
+            rel_apps = []
+            for app in App.objects.filter(rel_services__isnull=False):
+                rel_services = json.loads(app.rel_services)
+                if form.id in rel_services:
+                    rel_apps.append(app.name)
+            if rel_apps:
+                return json_response(error=f'该服务在配置中心已被 "{", ".join(rel_apps)}" 依赖，请解除依赖关系后再尝试删除。')
+            # auto delete configs
+            Config.objects.filter(type='src', o_id=form.id).delete()
+            ConfigHistory.objects.filter(type='src', o_id=form.id).delete()
             Service.objects.filter(pk=form.id).delete()
         return json_response(error=error)
 

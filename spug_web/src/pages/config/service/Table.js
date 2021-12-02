@@ -20,7 +20,7 @@ class ComTable extends React.Component {
   handleDelete = (text) => {
     Modal.confirm({
       title: '删除确认',
-      content: `确定要删除【${text['name']}】?`,
+      content: `将会同步删除服务的配置信息，确定要删除服务【${text['name']}】? `,
       onOk: () => {
         return http.delete('/api/config/service/', {params: {id: text.id}})
           .then(() => {
@@ -66,8 +66,8 @@ class ComTable extends React.Component {
           <Table.Column title="操作" render={info => (
             <Action>
               <Action.Button auth="config.src.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-              <Action.Button auth="config.src.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
               <Action.Button auth="config.src.view_config" onClick={() => this.toConfig(info)}>配置</Action.Button>
+              <Action.Button danger auth="config.src.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
             </Action>
           )}/>
         )}

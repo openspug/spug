@@ -70,9 +70,9 @@ class ComTable extends React.Component {
           <Table.Column width={210} title="操作" render={info => (
             <Action>
               <Action.Button auth="config.app.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-              <Action.Button auth="config.app.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
               <Action.Button auth="config.app.view_config" onClick={() => store.showRel(info)}>依赖</Action.Button>
               <Action.Button auth="config.app.view_config" onClick={() => this.toConfig(info)}>配置</Action.Button>
+              <Action.Button danger auth="config.app.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
             </Action>
           )}/>
         )}
