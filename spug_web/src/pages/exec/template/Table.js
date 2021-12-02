@@ -69,7 +69,7 @@ class ComTable extends React.Component {
           <Table.Column title="操作" render={info => (
             <Action>
               <Action.Button auth="exec.template.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-              <Action.Button auth="exec.template.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+              <Action.Button danger auth="exec.template.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
             </Action>
           )}/>
         )}

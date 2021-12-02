@@ -29,6 +29,15 @@ function TaskIndex() {
     }
   }, [loading])
 
+  useEffect(() => {
+    return () => {
+      store.host_ids = []
+      if (store.showConsole) {
+        store.switchConsole()
+      }
+    }
+  }, [])
+
   function handleSubmit() {
     setLoading(true)
     const host_ids = store.host_ids;
@@ -37,7 +46,8 @@ function TaskIndex() {
       .finally(() => setLoading(false))
   }
 
-  function handleTemplate(command, interpreter) {
+  function handleTemplate(host_ids, command, interpreter) {
+    if (host_ids.length > 0) store.host_ids = host_ids
     setInterpreter(interpreter)
     setCommand(command)
   }

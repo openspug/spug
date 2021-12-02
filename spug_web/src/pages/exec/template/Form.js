@@ -8,6 +8,7 @@ import { observer } from 'mobx-react';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { Modal, Form, Input, Select, Button, Radio, message } from 'antd';
 import { ACEditor } from 'components';
+import Selector from 'pages/host/Selector';
 import { http, cleanCommand } from 'libs';
 import store from './store';
 
@@ -15,12 +16,14 @@ export default observer(function () {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [body, setBody] = useState(store.record.body);
+  const [visible, setVisible] = useState(false);
 
   function handleSubmit() {
     setLoading(true);
     const formData = form.getFieldsValue();
     formData['id'] = store.record.id;
     formData['body'] = cleanCommand(body);
+    formData['host_ids'] = store.record.host_ids;
     http.post('/api/exec/template/', formData)
       .then(res => {
         message.success('操作成功');
@@ -91,10 +94,19 @@ export default observer(function () {
               height="300px"/>
           )}
         </Form.Item>
+        <Form.Item label="目标主机">
+          {info.host_ids.length > 0 && <span style={{marginRight: 16}}>已选择 {info.host_ids.length} 台</span>}
+          <Button type="link" style={{padding: 0}} onClick={() => setVisible(true)}>选择主机</Button>
+        </Form.Item>
         <Form.Item name="desc" label="备注信息">
           <Input.TextArea placeholder="请输入模板备注信息"/>
         </Form.Item>
       </Form>
+      <Selector
+        visible={visible}
+        selectedRowKeys={[...info.host_ids]}
+        onCancel={() => setVisible(false)}
+        onOk={(_, ids) => info.host_ids = ids}/>
     </Modal>
   )
 })

@@ -32,28 +32,33 @@ class TemplateSelector extends React.Component {
 
   handleSubmit = () => {
     if (this.state.selectedRows.length > 0) {
-      const {body, interpreter} = this.state.selectedRows[0]
-      this.props.onOk(body, interpreter)
+      const {host_ids, body, interpreter} = this.state.selectedRows[0]
+      this.props.onOk(host_ids, body, interpreter)
     }
     this.props.onCancel()
   };
 
-  columns = [{
-    title: '类型',
-    dataIndex: 'type',
-  }, {
-    title: '名称',
-    dataIndex: 'name',
-    ellipsis: true
-  }, {
-    title: '内容',
-    dataIndex: 'body',
-    ellipsis: true
-  }, {
-    title: '备注',
-    dataIndex: 'desc',
-    ellipsis: true
-  }];
+  columns = [
+    {
+      title: '名称',
+      dataIndex: 'name',
+      ellipsis: true
+    }, {
+      title: '类型',
+      dataIndex: 'type',
+    }, {
+      title: '目标主机',
+      dataIndex: 'host_ids',
+      render: v => `${v.length}台`
+    }, {
+      title: '内容',
+      dataIndex: 'body',
+      ellipsis: true
+    }, {
+      title: '备注',
+      dataIndex: 'desc',
+      ellipsis: true
+    }];
 
   render() {
     const {selectedRows} = this.state;
@@ -84,7 +89,7 @@ class TemplateSelector extends React.Component {
             <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
           </SearchForm.Item>
           <SearchForm.Item span={8}>
-            <Button type="primary" icon={<SyncOutlined />} onClick={store.fetchRecords}>刷新</Button>
+            <Button type="primary" icon={<SyncOutlined/>} onClick={store.fetchRecords}>刷新</Button>
           </SearchForm.Item>
         </SearchForm>
         <Table

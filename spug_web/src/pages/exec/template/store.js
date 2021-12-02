@@ -26,7 +26,7 @@ class Store {
       .finally(() => this.isFetching = false)
   };
 
-  showForm = (info = {interpreter: 'sh'}) => {
+  showForm = (info = {interpreter: 'sh', host_ids: []}) => {
     this.formVisible = true;
     this.record = info
   }

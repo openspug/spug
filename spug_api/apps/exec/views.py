@@ -18,7 +18,7 @@ class TemplateView(View):
     def get(self, request):
         templates = ExecTemplate.objects.all()
         types = [x['type'] for x in templates.order_by('type').values('type').distinct()]
-        return json_response({'types': types, 'templates': [x.to_dict() for x in templates]})
+        return json_response({'types': types, 'templates': [x.to_view() for x in templates]})
 
     @auth('exec.template.add|exec.template.edit')
     def post(self, request):
@@ -28,6 +28,7 @@ class TemplateView(View):
             Argument('type', help='请选择模版类型'),
             Argument('body', help='请输入模版内容'),
             Argument('interpreter', default='sh'),
+            Argument('host_ids', type=list, handler=json.dumps, default=[]),
             Argument('desc', required=False)
         ).parse(request.body)
         if error is None:
