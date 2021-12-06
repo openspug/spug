@@ -20,7 +20,7 @@ regex = re.compile(r'Failed to establish a new connection: (.*)\'\)+')
 
 def site_check(url, limit):
     try:
-        res = requests.get(url, timeout=10)
+        res = requests.get(url, timeout=30)
         if limit:
             duration = int(res.elapsed.total_seconds() * 1000)
             if duration > int(limit):
