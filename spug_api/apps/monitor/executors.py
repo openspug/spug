@@ -24,8 +24,8 @@ def site_check(url, limit):
         if limit:
             duration = int(res.elapsed.total_seconds() * 1000)
             if duration > int(limit):
-                return False, f'响应时间：{duration}ms'
-        return 200 <= res.status_code < 400, f'返回状态码：{res.status_code}'
+                return False, f'响应时间 {duration}ms 大于 {limit}ms'
+        return 200 <= res.status_code < 400, f'返回HTTP状态码 {res.status_code}'
     except Exception as e:
         error = e.__str__()
         exps = re.findall(regex, error)
