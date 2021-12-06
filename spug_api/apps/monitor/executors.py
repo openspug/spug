@@ -12,8 +12,10 @@ import requests
 import logging
 import json
 import time
+import re
 
 logging.captureWarnings(True)
+regex = re.compile(r'Failed to establish a new connection: (.*)\'\)+')
 
 
 def site_check(url, limit):
@@ -25,7 +27,11 @@ def site_check(url, limit):
                 return False, f'响应时间：{duration}ms'
         return 200 <= res.status_code < 400, f'返回状态码：{res.status_code}'
     except Exception as e:
-        return False, f'异常信息：{e}'
+        error = e.__str__()
+        exps = re.findall(regex, error)
+        if exps:
+            error = exps[0]
+        return False, error
 
 
 def port_check(addr, port):
