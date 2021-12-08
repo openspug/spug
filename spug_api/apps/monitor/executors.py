@@ -1,7 +1,6 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
-from django.db import close_old_connections
 from django_redis import get_redis_connection
 from apps.host.models import Host
 from apps.monitor.utils import handle_notify
@@ -84,7 +83,6 @@ def monitor_worker_handler(job):
     elif tp not in ('3', '4'):
         is_ok, message = False, f'invalid monitor type for {tp!r}'
     else:
-        close_old_connections()
         command = f'ps -ef|grep -v grep|grep {extra!r}' if tp == '3' else extra
         host = Host.objects.filter(pk=addr).first()
         if not host:

@@ -40,4 +40,4 @@ def handle_notify(task_id, target, is_ok, out, fault_times):
     _record_alarm(det, target, duration, event)
     grp = json.loads(det.notify_grp)
     notify = Notification(grp, event, target, det.name, out, duration)
-    notify.dispatch(json.loads(det.notify_mode))
+    notify.dispatch_monitor(json.loads(det.notify_mode))
