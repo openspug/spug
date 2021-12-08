@@ -42,12 +42,12 @@ def schedule_worker_handler(job):
     if host_id == 'local':
         code, duration, out = local_executor(command)
     else:
-        close_old_connections()
         host = Host.objects.filter(pk=host_id).first()
         if not host:
             code, duration, out = 1, 0, f'unknown host id for {host_id!r}'
         else:
             code, duration, out = host_executor(host, command)
+
     close_old_connections()
     with transaction.atomic():
         history = History.objects.select_for_update().get(pk=history_id)

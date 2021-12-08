@@ -3,7 +3,6 @@
 # Released under the AGPL-3.0 License.
 from libs.utils import human_datetime
 from libs.spug import Notification
-from threading import Thread
 import json
 
 
@@ -12,7 +11,7 @@ def send_fail_notify(task, msg=None):
     mode = rst_notify.get('mode')
     url = rst_notify.get('value')
     if mode != '0' and url:
-        Thread(target=_do_notify, args=(task, mode, url, msg)).start()
+        _do_notify(task, mode, url, msg)
 
 
 def _do_notify(task, mode, url, msg):

@@ -6,13 +6,9 @@ from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.cron import CronTrigger
-from apscheduler.events import EVENT_SCHEDULER_SHUTDOWN, EVENT_JOB_MAX_INSTANCES, EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 from django_redis import get_redis_connection
-from django.utils.functional import SimpleLazyObject
 from django.db import connections
 from apps.schedule.models import Task, History
-from apps.schedule.utils import send_fail_notify
-from apps.notify.models import Notify
 from apps.schedule.builtin import auto_run_by_day, auto_run_by_minute
 from django.conf import settings
 from libs import AttrDict, human_datetime
@@ -40,10 +36,6 @@ class Scheduler:
 
     def __init__(self):
         self.scheduler = BackgroundScheduler(timezone=self.timezone, executors={'default': ThreadPoolExecutor(30)})
-        self.scheduler.add_listener(
-            self._handle_event,
-            EVENT_SCHEDULER_SHUTDOWN | EVENT_JOB_ERROR | EVENT_JOB_MAX_INSTANCES | EVENT_JOB_EXECUTED
-        )
 
     @classmethod
     def covert_week(cls, week_str):
@@ -64,19 +56,6 @@ class Scheduler:
         else:
             raise TypeError(f'unknown schedule policy: {trigger!r}')
 
-    def _handle_event(self, event):
-        obj = SimpleLazyObject(lambda: Task.objects.filter(pk=event.job_id).first())
-        if event.code == EVENT_SCHEDULER_SHUTDOWN:
-            logging.warning(f'EVENT_SCHEDULER_SHUTDOWN: {event}')
-            Notify.make_notify('schedule', '1', '调度器已关闭', '调度器意外关闭，你可以在github上提交issue')
-        elif event.code == EVENT_JOB_MAX_INSTANCES:
-            logging.warning(f'EVENT_JOB_MAX_INSTANCES: {event}')
-            send_fail_notify(obj, '达到调度实例上限，一般为上个周期的执行任务还未结束，请增加调度间隔或减少任务执行耗时')
-        elif event.code == EVENT_JOB_ERROR:
-            logging.warning(f'EVENT_JOB_ERROR: job_id {event.job_id} exception: {event.exception}')
-            send_fail_notify(obj, f'执行异常：{event.exception}')
-        connections.close_all()
-
     def _init_builtin_jobs(self):
         self.scheduler.add_job(auto_run_by_day, 'cron', hour=1, minute=20)
         self.scheduler.add_job(auto_run_by_minute, 'interval', minutes=1)
@@ -93,6 +72,7 @@ class Scheduler:
         rds_cli = get_redis_connection()
         for t in targets:
             rds_cli.rpush(SCHEDULE_WORKER_KEY, json.dumps([history.id, t, command]))
+        connections.close_all()
 
     def _init(self):
         self.scheduler.start()
@@ -105,6 +85,7 @@ class Scheduler:
                 id=str(task.id),
                 args=(task.id, task.command, json.loads(task.targets)),
             )
+        connections.close_all()
 
     def run(self):
         rds_cli = get_redis_connection()
