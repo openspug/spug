@@ -5,7 +5,7 @@ from django.db import models
 from django.core.cache import cache
 from libs import ModelMixin, human_datetime
 from libs.channel import Channel
-import time
+import hashlib
 
 
 class Notify(models.Model, ModelMixin):
@@ -17,6 +17,7 @@ class Notify(models.Model, ModelMixin):
         ('monitor', '监控中心'),
         ('schedule', '任务计划'),
         ('flag', '应用发布'),
+        ('alert', '系统警告'),
     )
     title = models.CharField(max_length=255)
     source = models.CharField(max_length=10, choices=SOURCES)
@@ -28,9 +29,28 @@ class Notify(models.Model, ModelMixin):
     created_at = models.CharField(max_length=20, default=human_datetime)
 
     @classmethod
-    def make_notify(cls, source, type, title, content=None, with_quiet=True):
-        if not with_quiet or time.time() - cache.get('spug:notify_quiet', 0) > 3600:
-            cache.set('spug:notify_quiet', time.time())
+    def make_system_notify(cls, title, content):
+        cls._make_notify('alert', '1', title, content)
+
+    @classmethod
+    def make_monitor_notify(cls, title, content):
+        cls._make_notify('monitor', '1', title, content)
+
+    @classmethod
+    def make_schedule_notify(cls, title, content):
+        cls._make_notify('schedule', '1', title, content)
+
+    @classmethod
+    def make_deploy_notify(cls, title, content):
+        cls._make_notify('flag', '1', title, content)
+
+    @classmethod
+    def _make_notify(cls, source, type, title, content):
+        tmp_str = f'{source},{type},{title},{content}'
+        digest = hashlib.md5(tmp_str.encode()).hexdigest()
+        unique_key = f'spug:notify:{digest}'
+        if not cache.get(unique_key):   # 限制相同内容的发送频率
+            cache.set(unique_key, 1, 3600)
             cls.objects.create(source=source, title=title, type=type, content=content)
         Channel.send_notify(title, content)
 

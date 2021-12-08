@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, List, Dropdown, Badge, Button, notification } from 'antd';
-import { NotificationOutlined, MonitorOutlined, FlagOutlined, ScheduleOutlined } from '@ant-design/icons';
+import {
+  NotificationOutlined,
+  MonitorOutlined,
+  FlagOutlined,
+  ScheduleOutlined,
+  AlertOutlined
+} from '@ant-design/icons';
 import { http, X_TOKEN } from 'libs';
 import moment from 'moment';
 import styles from './layout.module.less';
@@ -17,6 +23,8 @@ function Icon(props) {
       return <ScheduleOutlined style={{fontSize: 24, color: '#1890ff'}}/>
     case 'flag':
       return <FlagOutlined style={{fontSize: 24, color: '#1890ff'}}/>
+    case 'alert':
+      return <AlertOutlined style={{fontSize: 24, color: '#ff4d4f'}}/>
     default:
       return null
   }
