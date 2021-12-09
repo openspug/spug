@@ -67,7 +67,7 @@ class Store {
         const host = hostStore.idMap[id];
         this.outputs[host.id] = {
           title: `${host.name}(${host.hostname}:${host.port})`,
-          data: '',
+          data: '\x1b[36m### WebSocket connecting ...\x1b[0m',
           status: -2
         }
       }

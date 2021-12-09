@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { PlusOutlined, ThunderboltOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { PlusOutlined, ThunderboltOutlined, BulbOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { Form, Button, Alert, Radio, Tooltip } from 'antd';
 import { ACEditor, AuthDiv, Breadcrumb } from 'components';
 import Selector from 'pages/host/Selector';
@@ -68,14 +68,19 @@ function TaskIndex() {
       <div className={style.index} hidden={store.showConsole}>
         <Form layout="vertical" className={style.left}>
           <Form.Item required label="目标主机">
-            {store.host_ids.length > 0 && (
-              <Alert style={{width: 200}} type="info" message={`已选择 ${store.host_ids.length} 台主机`}/>
+            {store.host_ids.length > 0 ? (
+              <Alert
+                type="info"
+                className={style.area}
+                message={<div>已选择 <b style={{fontSize: 18, color: '#1890ff'}}>{store.host_ids.length}</b> 台主机</div>}
+                onClick={() => store.showHost = true}/>
+            ) : (
+              <Button icon={<PlusOutlined/>} onClick={() => store.showHost = true}>
+                从主机列表中选择
+              </Button>
             )}
           </Form.Item>
-          <Button
-            style={{marginBottom: 24}}
-            icon={<PlusOutlined/>}
-            onClick={() => store.showHost = true}>从主机列表中选择</Button>
+
           <Form.Item required label="执行命令" style={{position: 'relative'}}>
             <Radio.Group
               buttonStyle="solid"
@@ -86,11 +91,9 @@ function TaskIndex() {
               <Radio.Button value="python">Python</Radio.Button>
             </Radio.Group>
             <a href="https://spug.cc/docs/batch-exec" target="_blank" rel="noopener noreferrer"
-               className={style.tips}>全局变量</a>
+               className={style.tips}><BulbOutlined/> 使用全局变量？</a>
+            <Button style={{float: 'right'}} icon={<PlusOutlined/>} onClick={store.switchTemplate}>从执行模版中选择</Button>
             <ACEditor className={style.editor} mode={interpreter} value={command} width="100%" onChange={setCommand}/>
-          </Form.Item>
-          <Form.Item>
-            <Button icon={<PlusOutlined/>} onClick={store.switchTemplate}>从执行模版中选择</Button>
           </Form.Item>
           <Button loading={loading} icon={<ThunderboltOutlined/>} type="primary" onClick={handleSubmit}>开始执行</Button>
         </Form>

@@ -36,7 +36,7 @@ function OutView(props) {
     term.loadAddon(fitPlugin)
     term.open(el.current)
     fitPlugin.fit()
-    term.write('WebSocket connecting ... ')
+    term.write('\x1b[36m### WebSocket connecting ...\x1b[0m')
     const resize = () => fitPlugin.fit();
     window.addEventListener('resize', resize)
     setTerm(term)
@@ -49,7 +49,11 @@ function OutView(props) {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${store.token}/?x-token=${X_TOKEN}`);
     socket.onopen = () => {
-      term.write('\r\x1b[K\x1b[36m### Waiting for scheduling ...\x1b[0m')
+      const message = '\r\x1b[K\x1b[36m### Waiting for scheduling ...\x1b[0m'
+      for (let key of Object.keys(store.outputs)) {
+        store.outputs[key].data = message
+      }
+      term.write(message)
       socket.send('ok');
     }
     socket.onmessage = e => {

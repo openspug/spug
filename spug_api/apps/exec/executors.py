@@ -38,7 +38,7 @@ class Job:
 
     def _handle_command(self, command, interpreter):
         if interpreter == 'python':
-            return f'python << EOF\n{command}\nEOF'
+            return f'python << EOF\n# -*- coding: UTF-8 -*-\n{command}\nEOF'
         return command
 
     def send(self, data):
@@ -53,7 +53,7 @@ class Job:
         if not self.token:
             with self.ssh:
                 return self.ssh.exec_command(self.command, self.env)
-        self.send('\r\33[K\x1b[36m### Executing ...\x1b[0m\r\n')
+        self.send('\r\n\x1b[36m### Executing ...\x1b[0m\r\n')
         code = -1
         try:
             with self.ssh:
