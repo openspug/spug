@@ -216,9 +216,13 @@ def fetch_host_extend(ssh):
 
         code, out = ssh.exec_command_raw('lsblk -dbn -o SIZE -e 11 2> /dev/null')
         if code == 0:
-            for item in out.strip().splitlines()[:10]:
+            disks = []
+            for item in out.strip().splitlines():
                 item = item.strip()
-                response['disk'].append(math.ceil(int(item) / 1024 / 1024 / 1024))
+                size = math.ceil(int(item) / 1024 / 1024 / 1024)
+                if size > 10:
+                    disks.append(size)
+            response['disk'] = disks[:10]
 
         code, out = ssh.exec_command_raw("dmidecode -t 17 | grep -E 'Size: [0-9]+' | awk '{s+=$2} END {print s,$3}'")
         if code == 0:
