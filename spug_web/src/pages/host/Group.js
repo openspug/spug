@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Input, Card, Tree, Dropdown, Menu, Switch, Tooltip, Modal } from 'antd';
+import { Input, Card, Tree, Dropdown, Menu, Switch, Tooltip, Spin, Modal } from 'antd';
 import {
   FolderOutlined,
   FolderAddOutlined,
@@ -158,7 +158,6 @@ export default observer(function () {
     <Card
       title="分组列表"
       style={{height: '100%'}}
-      loading={store.grpFetching}
       extra={(
         <AuthFragment auth="admin">
           <Switch
@@ -170,25 +169,27 @@ export default observer(function () {
             <QuestionCircleOutlined style={{marginLeft: 8, color: '#999'}}/>
           </Tooltip>
         </AuthFragment>)}>
-      <Dropdown
-        overlay={menus}
-        visible={visible}
-        trigger={['contextMenu']}
-        onVisibleChange={v => v || setVisible(v)}>
-        <Tree.DirectoryTree
-          autoExpandParent
-          expandAction="doubleClick"
-          draggable={draggable}
-          treeData={treeData}
-          titleRender={treeRender}
-          expandedKeys={expands}
-          selectedKeys={[store.group.key]}
-          onSelect={(_, {node}) => store.group = node}
-          onExpand={handleExpand}
-          onDrop={handleDrag}
-          onRightClick={handleRightClick}
-        />
-      </Dropdown>
+      <Spin spinning={store.grpFetching}>
+        <Dropdown
+          overlay={menus}
+          visible={visible}
+          trigger={['contextMenu']}
+          onVisibleChange={v => v || setVisible(v)}>
+          <Tree.DirectoryTree
+            autoExpandParent
+            expandAction="doubleClick"
+            draggable={draggable}
+            treeData={treeData}
+            titleRender={treeRender}
+            expandedKeys={expands}
+            selectedKeys={[store.group.key]}
+            onSelect={(_, {node}) => store.group = node}
+            onExpand={handleExpand}
+            onDrop={handleDrag}
+            onRightClick={handleRightClick}
+          />
+        </Dropdown>
+      </Spin>
       {treeData.length === 1 && treeData[0].children.length === 0 && (
         <div style={{color: '#999', marginTop: 20, textAlign: 'center'}}>右键点击分组进行分组管理哦~</div>
       )}
