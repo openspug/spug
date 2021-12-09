@@ -11,13 +11,15 @@ function OutView(props) {
   const el = useRef()
 
   useEffect(() => {
-    const fitPlugin = new FitAddon()
-    const term = new Terminal({disableStdin: true})
-    term.loadAddon(fitPlugin)
-    term.setOption('theme', {background: '#fff', foreground: '#000', selection: '#999'})
-    term.open(el.current)
-    props.setTerm(term)
-    fitPlugin.fit()
+    setTimeout(() => {
+      const fitPlugin = new FitAddon()
+      const term = new Terminal({disableStdin: true})
+      term.loadAddon(fitPlugin)
+      term.setOption('theme', {background: '#fff', foreground: '#000', selection: '#999'})
+      term.open(el.current)
+      fitPlugin.fit()
+      props.setTerm(term)
+    }, 100)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

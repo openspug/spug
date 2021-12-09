@@ -130,7 +130,7 @@ function Ext1Console(props) {
       )}
       <Modal
         visible={visible}
-        width={1000}
+        width="70%"
         footer={null}
         maskClosable={false}
         className={styles.console}
@@ -147,7 +147,7 @@ function Ext1Console(props) {
               <Collapse.Panel header={(
                 <div className={styles.header}>
                   <b className={styles.title}/>
-                  <Steps size="small" className={styles.step} current={local.step} status={local.status}>
+                  <Steps size="small" className={styles.step} current={local.step} status={local.status} style={{margin: 0}}>
                     <StepItem title="构建准备" item={local} step={0}/>
                     <StepItem title="检出前任务" item={local} step={1}/>
                     <StepItem title="执行检出" item={local} step={2}/>
