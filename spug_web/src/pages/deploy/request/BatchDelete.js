@@ -68,17 +68,17 @@ export default observer(function () {
         {mode === 'expire' && (
           <Form.Item
             label="截止日期 :"
-            help={<div>将删除截止日期<span style={{color: 'red'}}>之前</span>的所有发布申请记录。</div>}>
+            extra={<div>将删除截止日期<span style={{color: 'red'}}>之前</span>的所有发布申请记录。</div>}>
             <DatePicker value={value} style={{width: 290}} onChange={setValue} placeholder="请选择截止日期"/>
           </Form.Item>
         )}
         {mode === 'count' && (
-          <Form.Item label="保留记录 :" help="每个应用每个环境仅保留最新的N条发布申请。">
+          <Form.Item label="保留记录 :" extra="每个应用每个环境仅保留最新的N条发布申请。">
             <Input value={value} style={{width: 290}} onChange={e => setValue(e.target.value)} placeholder="请输入保留个数"/>
           </Form.Item>
         )}
         {mode === 'deploy' && (
-          <Form.Item label="发布配置 :" help="删除指定应用环境下的发布申请记录。">
+          <Form.Item label="发布配置 :" extra="删除指定应用环境下的发布申请记录。">
             <Space>
               <Select
                 showSearch

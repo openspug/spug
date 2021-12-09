@@ -108,14 +108,14 @@ export default observer(function () {
             </Form.Item>
           </Tabs.TabPane>
           <Tabs.TabPane tab="UNIX Cron" key="cron">
-            <Form.Item required label="执行规则" help="兼容Cron风格，可参考官方例子">
+            <Form.Item required label="执行规则" extra="兼容Cron风格，可参考官方例子">
               <Input
                 suffix={nextRunTime || <span/>}
                 value={lds.get(args, 'cron.rule')}
                 placeholder="例如每天凌晨1点执行：0 1 * * *"
                 onChange={e => handleCronArgs('rule', e.target.value)}/>
             </Form.Item>
-            <Form.Item label="生效时间" help="定义的执行规则在到达该时间后生效">
+            <Form.Item label="生效时间" extra="定义的执行规则在到达该时间后生效">
               <DatePicker
                 showTime
                 style={{width: '100%'}}
@@ -123,7 +123,7 @@ export default observer(function () {
                 value={lds.get(args, 'cron.start') ? moment(args['cron']['start']) : undefined}
                 onChange={v => handleCronArgs('start', v)}/>
             </Form.Item>
-            <Form.Item label="结束时间" help="执行规则在到达该时间后不再执行">
+            <Form.Item label="结束时间" extra="执行规则在到达该时间后不再执行">
               <DatePicker
                 showTime
                 style={{width: '100%'}}

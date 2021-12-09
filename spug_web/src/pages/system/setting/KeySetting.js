@@ -51,7 +51,7 @@ export default observer(function () {
         description="在这里你可以上传并使用已有的密钥对，没有上传密钥的情况下，Spug会在首次添加主机时自动生成密钥对。"
       />
       <Form layout="vertical" style={{maxWidth: 650, marginTop: 12}}>
-        <Form.Item label="公钥" help="一般位于 ~/.ssh/id_rsa.pub">
+        <Form.Item label="公钥" extra="一般位于 ~/.ssh/id_rsa.pub">
           <Input.TextArea
             rows={7}
             spellCheck={false}
@@ -59,7 +59,7 @@ export default observer(function () {
             onChange={e => store.settings.public_key = e.target.value}
             placeholder="请输入公钥"/>
         </Form.Item>
-        <Form.Item label="私钥" help="一般位于 ~/.ssh/id_rsa" style={{marginTop: 12}}>
+        <Form.Item label="私钥" extra="一般位于 ~/.ssh/id_rsa" style={{marginTop: 12}}>
           <Input.TextArea
             rows={14}
             spellCheck={false}

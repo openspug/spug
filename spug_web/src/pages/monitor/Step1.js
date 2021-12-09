@@ -143,7 +143,7 @@ export default observer(function () {
       <Form.Item required label="检测端口" style={getStyle(['2'])}>
         <Input value={extra} placeholder="请输入端口号" onChange={e => store.record.extra = e.target.value}/>
       </Form.Item>
-      <Form.Item required label="进程名称" help="执行 ps -ef 看到的进程名称。" style={getStyle(['3'])}>
+      <Form.Item required label="进程名称" extra="执行 ps -ef 看到的进程名称。" style={getStyle(['3'])}>
         <Input value={extra} placeholder="请输入进程名称" onChange={e => store.record.extra = e.target.value}/>
       </Form.Item>
       <Form.Item

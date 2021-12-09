@@ -7,8 +7,8 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { Form, Radio, Button, Tooltip } from 'antd';
+import { ACEditor } from 'components';
 import { cleanCommand } from 'libs';
-import Editor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-text';
 import 'ace-builds/src-noconflict/mode-sh';
 import 'ace-builds/src-noconflict/theme-tomorrow';
@@ -46,10 +46,9 @@ export default observer(function () {
   return (
     <Form layout="vertical" style={{padding: '0 120px'}}>
       <Form.Item label={FilterHead} tooltip="xxx">
-        <Editor
+        <ACEditor
           readOnly={store.isReadOnly}
           mode="text"
-          theme="tomorrow"
           width="100%"
           height="80px"
           placeholder="每行一条规则"
@@ -60,8 +59,8 @@ export default observer(function () {
       <Form.Item
         label="代码检出前执行"
         tooltip="在运行 Spug 的服务器(或容器)上执行，当前目录为仓库源代码目录，可以执行任意自定义命令。"
-        help={<span>{Tips}，请避免在此修改已跟踪的文件，防止在检出代码时失败。</span>}>
-        <Editor
+        extra={<span>{Tips}，请避免在此修改已跟踪的文件，防止在检出代码时失败。</span>}>
+        <ACEditor
           readOnly={store.isReadOnly}
           mode="sh"
           theme="tomorrow"
@@ -76,8 +75,8 @@ export default observer(function () {
         label="代码检出后执行"
         style={{marginTop: 12, marginBottom: 24}}
         tooltip="在运行 Spug 的服务器(或容器)上执行，当前目录为检出后的源代码目录，可执行任意自定义命令。"
-        help={<span>{Tips}，大多数情况下在此进行构建操作。</span>}>
-        <Editor
+        extra={<span>{Tips}，大多数情况下在此进行构建操作。</span>}>
+        <ACEditor
           readOnly={store.isReadOnly}
           mode="sh"
           theme="tomorrow"

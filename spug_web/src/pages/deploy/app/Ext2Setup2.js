@@ -7,9 +7,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { Form, Input, Button, message, Divider, Alert, Select } from 'antd';
-import Editor from 'react-ace';
-import 'ace-builds/src-noconflict/mode-sh';
-import 'ace-builds/src-noconflict/theme-tomorrow';
+import { ACEditor } from 'components';
 import styles from './index.module.css';
 import { http, cleanCommand } from 'libs';
 import Tips from './Tips';
@@ -72,7 +70,7 @@ class Ext2Setup2 extends React.Component {
             </Form.Item>
 
             <Form.Item required label="执行内容">
-              <Editor
+              <ACEditor
                 readOnly={store.isReadOnly}
                 mode="sh"
                 theme="tomorrow"
@@ -120,7 +118,7 @@ class Ext2Setup2 extends React.Component {
                   )}/>
               </Form.Item>,
               [undefined, '0'].includes(item['src_mode']) ? (
-                <Form.Item key={1} label="过滤规则" help={this.helpMap[item['mode']]}>
+                <Form.Item key={1} label="过滤规则" extra={this.helpMap[item['mode']]}>
                   <Input
                     spellCheck={false}
                     placeholder="请输入逗号分割的过滤规则"
@@ -149,7 +147,7 @@ class Ext2Setup2 extends React.Component {
               </Form.Item>
             ]) : (
               <Form.Item required label="执行内容">
-                <Editor
+                <ACEditor
                   readOnly={store.isReadOnly}
                   mode="sh"
                   theme="tomorrow"

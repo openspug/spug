@@ -53,7 +53,7 @@ export default observer(function () {
           <Input type="password" placeholder="请输入密码"/>
         </Form.Item>
         <Form.Item hidden={store.record.is_supper} label="角色" style={{marginBottom: 0}}>
-          <Form.Item name="role_ids" style={{display: 'inline-block', width: '80%'}} help="权限最大化原则，组合多个角色权限。">
+          <Form.Item name="role_ids" style={{display: 'inline-block', width: '80%'}} extra="权限最大化原则，组合多个角色权限。">
             <Select mode="multiple" placeholder="请选择">
               {roleStore.records.map(item => (
                 <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
@@ -67,7 +67,7 @@ export default observer(function () {
         <Form.Item
           name="wx_token"
           label="微信Token"
-          help={(
+          extra={(
             <span>
               如果启用了MFA（两步验证）则该项为必填。
               <a target="_blank" rel="noopener noreferrer" href="https://spug.cc/docs/wx-token/">什么是微信Token？</a>

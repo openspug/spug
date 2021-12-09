@@ -5,8 +5,8 @@
  */
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Button, Tooltip, message, TreeSelect } from 'antd';
-import { PlusOutlined, QuestionCircleOutlined, MinusCircleOutlined } from '@ant-design/icons';
+import { Modal, Form, Button, message, TreeSelect } from 'antd';
+import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import hostStore from 'pages/host/store';
 import http from 'libs/http';
 import store from './store';

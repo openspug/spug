@@ -70,7 +70,7 @@ export default observer(function () {
         style={{width: 365, margin: '0 auto 20px'}}
         message="导入或输入的密码仅作首次验证使用，不会存储。"/>
       <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
-        <Form.Item label="模板下载" help="请下载使用该模板填充数据后导入">
+        <Form.Item label="模板下载" extra="请下载使用该模板填充数据后导入">
           <a href="/resource/主机导入模板.xlsx">主机导入模板.xlsx</a>
         </Form.Item>
         <Form.Item required label="选择分组">

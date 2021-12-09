@@ -65,7 +65,7 @@ export default observer(function () {
 
   const ConfirmForm = (props) => (
     <Form layout="vertical" style={{marginTop: 24}}>
-      <Form.Item required label="授权密码" help={`用户 ${props.username} 的密码， 该密码仅做首次验证使用，不会存储该密码。`}>
+      <Form.Item required label="授权密码" extra={`用户 ${props.username} 的密码， 该密码仅做首次验证使用，不会存储该密码。`}>
         <Input.Password onChange={e => props.onChange(e.target.value)}/>
       </Form.Item>
     </Form>

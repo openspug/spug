@@ -6,10 +6,7 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react';
 import { Form, Button, Input, Row, Col, message } from 'antd';
-import Editor from 'react-ace';
-import 'ace-builds/src-noconflict/mode-text';
-import 'ace-builds/src-noconflict/mode-sh';
-import 'ace-builds/src-noconflict/theme-tomorrow';
+import { ACEditor } from 'components';
 import { http, cleanCommand } from 'libs';
 import Tips from './Tips';
 import store from './store';
@@ -57,8 +54,8 @@ export default observer(function () {
       <Form.Item
         label="应用发布前执行"
         tooltip="在发布的目标主机上运行，当前目录为目标主机上待发布的源代码目录，可执行任意自定义命令。"
-        help={<span>{Tips}，此时还未进行文件变更，可进行一些发布前置操作。</span>}>
-        <Editor
+        extra={<span>{Tips}，此时还未进行文件变更，可进行一些发布前置操作。</span>}>
+        <ACEditor
           readOnly={store.isReadOnly}
           mode="sh"
           theme="tomorrow"
@@ -73,8 +70,8 @@ export default observer(function () {
         label="应用发布后执行"
         style={{marginTop: 12, marginBottom: 24}}
         tooltip="在发布的目标主机上运行，当前目录为已发布的应用目录，可执行任意自定义命令。"
-        help={<span>{Tips}，可以在发布后进行重启服务等操作。</span>}>
-        <Editor
+        extra={<span>{Tips}，可以在发布后进行重启服务等操作。</span>}>
+        <ACEditor
           readOnly={store.isReadOnly}
           mode="sh"
           theme="tomorrow"

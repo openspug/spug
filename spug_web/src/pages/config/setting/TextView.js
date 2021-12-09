@@ -5,13 +5,13 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import Editor from 'react-ace';
-import 'ace-builds/src-noconflict/mode-space';
-import 'ace-builds/src-noconflict/theme-tomorrow';
-import store from './store';
-import { http } from "libs";
-import { SaveOutlined, EditOutlined } from '@ant-design/icons';
 import { Button, message } from 'antd';
+import { SaveOutlined, EditOutlined } from '@ant-design/icons';
+import { ACEditor } from 'components';
+import store from './store';
+import { http } from 'libs';
+
+
 import { AuthButton } from 'components';
 
 @observer
@@ -52,12 +52,11 @@ class TextView extends React.Component {
     const {body, loading, readOnly} = this.state;
     return (
       <div style={{position: 'relative'}}>
-        <Editor
+        <ACEditor
           mode="space"
           width="100%"
           height="500px"
           theme="tomorrow"
-          style={{fontSize: 14}}
           value={body}
           readOnly={readOnly}
           onChange={v => this.setState({body: v})}/>

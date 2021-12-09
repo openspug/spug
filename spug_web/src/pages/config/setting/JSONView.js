@@ -7,10 +7,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { SaveOutlined, EditOutlined } from '@ant-design/icons';
 import { Button, message } from 'antd';
-import Editor from 'react-ace';
-import 'ace-builds/src-noconflict/mode-json';
-import 'ace-builds/src-noconflict/theme-tomorrow';
-import { AuthButton } from 'components';
+import { AuthButton, ACEditor } from 'components';
 import { http } from 'libs';
 import store from './store';
 
@@ -57,14 +54,13 @@ class JSONView extends React.Component {
     const {body, readOnly, loading} = this.state;
     return (
       <div style={{position: 'relative'}}>
-        <Editor
+        <ACEditor
           mode="json"
           theme="tomorrow"
           height="500px"
           width="100%"
           readOnly={readOnly}
           setOptions={{useWorker: false}}
-          style={{fontSize: 14}}
           value={body}
           onChange={v => this.setState({body: v})}/>
         {readOnly && <AuthButton

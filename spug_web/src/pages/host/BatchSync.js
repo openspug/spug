@@ -84,7 +84,7 @@ export default observer(function () {
 
       <Form hidden={!token} labelCol={{span: 8}} wrapperCol={{span: 14}}>
         {Object.entries(hosts).map(([key, item]) => (
-          <Form.Item key={key} label={item.name} help={item.message}>
+          <Form.Item key={key} label={item.name} extra={item.message}>
             {item.status === 'ok' && <span style={{color: "#52c41a"}}>成功</span>}
             {item.status === 'fail' && <span style={{color: "red"}}>失败</span>}
             {item.status === undefined && <LoadingOutlined style={{fontSize: 20}}/>}

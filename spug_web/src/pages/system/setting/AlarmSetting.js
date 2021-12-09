@@ -49,7 +49,7 @@ export default observer(function () {
     <React.Fragment>
       <div className={styles.title}>报警服务设置</div>
       <div style={{maxWidth: 340}}>
-        <Form.Item label="邮件服务" labelCol={{span: 24}} style={{marginTop: 12}} help="用于通过邮件方式发送报警信息">
+        <Form.Item label="邮件服务" labelCol={{span: 24}} style={{marginTop: 12}} extra="用于通过邮件方式发送报警信息">
           <Radio.Group
             value={mode}
             style={{marginBottom: 8}}

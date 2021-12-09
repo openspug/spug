@@ -82,7 +82,7 @@ export default observer(function () {
       <Form.Item required name="notify_mode" initialValue={info.notify_mode} label="报警方式">
         <Checkbox.Group options={modeOptions}/>
       </Form.Item>
-      <Form.Item name="quiet" initialValue={info.quiet || 24 * 60} label="通道沉默" help="相同的告警信息，沉默期内只发送一次。">
+      <Form.Item name="quiet" initialValue={info.quiet || 24 * 60} label="通道沉默" extra="相同的告警信息，沉默期内只发送一次。">
         <Select placeholder="请选择">
           <Select.Option value={5}>5分钟</Select.Option>
           <Select.Option value={10}>10分钟</Select.Option>

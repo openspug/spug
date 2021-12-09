@@ -31,7 +31,7 @@ export default observer(function () {
         <Form.Item
           label="调用凭据"
           labelCol={{span: 24}}
-          help={<span>如需要使用Spug的邮件、微信和MFA等内置服务，请关注公众号
+          extra={<span>如需要使用Spug的邮件、微信和MFA等内置服务，请关注公众号
               <span style={{color: '#008dff', cursor: 'pointer'}}>
                   <Popover content={spugWx}>
                     <span>Spug</span>
