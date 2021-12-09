@@ -74,6 +74,10 @@
   overflow-y: scroll;
 }
 
+.content::-webkit-scrollbar {
+  width: 0;
+}
+
 .sider {
   height: 100%;
   width: 208px;
@@ -83,7 +87,10 @@
 
   .menus {
     overflow: auto;
+  }
 
+  .menus::-webkit-scrollbar {
+    width: 0;
   }
 
   .logo {

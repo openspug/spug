@@ -35,7 +35,7 @@ export default function () {
         {ip !== null && <Tag closable color="#1890ff" onClose={() => setIp(null)}>{ip}</Tag>}
       </div>
     )}>
-      <List style={{height: 329, overflow: 'scroll'}} dataSource={dataSource} renderItem={item => (
+      <List className={styles.loginActive} dataSource={dataSource} renderItem={item => (
         <List.Item>
           <span>{item.created_at}</span>
           <span className={styles.spanText} onClick={() => setName(item.nickname)}>{item.nickname}</span>

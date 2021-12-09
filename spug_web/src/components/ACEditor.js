@@ -15,6 +15,7 @@ export default function (props) {
       theme="tomorrow"
       fontSize={13}
       tabSize={2}
+      style={{fontFamily: 'source-code-pro, Menlo, Monaco, Consolas, PingFang SC, Microsoft YaHei'}}
       {...props}
     />
   )

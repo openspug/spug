@@ -1,25 +1,30 @@
 :global(.ant-card-extra) {
-    padding: 12px 0;
+  padding: 12px 0;
 }
 
 .spanButton {
-    cursor: pointer;
-    margin-right: 24px;
-    color: rgba(0, 0, 0, .65);
+  cursor: pointer;
+  margin-right: 24px;
+  color: rgba(0, 0, 0, .65);
 }
 
 .spanButtonActive {
-    cursor: pointer;
-    margin-right: 24px;
-    color: #1890ff;
+  cursor: pointer;
+  margin-right: 24px;
+  color: #1890ff;
 }
 
 .spanButton:hover {
-    color: #1890ff;
+  color: #1890ff;
 }
 
 .spanText {
-    cursor: pointer;
-    color: #1890ff;
-    padding: 0 4px;
+  cursor: pointer;
+  color: #1890ff;
+  padding: 0 4px;
+}
+
+.loginActive {
+  height: 329px;
+  overflow: auto;
 }

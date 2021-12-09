@@ -56,14 +56,7 @@ export default observer(function () {
       confirmLoading={loading}
       onOk={handleSubmit}>
       <Form layout="vertical">
-        <Form.Item label={
-          <span>
-            授权访问主机组&nbsp;
-            <Tooltip title="主机权限将全局影响属于该角色的用户能够看到的主机。">
-              <QuestionCircleOutlined/>
-            </Tooltip>
-          </span>
-        }>
+        <Form.Item label="授权访问主机组" tooltip="主机权限将全局影响属于该角色的用户能够看到的主机。">
           {groups.map((id, index) => (
             <div className={styles.groupItem} key={index}>
               <TreeSelect

@@ -166,7 +166,7 @@ export default observer(function () {
             onChange={setDraggable}
             checkedChildren="排版"
             unCheckedChildren="浏览"/>
-          <Tooltip title="右键点击分组进行编辑，开启排版模式后可通过拖拽分组进行快速排序。">
+          <Tooltip title="排版模式下，可通过拖拽分组实现快速排序。">
             <QuestionCircleOutlined style={{marginLeft: 8, color: '#999'}}/>
           </Tooltip>
         </AuthFragment>)}>
