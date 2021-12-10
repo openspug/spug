@@ -76,7 +76,7 @@ function TaskIndex() {
                 onClick={() => store.showHost = true}/>
             ) : (
               <Button icon={<PlusOutlined/>} onClick={() => store.showHost = true}>
-                从主机列表中选择
+                添加目标主机
               </Button>
             )}
           </Form.Item>
@@ -87,8 +87,8 @@ function TaskIndex() {
               style={{marginBottom: 12}}
               value={interpreter}
               onChange={e => setInterpreter(e.target.value)}>
-              <Radio.Button value="sh">Shell</Radio.Button>
-              <Radio.Button value="python">Python</Radio.Button>
+              <Radio.Button value="sh" style={{width: 80, textAlign: 'center'}}>Shell</Radio.Button>
+              <Radio.Button value="python" style={{width: 80, textAlign: 'center'}}>Python</Radio.Button>
             </Radio.Group>
             <a href="https://spug.cc/docs/batch-exec" target="_blank" rel="noopener noreferrer"
                className={style.tips}><BulbOutlined/> 使用全局变量？</a>

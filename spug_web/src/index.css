@@ -2,7 +2,7 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, Microsoft YaHei, PingFang SC, Source Han Sans SC, Noto Sans CJK SC, WenQuanYi Micro Hei, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, PingFang SC, Microsoft YaHei, Source Han Sans SC, Noto Sans CJK SC, WenQuanYi Micro Hei, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
@@ -18,7 +18,7 @@ div::-webkit-scrollbar-thumb, textarea::-webkit-scrollbar-thumb {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, Courier New, monospace, Microsoft YaHei, PingFang SC;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, Courier New, monospace, PingFang SC, Microsoft YaHei;
 }
 
 .ant-form-item-extra {
