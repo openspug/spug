@@ -11,7 +11,7 @@ class ExecTemplate(models.Model, ModelMixin):
     name = models.CharField(max_length=50)
     type = models.CharField(max_length=50)
     body = models.TextField()
-    interpreter = models.CharField(max_length=20)
+    interpreter = models.CharField(max_length=20, default='sh')
     host_ids = models.TextField(default='[]')
     desc = models.CharField(max_length=255, null=True)
 
