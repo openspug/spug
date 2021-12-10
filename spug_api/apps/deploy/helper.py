@@ -65,6 +65,9 @@ class Helper:
             'markdown': {
                 'title': 'Spug 发布消息通知',
                 'text': '\n\n'.join(texts)
+            },
+            'at': {
+                'isAtAll': True
             }
         }
         Notification.handle_request(url, data, 'dd')
