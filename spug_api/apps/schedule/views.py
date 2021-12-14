@@ -162,7 +162,7 @@ class HistoryView(View):
         return data
 
 
-@auth('schedule.schedule.add|schedule.schedule.edit')
+@auth('schedule.schedule.view|schedule.schedule.add|schedule.schedule.edit')
 def next_run_time(request):
     form, error = JsonParser(
         Argument('rule', help='参数错误'),
