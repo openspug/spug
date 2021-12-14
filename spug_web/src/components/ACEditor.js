@@ -13,7 +13,7 @@ import 'ace-builds/src-noconflict/mode-python';
 import 'ace-builds/src-noconflict/theme-tomorrow';
 
 export default function (props) {
-  const style = {fontFamily: 'source-code-pro, Menlo, Monaco, Consolas, PingFang SC, Microsoft YaHei', ...props.style}
+  const style = {fontFamily: 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei', ...props.style}
   return (
     <Editor
       theme="tomorrow"

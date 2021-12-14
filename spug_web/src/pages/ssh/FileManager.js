@@ -234,7 +234,7 @@ class FileManager extends React.Component {
           pagination={false}
           columns={this.columns}
           scroll={{y: scrollY}}
-          bodyStyle={{fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace"}}
+          style={{fontFamily: 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei'}}
           dataSource={objects}/>
       </Drawer>
     )

@@ -14,7 +14,7 @@ function OutView(props) {
     setTimeout(() => {
       const fitPlugin = new FitAddon()
       const term = new Terminal({disableStdin: true})
-      term.setOption('fontFamily', 'source-code-pro, Menlo, Monaco, Consolas, PingFang SC, Microsoft YaHei')
+      term.setOption('fontFamily', 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei')
       term.loadAddon(fitPlugin)
       term.setOption('theme', {background: '#fff', foreground: '#000', selection: '#999'})
       term.open(el.current)

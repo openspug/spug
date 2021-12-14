@@ -31,7 +31,7 @@ function OutView(props) {
     gCurrent = current
     const fitPlugin = new FitAddon()
     term.setOption('disableStdin', false)
-    term.setOption('fontFamily', 'source-code-pro, Menlo, Monaco, Consolas, PingFang SC, Microsoft YaHei')
+    term.setOption('fontFamily', 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei')
     term.setOption('theme', {background: '#f0f0f0', foreground: '#000', selection: '#999', cursor: '#f0f0f0'})
     term.loadAddon(fitPlugin)
     term.open(el.current)

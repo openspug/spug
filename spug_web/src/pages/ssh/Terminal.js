@@ -18,7 +18,7 @@ function WebSSH(props) {
   useEffect(() => {
     const fitPlugin = new FitAddon();
     term.loadAddon(fitPlugin);
-    term.setOption('fontFamily', 'source-code-pro, Menlo, Monaco, Consolas, PingFang SC, Microsoft YaHei')
+    term.setOption('fontFamily', 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei')
     term.open(container.current);
     term.write('WebSocket connecting ... ');
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';

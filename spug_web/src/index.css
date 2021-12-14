@@ -10,6 +10,7 @@ body {
 
 div::-webkit-scrollbar, textarea::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 div::-webkit-scrollbar-thumb, textarea::-webkit-scrollbar-thumb {
@@ -18,7 +19,7 @@ div::-webkit-scrollbar-thumb, textarea::-webkit-scrollbar-thumb {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, Courier New, monospace, PingFang SC, Microsoft YaHei;
+  font-family: Source Code Pro, Menlo, Monaco, Consolas, Courier New, monospace, Courier, PingFang SC, Microsoft YaHei;
 }
 
 .ant-form-item-extra {

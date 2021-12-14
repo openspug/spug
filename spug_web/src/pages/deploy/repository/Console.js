@@ -71,7 +71,7 @@ export default observer(function Console() {
   function initialTerm() {
     const fitPlugin = new FitAddon()
     term.loadAddon(fitPlugin)
-    term.setOption('fontFamily', 'source-code-pro, Menlo, Monaco, Consolas, PingFang SC, Microsoft YaHei')
+    term.setOption('fontFamily', 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei')
     term.setOption('theme', {background: '#fafafa', foreground: '#000', selection: '#999'})
     term.open(el.current)
     term.fit = () => fitPlugin.fit()
