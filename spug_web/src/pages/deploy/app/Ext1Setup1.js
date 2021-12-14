@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
-import { Switch, Form, Input, Select, Button, Radio } from 'antd';
+import { Switch, Form, Input, Select, Button, Radio, InputNumber } from 'antd';
 import envStore from 'pages/config/environment/store';
 import Selector from 'pages/host/Selector';
 import store from './store';
@@ -77,6 +77,93 @@ export default observer(function Ext1Setup1() {
           <Radio.Button value={false}>串行</Radio.Button>
         </Radio.Group>
       </Form.Item>
+      {
+        !info['is_parallel']?(
+            <Form.Item label="串行并发">
+              <InputNumber min={1} max={info.host_ids.length}
+                           defaultValue={1}
+                           value={info.parallel_num}
+                           onChange={(value) => info['parallel_num'] = value}
+              />
+            </Form.Item>
+        ): null
+      }
+      <Form.Item label="健康检查">
+          <Switch
+              disabled={store.isReadOnly}
+              checkedChildren="开启"
+              unCheckedChildren="关闭"
+              checked={info['is_health_check_enabled']}
+              onChange={v => info['is_health_check_enabled'] = v}/>
+      </Form.Item>
+      {
+        info['is_health_check_enabled']?(
+          <>
+            <Form.Item label="健康检查方式">
+            <Radio.Group
+              buttonStyle="solid"
+              defaultValue={false}
+              value={info.is_http_check}
+              onChange={(e) => info['is_http_check'] = e.target.value}>
+              <Radio.Button value={false}>TCP</Radio.Button>
+              <Radio.Button value={true}>HTTP</Radio.Button>
+            </Radio.Group>
+            </Form.Item>
+            <Form.Item label="健康检查端口">
+              <InputNumber placeholder="8080" style={{ width: 120}} value={info.check_port}  onChange={(value) => info['check_port'] = value} />
+            </Form.Item>
+            {
+              info.is_http_check?(
+                <Form.Item label="健康检查URL">
+                <Input placeholder="/healthz" style={{ width: 500}} value={info.check_path} onChange={(e) => info['check_path'] = e.target.value} />
+              </Form.Item>
+              ):null
+            }
+            <Form.Item label="健康检查重试次数">
+              <InputNumber 
+                min={1} 
+                max={100} 
+                defaultValue={3} 
+                value={info.check_retry} 
+                addonAfter="次" 
+                style={{ width: 120}}
+                onChange={(value) => info['check_retry'] = value}
+              />
+            </Form.Item>
+            <Form.Item label="健康检查间隔时间">
+              <InputNumber 
+                min={1} 
+                defaultValue={60} 
+                value={info.check_interval} 
+                onChange={(value) => info['check_interval'] = value}
+                addonAfter="秒" 
+                style={{ width: 120}} 
+              />
+            </Form.Item>
+            <Form.Item label="健康检查超时时间">
+              <InputNumber 
+                min={1} 
+                defaultValue={30} 
+                value={info.check_timeout} 
+                onChange={(value) => info['check_timeout'] = value}
+                addonAfter="秒" 
+                style={{ width: 120}} 
+              />
+            </Form.Item>
+            <Form.Item label="健康检查失败">
+              <Select
+                defaultValue={0}
+                value={info.check_failed_action} 
+                onChange={(e) => info['check_failed_action'] = e.target.value}
+                style={{width: 120}} 
+                >
+                <Select.Option value={0}>终止发布</Select.Option>
+                <Select.Option value={1}>忽略继续</Select.Option>
+              </Select>
+            </Form.Item>
+          </>
+        ):null
+      }
       <Form.Item label="发布审核">
         <Switch
           disabled={store.isReadOnly}

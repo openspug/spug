@@ -5,6 +5,7 @@ from django_redis import get_redis_connection
 from django.conf import settings
 from django.db import close_old_connections
 from libs.utils import AttrDict, human_time
+from libs.healthcheck import HealthCheck
 from apps.host.models import Host
 from apps.config.utils import compose_configs
 from apps.repository.models import Repository
@@ -12,6 +13,7 @@ from apps.repository.utils import dispatch as build_repository
 from apps.deploy.helper import Helper, SpugError
 from concurrent import futures
 from functools import partial
+import queue
 import json
 import uuid
 import os
@@ -75,6 +77,7 @@ def _ext1_deploy(req, helper, env):
         build_repository(rep, helper)
         req.repository = rep
     extend = req.deploy.extend_obj
+    hc_obj = req.deploy.health_check_obj
     env.update(SPUG_DST_DIR=extend.dst_dir)
     extras = json.loads(req.extra)
     if extras[0] == 'repository':
@@ -83,35 +86,31 @@ def _ext1_deploy(req, helper, env):
         env.update(SPUG_GIT_BRANCH=extras[1], SPUG_GIT_COMMIT_ID=extras[2])
     else:
         env.update(SPUG_GIT_TAG=extras[1])
-    if req.deploy.is_parallel:
-        threads, latest_exception = [], None
-        max_workers = max(10, os.cpu_count() * 5)
-        with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            for h_id in json.loads(req.host_ids):
-                new_env = AttrDict(env.items())
-                t = executor.submit(_deploy_ext1_host, req, helper, h_id, new_env)
-                t.h_id = h_id
-                threads.append(t)
-            for t in futures.as_completed(threads):
-                exception = t.exception()
-                if exception:
-                    latest_exception = exception
-                    if not isinstance(exception, SpugError):
-                        helper.send_error(t.h_id, f'Exception: {exception}', False)
-        if latest_exception:
-            raise latest_exception
-    else:
-        host_ids = sorted(json.loads(req.host_ids), reverse=True)
-        while host_ids:
-            h_id = host_ids.pop()
+    threads, latest_exception = [], None
+    max_workers = max(10, os.cpu_count() * 5) if req.deploy.is_parallel else req.deploy.parallel_num
+    exception_queue = queue.Queue()
+    check_failed_action = 1 if not hc_obj else hc_obj.check_failed_action
+
+    with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for h_id in json.loads(req.host_ids):
             new_env = AttrDict(env.items())
-            try:
-                _deploy_ext1_host(req, helper, h_id, new_env)
-            except Exception as e:
-                helper.send_error(h_id,  f'Exception: {e}', False)
-                for h_id in host_ids:
-                    helper.send_error(h_id, '终止发布', False)
-                raise e
+            t = executor.submit(_deploy_ext1_host, req, helper, h_id, new_env, exception_queue, check_failed_action)
+            t.h_id = h_id
+            threads.append(t)
+        futures.wait(threads, return_when=futures.FIRST_EXCEPTION)
+        for t in reversed(threads):
+            t.cancel()
+        futures.wait(threads, return_when=futures.ALL_COMPLETED)
+        for t in threads:
+            if "finished returned NoneType" in str(t) or t.cancelled():
+                helper.send_error(t.h_id, '终止发布', False)
+            elif "finished raised SpugError" in str(t):
+                exception = t.exception()
+                latest_exception = exception
+                helper.send_error(t.h_id, f'Exception: {exception}', False)
+    if latest_exception:
+        raise latest_exception
+
 
 
 def _ext2_deploy(req, helper, env):
@@ -193,8 +192,12 @@ def _ext2_deploy(req, helper, env):
         helper.send_step('local', 100, f'\r\n{human_time()} ** 发布成功 **')
 
 
-def _deploy_ext1_host(req, helper, h_id, env):
+def _deploy_ext1_host(req, helper, h_id, env, exception_queue, failed_action=1):
+    # 异常队列不为空 且动作是中断发布   0 中断所有 1 忽略继续
+    if not exception_queue.empty() and failed_action == 0:
+        return
     extend = req.deploy.extend_obj
+    hc_obj = req.deploy.health_check_obj
     helper.send_step(h_id, 1, f'\033[32m就绪√\033[0m\r\n{human_time()} 数据准备...        ')
     host = Host.objects.filter(pk=h_id).first()
     if not host:
@@ -241,7 +244,21 @@ def _deploy_ext1_host(req, helper, h_id, env):
             command = f'cd {extend.dst_dir} && {extend.hook_post_host}'
             helper.remote(host.id, ssh, command)
 
+        # healthcheck
+        if hc_obj:
+            if hc_obj.is_health_check_enabled:
+                helper.send_step(h_id, 4, f'{human_time()} 执行健康检查...       \r\n')
+                hc = HealthCheck(host=host.hostname, host_id=h_id, helper=helper, **hc_obj.__dict__)
+                health_status = hc.is_health()
+                if not health_status and failed_action == 0:
+                    exception_queue.put("quit")
+                    helper.send_error(h_id, f'{human_time()} 健康检查失败...       \r\n')
+                    # raise Exception
+                else:
+                    helper.send_step(h_id, 4, f'{human_time()} 健康检查通过...       \r\n')
+
         helper.send_step(h_id, 100, f'\r\n{human_time()} ** \033[32m发布成功\033[0m **')
+        return True
 
 
 def _deploy_ext2_host(helper, h_id, actions, env, spug_version):

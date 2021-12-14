@@ -46,11 +46,16 @@ class Deploy(models.Model, ModelMixin):
     extend = models.CharField(max_length=2, choices=EXTENDS)
     is_audit = models.BooleanField()
     is_parallel = models.BooleanField(default=True)
+    parallel_num = models.IntegerField(default=1)
     rst_notify = models.CharField(max_length=255, null=True)
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
     updated_at = models.CharField(max_length=20, null=True)
     updated_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)
+
+    @property
+    def health_check_obj(self):
+        return DeployHealthCheck.objects.filter(deploy=self).first()
 
     @property
     def extend_obj(self):
@@ -64,6 +69,9 @@ class Deploy(models.Model, ModelMixin):
         deploy['host_ids'] = json.loads(self.host_ids)
         deploy['rst_notify'] = json.loads(self.rst_notify)
         deploy.update(self.extend_obj.to_dict())
+        health_check = self.health_check_obj
+        if health_check:
+            deploy.update(health_check.to_dict())
         return deploy
 
     def delete(self, using=None, keep_parents=False):
@@ -122,3 +130,25 @@ class DeployExtend2(models.Model, ModelMixin):
 
     class Meta:
         db_table = 'deploy_extend2'
+
+
+class DeployHealthCheck(models.Model, ModelMixin):
+    deploy = models.OneToOneField(Deploy, primary_key=True, on_delete=models.CASCADE)
+    is_health_check_enabled = models.BooleanField(default=False)
+    is_http_check = models.BooleanField(default=True)
+    check_port = models.IntegerField(default=8080)
+    check_path = models.CharField(null=True, max_length=255, default="/healthz")
+    check_retry = models.IntegerField(default=3)
+    check_interval = models.IntegerField(default=60)
+    check_timeout = models.IntegerField(default=30)
+    check_failed_action = models.IntegerField(default=0, help_text="0 终止发布 1 忽略继续")
+
+    def to_dict(self, *args, **kwargs):
+        tmp = super().to_dict(*args, **kwargs)
+        return tmp
+
+    def __repr__(self):
+        return '<DeployHealthCheck deploy_id=%r>' % self.deploy_id
+
+    class Meta:
+        db_table = 'deploy_health_check'

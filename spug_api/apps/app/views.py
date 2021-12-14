@@ -4,7 +4,7 @@
 from django.views.generic import View
 from django.db.models import F
 from libs import JsonParser, Argument, json_response, auth
-from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
+from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2, DeployHealthCheck
 from apps.config.models import Config, ConfigHistory
 from apps.app.utils import fetch_versions, remove_repo
 from apps.setting.utils import AppSetting
@@ -117,6 +117,7 @@ class DeployView(View):
             Argument('rst_notify', type=dict, help='请选择发布结果通知方式'),
             Argument('extend', filter=lambda x: x in dict(Deploy.EXTENDS), help='请选择发布类型'),
             Argument('is_parallel', type=bool, default=True),
+            Argument('parallel_num', type=int, default=1),
             Argument('is_audit', type=bool, default=False)
         ).parse(request.body)
         if error is None:
@@ -125,6 +126,18 @@ class DeployView(View):
                 return json_response(error='应用在该环境下已经存在发布配置')
             form.host_ids = json.dumps(form.host_ids)
             form.rst_notify = json.dumps(form.rst_notify)
+            health_check_form, error = JsonParser(
+                Argument('is_health_check_enabled', type=bool, default=False),
+                Argument('is_http_check', type=bool, default=False),
+                Argument('check_port', type=int, default=8080, help='健康检查端口'),
+                Argument('check_path', type=str, required=False, help='健康检查url'),
+                Argument('check_retry', type=int, default=3),
+                Argument('check_interval', type=int, default=60),
+                Argument('check_timeout', type=int, default=30),
+                Argument('check_failed_action', type=int, default=0)
+            ).parse(request.body)
+            if error:
+                return json_response(error=error)
             if form.extend == '1':
                 extend_form, error = JsonParser(
                     Argument('git_repo', handler=str.strip, help='请输入git仓库地址'),
@@ -147,9 +160,11 @@ class DeployView(View):
                         remove_repo(form.id)
                     Deploy.objects.filter(pk=form.id).update(**form)
                     DeployExtend1.objects.filter(deploy_id=form.id).update(**extend_form)
+                    DeployHealthCheck.objects.filter(deploy_id=form.id).update(**health_check_form)
                 else:
                     deploy = Deploy.objects.create(created_by=request.user, **form)
                     DeployExtend1.objects.create(deploy=deploy, **extend_form)
+                    DeployHealthCheck.objects.create(deploy=deploy, **health_check_form)
             elif form.extend == '2':
                 extend_form, error = JsonParser(
                     Argument('server_actions', type=list, help='请输入执行动作'),
