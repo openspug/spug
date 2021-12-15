@@ -41,6 +41,8 @@ def _is_valid_token(request):
     token = request.headers.get('X-Gitlab-Token')
     token = token or request.headers.get('X-Gitee-Token')
     token = token or request.headers.get('X-Codeup-Token')
+    # Compatible the old version of gitlab
+    token = token or request.GET.get('token')
     if token:
         return token == api_key
 
