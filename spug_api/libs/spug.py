@@ -27,16 +27,14 @@ def send_login_wx_code(wx_token, code):
 
 class Notification:
     def __init__(self, grp, event, target, title, message, duration):
+        self.grp = grp
         self.event = event
         self.title = title
         self.target = target
         self.message = message
         self.duration = duration
-        self.spug_key, self.u_ids = self._parse_args(grp)
-
-    def _parse_args(self, grp):
-        spug_key = AppSetting.get_default('spug_key')
-        return spug_key, sum([json.loads(x.contacts) for x in Group.objects.filter(id__in=grp)], [])
+        self.spug_key = AppSetting.get_default('spug_key')
+        self.u_ids = []
 
     @staticmethod
     def handle_request(url, data, mode=None):
@@ -63,7 +61,7 @@ class Notification:
             raise NotImplementedError
         Notify.make_system_notify('通知发送失败', f'返回数据：{res}')
 
-    def _monitor_by_wx(self, users):
+    def monitor_by_wx(self, users):
         if not self.spug_key:
             Notify.make_monitor_notify('发送报警信息失败', '未配置报警服务调用凭据，请在系统管理/系统设置/基本设置/调用凭据中配置。')
             return
@@ -77,7 +75,7 @@ class Notification:
         }
         self.handle_request(f'{spug_server}/apis/notify/wx/', data, 'spug')
 
-    def _monitor_by_email(self, users):
+    def monitor_by_email(self, users):
         mail_service = AppSetting.get_default('mail_service', {})
         body = [
             f'告警名称：{self.title}',
@@ -104,7 +102,7 @@ class Notification:
         else:
             Notify.make_monitor_notify('发送报警信息失败', '未配置报警服务调用凭据，请在系统管理/系统设置/报警服务设置中配置。')
 
-    def _monitor_by_dd(self, users):
+    def monitor_by_dd(self, users):
         texts = [
             '## %s ## ' % ('监控告警通知' if self.event == '1' else '告警恢复通知'),
             f'**告警名称：** <font color="#{"f90202" if self.event == "1" else "008000"}">{self.title}</font> ',
@@ -127,7 +125,7 @@ class Notification:
         for url in users:
             self.handle_request(url, data, 'dd')
 
-    def _monitor_by_qy_wx(self, users):
+    def monitor_by_qy_wx(self, users):
         color, title = ('warning', '监控告警通知') if self.event == '1' else ('info', '告警恢复通知')
         texts = [
             f'## {title}',
@@ -148,28 +146,29 @@ class Notification:
             self.handle_request(url, data, 'wx')
 
     def dispatch_monitor(self, modes):
+        self.u_ids = sum([json.loads(x.contacts) for x in Group.objects.filter(id__in=self.grp)], [])
         for mode in modes:
             if mode == '1':
                 users = set(x.wx_token for x in Contact.objects.filter(id__in=self.u_ids, wx_token__isnull=False))
                 if not users:
                     Notify.make_monitor_notify('发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的微信Token。')
                     continue
-                self._monitor_by_wx(users)
+                self.monitor_by_wx(users)
             elif mode == '3':
                 users = set(x.ding for x in Contact.objects.filter(id__in=self.u_ids, ding__isnull=False))
                 if not users:
                     Notify.make_monitor_notify('发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的钉钉。')
                     continue
-                self._monitor_by_dd(users)
+                self.monitor_by_dd(users)
             elif mode == '4':
                 users = set(x.email for x in Contact.objects.filter(id__in=self.u_ids, email__isnull=False))
                 if not users:
                     Notify.make_monitor_notify('发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的邮件地址。')
                     continue
-                self._monitor_by_email(users)
+                self.monitor_by_email(users)
             elif mode == '5':
                 users = set(x.qy_wx for x in Contact.objects.filter(id__in=self.u_ids, qy_wx__isnull=False))
                 if not users:
                     Notify.make_monitor_notify('发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的企业微信。')
                     continue
-                self._monitor_by_qy_wx(users)
+                self.monitor_by_qy_wx(users)

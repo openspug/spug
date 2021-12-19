@@ -5,13 +5,15 @@
  */
 import React, { useState } from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, message } from 'antd';
+import { Modal, Form, Input, Tooltip, message } from 'antd';
+import { ThunderboltOutlined, LoadingOutlined } from '@ant-design/icons';
 import http from 'libs/http';
 import store from './store';
 
 export default observer(function () {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [testLoading, setTestLoading] = useState('0');
 
   function handleSubmit() {
     setLoading(true);
@@ -23,6 +25,34 @@ export default observer(function () {
         store.formVisible = false;
         store.fetchRecords()
       }, () => setLoading(false))
+  }
+
+  function handleTest(mode, name) {
+    const value = form.getFieldValue(name)
+    console.log(name, value)
+    if (!value) return message.error('请输入后再执行测试')
+    setTestLoading(mode)
+    http.post('/api/alarm/test/', {mode, value})
+      .then(() => {
+        message.success('执行成功')
+      })
+      .finally(() => setTestLoading('0'))
+  }
+
+  function Test(props) {
+    return (
+      <div style={{position: 'absolute', right: -30, top: 8}}>
+        {testLoading === props.mode ? (
+          <LoadingOutlined style={{fontSize: 18, color: '#faad14'}}/>
+        ) : (
+          <Tooltip title="执行测试">
+            <ThunderboltOutlined
+              style={{fontSize: 18, color: '#faad14'}}
+              onClick={() => handleTest(props.mode, props.name)}/>
+          </Tooltip>
+        )}
+      </div>
+    )
   }
 
   return (
@@ -41,23 +71,35 @@ export default observer(function () {
         <Form.Item name="phone" label="手机号">
           <Input placeholder="请输入手机号"/>
         </Form.Item>
-        <Form.Item name="email" label="邮箱">
-          <Input placeholder="请输入邮箱地址"/>
+        <Form.Item label="邮箱">
+          <Form.Item noStyle name="email">
+            <Input placeholder="请输入邮箱地址"/>
+          </Form.Item>
+          <Test mode="4" name="email"/>
         </Form.Item>
-        <Form.Item name="wx_token" label="微信Token" extra={
+        <Form.Item label="微信Token" extra={
           <a target="_blank" rel="noopener noreferrer"
              href="https://spug.cc/docs/alarm-contact/">如何获取微信 Token ？</a>}>
-          <Input placeholder="请输入微信token"/>
+          <Form.Item noStyle name="wx_token">
+            <Input placeholder="请输入微信token"/>
+          </Form.Item>
+          <Test mode="1" name="wx_token"/>
         </Form.Item>
-        <Form.Item name="ding" label="钉钉" extra={<span>
+        <Form.Item label="钉钉" extra={<span>
             钉钉收不到通知？请参考
             <a target="_blank" rel="noopener noreferrer"
                href="https://spug.cc/docs/install-error/#%E9%92%89%E9%92%89%E6%94%B6%E4%B8%8D%E5%88%B0%E9%80%9A%E7%9F%A5%EF%BC%9F">官方文档</a>
           </span>}>
-          <Input placeholder="https://oapi.dingtalk.com/robot/send?access_token=xxx"/>
+          <Form.Item noStyle name="ding">
+            <Input placeholder="https://oapi.dingtalk.com/robot/send?access_token=xxx"/>
+          </Form.Item>
+          <Test mode="3" name="ding"/>
         </Form.Item>
-        <Form.Item name="qy_wx" label="企业微信">
-          <Input placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx"/>
+        <Form.Item label="企业微信">
+          <Form.Item noStyle name="qy_wx">
+            <Input placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx"/>
+          </Form.Item>
+          <Test mode="5" name="qy_wx"/>
         </Form.Item>
       </Form>
     </Modal>

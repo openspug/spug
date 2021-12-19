@@ -9,4 +9,5 @@ urlpatterns = [
     path('alarm/', AlarmView.as_view()),
     path('group/', GroupView.as_view()),
     path('contact/', ContactView.as_view()),
+    path('test/', handle_test),
 ]
