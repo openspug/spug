@@ -210,9 +210,13 @@ def fetch_host_extend(ssh):
         ssh_hostname = ssh.arguments.get('hostname')
         if ip_validator(ssh_hostname):
             if ipaddress.ip_address(ssh_hostname).is_global:
-                public_ip_address.add(ssh_hostname)
+                if ssh_hostname in public_ip_address:
+                    public_ip_address.remove(ssh_hostname)
+                public_ip_address = [ssh_hostname] + list(public_ip_address)
             else:
-                private_ip_address.add(ssh_hostname)
+                if ssh_hostname in private_ip_address:
+                    private_ip_address.remove(ssh_hostname)
+                private_ip_address = [ssh_hostname] + list(private_ip_address)
 
         code, out = ssh.exec_command_raw('lsblk -dbn -o SIZE -e 11 2> /dev/null')
         if code == 0:
