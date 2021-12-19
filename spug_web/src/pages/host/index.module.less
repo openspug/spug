@@ -59,3 +59,13 @@
     border-radius: 0;
   }
 }
+
+.group {
+  height: 100%;
+
+  :global(.ant-tree-node-content-wrapper) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

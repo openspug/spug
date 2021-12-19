@@ -19,6 +19,7 @@ import {
 } from '@ant-design/icons';
 import { AuthFragment } from 'components';
 import { hasPermission, http } from 'libs';
+import styles from './index.module.less';
 import store from './store';
 import lds from 'lodash';
 
@@ -146,9 +147,7 @@ export default observer(function () {
     } else {
       const extend = nodeData.all_host_ids && nodeData.all_host_ids.length ? `（${nodeData.all_host_ids.length}）` : null
       return (
-        <div style={{display: 'inline-block', lineHeight: '24px'}}>
-          <span>{nodeData.title}{extend}</span>
-        </div>
+        <span style={{lineHeight: '24px'}}>{nodeData.title}{extend}</span>
       )
     }
   }
@@ -157,7 +156,7 @@ export default observer(function () {
   return (
     <Card
       title="分组列表"
-      style={{height: '100%'}}
+      className={styles.group}
       extra={(
         <AuthFragment auth="admin">
           <Switch
