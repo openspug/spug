@@ -2,11 +2,12 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
+from django.conf import settings
+from django_redis import get_redis_connection
 from libs import json_response, JsonParser, Argument, human_datetime, auth
 from apps.monitor.models import Detection
-from django_redis import get_redis_connection
-from django.conf import settings
 from apps.monitor.executors import dispatch
+from apps.setting.utils import AppSetting
 import json
 
 
@@ -34,6 +35,10 @@ class DetectionView(View):
             Argument('notify_mode', type=list, help='请选择报警方式'),
         ).parse(request.body)
         if error is None:
+            if set(form.notify_mode).intersection(['1', '2', '4']):
+                if not AppSetting.get_default('spug_key'):
+                    return json_response(error='报警方式 微信、短信、邮件需要配置调用凭据（系统设置/基本设置），请配置后再启用该报警方式。')
+
             form.targets = json.dumps(form.targets)
             form.notify_grp = json.dumps(form.notify_grp)
             form.notify_mode = json.dumps(form.notify_mode)

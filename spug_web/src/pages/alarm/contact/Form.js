@@ -54,10 +54,10 @@ export default observer(function () {
             <a target="_blank" rel="noopener noreferrer"
                href="https://spug.cc/docs/install-error/#%E9%92%89%E9%92%89%E6%94%B6%E4%B8%8D%E5%88%B0%E9%80%9A%E7%9F%A5%EF%BC%9F">官方文档</a>
           </span>}>
-          <Input placeholder="请输入钉钉机器人完整地址"/>
+          <Input placeholder="https://oapi.dingtalk.com/robot/send?access_token=xxx"/>
         </Form.Item>
         <Form.Item name="qy_wx" label="企业微信">
-          <Input placeholder="请输入企业微信机器人完整地址"/>
+          <Input placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx"/>
         </Form.Item>
       </Form>
     </Modal>
