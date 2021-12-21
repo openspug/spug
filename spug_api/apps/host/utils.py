@@ -203,7 +203,8 @@ def fetch_host_extend(ssh):
         if code == 0:
             for ip in out.strip().split():
                 if ipaddress.ip_address(ip).is_global:
-                    public_ip_address.add(ip)
+                    if len(public_ip_address) < 10:
+                        public_ip_address.add(ip)
                 elif len(private_ip_address) < 10:
                     private_ip_address.add(ip)
 
