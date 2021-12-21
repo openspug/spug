@@ -4,7 +4,7 @@
 from django_redis import get_redis_connection
 from django.conf import settings
 from django.db import close_old_connections
-from libs.utils import AttrDict, human_time
+from libs.utils import AttrDict, human_time, render_str
 from apps.host.models import Host
 from apps.config.utils import compose_configs
 from apps.repository.models import Repository
@@ -74,8 +74,6 @@ def _ext1_deploy(req, helper, env):
         )
         build_repository(rep, helper)
         req.repository = rep
-    extend = req.deploy.extend_obj
-    env.update(SPUG_DST_DIR=extend.dst_dir)
     extras = json.loads(req.extra)
     if extras[0] == 'repository':
         extras = extras[1:]
@@ -127,22 +125,25 @@ def _ext2_deploy(req, helper, env):
         helper.send_step('local', step, f'{human_time()} {action["title"]}...\r\n')
         helper.local(f'cd /tmp && {action["data"]}', env)
         step += 1
-    helper.send_step('local', 100, '')
 
     for action in host_actions:
         if action.get('type') == 'transfer':
+            action['src'] = render_str(action['src'].strip().rstrip('/'), env)
+            action['dst'] = render_str(action['dst'].strip().rstrip('/'), env)
             if action.get('src_mode') == '1':
                 break
-            helper.send_info('local', f'{human_time()} 检测到来源为本地路径的数据传输动作，执行打包...   \r\n')
+            helper.send_step('local', step, f'{human_time()} 检测到来源为本地路径的数据传输动作，执行打包...   \r\n')
             action['src'] = action['src'].rstrip('/ ')
             action['dst'] = action['dst'].rstrip('/ ')
             if not action['src'] or not action['dst']:
-                helper.send_error('local', f'invalid path for transfer, src: {action["src"]} dst: {action["dst"]}')
+                helper.send_error('local', f'Invalid path for transfer, src: {action["src"]} dst: {action["dst"]}')
+            if not os.path.exists(action['src']):
+                helper.send_error('local', f'No such file or directory: {action["src"]}')
             is_dir, exclude = os.path.isdir(action['src']), ''
             sp_dir, sd_dst = os.path.split(action['src'])
             contain = sd_dst
             if action['mode'] != '0' and is_dir:
-                files = helper.parse_filter_rule(action['rule'], ',')
+                files = helper.parse_filter_rule(action['rule'], ',', env)
                 if files:
                     if action['mode'] == '1':
                         contain = ' '.join(f'{sd_dst}/{x}' for x in files)
@@ -159,6 +160,8 @@ def _ext2_deploy(req, helper, env):
             helper.send_info('local', f'{human_time()} \033[32m完成√\033[0m\r\n')
             helper.add_callback(partial(os.remove, os.path.join(sp_dir, tar_gz_file)))
             break
+    helper.send_step('local', 100, '')
+
     if host_actions:
         if req.deploy.is_parallel:
             threads, latest_exception = [], None
@@ -194,12 +197,15 @@ def _ext2_deploy(req, helper, env):
 
 
 def _deploy_ext1_host(req, helper, h_id, env):
-    extend = req.deploy.extend_obj
     helper.send_step(h_id, 1, f'\033[32m就绪√\033[0m\r\n{human_time()} 数据准备...        ')
     host = Host.objects.filter(pk=h_id).first()
     if not host:
         helper.send_error(h_id, 'no such host')
     env.update({'SPUG_HOST_ID': h_id, 'SPUG_HOST_NAME': host.hostname})
+    extend = req.deploy.extend_obj
+    extend.dst_dir = render_str(extend.dst_dir, env)
+    extend.dst_repo = render_str(extend.dst_repo, env)
+    env.update(SPUG_DST_DIR=extend.dst_dir)
     with host.get_ssh(default_env=env) as ssh:
         base_dst_dir = os.path.dirname(extend.dst_dir)
         code, _ = ssh.exec_command_raw(

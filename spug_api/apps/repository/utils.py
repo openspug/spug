@@ -4,7 +4,7 @@
 from django_redis import get_redis_connection
 from django.conf import settings
 from django.db import close_old_connections
-from libs.utils import AttrDict, human_time
+from libs.utils import AttrDict, human_time, render_str
 from apps.repository.models import Repository
 from apps.app.utils import fetch_repo
 from apps.config.utils import compose_configs
@@ -68,13 +68,13 @@ def _build(rep: Repository, helper, env):
     git_dir = os.path.join(REPOS_DIR, str(rep.deploy_id))
     build_dir = os.path.join(REPOS_DIR, rep.spug_version)
     tar_file = os.path.join(BUILD_DIR, f'{rep.spug_version}.tar.gz')
-    env.update(SPUG_DST_DIR=extend.dst_dir)
     if extras[0] == 'branch':
         tree_ish = extras[2]
         env.update(SPUG_GIT_BRANCH=extras[1], SPUG_GIT_COMMIT_ID=extras[2])
     else:
         tree_ish = extras[1]
         env.update(SPUG_GIT_TAG=extras[1])
+    env.update(SPUG_DST_DIR=render_str(extend.dst_dir, env))
     fetch_repo(rep.deploy_id, extend.git_repo)
     helper.send_info('local', '\033[32m完成√\033[0m\r\n')
 
@@ -93,7 +93,7 @@ def _build(rep: Repository, helper, env):
 
     helper.send_step('local', 4, f'\r\n{human_time()} 执行打包...        ')
     filter_rule, exclude, contain = json.loads(extend.filter_rule), '', rep.spug_version
-    files = helper.parse_filter_rule(filter_rule['data'])
+    files = helper.parse_filter_rule(filter_rule['data'], env=env)
     if files:
         if filter_rule['type'] == 'exclude':
             excludes = []

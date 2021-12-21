@@ -1,9 +1,7 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
-from django_redis import get_redis_connection
-from django.conf import settings
-from libs.utils import human_datetime
+from libs.utils import human_datetime, render_str
 from libs.spug import Notification
 from apps.host.models import Host
 import subprocess
@@ -208,13 +206,13 @@ class Helper:
     def add_callback(self, func):
         self.callback.append(func)
 
-    def parse_filter_rule(self, data: str, sep='\n'):
+    def parse_filter_rule(self, data: str, sep='\n', env=None):
         data, files = data.strip(), []
         if data:
             for line in data.split(sep):
                 line = line.strip()
                 if line and not line.startswith('#'):
-                    files.append(line)
+                    files.append(render_str(line, env))
         return files
 
     def _send(self, message):

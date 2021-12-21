@@ -5,6 +5,7 @@ from django.http.response import HttpResponse
 from django.db.models import QuerySet
 from datetime import datetime, date as datetime_date
 from decimal import Decimal
+from string import Template
 import string
 import random
 import json
@@ -60,6 +61,11 @@ def human_diff_time(time1, time2):
     else:
         text = '%d小时' % (delta.seconds / 3600)
     return '%d天%s' % (delta.days, text) if delta.days else text
+
+
+# 字符串模版渲染
+def render_str(template, datasheet):
+    return Template(template).safe_substitute(datasheet)
 
 
 def json_response(data='', error=''):
