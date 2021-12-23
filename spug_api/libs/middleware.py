@@ -5,6 +5,7 @@ from django.utils.deprecation import MiddlewareMixin
 from django.conf import settings
 from .utils import json_response, get_request_real_ip
 from apps.account.models import User
+from apps.setting.utils import AppSetting
 import traceback
 import time
 
@@ -33,11 +34,12 @@ class AuthenticationMiddleware(MiddlewareMixin):
         if access_token and len(access_token) == 32:
             x_real_ip = get_request_real_ip(request.headers)
             user = User.objects.filter(access_token=access_token).first()
-            if user and x_real_ip == user.last_ip and user.token_expired >= time.time() and user.is_active:
-                request.user = user
-                user.token_expired = time.time() + 8 * 60 * 60
-                user.save()
-                return None
+            if user and user.token_expired >= time.time() and user.is_active:
+                if x_real_ip == user.last_ip or AppSetting.get_default('bind_ip') is False:
+                    request.user = user
+                    user.token_expired = time.time() + 8 * 60 * 60
+                    user.save()
+                    return None
         response = json_response(error="验证失败，请重新登录")
         response.status_code = 401
         return response

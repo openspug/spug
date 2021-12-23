@@ -14,11 +14,7 @@ class Store {
   fetchSettings = () => {
     this.isFetching = true;
     http.get('/api/setting/')
-      .then(res => {
-        for (let item of res) {
-          this.settings[item.key] = item.value;
-        }
-      })
+      .then(res => this.settings = res)
       .finally(() => this.isFetching = false)
   };
 

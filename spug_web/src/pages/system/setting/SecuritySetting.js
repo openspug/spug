@@ -12,6 +12,7 @@ import store from './store';
 
 export default observer(function () {
   const [verify_ip, setVerifyIP] = useState(store.settings.verify_ip);
+  const [bind_ip, setBindIP] = useState(store.settings.bind_ip);
   const [mfa, setMFA] = useState(store.settings.MFA || {});
   const [code, setCode] = useState();
   const [visible, setVisible] = useState(false);
@@ -30,6 +31,15 @@ export default observer(function () {
   function handleChangeVerifyIP(v) {
     setVerifyIP(v);
     http.post('/api/setting/', {data: [{key: 'verify_ip', value: v}]})
+      .then(() => {
+        message.success('设置成功');
+        store.fetchSettings()
+      })
+  }
+
+  function handleChangeBindIP(v) {
+    setBindIP(v);
+    http.post('/api/setting/', {data: [{key: 'bind_ip', value: v}]})
       .then(() => {
         message.success('设置成功');
         store.fetchSettings()
@@ -66,12 +76,23 @@ export default observer(function () {
       <Form layout="vertical" style={{maxWidth: 500}}>
         <Form.Item
           label="访问IP校验"
-          extra="建议开启，校验是否获取了真实的访问者IP，防止因为增加的反向代理层导致基于IP的安全策略失效，当校验失败时会在登录时弹窗提醒。如果你在内网部署且仅在内网使用可以关闭该特性。">
+          extra={<span>建议开启，校验是否获取了真实的访问者IP，防止因为增加的反向代理层导致基于IP的安全策略失效，当校验失败时会在登录时弹窗提醒。如果你在内网部署且仅在内网使用可以关闭该特性。<a
+            href="https://spug.cc/docs/practice/#%E5%AE%89%E5%85%A8%E6%80%A7%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97"
+            target="_blank" rel="noopener noreferrer">为什么没有获取到真实IP？</a></span>}>
           <Switch
             checkedChildren="开启"
             unCheckedChildren="关闭"
             onChange={handleChangeVerifyIP}
             checked={verify_ip}/>
+        </Form.Item>
+        <Form.Item
+          label="登录IP绑定"
+          extra="强烈建议开启，当开启后会把登录凭证与IP进行绑定，当该登录凭证通过其他IP访问时将自动失效。如非必要，切勿关闭该特性！">
+          <Switch
+            checkedChildren="开启"
+            unCheckedChildren="关闭"
+            onChange={handleChangeBindIP}
+            checked={bind_ip}/>
         </Form.Item>
         <Form.Item
           label="登录MFA（两步）认证"

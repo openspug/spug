@@ -10,15 +10,18 @@ from libs.mail import Mail
 from libs.spug import send_login_wx_code
 from libs.mixins import AdminView
 from apps.setting.utils import AppSetting
-from apps.setting.models import Setting
+from apps.setting.models import Setting, KEYS_DEFAULT
+from copy import deepcopy
 import platform
 import ldap
 
 
 class SettingView(AdminView):
     def get(self, request):
-        data = Setting.objects.all()
-        return json_response([x.to_view() for x in data])
+        response = deepcopy(KEYS_DEFAULT)
+        for item in Setting.objects.all():
+            response[item.key] = item.real_val
+        return json_response(response)
 
     def post(self, request):
         form, error = JsonParser(

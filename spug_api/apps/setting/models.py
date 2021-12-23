@@ -8,6 +8,7 @@ import json
 KEYS_DEFAULT = {
     'MFA': {'enable': False},
     'verify_ip': True,
+    'bind_ip': True,
     'ldap_service': {},
     'spug_key': None,
     'api_key': None,
