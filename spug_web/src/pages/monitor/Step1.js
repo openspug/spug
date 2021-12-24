@@ -167,7 +167,7 @@ export default observer(function () {
         <Button disabled={!canNext()} type="link" loading={loading} onClick={handleTest}>执行测试</Button>
         <span style={{color: '#888', fontSize: 12}}>Tips: 仅测试第一个监控地址</span>
       </Form.Item>
-      {showTmp && <TemplateSelector onOk={v => store.record.extra += v} onCancel={() => setShowTmp(false)}/>}
+      {showTmp && <TemplateSelector onOk={(_, v) => store.record.extra = v} onCancel={() => setShowTmp(false)}/>}
       <Selector
         visible={showSelector}
         selectedRowKeys={[...store.record.targets]}
