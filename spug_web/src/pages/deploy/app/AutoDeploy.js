@@ -103,7 +103,10 @@ export default observer(function AutoDeploy() {
           </Form.Item>
         )}
         {key ? (
-          <Form.Item label="Secret Token" tooltip="调用该Webhook接口的访问凭据，在Gitee中为WebHook密码，Gogs中为密钥文本。" extra="点击复制">
+          <Form.Item
+            label="Secret Token"
+            tooltip="调用该Webhook接口的访问凭据，在Gitee中为WebHook密码，Gogs中为密钥文本。"
+            extra={`点击复制，老版本gitlab等无该项设置的可以在上述Webhook URL后边附加 &token=${key}`}>
             <div className={styles.webhook} onClick={() => copyToClipBoard(key)}>{key}</div>
           </Form.Item>
         ) : (
