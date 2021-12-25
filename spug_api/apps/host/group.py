@@ -39,7 +39,6 @@ def filter_by_perm(data, result, ids):
 
 
 class GroupView(View):
-    @auth('host.host.view|host.console.view|exec.task.do')
     def get(self, request):
         with_hosts = request.GET.get('with_hosts')
         data, data2 = dict(), dict()

@@ -15,7 +15,7 @@ import json
 
 
 class RepositoryView(View):
-    @auth('deploy.repository.view')
+    @auth('deploy.repository.view|deploy.request.add|deploy.request.edit')
     def get(self, request):
         deploy_id = request.GET.get('deploy_id')
         data = Repository.objects.annotate(

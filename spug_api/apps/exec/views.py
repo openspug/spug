@@ -14,7 +14,8 @@ import json
 
 
 class TemplateView(View):
-    @auth('exec.template.view')
+    @auth('exec.template.view|exec.task.do|schedule.schedule.add|schedule.schedule.edit|\
+    monitor.monitor.add|monitor.monitor.edit')
     def get(self, request):
         templates = ExecTemplate.objects.all()
         types = [x['type'] for x in templates.order_by('type').values('type').distinct()]

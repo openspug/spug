@@ -185,7 +185,7 @@ class DeployView(View):
         return json_response(error=error)
 
 
-@auth('deploy.app.config')
+@auth('deploy.app.config|deploy.repository.add|deploy.request.add|deploy.request.edit')
 def get_versions(request, d_id):
     deploy = Deploy.objects.filter(pk=d_id).first()
     if not deploy:

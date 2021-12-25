@@ -20,7 +20,6 @@ import uuid
 
 
 class HostView(View):
-    @auth('host.host.view|exec.task.do')
     def get(self, request):
         hosts = Host.objects.select_related('hostextend')
         if not request.user.is_supper:
