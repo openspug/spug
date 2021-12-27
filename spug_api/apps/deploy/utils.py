@@ -128,7 +128,7 @@ def _ext2_deploy(req, helper, env):
 
     for action in host_actions:
         if action.get('type') == 'transfer':
-            action['src'] = render_str(action['src'].strip().rstrip('/'), env)
+            action['src'] = render_str(action.get('src', '').strip().rstrip('/'), env)
             action['dst'] = render_str(action['dst'].strip().rstrip('/'), env)
             if action.get('src_mode') == '1':
                 break
