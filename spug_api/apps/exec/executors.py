@@ -38,7 +38,8 @@ class Job:
 
     def _handle_command(self, command, interpreter):
         if interpreter == 'python':
-            return f'python << EOF\n# -*- coding: UTF-8 -*-\n{command}\nEOF'
+            attach = 'INTERPRETER=python\ncommand -v python3 &> /dev/null && INTERPRETER=python3'
+            return f'{attach}\n$INTERPRETER << EOF\n# -*- coding: UTF-8 -*-\n{command}\nEOF'
         return command
 
     def send(self, data):
