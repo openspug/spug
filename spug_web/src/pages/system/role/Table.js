@@ -5,16 +5,22 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, message } from 'antd';
+import { Modal, Popover, Button, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { TableCard, AuthButton, Action } from 'components';
+import RoleUsers from './RoleUsers';
 import http from 'libs/http';
 import store from './store';
+import uStore from '../account/store';
+import styles from './index.module.css';
 
 @observer
 class ComTable extends React.Component {
   componentDidMount() {
     store.fetchRecords()
+    if (uStore.records.length === 0) {
+      uStore.fetchRecords()
+    }
   }
 
   columns = [{
@@ -22,7 +28,11 @@ class ComTable extends React.Component {
     dataIndex: 'name',
   }, {
     title: '关联账户',
-    dataIndex: 'used',
+    render: info => info.used ? (
+      <Popover overlayClassName={styles.roleUser} content={<RoleUsers id={info.id}/>}>
+        <Button type="link">{info.used}</Button>
+      </Popover>
+    ) : <Button type="link" disabled>{info.used}</Button>
   }, {
     title: '描述信息',
     dataIndex: 'desc',
@@ -58,7 +68,7 @@ class ComTable extends React.Component {
   render() {
     return (
       <TableCard
-        rowKey="sr"
+        rowKey="id"
         title="角色列表"
         loading={store.isFetching}
         dataSource={store.dataSource}

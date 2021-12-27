@@ -37,3 +37,7 @@
 .delIcon:hover {
     color: #f5222d;
 }
+
+.roleUser :global(.ant-popover-inner-content) {
+  padding: 0;
+}
