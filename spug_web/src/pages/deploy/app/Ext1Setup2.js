@@ -48,7 +48,7 @@ export default observer(function () {
       <Form.Item label={FilterHead} tooltip="xxx">
         <ACEditor
           readOnly={store.isReadOnly}
-          mode="text"
+          mode="sh"
           width="100%"
           height="80px"
           placeholder="每行一条规则"
