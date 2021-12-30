@@ -115,7 +115,7 @@ class ComTable extends React.Component {
   handleTest = (text) => {
     Modal.confirm({
       title: '操作确认',
-      content: '立即以串行模式执行该任务（不影响调度规则，且不会触发失败通知）？',
+      content: '立即以串行模式执行该任务（不影响调度规则，且不会触发失败通知，测试执行会有120秒的超时，真实调度执行无此限制）？',
       onOk: () => http.post(`/api/schedule/${text.id}/`, null, {timeout: 120000})
         .then(res => store.showInfo(text, res))
     })
