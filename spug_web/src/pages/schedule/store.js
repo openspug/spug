@@ -71,10 +71,6 @@ class Store {
     this.record = info
   };
 
-  addTarget = () => {
-    this.targets.push(undefined)
-  };
-
   editTarget = (index, v) => {
     this.targets[index] = v
   };

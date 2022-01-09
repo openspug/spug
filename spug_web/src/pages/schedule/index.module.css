@@ -6,7 +6,8 @@
 .delIcon {
     font-size: 24px;
     position: relative;
-    top: 4px
+    top: 4px;
+    color: #999999;
 }
 
 .delIcon:hover {
