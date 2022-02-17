@@ -9,7 +9,7 @@ RUN pip3 install --no-cache-dir -i https://pypi.doubanio.com/simple/ \
     mysqlclient \
     apscheduler==3.7.0 \
     asgiref==3.2.10 \
-    Django==2.2.22 \
+    Django==2.2.27 \
     channels==2.3.1 \
     channels_redis==2.4.1 \
     paramiko==2.8.1 \
