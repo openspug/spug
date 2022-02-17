@@ -10,6 +10,7 @@ let Permission = {
 };
 
 export let X_TOKEN;
+export const isMobile = /Android|iPhone/i.test(navigator.userAgent)
 
 export function updatePermissions() {
   X_TOKEN = localStorage.getItem('token');
