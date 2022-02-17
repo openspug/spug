@@ -32,8 +32,8 @@ class TemplateSelector extends React.Component {
 
   handleSubmit = () => {
     if (this.state.selectedRows.length > 0) {
-      const {host_ids, body, interpreter} = this.state.selectedRows[0]
-      this.props.onOk(host_ids, body, interpreter)
+      const tpl = this.state.selectedRows[0]
+      this.props.onOk(tpl)
     }
     this.props.onCancel()
   };
@@ -62,13 +62,6 @@ class TemplateSelector extends React.Component {
 
   render() {
     const {selectedRows} = this.state;
-    let data = store.records;
-    if (store.f_name) {
-      data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
-    }
-    if (store.f_type) {
-      data = data.filter(item => item['type'].toLowerCase().includes(store.f_type.toLowerCase()))
-    }
     return (
       <Modal
         visible
@@ -99,7 +92,7 @@ class TemplateSelector extends React.Component {
             type: 'radio',
             onChange: (_, selectedRows) => this.setState({selectedRows})
           }}
-          dataSource={data}
+          dataSource={store.dataSource}
           loading={store.isFetching}
           onRow={record => {
             return {

@@ -20,6 +20,7 @@ function TaskIndex() {
   const [loading, setLoading] = useState(false)
   const [interpreter, setInterpreter] = useState('sh')
   const [command, setCommand] = useState('')
+  const [template_id, setTemplateId] = useState()
   const [histories, setHistories] = useState([])
 
   useEffect(() => {
@@ -40,19 +41,21 @@ function TaskIndex() {
 
   function handleSubmit() {
     setLoading(true)
-    const host_ids = store.host_ids;
-    http.post('/api/exec/do/', {host_ids, interpreter, command: cleanCommand(command)})
+    const formData = {interpreter, template_id, host_ids: store.host_ids, command: cleanCommand(command)}
+    http.post('/api/exec/do/', formData)
       .then(store.switchConsole)
       .finally(() => setLoading(false))
   }
 
-  function handleTemplate(host_ids, command, interpreter) {
-    if (host_ids.length > 0) store.host_ids = host_ids
-    setInterpreter(interpreter)
-    setCommand(command)
+  function handleTemplate(tpl) {
+    if (tpl.host_ids.length > 0) store.host_ids = tpl.host_ids
+    setTemplateId(tpl.id)
+    setInterpreter(tpl.interpreter)
+    setCommand(tpl.body)
   }
 
   function handleClick(item) {
+    setTemplateId(item.template_id)
     setInterpreter(item.interpreter)
     setCommand(item.command)
     store.host_ids = item.host_ids
@@ -110,7 +113,11 @@ function TaskIndex() {
               <div key={index} className={style.item} onClick={() => handleClick(item)}>
                 <div className={style[item.interpreter]}>{item.interpreter.substr(0, 2)}</div>
                 <div className={style.number}>{item.host_ids.length}</div>
-                <div className={style.command}>{item.command}</div>
+                {item.template_name ? (
+                  <div className={style.tpl}>{item.template_name}</div>
+                ) : (
+                  <div className={style.command}>{item.command}</div>
+                )}
                 <div className={style.desc}>{moment(item.updated_at).format('MM.DD HH:mm')}</div>
               </div>
             ))}

@@ -4,7 +4,7 @@
  * Released under the AGPL-3.0 License.
  */
 import { observable } from "mobx";
-import http from 'libs/http';
+import { http, includes } from 'libs';
 
 class Store {
   @observable records = [];
@@ -15,6 +15,13 @@ class Store {
 
   @observable f_name;
   @observable f_type;
+
+  get dataSource() {
+    let data = this.records
+    if (this.f_name) data = data.filter(x => includes(x.name, this.f_name))
+    if (this.f_type) data = data.filter(x => includes(x.type, this.f_type))
+    return data
+  }
 
   fetchRecords = () => {
     this.isFetching = true;

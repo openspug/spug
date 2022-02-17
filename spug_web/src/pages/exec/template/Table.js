@@ -32,20 +32,13 @@ class ComTable extends React.Component {
   };
 
   render() {
-    let data = store.records;
-    if (store.f_name) {
-      data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
-    }
-    if (store.f_type) {
-      data = data.filter(item => item['type'].toLowerCase().includes(store.f_type.toLowerCase()))
-    }
     return (
       <TableCard
         tKey="et"
         title="模板列表"
         rowKey="id"
         loading={store.isFetching}
-        dataSource={data}
+        dataSource={store.dataSource}
         onReload={store.fetchRecords}
         actions={[
           <AuthButton

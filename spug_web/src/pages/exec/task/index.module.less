@@ -1,6 +1,7 @@
 .index {
   display: flex;
   height: calc(100vh - 218px);
+  min-height: 420px;
   background-color: #fff;
   overflow: hidden;
 
@@ -27,6 +28,7 @@
 
     .editor {
       height: calc(100vh - 482px) !important;
+      min-height: 152px;
     }
   }
 
@@ -93,6 +95,17 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         margin: 0 12px;
+      }
+
+      .tpl {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin: 0 12px;
+        background-color: #d2e7fd;
+        padding: 0 8px;
+        border-radius: 2px;
       }
 
       .desc {

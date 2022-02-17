@@ -4,6 +4,7 @@
 from django.views.generic import View
 from django_redis import get_redis_connection
 from django.conf import settings
+from django.db.models import F
 from libs import json_response, JsonParser, Argument, human_datetime, auth
 from apps.exec.models import ExecTemplate, ExecHistory
 from apps.host.models import Host
@@ -57,7 +58,8 @@ def do_task(request):
     form, error = JsonParser(
         Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择执行主机'),
         Argument('command', help='请输入执行命令内容'),
-        Argument('interpreter', default='sh')
+        Argument('interpreter', default='sh'),
+        Argument('template_id', type=int, required=False)
     ).parse(request.body)
     if error is None:
         if not has_host_perm(request.user, form.host_ids):
@@ -81,7 +83,12 @@ def do_task(request):
         tmp_str = f'{form.interpreter},{host_ids},{form.command}'
         digest = hashlib.md5(tmp_str.encode()).hexdigest()
         record = ExecHistory.objects.filter(user=request.user, digest=digest).first()
+        if form.template_id:
+            template = ExecTemplate.objects.filter(pk=form.template_id).first()
+            if not template or template.body != form.command:
+                form.template_id = None
         if record:
+            record.template_id = form.template_id
             record.updated_at = human_datetime()
             record.save()
         else:
@@ -89,6 +96,7 @@ def do_task(request):
                 user=request.user,
                 digest=digest,
                 interpreter=form.interpreter,
+                template_id=form.template_id,
                 command=form.command,
                 host_ids=json.dumps(form.host_ids),
             )
@@ -98,5 +106,5 @@ def do_task(request):
 
 @auth('exec.task.do')
 def get_histories(request):
-    records = ExecHistory.objects.filter(user=request.user)
+    records = ExecHistory.objects.filter(user=request.user).annotate(template_name=F('template__name'))
     return json_response([x.to_view() for x in records])

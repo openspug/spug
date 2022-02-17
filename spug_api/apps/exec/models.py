@@ -35,6 +35,7 @@ class ExecTemplate(models.Model, ModelMixin):
 
 class ExecHistory(models.Model, ModelMixin):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    template = models.ForeignKey(ExecTemplate, on_delete=models.SET_NULL, null=True)
     digest = models.CharField(max_length=32, db_index=True)
     interpreter = models.CharField(max_length=20)
     command = models.TextField()
@@ -44,6 +45,8 @@ class ExecHistory(models.Model, ModelMixin):
     def to_view(self):
         tmp = self.to_dict()
         tmp['host_ids'] = json.loads(self.host_ids)
+        if hasattr(self, 'template_name'):
+            tmp['template_name'] = self.template_name
         return tmp
 
     class Meta:

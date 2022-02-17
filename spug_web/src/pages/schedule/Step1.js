@@ -109,7 +109,7 @@ export default observer(function () {
       <Form.Item shouldUpdate wrapperCol={{span: 14, offset: 6}}>
         {() => <Button disabled={canNext()} type="primary" onClick={handleNext}>下一步</Button>}
       </Form.Item>
-      {showTmp && <TemplateSelector onOk={(_, v) => setCommand(v)} onCancel={() => setShowTmp(false)}/>}
+      {showTmp && <TemplateSelector onOk={({body}) => setCommand(body)} onCancel={() => setShowTmp(false)}/>}
     </Form>
   )
 })
