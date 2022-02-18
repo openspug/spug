@@ -4,6 +4,7 @@
 from django.db import close_old_connections
 from channels.security.websocket import WebsocketDenier
 from apps.account.models import User
+from apps.setting.utils import AppSetting
 from libs.utils import get_request_real_ip
 from urllib.parse import parse_qs
 import time
@@ -41,8 +42,9 @@ class AuthMiddleware:
         token = parse_qs(query_string).get('x-token', [''])[0]
         if token and len(token) == 32:
             user = User.objects.filter(access_token=token).first()
-            if user and x_real_ip == user.last_ip and user.token_expired >= time.time() and user.is_active:
-                scope['user'] = user
-                return True, None
-            return False, f'Verify failed: {x_real_ip} <> {user.last_ip if user else None}'
+            if user and user.token_expired >= time.time() and user.is_active:
+                if x_real_ip == user.last_ip or AppSetting.get_default('bind_ip') is False:
+                    scope['user'] = user
+                    return True, None
+                return False, f'Verify failed: {x_real_ip} <> {user.last_ip if user else None}'
         return False, 'Token is invalid'
