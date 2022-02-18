@@ -5,8 +5,8 @@
  */
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Tabs, Tree, Input, Spin } from 'antd';
-import { FolderOutlined, FolderOpenOutlined, CloudServerOutlined, SearchOutlined } from '@ant-design/icons';
+import { Tabs, Tree, Input, Spin, Button } from 'antd';
+import { FolderOutlined, FolderOpenOutlined, CloudServerOutlined, SearchOutlined, SyncOutlined } from '@ant-design/icons';
 import { NotFound, AuthButton } from 'components';
 import Terminal from './Terminal';
 import FileManager from './FileManager';
@@ -30,6 +30,27 @@ function WebSSH(props) {
   useEffect(() => {
     window.document.title = 'Spug web terminal'
     window.addEventListener('beforeunload', leaveTips)
+    fetchNodes()
+    return () => window.removeEventListener('beforeunload', leaveTips)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (searchValue) {
+      const newTreeData = rawHostList.filter(x => includes(x.title, searchValue))
+      setTreeData(newTreeData)
+    } else {
+      setTreeData(rawTreeData)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchValue])
+
+  function leaveTips(e) {
+    e.returnValue = '确定要离开页面？'
+  }
+
+  function fetchNodes() {
+    setFetching(true)
     http.get('/api/host/group/?with_hosts=1')
       .then(res => {
         const tmp = {}
@@ -54,22 +75,6 @@ function WebSSH(props) {
         }
       })
       .finally(() => setFetching(false))
-    return () => window.removeEventListener('beforeunload', leaveTips)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    if (searchValue) {
-      const newTreeData = rawHostList.filter(x => includes(x.title, searchValue))
-      setTreeData(newTreeData)
-    } else {
-      setTreeData(rawTreeData)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchValue])
-
-  function leaveTips(e) {
-    e.returnValue = '确定要离开页面？'
   }
 
   function _openNode(node) {
@@ -138,6 +143,7 @@ function WebSSH(props) {
           <Spin spinning={fetching}>
             <Input allowClear className={styles.search} prefix={<SearchOutlined style={{color: '#999'}}/>}
                    placeholder="输入检索" onChange={e => setSearchValue(e.target.value)}/>
+            <Button icon={<SyncOutlined/>} type="link" loading={fetching} onClick={fetchNodes}/>
             <Tree.DirectoryTree
               defaultExpandAll
               expandAction="doubleClick"
