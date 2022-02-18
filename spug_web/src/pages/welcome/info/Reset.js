@@ -38,13 +38,13 @@ export default function Reset(props) {
     <React.Fragment>
       <div className={styles.title}>修改密码</div>
       <Form style={{maxWidth: 320}} labelCol={{span: 6}} wrapperCol={{span: 18}}>
-        <Form.Item label="原密码">
+        <Form.Item required label="原密码">
           <Input.Password value={old_password} placeholder="请输入" onChange={e => setOldPassword(e.target.value)}/>
         </Form.Item>
-        <Form.Item label="新密码">
+        <Form.Item required label="新密码">
           <Input.Password value={new_password} placeholder="请输入" onChange={e => setNewPassword(e.target.value)}/>
         </Form.Item>
-        <Form.Item label="再次确认">
+        <Form.Item required label="再次确认">
           <Input.Password value={new2_password} placeholder="请输入" onChange={e => setNew2Password(e.target.value)}/>
         </Form.Item>
         <Form.Item>

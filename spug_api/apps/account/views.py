@@ -142,14 +142,20 @@ class RoleView(AdminView):
 
 
 class SelfView(View):
+    def get(self, request):
+        data = request.user.to_dict(selects=('nickname', 'wx_token'))
+        return json_response(data)
+
     def patch(self, request):
         form, error = JsonParser(
             Argument('old_password', required=False),
             Argument('new_password', required=False),
-            Argument('nickname', required=False),
-        ).parse(request.body, True)
+            Argument('nickname', required=False, help='请输入昵称'),
+            Argument('wx_token', required=False),
+        ).parse(request.body)
         if error is None:
-            if form.get('old_password') and form.get('new_password'):
+            print(form)
+            if form.old_password and form.new_password:
                 if request.user.type == 'ldap':
                     return json_response(error='LDAP账户无法修改密码')
                 if len(form.new_password) < 6:
@@ -158,11 +164,14 @@ class SelfView(View):
                     request.user.password_hash = User.make_password(form.new_password)
                     request.user.token_expired = 0
                     request.user.save()
+                    return json_response()
                 else:
                     return json_response(error='原密码错误，请重新输入')
-            if form.get('nickname'):
+            if form.nickname is not None:
                 request.user.nickname = form.nickname
-                request.user.save()
+            if form.wx_token is not None:
+                request.user.wx_token = form.wx_token
+            request.user.save()
         return json_response(error=error)
 
 

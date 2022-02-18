@@ -20,13 +20,11 @@ class Argument(object):
     :param bool required: is required
     """
 
-    def __init__(self, name, default=None, handler=None, required=True, type=str, filter=None, help=None,
-                 nullable=False):
+    def __init__(self, name, default=None, handler=None, required=True, type=str, filter=None, help=None):
         self.name = name
         self.default = default
         self.type = type
         self.required = required
-        self.nullable = nullable
         self.filter = filter
         self.help = help
         self.handler = handler
@@ -45,11 +43,12 @@ class Argument(object):
         elif value in [u'', '', None]:
             if self.default is not None:
                 return self.default
-            elif not self.nullable and self.required:
-                raise ParseError(
-                    self.help or 'Value Error: %s must not be null' % self.name)
+            elif self.required:
+                raise ParseError(self.help or 'Value Error: %s must not be null' % self.name)
+            elif self.help:
+                raise ParseError(self.help)
             else:
-                return None
+                return value
         try:
             if self.type:
                 if self.type in (list, dict) and isinstance(value, str):
