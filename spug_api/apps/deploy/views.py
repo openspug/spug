@@ -36,6 +36,8 @@ class RequestView(View):
                 app_host_ids=F('deploy__host_ids'),
                 app_extend=F('deploy__extend'),
                 rep_extra=F('repository__extra'),
+                do_by_user=F('do_by__nickname'),
+                approve_by_user=F('approve_by__nickname'),
                 created_by_user=F('created_by__nickname')):
             tmp = item.to_dict()
             tmp['env_id'] = item.env_id
@@ -49,6 +51,8 @@ class RequestView(View):
             tmp['app_host_ids'] = json.loads(item.app_host_ids)
             tmp['status_alias'] = item.get_status_display()
             tmp['created_by_user'] = item.created_by_user
+            tmp['approve_by_user'] = item.approve_by_user
+            tmp['do_by_user'] = item.do_by_user
             if item.app_extend == '1':
                 tmp['visible_rollback'] = item.deploy_id not in counter
                 counter[item.deploy_id] = True
