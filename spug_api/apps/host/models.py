@@ -93,7 +93,7 @@ class Group(models.Model, ModelMixin):
         response = dict(key=self.id, value=self.id, title=self.name, children=[])
         if with_hosts:
             def make_item(x):
-                return dict(title=x.name, key=f'{self.id}_{x.id}', id=x.id, isLeaf=True)
+                return dict(title=x.name, hostname=x.hostname, key=f'{self.id}_{x.id}', id=x.id, isLeaf=True)
 
             response['children'] = [make_item(x) for x in self.hosts.all()]
         return response

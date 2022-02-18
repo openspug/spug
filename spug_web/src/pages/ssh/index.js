@@ -37,7 +37,7 @@ function WebSSH(props) {
 
   useEffect(() => {
     if (searchValue) {
-      const newTreeData = rawHostList.filter(x => includes(x.title, searchValue))
+      const newTreeData = rawHostList.filter(x => includes([x.title, x.hostname], searchValue))
       setTreeData(newTreeData)
     } else {
       setTreeData(rawTreeData)
