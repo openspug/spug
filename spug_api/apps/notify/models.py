@@ -22,7 +22,7 @@ class Notify(models.Model, ModelMixin):
     title = models.CharField(max_length=255)
     source = models.CharField(max_length=10, choices=SOURCES)
     type = models.CharField(max_length=2, choices=TYPES)
-    content = models.CharField(max_length=255, null=True)
+    content = models.TextField(null=True)
     unread = models.BooleanField(default=True)
     link = models.CharField(max_length=255, null=True)
 
