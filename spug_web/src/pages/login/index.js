@@ -160,7 +160,7 @@ export default function () {
           <a title="文档" href="https://spug.cc/docs/about-spug/" target="_blank"
              rel="noopener noreferrer">文档</a>
         </div>
-        <div style={{color: 'rgba(0, 0, 0, .45)'}}>Copyright <CopyrightOutlined/> 2022 By OpenSpug</div>
+        <div style={{color: 'rgba(0, 0, 0, .45)'}}>Copyright <CopyrightOutlined/> {new Date().getFullYear()} By OpenSpug</div>
       </div>
     </div>
   )
