@@ -107,7 +107,7 @@ class Ext2Setup2 extends React.Component {
                   spellCheck={false}
                   disabled={store.isReadOnly || item['src_mode'] === '1'}
                   placeholder="请输入本地（部署spug的容器或主机）路径"
-                  value={item['src']}
+                  value={item['src_mode'] === '1' ? 'N/A' : item['src']}
                   onChange={e => item['src'] = e.target.value}
                   addonBefore={(
                     <Select disabled={store.isReadOnly} style={{width: 120}} value={item['src_mode'] || '0'}
@@ -121,7 +121,7 @@ class Ext2Setup2 extends React.Component {
                 <Form.Item key={1} label="过滤规则" extra={this.helpMap[item['mode']]}>
                   <Input
                     spellCheck={false}
-                    placeholder="请输入逗号分割的过滤规则"
+                    placeholder={item['mode'] === '0' ? 'N/A' : '请输入逗号分割的过滤规则'}
                     value={item['rule']}
                     onChange={e => item['rule'] = e.target.value.replace('，', ',')}
                     disabled={store.isReadOnly || item['mode'] === '0'}
