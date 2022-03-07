@@ -8,7 +8,7 @@ from libs import json_response, JsonParser, Argument
 
 class NotifyView(View):
     def get(self, request):
-        notifies = Notify.objects.filter(unread=True)
+        notifies = Notify.objects.all()
         return json_response(notifies)
 
     def patch(self, request):

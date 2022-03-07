@@ -56,8 +56,8 @@ export default function () {
     setLoading(true);
     http.get('/api/notify/')
       .then(res => {
+        setReads(res.filter(x => !x.unread).map(x => x.id))
         setNotifies(res);
-        setReads([])
       })
       .finally(() => setLoading(false))
   }
@@ -68,8 +68,7 @@ export default function () {
     ws = new WebSocket(`${protocol}//${window.location.host}/api/ws/notify/?x-token=${X_TOKEN}`);
     ws.onopen = () => ws.send('ok');
     ws.onmessage = e => {
-      if (e.data === 'pong') {
-      } else {
+      if (e.data !== 'pong') {
         fetch();
         const {title, content} = JSON.parse(e.data);
         const key = `open${Date.now()}`;
@@ -77,6 +76,12 @@ export default function () {
         const btn = <Button type="primary" size="small" onClick={() => notification.close(key)}>知道了</Button>;
         notification.warning({message: title, description, btn, key, top: 64, duration: null})
       }
+    }
+  }
+
+  function handleVisible(visible) {
+    if (visible) {
+      fetch()
     }
   }
 
@@ -95,9 +100,10 @@ export default function () {
     http.patch('/api/notify/', {ids})
   }
 
+  const count = notifies.length - reads.length;
   return (
     <div className={styles.right}>
-      <Dropdown trigger={['click']} overlay={(
+      <Dropdown trigger={['click']} onVisibleChange={handleVisible} overlay={(
         <Menu className={styles.notify}>
           <Menu.Item style={{padding: 0, whiteSpace: 'unset'}}>
             <List
@@ -112,7 +118,7 @@ export default function () {
                     avatar={<Icon type={item.source}/>}
                     title={<span style={{fontWeight: 400, color: '#404040'}}>{item.title}</span>}
                     description={[
-                      <div key="1" style={{fontSize: 12}}>{item.content}</div>,
+                      <div key="1" style={{fontSize: 12, overflowWrap: 'anywhere'}}>{item.content}</div>,
                       <div key="2" style={{fontSize: 12}}>{moment(item['created_at']).fromNow()}</div>
                     ]}/>
                 </List.Item>
@@ -124,7 +130,7 @@ export default function () {
         </Menu>
       )}>
         <span className={styles.trigger}>
-          <Badge count={notifies.length - reads.length}>
+          <Badge count={count > 0 ? count : 0}>
             <NotificationOutlined style={{fontSize: 16}}/>
           </Badge>
         </span>
