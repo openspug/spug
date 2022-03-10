@@ -131,7 +131,10 @@ def _ext2_deploy(req, helper, env):
         if action.get('type') == 'transfer':
             action['src'] = render_str(action.get('src', '').strip().rstrip('/'), env)
             action['dst'] = render_str(action['dst'].strip().rstrip('/'), env)
-            if action.get('src_mode') == '1':
+            if action.get('src_mode') == '1':   # upload when publish
+                extra = json.loads(req.extra)
+                if 'name' in extra:
+                    action['name'] = extra['name']
                 break
             helper.send_step('local', step, f'{human_time()} 检测到来源为本地路径的数据传输动作，执行打包...   \r\n')
             action['src'] = action['src'].rstrip('/ ')
@@ -263,7 +266,14 @@ def _deploy_ext2_host(helper, h_id, actions, env, spug_version):
             if action.get('type') == 'transfer':
                 if action.get('src_mode') == '1':
                     try:
-                        ssh.put_file(os.path.join(REPOS_DIR, env.SPUG_DEPLOY_ID, spug_version), action['dst'])
+                        dst = action['dst']
+                        command = f'[ -e {dst} ] || mkdir -p $(dirname {dst}); [ -d {dst} ]'
+                        code, _ = ssh.exec_command_raw(command)
+                        if code == 0:    # is dir
+                            if not action.get('name'):
+                                raise RuntimeError('internal error 1002')
+                            dst = dst.rstrip('/') + '/' + action['name']
+                        ssh.put_file(os.path.join(REPOS_DIR, env.SPUG_DEPLOY_ID, spug_version), dst)
                     except Exception as e:
                         helper.send_error(host.id, f'Exception: {e}')
                     helper.send_info(host.id, 'transfer completed\r\n')

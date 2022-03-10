@@ -22,7 +22,7 @@ def auto_deploy(request, deploy_id, kind):
         if kind == 'branch' and _kind == 'heads':
             commit_id = body['after']
             if commit_id != '0000000000000000000000000000000000000000' and ref == request.GET.get('name'):
-                message = _parse_message(body, repo)[:20]
+                message = _parse_message(body, repo)
                 Thread(target=_dispatch, args=(deploy_id, ref, commit_id, message)).start()
                 return HttpResponse(status=202)
         elif kind == 'tag' and _kind == 'tags':
@@ -82,7 +82,7 @@ def _parse_message(body, repo):
             message = body['commits'][0].get('message', '')
     else:
         raise ValueError(f'repo {repo} is not supported')
-    return message
+    return message[:20].strip()
 
 
 def _dispatch(deploy_id, ref, commit_id=None, message=None):
