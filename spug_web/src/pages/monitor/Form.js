@@ -9,7 +9,7 @@ import { Modal, Steps } from 'antd';
 import Step1 from './Step1';
 import Step2 from './Step2';
 import store from './store';
-import styles from './index.module.css';
+import styles from './index.module.less';
 import groupStore from '../alarm/group/store';
 
 export default observer(function () {

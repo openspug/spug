@@ -8,6 +8,7 @@ from libs import json_response, JsonParser, Argument, human_datetime, auth
 from apps.monitor.models import Detection
 from apps.monitor.executors import dispatch
 from apps.setting.utils import AppSetting
+from datetime import datetime
 import json
 
 
@@ -104,3 +105,36 @@ def run_test(request):
         is_success, message = dispatch(form.type, form.targets[0], form.extra)
         return json_response({'is_success': is_success, 'message': message})
     return json_response(error=error)
+
+
+@auth('monitor.monitor.view')
+def get_overview(request):
+    response = []
+    rds = get_redis_connection()
+    for item in Detection.objects.all():
+        data = {}
+        for key in json.loads(item.targets):
+            data[key] = {
+                'id': f'{item.id}_{key}',
+                'group': item.group,
+                'name': item.name,
+                'type': item.get_type_display(),
+                'target': key,
+                'desc': item.desc,
+                'status': '1' if item.is_active else '0',
+                'latest_run_time': item.latest_run_time,
+            }
+        if item.is_active:
+            for key, val in rds.hgetall(f'spug:det:{item.id}').items():
+                prefix, key = key.decode().split('_', 1)
+                if key in data:
+                    val = int(val)
+                    if prefix == 'c':
+                        if data[key]['status'] == '1':
+                            data[key]['status'] = '2'
+                        data[key]['count'] = val
+                    elif prefix == 't':
+                        date = datetime.fromtimestamp(val).strftime('%Y-%m-%d %H:%M:%S')
+                        data[key].update(status='3', notified_at=date)
+        response.extend(list(data.values()))
+    return json_response(response)
