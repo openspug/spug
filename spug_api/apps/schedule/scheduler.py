@@ -8,6 +8,7 @@ from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.cron import CronTrigger
 from django_redis import get_redis_connection
 from django.db import connections
+from django.db.utils import DatabaseError
 from apps.schedule.models import Task, History
 from apps.schedule.builtin import auto_run_by_day, auto_run_by_minute
 from django.conf import settings
@@ -78,15 +79,18 @@ class Scheduler:
     def _init(self):
         self.scheduler.start()
         self._init_builtin_jobs()
-        for task in Task.objects.filter(is_active=True):
-            trigger = self.parse_trigger(task.trigger, task.trigger_args)
-            self.scheduler.add_job(
-                self._dispatch,
-                trigger,
-                id=str(task.id),
-                args=(task.id, task.command, json.loads(task.targets)),
-            )
-        connections.close_all()
+        try:
+            for task in Task.objects.filter(is_active=True):
+                trigger = self.parse_trigger(task.trigger, task.trigger_args)
+                self.scheduler.add_job(
+                    self._dispatch,
+                    trigger,
+                    id=str(task.id),
+                    args=(task.id, task.command, json.loads(task.targets)),
+                )
+            connections.close_all()
+        except DatabaseError:
+            pass
 
     def run(self):
         rds_cli = get_redis_connection()

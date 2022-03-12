@@ -7,6 +7,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from django_redis import get_redis_connection
 from django.conf import settings
 from django.db import connections
+from django.db.utils import DatabaseError
 from apps.monitor.models import Detection
 from libs import AttrDict, human_datetime
 from datetime import datetime, timedelta
@@ -32,17 +33,20 @@ class Scheduler:
 
     def _init(self):
         self.scheduler.start()
-        for item in Detection.objects.filter(is_active=True):
-            now = datetime.now()
-            trigger = IntervalTrigger(minutes=int(item.rate), timezone=self.timezone)
-            self.scheduler.add_job(
-                self._dispatch,
-                trigger,
-                id=str(item.id),
-                args=(item.id, item.type, item.targets, item.extra, item.threshold, item.quiet),
-                next_run_time=now + timedelta(seconds=randint(0, 60))
-            )
-        connections.close_all()
+        try:
+            for item in Detection.objects.filter(is_active=True):
+                now = datetime.now()
+                trigger = IntervalTrigger(minutes=int(item.rate), timezone=self.timezone)
+                self.scheduler.add_job(
+                    self._dispatch,
+                    trigger,
+                    id=str(item.id),
+                    args=(item.id, item.type, item.targets, item.extra, item.threshold, item.quiet),
+                    next_run_time=now + timedelta(seconds=randint(0, 60))
+                )
+            connections.close_all()
+        except DatabaseError:
+            pass
 
     def run(self):
         rds_cli = get_redis_connection()
