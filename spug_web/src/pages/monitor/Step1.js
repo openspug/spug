@@ -42,7 +42,7 @@ export default observer(function () {
     store.record.type = v;
     store.record.targets = [];
     store.record.extra = undefined;
-  };
+  }
 
   function handleAddGroup() {
     Modal.confirm({

@@ -4,6 +4,7 @@
  * Released under the AGPL-3.0 License.
  */
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react';
 import { Form, Select, Radio, Transfer, Checkbox, Button, message } from 'antd';
 import { http } from 'libs';
@@ -39,6 +40,7 @@ export default observer(function () {
     http.post('/api/monitor/', formData)
       .then(() => {
         message.success('操作成功');
+        store.record = {};
         store.formVisible = false;
         store.fetchRecords()
       }, () => setLoading(false))
@@ -52,7 +54,7 @@ export default observer(function () {
   const info = store.record;
   return (
     <Form form={form} labelCol={{span: 6}} wrapperCol={{span: 14}}>
-      <Form.Item name="rate" initialValue={info.rate || 5} label="监控频率">
+      <Form.Item name="rate" initialValue={info.rate || 5} label="监控频率" tooltip="每隔N分钟检测一次">
         <Radio.Group>
           <Radio value={1}>1分钟</Radio>
           <Radio value={5}>5分钟</Radio>
@@ -61,7 +63,7 @@ export default observer(function () {
           <Radio value={60}>60分钟</Radio>
         </Radio.Group>
       </Form.Item>
-      <Form.Item name="threshold" initialValue={info.threshold || 3} label="报警阈值">
+      <Form.Item name="threshold" initialValue={info.threshold || 3} label="报警阈值" tooltip="连续N次检测失败，则发送告警">
         <Radio.Group>
           <Radio value={1}>1次</Radio>
           <Radio value={2}>2次</Radio>
@@ -70,7 +72,8 @@ export default observer(function () {
           <Radio value={5}>5次</Radio>
         </Radio.Group>
       </Form.Item>
-      <Form.Item required name="notify_grp" valuePropName="targetKeys" initialValue={info.notify_grp} label="报警联系人组">
+      <Form.Item required name="notify_grp" valuePropName="targetKeys" initialValue={info.notify_grp} label="报警联系人组"
+                 extra={<>去创建 <Link to="/alarm/contact">报警联系人</Link> 和 <Link to="/alarm/group">联系人组</Link>。</>}>
         <Transfer
           lazy={false}
           rowKey={item => item.id}
