@@ -121,9 +121,14 @@ def get_overview(request):
                 'type': item.get_type_display(),
                 'target': key,
                 'desc': item.desc,
-                'status': '1' if item.is_active else '0',
+                'status': '0',
                 'latest_run_time': item.latest_run_time,
             }
+            if item.is_active:
+                if item.latest_run_time:
+                    data[key]['status'] = '1'
+                else:
+                    data[key]['status'] = '10'
         if item.is_active:
             for key, val in rds.hgetall(f'spug:det:{item.id}').items():
                 prefix, key = key.decode().split('_', 1)

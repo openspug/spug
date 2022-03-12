@@ -9,21 +9,22 @@ import { Card, Input, Select, Space, Tooltip, Spin, message } from 'antd';
 import { FrownOutlined, RedoOutlined, SyncOutlined } from '@ant-design/icons';
 import styles from './index.module.less';
 import { http, includes } from 'libs';
-import moment from 'moment';
 import store from './store';
 
-const ColorMap = {
-  '0': '#cccccc',
-  '1': '#009400',
-  '2': '#ffba00',
-  '3': '#fa383e',
+const StyleMap = {
+  '0': {background: '#99999933', border: '2px solid #999', color: '#999999'},
+  '1': {background: '#16a98733', border: '2px solid #16a987', color: '#16a987'},
+  '2': {background: '#ffba0033', border: '2px solid #ffba00', color: '#ffba00'},
+  '3': {background: '#f2655d33', border: '2px solid #f2655d', color: '#f2655d'},
+  '10': {background: '#99999919', border: '2px dashed #999999'}
 }
 
 const StatusMap = {
   '1': '正常',
   '2': '警告',
   '3': '紧急',
-  '0': '禁用',
+  '0': '未激活',
+  '10': '待调度'
 }
 
 let AutoReload = null
@@ -37,14 +38,12 @@ function CardItem(props) {
       <div>描述: {desc}</div>
       <div>目标: {target}</div>
       <div>状态: {StatusMap[status]}</div>
-      {latest_run_time ? <div>更新: {latest_run_time}</div> : null}
+      <div>更新: {latest_run_time || '---'}</div>
     </div>
   )
   return (
     <Tooltip title={title}>
-      <div className={styles.card} style={{backgroundColor: ColorMap[status]}}>
-        {moment(latest_run_time).fromNow()}
-      </div>
+      <div className={styles.card} style={StyleMap[status]}/>
     </Tooltip>
   )
 }
@@ -119,16 +118,14 @@ function MonitorCard() {
     )}>
       <Spin spinning={fetching}>
         <div className={styles.header}>
-          {Object.entries(StatusMap).map(([s, desc]) => {
+          {Object.entries(StyleMap).map(([s, style]) => {
+            if (s === '10') return null
             const count = dataSource.filter(x => x.status === s).length;
             return count ? (
               <div
                 key={s}
                 className={styles.item}
-                style={s === status ? {backgroundColor: ColorMap[s]} : {
-                  border: `1.5px solid ${ColorMap[s]}`,
-                  color: ColorMap[s]
-                }}
+                style={s === status ? style : {...style, background: '#fff'}}
                 onClick={() => setStatus(s === status ? '' : s)}>
                 {dataSource.filter(x => x.status === s).length}
               </div>
@@ -136,7 +133,7 @@ function MonitorCard() {
           })}
           <div
             className={styles.authLoad}
-            style={autoReload ? {backgroundColor: '#1890ff'} : {color: '#1890ff', border: '1.5px solid #1890ff'}}
+            style={autoReload ? {backgroundColor: '#1890ff'} : {color: '#1890ff', border: '2px solid #1890ff'}}
             onClick={handleAutoReload}>
             {autoReload ? <SyncOutlined/> : <RedoOutlined/>}
           </div>
