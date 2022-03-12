@@ -8,7 +8,6 @@ import { observer } from 'mobx-react';
 import { Card, Input, Select, Space, Tooltip, Spin, message } from 'antd';
 import { FrownOutlined, RedoOutlined, SyncOutlined } from '@ant-design/icons';
 import styles from './index.module.less';
-import { http, includes } from 'libs';
 import store from './store';
 
 const StyleMap = {
@@ -16,7 +15,7 @@ const StyleMap = {
   '1': {background: '#16a98733', border: '2px solid #16a987', color: '#16a987'},
   '2': {background: '#ffba0033', border: '2px solid #ffba00', color: '#ffba00'},
   '3': {background: '#f2655d33', border: '2px solid #f2655d', color: '#f2655d'},
-  '10': {background: '#99999919', border: '2px dashed #999999'}
+  '10': {background: '#99999919', border: '2px dashed #999999', color: '#999999'}
 }
 
 const StatusMap = {
@@ -27,18 +26,16 @@ const StatusMap = {
   '10': '待调度'
 }
 
-let AutoReload = null
-
 function CardItem(props) {
   const {status, type, desc, name, target, latest_run_time} = props.data
   const title = (
     <div>
       <div>类型: {type}</div>
       <div>名称: {name}</div>
-      <div>描述: {desc}</div>
       <div>目标: {target}</div>
       <div>状态: {StatusMap[status]}</div>
       <div>更新: {latest_run_time || '---'}</div>
+      <div>描述: {desc}</div>
     </div>
   )
   return (
@@ -49,48 +46,24 @@ function CardItem(props) {
 }
 
 function MonitorCard() {
-  const [fetching, setFetching] = useState(true);
   const [autoReload, setAutoReload] = useState(false);
   const [status, setStatus] = useState();
-  const [records, setRecords] = useState([]);
-  const [dataSource, setDataSource] = useState([]);
 
   useEffect(() => {
-    fetchRecords()
+    store.fetchOverviews()
 
-    return () => AutoReload = null
+    return () => store.autoReload = null
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function fetchRecords() {
-    if (AutoReload === false) return
-    setFetching(true);
-    return http.get('/api/monitor/overview/')
-      .then(res => setRecords(res))
-      .finally(() => {
-        setFetching(false)
-        if (AutoReload) setTimeout(fetchRecords, 5000)
-      })
-  }
-
-  useEffect(() => {
-    const data = records.filter(x =>
-      (!store.f_type || x.type === store.f_type) &&
-      (!store.f_group || x.group === store.f_group) &&
-      (!store.f_name || includes(x.name, store.f_name))
-    )
-    setDataSource(data)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [records, store.f_type, store.f_group, store.f_name])
-
   function handleAutoReload() {
-    AutoReload = !autoReload
+    store.autoReload = !autoReload
     message.info(autoReload ? '关闭自动刷新' : '开启自动刷新')
-    if (!autoReload) fetchRecords()
+    if (!autoReload) store.fetchOverviews()
     setAutoReload(!autoReload)
   }
 
-  const filteredRecords = dataSource.filter(x => !status || x.status === status)
+  const filteredRecords = store.ovDataSource.filter(x => !status || x.status === status)
   return (
     <Card title="总览" style={{marginBottom: 24}} extra={(
       <Space size="middle">
@@ -116,18 +89,17 @@ function MonitorCard() {
         </Space>
       </Space>
     )}>
-      <Spin spinning={fetching}>
+      <Spin spinning={store.ovFetching}>
         <div className={styles.header}>
           {Object.entries(StyleMap).map(([s, style]) => {
-            if (s === '10') return null
-            const count = dataSource.filter(x => x.status === s).length;
+            const count = store.ovDataSource.filter(x => x.status === s).length;
             return count ? (
               <div
                 key={s}
                 className={styles.item}
                 style={s === status ? style : {...style, background: '#fff'}}
                 onClick={() => setStatus(s === status ? '' : s)}>
-                {dataSource.filter(x => x.status === s).length}
+                {store.ovDataSource.filter(x => x.status === s).length}
               </div>
             ) : null
           })}

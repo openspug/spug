@@ -4,18 +4,21 @@
  * Released under the AGPL-3.0 License.
  */
 import { observable, computed } from 'mobx';
-import http from 'libs/http';
+import { http, includes } from 'libs';
 import moment from 'moment';
 import lds from 'lodash';
 
 class Store {
+  autoReload = null;
   @observable records = [];
   @observable record = {};
   @observable types = [];
   @observable groups = [];
+  @observable overviews = [];
   @observable page = 0;
   @observable isFetching = false;
   @observable formVisible = false;
+  @observable ovFetching = false;
 
   @observable f_name;
   @observable f_type;
@@ -25,9 +28,17 @@ class Store {
   @computed get dataSource() {
     let records = this.records;
     if (this.f_active) records = records.filter(x => x.is_active === (this.f_active === '1'));
-    if (this.f_name) records = records.filter(x => x.name.toLowerCase().includes(this.f_name.toLowerCase()));
+    if (this.f_name) records = records.filter(x => includes(x.name, this.f_name));
     if (this.f_type) records = records.filter(x => x.type_alias === this.f_type);
     if (this.f_group) records = records.filter(x => x.group === this.f_group);
+    return records
+  }
+
+  @computed get ovDataSource() {
+    let records = this.overviews;
+    if (this.f_type) records = records.filter(x => x.type === this.f_type);
+    if (this.f_group) records = records.filter(x => x.group === this.f_group);
+    if (this.f_name) records = records.filter(x => includes(x.name, this.f_name));
     return records
   }
 
@@ -48,6 +59,17 @@ class Store {
       })
       .finally(() => this.isFetching = false)
   };
+
+  fetchOverviews = () => {
+    if (this.autoReload === false) return
+    this.ovFetching = true;
+    return http.get('/api/monitor/overview/')
+      .then(res => this.overviews = res)
+      .finally(() => {
+        this.ovFetching = false;
+        if (this.autoReload) setTimeout(this.fetchOverviews, 5000)
+      })
+  }
 
   showForm = (info) => {
     if (info) {

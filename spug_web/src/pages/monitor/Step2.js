@@ -42,7 +42,8 @@ export default observer(function () {
         message.success('操作成功');
         store.record = {};
         store.formVisible = false;
-        store.fetchRecords()
+        store.fetchRecords();
+        store.fetchOverviews()
       }, () => setLoading(false))
   }
 
