@@ -69,7 +69,7 @@ export default observer(function AutoDeploy() {
           <Form.Item hidden={tagMode} required={!tagMode} label="选择分支" extra={<span>
             根据你的网络情况，首次刷新可能会很慢，请耐心等待。
             <a target="_blank" rel="noopener noreferrer"
-               href="https://spug.cc/docs/install-error/#%E6%96%B0%E5%BB%BA%E5%B8%B8%E8%A7%84%E5%8F%91%E5%B8%83%E7%94%B3%E8%AF%B7-git-clone-%E9%94%99%E8%AF%AF">刷新失败？</a>
+               href="https://spug.cc/docs/use-problem#clone">刷新失败？</a>
           </span>}>
             <Form.Item style={{display: 'inline-block', marginBottom: 0, width: '246px'}}>
               <Select placeholder="仅指定分支的事件触发自动发布" value={branch} onChange={setBranch}>

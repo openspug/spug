@@ -61,7 +61,7 @@ export default function () {
             content: <div>
               未能获取到访问者的真实IP，无法提供基于请求来源IP的合法性验证，详细信息请参考
               <a target="_blank"
-                 href="https://spug.cc/docs/practice/#%E5%AE%89%E5%85%A8%E6%80%A7%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97"
+                 href="https://spug.cc/docs/practice/"
                  rel="noopener noreferrer">官方文档</a>。
             </div>,
             onOk: () => doLogin(data)

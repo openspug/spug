@@ -10,7 +10,7 @@ const Tips1 = (
   <a
     target="_blank"
     rel="noopener noreferrer"
-    href="https://spug.cc/docs/deploy-config/#%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F">内置全局变量</a>
+    href="https://spug.cc/docs/deploy-config#global-env">内置全局变量</a>
 )
 
 const Tips2 = (
