@@ -6,7 +6,13 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Tabs, Tree, Input, Spin, Button } from 'antd';
-import { FolderOutlined, FolderOpenOutlined, CloudServerOutlined, SearchOutlined, SyncOutlined } from '@ant-design/icons';
+import {
+  FolderOutlined,
+  FolderOpenOutlined,
+  CloudServerOutlined,
+  SearchOutlined,
+  SyncOutlined
+} from '@ant-design/icons';
 import { NotFound, AuthButton } from 'components';
 import Terminal from './Terminal';
 import FileManager from './FileManager';
@@ -15,6 +21,7 @@ import styles from './index.module.less';
 import LogoSpugText from 'layout/logo-spug-txt.png';
 import lds from 'lodash';
 
+let posX = 0
 
 function WebSSH(props) {
   const [visible, setVisible] = useState(false);
@@ -26,6 +33,7 @@ function WebSSH(props) {
   const [hosts, setHosts] = useState([]);
   const [activeId, setActiveId] = useState();
   const [hostId, setHostId] = useState();
+  const [width, setWidth] = useState(280);
 
   useEffect(() => {
     window.document.title = 'Spug web terminal'
@@ -125,6 +133,12 @@ function WebSSH(props) {
     }
   }
 
+  function handleMouseMove(e) {
+    if (posX) {
+      setWidth(e.pageX);
+    }
+  }
+
   const spug_web_terminal =
     '                                                 __       __                          _                __\n' +
     '   _____ ____   __  __ ____ _   _      __ ___   / /_     / /_ ___   _____ ____ ___   (_)____   ____ _ / /\n' +
@@ -134,8 +148,8 @@ function WebSSH(props) {
     '     /_/            /____/                                                                               \n'
 
   return hasPermission('host.console.view') ? (
-    <div className={styles.container}>
-      <div className={styles.sider}>
+    <div className={styles.container} onMouseUp={() => posX = 0} onMouseMove={handleMouseMove}>
+      <div className={styles.sider} style={{width}}>
         <div className={styles.logo}>
           <img src={LogoSpugText} alt="logo"/>
         </div>
@@ -152,6 +166,7 @@ function WebSSH(props) {
               onSelect={(k, e) => handleSelect(e)}/>
           </Spin>
         </div>
+        <div className={styles.split} onMouseDown={e => posX = e.pageX}/>
       </div>
       <div className={styles.content}>
         <Tabs
@@ -160,6 +175,7 @@ function WebSSH(props) {
           type="editable-card"
           onTabClick={key => setActiveId(key)}
           onEdit={handleRemove}
+          style={{width: `calc(100vw - ${width}px)`}}
           tabBarExtraContent={<AuthButton
             auth="host.console.list"
             type="primary"

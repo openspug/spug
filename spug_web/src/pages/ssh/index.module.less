@@ -7,6 +7,15 @@
         flex-direction: column;
         width: 280px;
         background-color: #fafafa;
+        position: relative;
+
+        .split {
+            position: absolute;
+            width: 6px;
+            height: 100vh;
+            right: -3px;
+            cursor: ew-resize;
+        }
 
         .logo {
             height: 42px;
@@ -32,7 +41,7 @@
 
             .search {
                 margin: 12px 10px;
-                width: 220px;
+                width: calc(100% - 60px);
             }
         }
     }
@@ -42,7 +51,6 @@
         flex-direction: column;
 
         :global(.ant-tabs-nav) {
-            width: calc(100vw - 280px);
             height: 42px;
             margin: 0;
         }

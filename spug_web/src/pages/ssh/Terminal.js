@@ -3,7 +3,7 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 import { X_TOKEN } from 'libs';
@@ -14,9 +14,9 @@ import styles from './index.module.less';
 function WebSSH(props) {
   const container = useRef();
   const [term] = useState(new Terminal());
+  const [fitPlugin] = useState(new FitAddon());
 
   useEffect(() => {
-    const fitPlugin = new FitAddon();
     term.loadAddon(fitPlugin);
     term.setOption('fontFamily', 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei')
     term.open(container.current);
@@ -33,12 +33,15 @@ function WebSSH(props) {
       setTimeout(() => term.write('\r\nConnection is closed.\r\n'), 200)
     };
     term.onData(data => socket.send(JSON.stringify({data})));
-    term.onResize(({cols, rows}) => socket.send(JSON.stringify({resize: [cols, rows]})));
-    const resize = () => fitPlugin.fit();
-    window.addEventListener('resize', resize)
+    term.onResize(({cols, rows}) => {
+      if (socket.readyState === 1) {
+        socket.send(JSON.stringify({resize: [cols, rows]}))
+      }
+    });
+    window.addEventListener('resize', fitTerminal)
 
     return () => {
-      window.removeEventListener('resize', resize);
+      window.removeEventListener('resize', fitTerminal);
       if (socket) socket.close()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -50,6 +53,19 @@ function WebSSH(props) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.activeId])
+
+  useLayoutEffect(fitTerminal)
+
+  function fitTerminal() {
+    if (props.vId === props.activeId) {
+      const dims = fitPlugin.proposeDimensions();
+      if (!dims || !term || !dims.cols || !dims.rows) return;
+      if (term.rows !== dims.rows || term.cols !== dims.cols) {
+        term._core._renderService.clear();
+        term.resize(dims.cols, dims.rows);
+      }
+    }
+  }
 
   function _read_as_text(data) {
     const reader = new window.FileReader();

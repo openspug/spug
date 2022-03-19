@@ -5,7 +5,7 @@
   "dependencies": {
     "@ant-design/icons": "^4.3.0",
     "ace-builds": "^1.4.13",
-    "antd": "^4.10.3",
+    "antd": "^4.19.2",
     "axios": "^0.21.0",
     "bizcharts": "^3.5.9",
     "history": "^4.10.1",
