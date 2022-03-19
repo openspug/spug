@@ -64,7 +64,7 @@ function NavIndex(props) {
           </Col>
           {records.map(item => (
             <Col key={item.id} span={6} style={{marginBottom: 24}}>
-              <Card actions={[
+              <Card hoverable actions={[
                 <LeftSquareOutlined onClick={() => handleSort(item, 'up')}/>,
                 <RightSquareOutlined onClick={() => handleSort(item, 'down')}/>,
                 <EditOutlined onClick={() => setRecord(item)}/>
@@ -83,9 +83,10 @@ function NavIndex(props) {
           {records.map(item => (
             <Col key={item.id} span={6} style={{marginBottom: 24}}>
               <Card
+                hoverable
                 actions={item.links.map(x => <a href={x.url} rel="noopener noreferrer" target="_blank">{x.name}</a>)}>
                 <Card.Meta
-                  avatar={<Avatar src={item.logo}/>}
+                  avatar={<Avatar size="large" src={item.logo}/>}
                   title={item.title}
                   description={item.desc}/>
               </Card>

@@ -154,7 +154,6 @@ class SelfView(View):
             Argument('wx_token', required=False),
         ).parse(request.body)
         if error is None:
-            print(form)
             if form.old_password and form.new_password:
                 if request.user.type == 'ldap':
                     return json_response(error='LDAP账户无法修改密码')
