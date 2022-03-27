@@ -55,6 +55,7 @@ export default observer(function () {
           <Input.TextArea
             rows={7}
             spellCheck={false}
+            className={styles.keyText}
             value={store.settings.public_key}
             onChange={e => store.settings.public_key = e.target.value}
             placeholder="请输入公钥"/>
@@ -63,6 +64,7 @@ export default observer(function () {
           <Input.TextArea
             rows={14}
             spellCheck={false}
+            className={styles.keyText}
             value={store.settings.private_key}
             onChange={e => store.settings.private_key = e.target.value}
             placeholder="请输入私钥"/>
