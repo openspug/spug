@@ -176,6 +176,8 @@ function TableCard(props) {
         onFieldsChange={handleFieldsChange}
         onReload={props.onReload}/>
       <Table
+        tableLayout={props.tableLayout}
+        scroll={props.scroll}
         rowKey={props.rowKey}
         loading={props.loading}
         columns={columns.filter((_, index) => fields.includes(index))}

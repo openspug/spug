@@ -9,11 +9,13 @@ import { BranchesOutlined, BuildOutlined, TagOutlined, PlusOutlined, TagsOutline
 import { Radio, Modal, Popover, Tag, Popconfirm, Tooltip, message } from 'antd';
 import { http, hasPermission } from 'libs';
 import { Action, AuthButton, TableCard } from 'components';
+import S from './index.module.less';
 import store from './store';
 
 function ComTable() {
   const columns = [{
     title: '申请标题',
+    className: S.min180,
     render: info => (
       <div>
         {info.type === '2' && <Tooltip title="回滚发布"><Tag color="#f50">R</Tag></Tooltip>}
@@ -24,12 +26,15 @@ function ComTable() {
     )
   }, {
     title: '应用',
+    className: S.min120,
     dataIndex: 'app_name',
   }, {
     title: '发布环境',
+    className: S.min120,
     dataIndex: 'env_name',
   }, {
     title: '版本',
+    className: S.min155,
     render: info => {
       if (info['app_extend'] === '1') {
         const [ext1] = info.extra || info.rep_extra;
@@ -48,7 +53,46 @@ function ComTable() {
       }
     }
   }, {
+    title: '申请人',
+    className: S.min120,
+    dataIndex: 'created_by_user',
+    hide: true
+  }, {
+    title: '申请时间',
+    className: S.min120,
+    dataIndex: 'created_at',
+    sorter: (a, b) => a['created_at'].localeCompare(b['created_at']),
+    render: v => <Tooltip title={v}>{v ? v.substring(0, 10) : null}</Tooltip>,
+    hide: true
+  }, {
+    title: '审核人',
+    className: S.min120,
+    dataIndex: 'approve_by_user',
+    hide: true
+  }, {
+    title: '审核时间',
+    className: S.min120,
+    dataIndex: 'approve_at',
+    render: v => <Tooltip title={v}>{v ? v.substring(0, 10) : null}</Tooltip>,
+  }, {
+    title: '发布人',
+    className: S.min120,
+    dataIndex: 'do_by_user',
+    hide: true
+  }, {
+    title: '发布时间',
+    className: S.min120,
+    dataIndex: 'do_at',
+    render: v => <Tooltip title={v}>{v ? v.substring(0, 10) : null}</Tooltip>,
+    hide: true
+  }, {
+    title: '备注',
+    className: S.min120,
+    dataIndex: 'desc',
+  }, {
     title: '状态',
+    fixed: 'right',
+    className: S.min120,
     render: info => {
       if (info.status === '-1' && info.reason) {
         return <Popover title="驳回原因:" content={info.reason}>
@@ -69,35 +113,9 @@ function ComTable() {
       }
     }
   }, {
-    title: '申请人',
-    dataIndex: 'created_by_user',
-    hide: true
-  }, {
-    title: '申请时间',
-    dataIndex: 'created_at',
-    sorter: (a, b) => a['created_at'].localeCompare(b['created_at']),
-    hide: true
-  }, {
-    title: '审核人',
-    dataIndex: 'approve_by_user',
-    hide: true
-  }, {
-    title: '审核时间',
-    dataIndex: 'approve_at'
-  }, {
-    title: '发布人',
-    dataIndex: 'do_by_user',
-    hide: true
-  }, {
-    title: '发布时间',
-    dataIndex: 'do_at',
-    hide: true
-  }, {
-    title: '备注',
-    dataIndex: 'desc',
-  }, {
     title: '操作',
-    className: hasPermission('deploy.request.do|deploy.request.edit|deploy.request.approve|deploy.request.del') ? null : 'none',
+    fixed: 'right',
+    className: hasPermission('deploy.request.do|deploy.request.edit|deploy.request.approve|deploy.request.del') ? S.min180 : 'none',
     render: info => {
       switch (info.status) {
         case '-3':
@@ -169,6 +187,8 @@ function ComTable() {
       rowKey="id"
       title="申请列表"
       columns={columns}
+      scroll={{x: 1500}}
+      tableLayout="auto"
       loading={store.isFetching}
       dataSource={store.dataSource}
       onReload={store.fetchRecords}
