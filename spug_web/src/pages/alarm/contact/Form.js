@@ -29,7 +29,6 @@ export default observer(function () {
 
   function handleTest(mode, name) {
     const value = form.getFieldValue(name)
-    console.log(name, value)
     if (!value) return message.error('请输入后再执行测试')
     setTestLoading(mode)
     http.post('/api/alarm/test/', {mode, value})

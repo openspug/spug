@@ -68,7 +68,6 @@ export default observer(function () {
   }
 
   function handleChange(e, key) {
-    console.log(e)
     host[key] = e && e.target ? e.target.value : e;
     if (['created_time', 'expired_time'].includes(key) && e) {
       host[key] = e.format('YYYY-MM-DD')

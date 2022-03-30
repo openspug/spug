@@ -64,7 +64,6 @@ function NavForm(props) {
     <Modal
       visible
       title={`${record.id ? '编辑' : '新建'}链接`}
-      afterClose={() => console.log('after close')}
       onCancel={props.onCancel}
       confirmLoading={loading}
       onOk={handleSubmit}>

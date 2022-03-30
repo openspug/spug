@@ -13,7 +13,6 @@ export default function Parameter(props) {
 
   function handleSubmit() {
     const formData = form.getFieldsValue();
-    console.log(formData)
     formData.id = props.parameter.id
     if (!formData.name) return message.error('请输入参数名')
     if (!formData.variable) return message.error('请输入变量名')
