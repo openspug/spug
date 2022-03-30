@@ -3,41 +3,19 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input, Button, Radio } from 'antd';
-import { LoadingOutlined } from '@ant-design/icons';
-import { http, X_TOKEN } from 'libs';
+import Sync from './Sync';
+import { http } from 'libs';
 import store from './store';
 
 export default observer(function () {
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState();
   const [range, setRange] = useState('2');
-  const [hosts, setHosts] = useState({});
+  const [hosts, setHosts] = useState();
   const [token, setToken] = useState();
-
-  useEffect(() => {
-    if (token) {
-      let index = 0;
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/host/${token}/?x-token=${X_TOKEN}`);
-      socket.onopen = () => socket.send(String(index));
-      socket.onmessage = e => {
-        if (e.data === 'pong') {
-          socket.send(String(index))
-        } else {
-          index += 1;
-          const {key, status, message} = JSON.parse(e.data);
-          hosts[key]['status'] = status;
-          hosts[key]['message'] = message;
-          setHosts({...hosts})
-        }
-      }
-      return () => socket && socket.close()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token])
 
   function handleSubmit() {
     setLoading(true);
@@ -82,15 +60,9 @@ export default observer(function () {
         </Form.Item>
       </Form>
 
-      <Form hidden={!token} labelCol={{span: 8}} wrapperCol={{span: 14}}>
-        {Object.entries(hosts).map(([key, item]) => (
-          <Form.Item key={key} label={item.name} extra={item.message}>
-            {item.status === 'ok' && <span style={{color: "#52c41a"}}>成功</span>}
-            {item.status === 'fail' && <span style={{color: "red"}}>失败</span>}
-            {item.status === undefined && <LoadingOutlined style={{fontSize: 20}}/>}
-          </Form.Item>
-        ))}
-      </Form>
+      {token && hosts ? (
+        <Sync token={token} hosts={hosts}/>
+      ) : null}
     </Modal>
   );
 })

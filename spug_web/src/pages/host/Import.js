@@ -5,8 +5,9 @@
  */
 import React, { useState } from 'react';
 import { observer } from 'mobx-react';
+import { Modal, Form, Upload, Button, Tooltip, Divider, Cascader, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
-import { Modal, Form, Upload, Button, Tooltip, Alert, Cascader, message } from 'antd';
+import Sync from './Sync';
 import http from 'libs/http';
 import store from './store';
 
@@ -14,6 +15,9 @@ export default observer(function () {
   const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState([]);
   const [groupId, setGroupId] = useState([]);
+  const [summary, setSummary] = useState({});
+  const [token, setToken] = useState();
+  const [hosts, setHosts] = useState();
 
   function handleSubmit() {
     if (groupId.length === 0) return message.error('请选择要导入的分组');
@@ -23,25 +27,9 @@ export default observer(function () {
     formData.append('group_id', groupId[groupId.length - 1]);
     http.post('/api/host/import/', formData, {timeout: 120000})
       .then(res => {
-        Modal.info({
-          title: '导入结果',
-          content: <Form labelCol={{span: 7}} wrapperCol={{span: 14}}>
-            <Form.Item style={{margin: 0}} label="导入成功">{res.success.length}</Form.Item>
-            {res['skip'].length > 0 && <Form.Item style={{margin: 0, color: '#1890ff'}} label="重复数据">
-              <Tooltip title={`相关行：${res['skip'].join(', ')}`}>{res['skip'].length}</Tooltip>
-            </Form.Item>}
-            {res['invalid'].length > 0 && <Form.Item style={{margin: 0, color: '#1890ff'}} label="无效数据">
-              <Tooltip title={`相关行：${res['invalid'].join(', ')}`}>{res['invalid'].length}</Tooltip>
-            </Form.Item>}
-            {res['repeat'].length > 0 && <Form.Item style={{margin: 0, color: '#1890ff'}} label="重复主机名">
-              <Tooltip title={`相关行：${res['repeat'].join(', ')}`}>{res['repeat'].length}</Tooltip>
-            </Form.Item>}
-          </Form>,
-          onOk: () => {
-            store.fetchRecords();
-            store.importVisible = false
-          }
-        })
+        setToken(res.token)
+        setHosts(res.hosts)
+        setSummary(res.summary)
       })
       .finally(() => setLoading(false))
   }
@@ -54,22 +42,20 @@ export default observer(function () {
     }
   }
 
+  function handleClose() {
+    store.importVisible = false;
+    store.fetchRecords()
+  }
+
   return (
     <Modal
       visible
       maskClosable={false}
       title="批量导入"
       okText="导入"
-      onCancel={() => store.importVisible = false}
-      confirmLoading={loading}
-      okButtonProps={{disabled: !fileList.length}}
-      onOk={handleSubmit}>
-      <Alert
-        showIcon
-        type="info"
-        style={{width: 365, margin: '0 auto 20px'}}
-        message="导入或输入的密码仅作首次验证使用，不会存储。"/>
-      <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
+      onCancel={handleClose}
+      footer={null}>
+      <Form hidden={token} labelCol={{span: 6}} wrapperCol={{span: 14}}>
         <Form.Item label="模板下载" extra="请下载使用该模板填充数据后导入">
           <a href="/resource/主机导入模板.xlsx">主机导入模板.xlsx</a>
         </Form.Item>
@@ -81,7 +67,7 @@ export default observer(function () {
             fieldNames={{label: 'title'}}
             placeholder="请选择"/>
         </Form.Item>
-        <Form.Item required label="导入数据" extra="导入完成后可通过验证功能进行批量验证。">
+        <Form.Item required label="导入数据" extra="Spug使用密钥认证连接服务器，导入或输入的密码仅作首次验证使用，不会存储。">
           <Upload
             name="file"
             accept=".xls, .xlsx"
@@ -93,7 +79,34 @@ export default observer(function () {
             )}
           </Upload>
         </Form.Item>
+        <Form.Item wrapperCol={{span: 14, offset: 6}}>
+          <Button loading={loading} disabled={!fileList.length} type="primary" onClick={handleSubmit}>导入主机</Button>
+        </Form.Item>
       </Form>
+
+      {token && hosts ? (
+        <div>
+          <Divider>导入结果</Divider>
+          <div style={{display: 'flex', justifyContent: 'space-around'}}>
+            <div>成功：{summary.success}</div>
+            <div>失败：{summary.fail > 0 ? (
+              <Tooltip style={{color: '#1890ff'}} title={(
+                <div>
+                  {summary.skip.map(x => <div key={x}>第 {x} 行，重复的服务器信息</div>)}
+                  {summary.repeat.map(x => <div key={x}>第 {x} 行，重复的主机名称</div>)}
+                  {summary.invalid.map(x => <div key={x}>第 {x} 行，无效的数据</div>)}
+                </div>
+              )}><span style={{color: '#1890ff'}}>{summary.fail}</span></Tooltip>
+            ) : 0}</div>
+          </div>
+          {Object.keys(hosts).length > 0 && (
+            <>
+              <Divider>验证及同步</Divider>
+              <Sync token={token} hosts={hosts} style={{maxHeight: 'calc(100vh - 400px)'}}/>
+            </>
+          )}
+        </div>
+      ) : null}
     </Modal>
   );
 })

@@ -129,31 +129,40 @@ class HostView(View):
 def post_import(request):
     group_id = request.POST.get('group_id')
     file = request.FILES['file']
+    hosts = []
     ws = load_workbook(file, read_only=True)['Sheet1']
-    summary = {'invalid': [], 'skip': [], 'repeat': [], 'success': []}
-    for i, row in enumerate(ws.rows):
-        if i == 0:  # 第1行是表头 略过
+    summary = {'fail': 0, 'success': 0, 'invalid': [], 'skip': [], 'repeat': []}
+    for i, row in enumerate(ws.rows, start=1):
+        if i == 1:  # 第1行是表头 略过
             continue
         if not all([row[x].value for x in range(4)]):
             summary['invalid'].append(i)
+            summary['fail'] += 1
             continue
         data = AttrDict(
             name=row[0].value,
             hostname=row[1].value,
             port=row[2].value,
             username=row[3].value,
-            desc=row[4].value
+            desc=row[5].value
         )
         if Host.objects.filter(hostname=data.hostname, port=data.port, username=data.username).exists():
             summary['skip'].append(i)
+            summary['fail'] += 1
             continue
         if Host.objects.filter(name=data.name).exists():
             summary['repeat'].append(i)
+            summary['fail'] += 1
             continue
         host = Host.objects.create(created_by=request.user, **data)
         host.groups.add(group_id)
-        summary['success'].append(i)
-    return json_response(summary)
+        summary['success'] += 1
+        host.password = row[4].value
+        hosts.append(host)
+    token = uuid.uuid4().hex
+    if hosts:
+        Thread(target=batch_sync_host, args=(token, hosts)).start()
+    return json_response({'summary': summary, 'token': token, 'hosts': {x.id: {'name': x.name} for x in hosts}})
 
 
 @auth('host.host.add')
