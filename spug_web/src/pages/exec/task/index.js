@@ -10,6 +10,7 @@ import { Form, Button, Alert, Radio, Tooltip } from 'antd';
 import { ACEditor, AuthDiv, Breadcrumb } from 'components';
 import Selector from 'pages/host/Selector';
 import TemplateSelector from './TemplateSelector';
+import Parameter from './Parameter';
 import Output from './Output';
 import { http, cleanCommand } from 'libs';
 import moment from 'moment';
@@ -22,6 +23,8 @@ function TaskIndex() {
   const [command, setCommand] = useState('')
   const [template_id, setTemplateId] = useState()
   const [histories, setHistories] = useState([])
+  const [parameters, setParameters] = useState([])
+  const [visible, setVisible] = useState(false)
 
   useEffect(() => {
     if (!loading) {
@@ -29,6 +32,12 @@ function TaskIndex() {
         .then(res => setHistories(res))
     }
   }, [loading])
+
+  useEffect(() => {
+    if (!command) {
+      setParameters([])
+    }
+  }, [command])
 
   useEffect(() => {
     return () => {
@@ -39,9 +48,12 @@ function TaskIndex() {
     }
   }, [])
 
-  function handleSubmit() {
+  function handleSubmit(params) {
+    if (!params && parameters.length > 0) {
+      return setVisible(true)
+    }
     setLoading(true)
-    const formData = {interpreter, template_id, host_ids: store.host_ids, command: cleanCommand(command)}
+    const formData = {interpreter, template_id, params, host_ids: store.host_ids, command: cleanCommand(command)}
     http.post('/api/exec/do/', formData)
       .then(store.switchConsole)
       .finally(() => setLoading(false))
@@ -52,12 +64,14 @@ function TaskIndex() {
     setTemplateId(tpl.id)
     setInterpreter(tpl.interpreter)
     setCommand(tpl.body)
+    setParameters(tpl.parameters)
   }
 
   function handleClick(item) {
     setTemplateId(item.template_id)
     setInterpreter(item.interpreter)
     setCommand(item.command)
+    setParameters(item.parameters || [])
     store.host_ids = item.host_ids
   }
 
@@ -98,7 +112,8 @@ function TaskIndex() {
             <Button style={{float: 'right'}} icon={<PlusOutlined/>} onClick={store.switchTemplate}>从执行模版中选择</Button>
             <ACEditor className={style.editor} mode={interpreter} value={command} width="100%" onChange={setCommand}/>
           </Form.Item>
-          <Button loading={loading} icon={<ThunderboltOutlined/>} type="primary" onClick={handleSubmit}>开始执行</Button>
+          <Button loading={loading} icon={<ThunderboltOutlined/>} type="primary"
+                  onClick={() => handleSubmit()}>开始执行</Button>
         </Form>
 
         <div className={style.right}>
@@ -124,14 +139,15 @@ function TaskIndex() {
           </div>
         </div>
       </div>
-      {store.showTemplate &&
-      <TemplateSelector onCancel={store.switchTemplate} onOk={handleTemplate}/>}
+      {store.showTemplate && <TemplateSelector onCancel={store.switchTemplate} onOk={handleTemplate}/>}
       {store.showConsole && <Output onBack={store.switchConsole}/>}
+      {visible && <Parameter parameters={parameters} onCancel={() => setVisible(false)} onOk={v => handleSubmit(v)}/>}
       <Selector
         visible={store.showHost}
         selectedRowKeys={[...store.host_ids]}
         onCancel={() => store.showHost = false}
         onOk={(_, ids) => store.host_ids = ids}/>
+
     </AuthDiv>
   )
 }

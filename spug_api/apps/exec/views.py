@@ -31,6 +31,7 @@ class TemplateView(View):
             Argument('body', help='请输入模版内容'),
             Argument('interpreter', default='sh'),
             Argument('host_ids', type=list, handler=json.dumps, default=[]),
+            Argument('parameters', type=list, handler=json.dumps, default=[]),
             Argument('desc', required=False)
         ).parse(request.body)
         if error is None:
@@ -59,7 +60,8 @@ def do_task(request):
         Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择执行主机'),
         Argument('command', help='请输入执行命令内容'),
         Argument('interpreter', default='sh'),
-        Argument('template_id', type=int, required=False)
+        Argument('template_id', type=int, required=False),
+        Argument('params', type=dict, required=False)
     ).parse(request.body)
     if error is None:
         if not has_host_perm(request.user, form.host_ids):
@@ -76,6 +78,7 @@ def do_task(request):
                 username=host.username,
                 command=form.command,
                 pkey=host.private_key,
+                params=form.params
             )
             rds.rpush(settings.EXEC_WORKER_KEY, json.dumps(data))
         form.host_ids.sort()
@@ -106,5 +109,5 @@ def do_task(request):
 
 @auth('exec.task.do')
 def get_histories(request):
-    records = ExecHistory.objects.filter(user=request.user).annotate(template_name=F('template__name'))
+    records = ExecHistory.objects.filter(user=request.user).select_related('template')
     return json_response([x.to_view() for x in records])

@@ -7,9 +7,14 @@ import { observable } from "mobx";
 import { http, includes } from 'libs';
 
 class Store {
+  ParameterTypes = {
+    'string': '文本框',
+    'password': '密码框',
+    'select': '下拉选择'
+  }
   @observable records = [];
   @observable types = [];
-  @observable record = {};
+  @observable record = {parameters: []};
   @observable isFetching = false;
   @observable formVisible = false;
 
@@ -33,7 +38,7 @@ class Store {
       .finally(() => this.isFetching = false)
   };
 
-  showForm = (info = {interpreter: 'sh', host_ids: []}) => {
+  showForm = (info = {interpreter: 'sh', host_ids: [], parameters: []}) => {
     this.formVisible = true;
     this.record = info
   }

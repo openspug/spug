@@ -14,7 +14,7 @@ class ExecTemplate(models.Model, ModelMixin):
     interpreter = models.CharField(max_length=20, default='sh')
     host_ids = models.TextField(default='[]')
     desc = models.CharField(max_length=255, null=True)
-
+    parameters = models.TextField(default='[]')
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
     updated_at = models.CharField(max_length=20, null=True)
@@ -26,6 +26,7 @@ class ExecTemplate(models.Model, ModelMixin):
     def to_view(self):
         tmp = self.to_dict()
         tmp['host_ids'] = json.loads(self.host_ids)
+        tmp['parameters'] = json.loads(self.parameters)
         return tmp
 
     class Meta:
@@ -45,8 +46,11 @@ class ExecHistory(models.Model, ModelMixin):
     def to_view(self):
         tmp = self.to_dict()
         tmp['host_ids'] = json.loads(self.host_ids)
-        if hasattr(self, 'template_name'):
-            tmp['template_name'] = self.template_name
+        if self.template:
+            tmp['template_name'] = self.template.name
+            tmp['interpreter'] = self.template.interpreter
+            tmp['parameters'] = json.loads(self.template.parameters)
+            tmp['command'] = self.template.body
         return tmp
 
     class Meta:

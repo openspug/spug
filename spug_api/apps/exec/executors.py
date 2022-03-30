@@ -14,7 +14,7 @@ def exec_worker_handler(job):
 
 
 class Job:
-    def __init__(self, key, name, hostname, port, username, pkey, command, interpreter, token=None):
+    def __init__(self, key, name, hostname, port, username, pkey, command, interpreter, params=None, token=None):
         self.ssh = SSH(hostname, port, username, pkey)
         self.key = key
         self.command = self._handle_command(command, interpreter)
@@ -28,6 +28,8 @@ class Job:
             SPUG_SSH_USERNAME=username,
             SPUG_INTERPRETER=interpreter
         )
+        if isinstance(params, dict):
+            self.env.update({f'_SPUG_{k}': str(v) for k, v in params.items()})
 
     def _send(self, message, with_expire=False):
         if self.rds_cli is None:
