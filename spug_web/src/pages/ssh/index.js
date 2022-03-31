@@ -5,13 +5,18 @@
  */
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Tabs, Tree, Input, Spin, Button } from 'antd';
+import { Tabs, Tree, Input, Spin, Dropdown, Menu, Button } from 'antd';
 import {
   FolderOutlined,
   FolderOpenOutlined,
   CloudServerOutlined,
   SearchOutlined,
-  SyncOutlined
+  SyncOutlined,
+  CopyOutlined,
+  ReloadOutlined,
+  VerticalAlignBottomOutlined,
+  VerticalAlignMiddleOutlined,
+  CloseOutlined
 } from '@ant-design/icons';
 import { NotFound, AuthButton } from 'components';
 import Terminal from './Terminal';
@@ -85,11 +90,17 @@ function WebSSH(props) {
       .finally(() => setFetching(false))
   }
 
-  function _openNode(node) {
-    node.vId = String(new Date().getTime())
-    hosts.push(node);
+  function _openNode(node, replace) {
+    const newNode = {...node}
+    newNode.vId = String(new Date().getTime())
+    if (replace) {
+      const index = lds.findIndex(hosts, {vId: node.vId})
+      if (index >= 0) hosts[index] = newNode
+    } else {
+      hosts.push(newNode);
+    }
     setHosts(lds.cloneDeep(hosts))
-    setActiveId(node.vId)
+    setActiveId(newNode.vId)
   }
 
   function handleSelect(e) {
@@ -98,12 +109,13 @@ function WebSSH(props) {
     }
   }
 
-  function handleRemove(key, action) {
-    if (action === 'remove') {
-      const index = lds.findIndex(hosts, x => x.vId === key);
-      if (index !== -1) {
-        hosts.splice(index, 1);
-        setHosts(lds.cloneDeep(hosts));
+  function handleRemove(key, target) {
+    const index = lds.findIndex(hosts, x => x.vId === key);
+    if (index === -1) return;
+    switch (target) {
+      case 'self':
+        hosts.splice(index, 1)
+        setHosts([...hosts])
         if (hosts.length > index) {
           setActiveId(hosts[index].vId)
         } else if (hosts.length) {
@@ -111,7 +123,22 @@ function WebSSH(props) {
         } else {
           setActiveId(undefined)
         }
-      }
+        break
+      case 'right':
+        hosts.splice(index + 1, hosts.length)
+        setHosts([...hosts])
+        setActiveId(key)
+        break
+      case 'other':
+        setHosts([hosts[index]])
+        setActiveId(key)
+        break
+      case 'all':
+        setHosts([])
+        setActiveId(undefined)
+        break
+      default:
+        break
     }
   }
 
@@ -139,6 +166,43 @@ function WebSSH(props) {
     }
   }
 
+  function handeTabAction(action, host, e) {
+    if (e) e.stopPropagation()
+    switch (action) {
+      case 'copy':
+        return _openNode(host)
+      case 'reconnect':
+        return _openNode(host, true)
+      case 'rClose':
+        return handleRemove(host.vId, 'right')
+      case 'oClose':
+        return handleRemove(host.vId, 'other')
+      case 'aClose':
+        return handleRemove(host.vId, 'all')
+      default:
+        break
+    }
+  }
+
+  function TabRender(props) {
+    const host = props.host;
+    return (
+      <Dropdown trigger={['contextMenu']} overlay={(
+        <Menu onClick={({key, domEvent}) => handeTabAction(key, host, domEvent)}>
+          <Menu.Item key="copy" icon={<CopyOutlined/>}>复制窗口</Menu.Item>
+          <Menu.Item key="reconnect" icon={<ReloadOutlined/>}>重新连接</Menu.Item>
+          <Menu.Item key="rClose"
+                     icon={<VerticalAlignBottomOutlined style={{transform: 'rotate(90deg)'}}/>}>关闭右侧</Menu.Item>
+          <Menu.Item key="oClose"
+                     icon={<VerticalAlignMiddleOutlined style={{transform: 'rotate(90deg)'}}/>}>关闭其他</Menu.Item>
+          <Menu.Item key="aClose" icon={<CloseOutlined/>}>关闭所有</Menu.Item>
+        </Menu>
+      )}>
+        <div className={styles.tabRender} onDoubleClick={() => handeTabAction('copy', host)}>{host.title}</div>
+      </Dropdown>
+    )
+  }
+
   const spug_web_terminal =
     '                                                 __       __                          _                __\n' +
     '   _____ ____   __  __ ____ _   _      __ ___   / /_     / /_ ___   _____ ____ ___   (_)____   ____ _ / /\n' +
@@ -158,12 +222,14 @@ function WebSSH(props) {
             <Input allowClear className={styles.search} prefix={<SearchOutlined style={{color: '#999'}}/>}
                    placeholder="输入检索" onChange={e => setSearchValue(e.target.value)}/>
             <Button icon={<SyncOutlined/>} type="link" loading={fetching} onClick={fetchNodes}/>
-            <Tree.DirectoryTree
-              defaultExpandAll
-              expandAction="doubleClick"
-              treeData={treeData}
-              icon={renderIcon}
-              onSelect={(k, e) => handleSelect(e)}/>
+            {treeData.length > 0 ? (
+              <Tree.DirectoryTree
+                defaultExpandAll
+                expandAction="doubleClick"
+                treeData={treeData}
+                icon={renderIcon}
+                onSelect={(k, e) => handleSelect(e)}/>
+            ) : null}
           </Spin>
         </div>
         <div className={styles.split} onMouseDown={e => posX = e.pageX}/>
@@ -174,17 +240,21 @@ function WebSSH(props) {
           activeKey={activeId}
           type="editable-card"
           onTabClick={key => setActiveId(key)}
-          onEdit={handleRemove}
+          onEdit={(key, action) => action === 'remove' ? handleRemove(key, 'self') : null}
           style={{width: `calc(100vw - ${width}px)`}}
-          tabBarExtraContent={<AuthButton
-            auth="host.console.list"
-            type="primary"
-            disabled={!activeId}
-            style={{marginRight: 5}}
-            onClick={handleOpenFileManager}
-            icon={<FolderOpenOutlined/>}>文件管理器</AuthButton>}>
+          tabBarExtraContent={hosts.length === 0 ? (
+            <div className={styles.tips}>小提示：双击标签快速复制窗口，右击标签展开更多操作。</div>
+          ) : (
+            <AuthButton
+              auth="host.console.list"
+              type="primary"
+              disabled={!activeId}
+              style={{marginRight: 5}}
+              onClick={handleOpenFileManager}
+              icon={<FolderOpenOutlined/>}>文件管理器</AuthButton>
+          )}>
           {hosts.map(item => (
-            <Tabs.TabPane key={item.vId} tab={item.title}>
+            <Tabs.TabPane key={item.vId} tab={<TabRender host={item}/>}>
               <Terminal id={item.id} vId={item.vId} activeId={activeId}/>
             </Tabs.TabPane>
           ))}

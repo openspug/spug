@@ -107,9 +107,10 @@ class SSHConsumer(WebsocketConsumer):
                 self.chan.send(data['data'])
 
     def disconnect(self, code):
-        self.chan.close()
-        self.ssh.close()
-        # print('Connection close')
+        if self.chan:
+            self.chan.close()
+        if self.ssh:
+            self.ssh.close()
 
     def connect(self):
         if has_host_perm(self.user, self.id):
