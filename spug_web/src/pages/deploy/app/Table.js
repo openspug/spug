@@ -24,19 +24,18 @@ import lds from 'lodash';
 function ComTable() {
   function handleClone(e, id) {
     e.stopPropagation();
-    let cloneObj = null;
+    let deploy = null;
     Modal.confirm({
       icon: <ExclamationCircleOutlined/>,
       title: '选择克隆对象',
-      content: <CloneConfirm onChange={v => cloneObj = v[1]}/>,
+      content: <CloneConfirm onChange={v => deploy = v}/>,
       onOk: () => {
-        if (!cloneObj) {
-          message.error('请选择目标应用及环境')
+        if (!deploy) {
+          message.error('请选择要克隆的应用及环境')
           return Promise.reject()
         }
-        const info = JSON.parse(cloneObj);
-        info.env_id = undefined;
-        store.showExtForm(null, id, info, true)
+        deploy.env_id = undefined;
+        store.showExtForm(null, id, deploy, true)
       },
     })
   }

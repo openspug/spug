@@ -3,68 +3,56 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Cascader, Form, Alert } from 'antd';
+import { Select, Form } from 'antd';
 import envStore from 'pages/config/environment/store';
+import { includes } from 'libs';
 import store from './store';
 import lds from 'lodash';
-import { toJS } from "mobx";
 
-@observer
-class CloneConfirm extends React.Component {
-  handleLoadData = (selectedOptions) => {
-    const targetOption = selectedOptions[selectedOptions.length - 1];
-    if (targetOption.deploys === undefined) {
-      targetOption.loading = true;
-      store.loadDeploys(targetOption.value).then(() => targetOption.loading = false)
+export default observer(function (props) {
+  const [form] = Form.useForm()
+  const [apps] = useState(Object.values(store.records))
+  const [appId, setAppId] = useState()
+  const [deploys, setDeploys] = useState([])
+
+  useEffect(() => {
+    if (appId) {
+      props.onChange(null)
+      form.setFieldsValue({env_id: undefined})
+      store.loadDeploys(appId)
+        .then(res => setDeploys(res))
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appId])
+
+  function handleChange(deployId) {
+    const deploy = lds.find(deploys, {id: deployId})
+    props.onChange(deploy)
   }
 
-  handleData = records => {
-    return records.map(x => {
-      const option = {
-        label: x.name,
-        value: x.id,
-        deploys: x.deploys,
-        isLeaf: false
-      }
-      if (x.children) {
-        option.children = x.children
-      } else if (x.deploys) {
-        option.children = x.deploys.map(item => ({
-          label: lds.get(envStore.idMap, `${item.env_id}.name`),
-          value: JSON.stringify(item),
-          id: `${x.id},${item.env_id}`,
-        }))
-      }
-      return option
-    })
-  }
-
-  filter = (inputValue, path) => {
-    return path.some(option => option.label.toLowerCase().indexOf(inputValue.toLowerCase()) > -1);
-  }
-
-  render() {
-    const options = this.handleData(Object.values(toJS(store.records)));
-    return (
-      <Form layout="vertical" style={{marginTop: 24}}>
-        <Form.Item
-          required
-          label="应用及环境"
-          help="克隆配置，将基于选择对象的配置来创建新的发布配置。"
-          extra={<Alert showIcon type="warning" message="使用搜索进行选择时可能需要选择两次。"/>}>
-          <Cascader
-            options={options}
-            placeholder="请选择目标应用及环境"
-            loadData={this.handleLoadData}
-            onChange={this.props.onChange}
-            showSearch={{filter: this.filter}}/>
-        </Form.Item>
-      </Form>
-    )
-  }
-}
-
-export default CloneConfirm
+  return (
+    <Form form={form} layout="vertical" style={{marginTop: 24}}>
+      <Form.Item required label="克隆的应用">
+        <Select showSearch filterOption={(i, o) => includes(o.children, i)} placeholder="请选择要克隆的应用" onChange={setAppId}>
+          {apps.map(item => (
+            <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
+          ))}
+        </Select>
+      </Form.Item>
+      <Form.Item required name="env_id" label="克隆的环境">
+        <Select
+          showSearch
+          filterOption={(i, o) => includes(o.children, i)}
+          placeholder="请选择要克隆的环境"
+          disabled={deploys.length === 0}
+          onChange={handleChange}>
+          {deploys.map(item => (
+            <Select.Option key={item.id} value={item.id}>{envStore.idMap[item.env_id]?.name}</Select.Option>
+          ))}
+        </Select>
+      </Form.Item>
+    </Form>
+  )
+})
