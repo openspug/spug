@@ -28,6 +28,8 @@ class SSH:
             'password': password,
             'pkey': RSAKey.from_private_key(StringIO(pkey)) if isinstance(pkey, str) else pkey,
             'timeout': connect_timeout,
+            'allow_agent': False,
+            'look_for_keys': False,
             'banner_timeout': 30
         }
 

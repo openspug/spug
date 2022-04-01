@@ -70,8 +70,9 @@ class FileManager extends React.Component {
     key: 'action',
     render: info => info.kind === '-' ? (
       <Action>
-        <Action.Button icon={<DownloadOutlined/>} onClick={() => this.handleDownload(info.name)}/>
-        <Action.Button auth="host.console.del" danger icon={<DeleteOutlined/>}
+        <Action.Button className={styles.drawerBtn} icon={<DownloadOutlined/>}
+                       onClick={() => this.handleDownload(info.name)}/>
+        <Action.Button danger auth="host.console.del" className={styles.drawerBtn} icon={<DeleteOutlined/>}
                        onClick={() => this.handleDelete(info.name)}/>
       </Action>
     ) : null
