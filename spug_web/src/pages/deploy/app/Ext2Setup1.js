@@ -48,7 +48,7 @@ export default observer(function Ext2Setup1() {
   }
   return (
     <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
-      <Form.Item required label="发布环境" style={{marginBottom: 0}}>
+      <Form.Item required label="发布环境" style={{marginBottom: 0}} tooltip="可以建立多个环境，实现同一应用在不同环境里配置不同的发布流程。">
         <Form.Item style={{display: 'inline-block', width: '80%'}}>
           <Select disabled={store.isReadOnly} value={info.env_id} onChange={v => info.env_id = v} placeholder="请选择发布环境">
             {envStore.records.map(item => (
@@ -60,11 +60,11 @@ export default observer(function Ext2Setup1() {
           <Link disabled={store.isReadOnly} to="/config/environment">新建环境</Link>
         </Form.Item>
       </Form.Item>
-      <Form.Item required label="目标主机">
+      <Form.Item required label="目标主机" tooltip="该发布配置作用于哪些目标主机。">
         {info.host_ids.length > 0 && <span style={{marginRight: 16}}>已选择 {info.host_ids.length} 台</span>}
         <Button type="link" style={{padding: 0}} onClick={() => setSelectorVisible(true)}>选择主机</Button>
       </Form.Item>
-      <Form.Item label="发布模式">
+      <Form.Item label="发布模式" tooltip="串行即发布时一台完成后再发布下一台，期间出现异常则终止发布。并行则每个主机相互独立发布同时进行。">
         <Radio.Group
           buttonStyle="solid"
           defaultValue={true}
@@ -74,7 +74,7 @@ export default observer(function Ext2Setup1() {
           <Radio.Button value={false}>串行</Radio.Button>
         </Radio.Group>
       </Form.Item>
-      <Form.Item label="发布审核">
+      <Form.Item label="发布审核" tooltip="开启后发布申请需要审核（审核权限在系统管理/角色管理/功能权限中配置）通过后才能发布。">
         <Switch
           disabled={store.isReadOnly}
           checkedChildren="开启"
