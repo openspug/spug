@@ -12,7 +12,7 @@ import uStore from '../account/store';
 export default observer(function (props) {
   const users = uStore.records.filter(x => x.role_ids.includes(props.id))
   return (
-    <Table rowKey="id" dataSource={users} pagination={false}>
+    <Table rowKey="id" dataSource={users} pagination={false} scroll={{y: 500,x: 500}}>
       <Table.Column title="姓名" dataIndex="nickname"/>
       <Table.Column title="状态" dataIndex="is_active"
                     render={v => v ? <Badge status="success" text="正常"/> : <Badge status="default" text="禁用"/>}/>
