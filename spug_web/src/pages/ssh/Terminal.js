@@ -75,7 +75,9 @@ function WebSSH(props) {
   }
 
   return (
-    <div className={styles.terminal} ref={container}/>
+    <div className={styles.termContainer}>
+      <div className={styles.terminal} ref={container}/>
+    </div>
   )
 }
 

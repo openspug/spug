@@ -16,14 +16,15 @@ import {
   ReloadOutlined,
   VerticalAlignBottomOutlined,
   VerticalAlignMiddleOutlined,
-  CloseOutlined
+  CloseOutlined,
+  LeftOutlined,
 } from '@ant-design/icons';
 import { NotFound, AuthButton } from 'components';
 import Terminal from './Terminal';
 import FileManager from './FileManager';
 import { http, hasPermission, includes } from 'libs';
 import styles from './index.module.less';
-import LogoSpugText from 'layout/logo-spug-txt.png';
+import LogoSpugText from 'layout/logo-spug-white.png';
 import lds from 'lodash';
 
 let posX = 0
@@ -241,17 +242,17 @@ function WebSSH(props) {
           type="editable-card"
           onTabClick={key => setActiveId(key)}
           onEdit={(key, action) => action === 'remove' ? handleRemove(key, 'self') : null}
-          style={{width: `calc(100vw - ${width}px)`}}
+          style={{background: '#fff', width: `calc(100vw - ${width}px)`}}
           tabBarExtraContent={hosts.length === 0 ? (
             <div className={styles.tips}>小提示：双击标签快速复制窗口，右击标签展开更多操作。</div>
           ) : (
             <AuthButton
               auth="host.console.list"
-              type="primary"
+              type="link"
               disabled={!activeId}
               style={{marginRight: 5}}
               onClick={handleOpenFileManager}
-              icon={<FolderOpenOutlined/>}>文件管理器</AuthButton>
+              icon={<LeftOutlined/>}>文件管理器</AuthButton>
           )}>
           {hosts.map(item => (
             <Tabs.TabPane key={item.vId} tab={<TabRender host={item}/>}>

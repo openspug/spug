@@ -39,8 +39,8 @@ class FileManager extends React.Component {
     key: 'name',
     render: info => info.kind === 'd' ? (
       <div onClick={() => this.handleChdir(info.name, '1')} style={{cursor: 'pointer'}}>
-        <FolderOutlined style={{color: info.is_link ? '#008b8b' : '#1890ff'}}/>
-        <span style={{color: info.is_link ? '#008b8b' : '#1890ff', paddingLeft: 5}}>{info.name}</span>
+        <FolderOutlined style={{color: info.is_link ? '#008b8b' : '#2563fc'}}/>
+        <span style={{color: info.is_link ? '#008b8b' : '#2563fc', paddingLeft: 5}}>{info.name}</span>
       </div>
     ) : (
       <React.Fragment>
@@ -131,7 +131,7 @@ class FileManager extends React.Component {
           this.setState({uploadStatus: 'success'});
           this.fetchFiles()
         }, () => this.setState({uploadStatus: 'exception'}))
-        .finally(() => setTimeout(() => this.setState({uploading: false}), 2000))
+      .finally(() => setTimeout(() => this.setState({uploading: false}), 2000))
     }
   };
 
@@ -188,7 +188,7 @@ class FileManager extends React.Component {
     if (!this.state.showDot) {
       objects = objects.filter(x => !x.name.startsWith('.'))
     }
-    const scrollY = document.body.clientHeight - 222;
+    const scrollY = document.body.clientHeight - 182;
     return (
       <Drawer
         title="文件管理器"
@@ -209,25 +209,27 @@ class FileManager extends React.Component {
               </Breadcrumb.Item>
             ))}
           </Breadcrumb>
-          <div style={{display: 'flex', alignItems: 'center'}}>
+          <div className={styles.action}>
             <span>显示隐藏文件：</span>
             <Switch
               checked={this.state.showDot}
               checkedChildren="开启"
               unCheckedChildren="关闭"
               onChange={v => this.setState({showDot: v})}/>
-            <AuthButton
-              auth="host.console.upload"
-              style={{marginLeft: 10}}
-              size="small"
-              type="primary"
-              icon={<UploadOutlined/>}
-              onClick={this.handleUpload}>上传文件</AuthButton>
+            {this.state.uploading ? (
+              <Progress className={styles.progress} strokeWidth={14} status={this.state.uploadStatus}
+                        percent={this.state.percent}/>
+            ) : (
+              <AuthButton
+                auth="host.console.upload"
+                style={{marginLeft: 12}}
+                size="small"
+                type="primary"
+                icon={<UploadOutlined/>}
+                onClick={this.handleUpload}>上传文件</AuthButton>
+            )}
           </div>
         </div>
-        {this.state.uploading && (
-          <Progress style={{marginBottom: 15}} status={this.state.uploadStatus} percent={this.state.percent}/>
-        )}
         <Table
           size="small"
           rowKey="name"
