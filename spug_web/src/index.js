@@ -8,7 +8,7 @@ import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import zhCN from 'antd/es/locale/zh_CN';
-import './index.css';
+import './index.less';
 import App from './App';
 import moment from 'moment';
 import 'moment/locale/zh-cn';

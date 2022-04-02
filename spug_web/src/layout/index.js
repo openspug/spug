@@ -45,7 +45,7 @@ export default function () {
       <Sider collapsed={collapsed}/>
       <Layout style={{height: '100vh'}}>
         <Header collapsed={collapsed} toggle={() => setCollapsed(!collapsed)}/>
-        <Layout.Content className={styles.content}>
+        <Layout.Content className={styles.content} id="spug-container">
           <Switch>
             {Routes}
             <Route component={NotFound}/>
