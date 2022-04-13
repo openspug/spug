@@ -36,7 +36,7 @@ function Ext1Console(props) {
 
   function doDeploy() {
     let socket;
-    http.post(`/api/deploy/request/${props.request.id}/`)
+    http.post(`/api/deploy/request/${props.request.id}/`, {mode: props.request.mode})
       .then(res => {
         Object.assign(outputs, res.outputs)
         setTimeout(() => setFetching(false), 100)
@@ -57,6 +57,7 @@ function Ext1Console(props) {
       } else {
         index += 1;
         const {key, data, step, status} = JSON.parse(e.data);
+        if (!outputs[key]) return
         if (data !== undefined) {
           outputs[key].data += data
           if (terms[key]) terms[key].write(data)

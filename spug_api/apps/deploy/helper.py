@@ -17,8 +17,27 @@ class Helper:
     def __init__(self, rds, key):
         self.rds = rds
         self.key = key
-        self.rds.delete(self.key)
         self.callback = []
+
+    @classmethod
+    def make(cls, rds, key, host_ids=None):
+        if host_ids:
+            counter, tmp_key = 0, f'{key}_tmp'
+            data = rds.lrange(key, counter, counter + 9)
+            while data:
+                for item in data:
+                    counter += 1
+                    print(item)
+                    tmp = json.loads(item.decode())
+                    if tmp['key'] not in host_ids:
+                        rds.rpush(tmp_key, item)
+                data = rds.lrange(key, counter, counter + 9)
+            rds.delete(key)
+            if rds.exists(tmp_key):
+                rds.rename(tmp_key, key)
+        else:
+            rds.delete(key)
+        return cls(rds, key)
 
     @classmethod
     def _make_dd_notify(cls, url, action, req, version, host_str):
@@ -169,7 +188,7 @@ class Helper:
     @classmethod
     def send_deploy_notify(cls, req, action=None):
         rst_notify = json.loads(req.deploy.rst_notify)
-        host_ids = json.loads(req.host_ids)
+        host_ids = req.host_ids
         if rst_notify['mode'] != '0' and rst_notify.get('value'):
             url = rst_notify['value']
             version = req.version
@@ -232,6 +251,7 @@ class Helper:
         self._send({'key': key, 'step': step, 'data': data})
 
     def clear(self):
+        self.rds.delete(f'{self.key}_tmp')
         # save logs for two weeks
         self.rds.expire(self.key, 14 * 24 * 60 * 60)
         self.rds.close()

@@ -23,7 +23,7 @@ def dispatch(rep: Repository, helper=None):
     if not helper:
         rds = get_redis_connection()
         rds_key = f'{settings.BUILD_KEY}:{rep.spug_version}'
-        helper = Helper(rds, rds_key)
+        helper = Helper.make(rds, rds_key)
         rep.save()
     try:
         api_token = uuid.uuid4().hex

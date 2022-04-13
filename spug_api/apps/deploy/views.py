@@ -46,6 +46,7 @@ class RequestView(View):
             tmp['app_name'] = item.app_name
             tmp['app_extend'] = item.app_extend
             tmp['host_ids'] = json.loads(item.host_ids)
+            tmp['fail_host_ids'] = json.loads(item.fail_host_ids)
             tmp['extra'] = json.loads(item.extra) if item.extra else None
             tmp['rep_extra'] = json.loads(item.rep_extra) if item.rep_extra else None
             tmp['app_host_ids'] = json.loads(item.app_host_ids)
@@ -138,6 +139,7 @@ class RequestDetailView(View):
 
     @auth('deploy.request.do')
     def post(self, request, r_id):
+        form, _ = JsonParser(Argument('mode', default='all')).parse(request.body)
         query = {'pk': r_id}
         if not request.user.is_supper:
             perms = request.user.deploy_perms
@@ -148,14 +150,16 @@ class RequestDetailView(View):
             return json_response(error='未找到指定发布申请')
         if req.status not in ('1', '-3'):
             return json_response(error='该申请单当前状态还不能执行发布')
-        hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
+
+        host_ids = req.fail_host_ids if form.mode == 'fail' else req.host_ids
+        hosts = Host.objects.filter(id__in=json.loads(host_ids))
         message = f'{human_time()} 等待调度...        '
         outputs = {x.id: {'id': x.id, 'title': x.name, 'step': 0, 'data': message} for x in hosts}
         req.status = '2'
         req.do_at = human_datetime()
         req.do_by = request.user
         req.save()
-        Thread(target=dispatch, args=(req,)).start()
+        Thread(target=dispatch, args=(req, form.mode == 'fail')).start()
         if req.is_quick_deploy:
             if req.repository_id:
                 outputs['local'] = {'id': 'local', 'step': 100, 'data': f'{human_time()} 已构建完成忽略执行。'}
@@ -325,6 +329,7 @@ def get_request_info(request):
     if error is None:
         req = DeployRequest.objects.get(pk=form.id)
         response = req.to_dict(selects=('status', 'reason'))
+        response['fail_host_ids'] = json.loads(req.fail_host_ids)
         response['status_alias'] = req.get_status_display()
         return json_response(response)
     return json_response(error=error)

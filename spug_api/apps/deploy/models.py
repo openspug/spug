@@ -37,6 +37,7 @@ class DeployRequest(models.Model, ModelMixin):
     version = models.CharField(max_length=50, null=True)
     spug_version = models.CharField(max_length=50, null=True)
     plan = models.DateTimeField(null=True)
+    fail_host_ids = models.TextField(default='[]')
 
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')

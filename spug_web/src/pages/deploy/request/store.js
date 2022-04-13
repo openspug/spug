@@ -58,7 +58,7 @@ class Store {
       .then(res => {
         for (let item of this.records) {
           if (item.id === id) {
-            Object.assign(item, res)
+            Object.assign(item, res, {key: Date.now()})
             break
           }
         }
