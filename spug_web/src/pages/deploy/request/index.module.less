@@ -99,8 +99,19 @@
   padding: 0;
 }
 
-.upload :global(.ant-upload-list-item) {
+.upload {
+  :global(.ant-upload-btn) {
+    padding: 0 !important;
+  }
+}
+
+.uploadHide {
+  :global(.ant-upload-drag) {
+    display: none;
+  }
+  :global(.ant-upload-list-item) {
     margin: 0;
+  }
 }
 
 .min120 {

@@ -9,7 +9,7 @@ import { UploadOutlined } from '@ant-design/icons';
 import { Modal, Form, Input, Upload, DatePicker, message, Button } from 'antd';
 import hostStore from 'pages/host/store';
 import HostSelector from './HostSelector';
-import { http, X_TOKEN } from 'libs';
+import { http, clsNames, X_TOKEN } from 'libs';
 import styles from './index.module.less';
 import store from './store';
 import lds from 'lodash';
@@ -91,11 +91,12 @@ export default observer(function () {
           <Input placeholder="请输入环境变量 SPUG_RELEASE 的值"/>
         </Form.Item>
         {require_upload && (
-          <Form.Item required label="上传数据" tooltip="通过数据传输动作来使用上传的文件。" className={styles.upload}>
-            <Upload name="file" fileList={fileList} headers={{'X-Token': X_TOKEN}} beforeUpload={handleUpload}
-                    data={{deploy_id}} onChange={handleUploadChange}>
-              {fileList.length === 0 ? <Button loading={uploading} icon={<UploadOutlined/>}>点击上传</Button> : null}
-            </Upload>
+          <Form.Item required label="上传数据" tooltip="通过数据传输动作来使用上传的文件。"
+                     className={clsNames(styles.upload, fileList.length ? styles.uploadHide : null)}>
+            <Upload.Dragger name="file" fileList={fileList} headers={{'X-Token': X_TOKEN}} beforeUpload={handleUpload}
+                            data={{deploy_id}} onChange={handleUploadChange}>
+              <Button type="link" loading={uploading} icon={<UploadOutlined/>}>点击或拖动文件至此区域上传</Button>
+            </Upload.Dragger>
           </Form.Item>
         )}
         <Form.Item required label="目标主机" tooltip="可以通过创建多个发布申请单，选择主机分批发布。">

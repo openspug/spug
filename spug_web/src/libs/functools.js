@@ -35,6 +35,10 @@ export function hasPermission(strCode) {
   return false
 }
 
+export function clsNames(...args) {
+  return args.filter(x => x).join(' ')
+}
+
 export function includes(s, key) {
   key = key.toLowerCase();
   if (Array.isArray(s)) {
