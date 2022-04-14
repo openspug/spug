@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { MinusCircleOutlined, PlusOutlined, UpOutlined, DownOutlined } from '@ant-design/icons';
 import { Form, Input, Button, message, Divider, Alert, Select } from 'antd';
 import { ACEditor } from 'components';
 import styles from './index.module.css';
@@ -21,7 +21,7 @@ class Ext2Setup2 extends React.Component {
     this.helpMap = {
       '0': null,
       '1': '相对于输入的本地路径的文件路径，仅将匹配到文件传输至要发布的目标主机。',
-      '2': '支持模糊匹配，如果路径以 / 开头则基于输入的本地路径匹配，匹配到文件将不会被传输。'
+      '2': '支持模糊匹配，基于输入的本地路径匹配，匹配到文件将不会被传输。'
     }
     this.state = {
       loading: false,
@@ -42,6 +42,28 @@ class Ext2Setup2 extends React.Component {
         store.loadDeploys(store.app_id)
       }, () => this.setState({loading: false}))
   };
+
+  _doAction = (actions, index, action) => {
+    if (action === 'up') {
+      if (index > 0) {
+        [actions[index], actions[index - 1]] = [actions[index - 1], actions[index]]
+      }
+    } else {
+      if (index < actions.length - 1) {
+        [actions[index], actions[index + 1]] = [actions[index + 1], actions[index]]
+      }
+    }
+  }
+
+  handleHostAction = (index, action) => {
+    const actions = store.deploy['host_actions'];
+    this._doAction(actions, index, action)
+  }
+
+  handleServerAction = (index, action) => {
+    const actions = store.deploy['server_actions'];
+    this._doAction(actions, index, action)
+  }
 
   render() {
     const server_actions = store.deploy['server_actions'];
@@ -81,16 +103,22 @@ class Ext2Setup2 extends React.Component {
                 placeholder="请输入要执行的动作"/>
             </Form.Item>
             {!store.isReadOnly && (
-              <div className={styles.delAction} onClick={() => server_actions.splice(index, 1)}>
-                <MinusCircleOutlined />移除
-              </div>
+              <React.Fragment>
+                <Button type="dashed" icon={<UpOutlined/>} className={styles.upAction}
+                        onClick={() => this.handleServerAction(index, 'up')}/>
+                <div className={styles.delAction} onClick={() => server_actions.splice(index, 1)}>
+                  <MinusCircleOutlined/>移除
+                </div>
+                <Button type="dashed" icon={<DownOutlined/>} className={styles.downAction}
+                        onClick={() => this.handleServerAction(index, 'down')}/>
+              </React.Fragment>
             )}
           </div>
         ))}
         {!store.isReadOnly && (
           <Form.Item wrapperCol={{span: 14, offset: 6}}>
             <Button type="dashed" block onClick={() => server_actions.push({})}>
-              <PlusOutlined />添加本地执行动作（在服务端本地执行）
+              <PlusOutlined/>添加本地执行动作（在服务端本地执行）
             </Button>
           </Form.Item>
         )}
@@ -159,16 +187,22 @@ class Ext2Setup2 extends React.Component {
               </Form.Item>
             )}
             {!store.isReadOnly && (
-              <div className={styles.delAction} onClick={() => host_actions.splice(index, 1)}>
-                <MinusCircleOutlined />移除
-              </div>
+              <React.Fragment>
+                <Button type="dashed" icon={<UpOutlined/>} className={styles.upAction}
+                        onClick={() => this.handleHostAction(index, 'up')}/>
+                <div className={styles.delAction} onClick={() => host_actions.splice(index, 1)}>
+                  <MinusCircleOutlined/>移除
+                </div>
+                <Button type="dashed" icon={<DownOutlined/>} className={styles.downAction}
+                        onClick={() => this.handleHostAction(index, 'down')}/>
+              </React.Fragment>
             )}
           </div>
         ))}
         {!store.isReadOnly && (
           <Form.Item wrapperCol={{span: 14, offset: 6}}>
             <Button disabled={store.isReadOnly} type="dashed" block onClick={() => host_actions.push({})}>
-              <PlusOutlined />添加目标主机执行动作（在部署目标主机执行）
+              <PlusOutlined/>添加目标主机执行动作（在部署目标主机执行）
             </Button>
             <Button
               block
@@ -176,7 +210,7 @@ class Ext2Setup2 extends React.Component {
               style={{marginTop: 8}}
               disabled={store.isReadOnly || lds.findIndex(host_actions, x => x.type === 'transfer') !== -1}
               onClick={() => host_actions.push({type: 'transfer', title: '数据传输', mode: '0', src_mode: '0'})}>
-              <PlusOutlined />添加数据传输动作（仅能添加一个）
+              <PlusOutlined/>添加数据传输动作（仅能添加一个）
             </Button>
           </Form.Item>
         )}

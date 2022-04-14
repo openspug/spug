@@ -50,7 +50,7 @@
     cursor: pointer;
     position: absolute;
     width: 35px;
-    padding: 10px;
+    padding: 5px 10px;
     text-align: center;
     top: 32px;
     right: 60px;
@@ -61,6 +61,26 @@
 .delAction:hover {
     border-color: rgb(255, 96, 59);
     color: rgb(255, 96, 59);
+}
+
+.upAction {
+    position: absolute;
+    width: 35px;
+    height: 26px;
+    top: 0;
+    right: 60px;
+    border-radius: 5px;
+    color: #d9d9d9;
+}
+
+.downAction {
+    position: absolute;
+    width: 35px;
+    height: 26px;
+    bottom: 0;
+    right: 60px;
+    border-radius: 5px;
+    color: #d9d9d9;
 }
 
 .fullScreen {
