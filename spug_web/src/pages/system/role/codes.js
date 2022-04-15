@@ -29,8 +29,8 @@ export default [{
     key: 'console',
     label: 'Web终端',
     perms: [
-      {key: 'view', label: '使用Web终端'},
-      {key: 'list', label: '查看文件'},
+      {key: 'view', label: 'Web终端'},
+      {key: 'list', label: '文件管理'},
       {key: 'upload', label: '上传文件'},
       {key: 'del', label: '删除文件'},
     ]

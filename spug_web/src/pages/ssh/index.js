@@ -5,7 +5,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Tabs, Tree, Input, Spin, Dropdown, Menu, Button } from 'antd';
+import { Tabs, Tree, Input, Spin, Dropdown, Menu, Button, Drawer } from 'antd';
 import {
   FolderOutlined,
   FolderOpenOutlined,
@@ -40,6 +40,7 @@ function WebSSH(props) {
   const [activeId, setActiveId] = useState();
   const [hostId, setHostId] = useState();
   const [width, setWidth] = useState(280);
+  const [sshMode] = useState(hasPermission('host.console.view'))
 
   useEffect(() => {
     window.document.title = 'Spug web terminal'
@@ -212,7 +213,8 @@ function WebSSH(props) {
     '/____// .___/ \\__,_/ \\__, /    |__/|__/ \\___//_.___/   \\__/ \\___//_/   /_/ /_/ /_//_//_/ /_/ \\__,_//_/   \n' +
     '     /_/            /____/                                                                               \n'
 
-  return hasPermission('host.console.view') ? (
+  console.log(sshMode)
+  return hasPermission('host.console.view|host.console.list') ? (
     <div className={styles.container} onMouseUp={() => posX = 0} onMouseMove={handleMouseMove}>
       <div className={styles.sider} style={{width}}>
         <div className={styles.logo}>
@@ -245,7 +247,7 @@ function WebSSH(props) {
           style={{background: '#fff', width: `calc(100vw - ${width}px)`}}
           tabBarExtraContent={hosts.length === 0 ? (
             <div className={styles.tips}>小提示：双击标签快速复制窗口，右击标签展开更多操作。</div>
-          ) : (
+          ) : sshMode ? (
             <AuthButton
               auth="host.console.list"
               type="link"
@@ -253,18 +255,32 @@ function WebSSH(props) {
               style={{marginRight: 5}}
               onClick={handleOpenFileManager}
               icon={<LeftOutlined/>}>文件管理器</AuthButton>
-          )}>
+          ) : null}>
           {hosts.map(item => (
             <Tabs.TabPane key={item.vId} tab={<TabRender host={item}/>}>
-              <Terminal id={item.id} vId={item.vId} activeId={activeId}/>
+              {sshMode ? (
+                <Terminal id={item.id} vId={item.vId} activeId={activeId}/>
+              ) : (
+                <div className={styles.fileManger}>
+                  <FileManager id={item.id}/>
+                </div>
+              )}
             </Tabs.TabPane>
           ))}
         </Tabs>
         {hosts.length === 0 && (
-          <pre className={styles.fig}>{spug_web_terminal}</pre>
+          <pre className={sshMode ? styles.fig : styles.fig2}>{spug_web_terminal}</pre>
         )}
       </div>
-      <FileManager id={hostId} visible={visible} onClose={() => setVisible(false)}/>
+      <Drawer
+        title="文件管理器"
+        placement="right"
+        width={900}
+        className={styles.drawerContainer}
+        visible={visible}
+        onClose={() => setVisible(false)}>
+        <FileManager id={hostId}/>
+      </Drawer>
     </div>
   ) : (
     <div style={{height: '100vh'}}>

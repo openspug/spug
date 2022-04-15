@@ -4,7 +4,7 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
-import { Drawer, Breadcrumb, Table, Switch, Progress, Modal, message } from 'antd';
+import { Breadcrumb, Table, Switch, Progress, Modal, message } from 'antd';
 import {
   DeleteOutlined,
   DownloadOutlined,
@@ -32,6 +32,10 @@ class FileManager extends React.Component {
       objects: [],
       percent: 0
     }
+  }
+
+  componentDidMount() {
+    this.fetchFiles()
   }
 
   columns = [{
@@ -77,12 +81,6 @@ class FileManager extends React.Component {
       </Action>
     ) : null
   }];
-
-  onShow = (visible) => {
-    if (visible) {
-      this.fetchFiles()
-    }
-  };
 
   _kindSort = (item) => {
     return item.kind === 'd'
@@ -131,7 +129,7 @@ class FileManager extends React.Component {
           this.setState({uploadStatus: 'success'});
           this.fetchFiles()
         }, () => this.setState({uploadStatus: 'exception'}))
-      .finally(() => setTimeout(() => this.setState({uploading: false}), 2000))
+        .finally(() => setTimeout(() => this.setState({uploading: false}), 2000))
     }
   };
 
@@ -188,15 +186,9 @@ class FileManager extends React.Component {
     if (!this.state.showDot) {
       objects = objects.filter(x => !x.name.startsWith('.'))
     }
-    const scrollY = document.body.clientHeight - 182;
+    const scrollY = document.body.clientHeight - 168;
     return (
-      <Drawer
-        title="文件管理器"
-        placement="right"
-        width={900}
-        afterVisibleChange={this.onShow}
-        visible={this.props.visible}
-        onClose={this.props.onClose}>
+      <React.Fragment>
         <input style={{display: 'none'}} type="file" ref={ref => this.input = ref}/>
         <div className={styles.drawerHeader}>
           <Breadcrumb>
@@ -239,7 +231,7 @@ class FileManager extends React.Component {
           scroll={{y: scrollY}}
           style={{fontFamily: 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei'}}
           dataSource={objects}/>
-      </Drawer>
+      </React.Fragment>
     )
   }
 }

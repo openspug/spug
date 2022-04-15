@@ -29,7 +29,8 @@ export default observer(function () {
 
   return (
     <AuthDiv auth="host.host.view">
-      <Breadcrumb extra={<AuthButton auth="host.console.view" type="primary" icon={<CodeOutlined/>} onClick={openTerminal}>Web 终端</AuthButton>}>
+      <Breadcrumb extra={<AuthButton auth="host.console.view|host.console.list" type="primary" icon={<CodeOutlined/>}
+                                     onClick={openTerminal}>Web 终端</AuthButton>}>
         <Breadcrumb.Item>首页</Breadcrumb.Item>
         <Breadcrumb.Item>主机管理</Breadcrumb.Item>
       </Breadcrumb>
@@ -49,7 +50,7 @@ export default observer(function () {
       {store.cloudImport && <CloudImport/>}
       {store.syncVisible && <BatchSync/>}
       {store.selectorVisible &&
-      <Selector oneGroup={!store.addByCopy} onCancel={() => store.selectorVisible = false} onOk={store.updateGroup}/>}
+        <Selector oneGroup={!store.addByCopy} onCancel={() => store.selectorVisible = false} onOk={store.updateGroup}/>}
     </AuthDiv>
   );
 })
