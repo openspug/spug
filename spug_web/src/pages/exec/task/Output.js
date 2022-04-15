@@ -30,9 +30,9 @@ function OutView(props) {
   useEffect(() => {
     store.tag = ''
     gCurrent = current
-    term.setOption('disableStdin', false)
+    term.setOption('disableStdin', true)
     term.setOption('fontFamily', 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei')
-    term.setOption('theme', {background: '#f0f0f0', foreground: '#000', selection: '#999', cursor: '#f0f0f0'})
+    term.setOption('theme', {background: '#2b2b2b', foreground: '#A9B7C6', cursor: '#2b2b2b'})
     term.loadAddon(fitPlugin)
     term.open(el.current)
     fitPlugin.fit()
