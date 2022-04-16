@@ -15,7 +15,7 @@ const Tips1 = (
 
 const Tips2 = (
   <Tooltip title="配置中心应用的配置将会以 _SPUG_标识符_Key 方式组合成环境变量，可通过执行 env | grep SPUG 来查看所有的内置的和配置中心的可使用变量。">
-    <span style={{color: '#1890ff'}}>配置中心的配置变量</span>
+    <span style={{color: '#2563fc'}}>配置中心的配置变量</span>
   </Tooltip>
 )
 

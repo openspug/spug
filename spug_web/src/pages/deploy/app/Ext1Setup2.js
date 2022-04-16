@@ -45,7 +45,7 @@ export default observer(function () {
   const info = store.deploy;
   return (
     <Form layout="vertical" style={{padding: '0 120px'}}>
-      <Form.Item label={FilterHead} tooltip="xxx">
+      <Form.Item label={FilterHead}>
         <ACEditor
           readOnly={store.isReadOnly}
           mode="sh"

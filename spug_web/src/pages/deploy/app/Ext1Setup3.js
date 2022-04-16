@@ -36,12 +36,12 @@ export default observer(function () {
   const info = store.deploy;
   return (
     <Form layout="vertical" style={{padding: '0 120px'}}>
-      <Form.Item required label="部署路径" tooltip="应用最终在主机上的部署路径，为了数据安全请确保该目录不存在，Spug 将会自动创建并接管该目录，例如：/var/www/html">
+      <Form.Item required label="部署路径" tooltip="应用最终在主机上的部署路径，为了数据安全请确保该目录不存在，Spug 将会自动创建并接管该目录，可使用全局变量，例如：/www/$SPUG_APP_KEY">
         <Input value={info['dst_dir']} onChange={e => info['dst_dir'] = e.target.value} placeholder="请输入部署目标路径"/>
       </Form.Item>
       <Row gutter={24}>
         <Col span={14}>
-          <Form.Item required label="存储路径" tooltip="此目录用于存储应用的历史版本，例如：/data/spug/repos">
+          <Form.Item required label="存储路径" tooltip="此目录用于存储应用的历史版本，可使用全局变量，例如：/data/repos/$SPUG_APP_KEY">
             <Input value={info['dst_repo']} onChange={e => info['dst_repo'] = e.target.value} placeholder="请输入部署目标路径"/>
           </Form.Item>
         </Col>
