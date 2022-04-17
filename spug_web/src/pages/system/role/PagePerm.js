@@ -77,7 +77,7 @@ class PagePerm extends React.Component {
           type="info"
           style={{width: 600, margin: '0 auto 20px', color: '#31708f !important'}}
           message="小提示"
-          description={[<div key="1">功能权限仅影响页面功能，管理发布应用权限请在发布权限中设置。</div>,
+          description={[<div key="1">功能权限仅影响页面功能，管理应用的发布权限请在发布权限中设置。</div>,
             <div key="2">权限更改成功后会强制属于该角色的账户重新登录。</div>]}/>
         <table border="1" className={styles.table}>
           <thead>
