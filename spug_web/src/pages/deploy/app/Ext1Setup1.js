@@ -7,12 +7,14 @@ import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
 import { Switch, Form, Input, Select, Button, Radio } from 'antd';
+import Repo from './Repo';
 import envStore from 'pages/config/environment/store';
 import Selector from 'pages/host/Selector';
 import store from './store';
 
 export default observer(function Ext1Setup1() {
   const [envs, setEnvs] = useState([]);
+  const [visible, setVisible] = useState(false);
 
   function updateEnvs() {
     const ids = store.currentRecord['deploys'].map(x => x.env_id);
@@ -63,7 +65,7 @@ export default observer(function Ext1Setup1() {
         {info.host_ids.length > 0 && <span style={{marginRight: 16}}>已选择 {info.host_ids.length} 台</span>}
         <Button type="link" style={{padding: 0}} onClick={() => store.selectorVisible = true}>选择主机</Button>
       </Form.Item>
-      <Form.Item required label="Git仓库地址">
+      <Form.Item required label="Git仓库地址" extra={<span className="btn" onClick={() => setVisible(true)}>私有仓库？</span>}>
         <Input disabled={store.isReadOnly} value={info['git_repo']} onChange={e => info['git_repo'] = e.target.value}
                placeholder="请输入Git仓库地址"/>
       </Form.Item>
@@ -119,6 +121,7 @@ export default observer(function Ext1Setup1() {
         selectedRowKeys={[...info.host_ids]}
         onCancel={() => store.selectorVisible = false}
         onOk={(_, ids) => info.host_ids = ids}/>
+      {visible && <Repo url={info['git_repo']} onOk={v => info['git_repo'] = v} onCancel={() => setVisible(false)}/>}
     </Form>
   )
 })

@@ -196,7 +196,12 @@ def get_versions(request, d_id):
     return json_response({'branches': branches, 'tags': tags})
 
 
-@auth('deploy.app.config')
+@auth('deploy.app.config|deploy.app.edit')
 def kit_key(request):
-    api_key = AppSetting.get_default('api_key')
-    return json_response(api_key)
+    form, error = JsonParser(
+        Argument('key', filter=lambda x: x in ('api_key', 'public_key'), help='参数错误')
+    ).parse(request.body)
+    if error is None:
+        api_key = AppSetting.get_default(form.key)
+        return json_response(api_key)
+    return json_response(error=error)
