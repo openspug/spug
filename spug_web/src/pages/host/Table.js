@@ -31,7 +31,7 @@ function ComTable() {
     if (menu.key === 'excel') {
       store.importVisible = true
     } else if (menu.key === 'form') {
-      store.showForm()
+      store.showForm({group_ids: [store.group.value]})
     } else {
       store.cloudImport = menu.key
     }
