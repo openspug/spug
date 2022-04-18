@@ -52,6 +52,9 @@ def _parse_request(request):
     elif 'X-Hub-Signature-256' in request.headers:
         token = request.headers['X-Hub-Signature-256'].replace('sha256=', '')
         repo = 'Github'
+    elif 'X-Coding-Signature' in request.headers:
+        token = request.headers['X-Coding-Signature'].replace('sha1=', '')
+        repo = 'Coding'
     elif 'token' in request.GET:  # Compatible the old version of gitlab
         token = request.GET.get('token')
         repo = 'Gitlab'
@@ -61,6 +64,10 @@ def _parse_request(request):
             return None, None
     elif repo in ['Github', 'Gogs']:
         en_api_key = hmac.new(api_key.encode(), request.body, hashlib.sha256).hexdigest()
+        if token != en_api_key:
+            return None, None
+    elif repo in ['Coding']:
+        en_api_key = hmac.new(api_key.encode(), request.body, hashlib.sha1).hexdigest()
         if token != en_api_key:
             return None, None
     else:
@@ -75,7 +82,7 @@ def _parse_request(request):
 
 def _parse_message(body, repo):
     message = None
-    if repo in ['Gitee', 'Github']:
+    if repo in ['Gitee', 'Github', 'Coding']:
         message = body.get('head_commit', {}).get('message', '')
     elif repo in ['Gitlab', 'Codeup', 'Gogs']:
         if body.get('commits'):

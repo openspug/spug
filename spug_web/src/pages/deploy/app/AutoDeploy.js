@@ -98,7 +98,7 @@ export default observer(function AutoDeploy() {
             <div style={{color: '#ff4d4f'}}>请指定分支名称。</div>
           </Form.Item>
         ) : (
-          <Form.Item label="Webhook URL" extra="点击复制链接，目前支持Gitee、Github、Gitlab、Gogs和Codeup(阿里云)。">
+          <Form.Item label="Webhook URL" extra="点击复制链接，目前支持Gitee、Github、Gitlab、Gogs、Coding和Codeup(阿里云)。">
             <div className={styles.webhook} onClick={() => copyToClipBoard(url)}>{url}</div>
           </Form.Item>
         )}
