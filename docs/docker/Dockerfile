@@ -12,7 +12,7 @@ RUN pip3 install --no-cache-dir -i https://pypi.doubanio.com/simple/ \
     Django==2.2.27 \
     channels==2.3.1 \
     channels_redis==2.4.1 \
-    paramiko==2.8.1 \
+    paramiko==2.10.3 \
     django-redis==4.10.0 \
     requests==2.22.0 \
     GitPython==3.0.8 \
