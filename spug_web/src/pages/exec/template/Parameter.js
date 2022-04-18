@@ -50,7 +50,7 @@ export default function Parameter(props) {
           {({getFieldValue}) =>
             ['select'].includes(getFieldValue('type')) ? (
               <Form.Item required name="options" label="可选项" tooltip="每项单独一行，每行可以用英文冒号分割前边是值后边是显示的内容。">
-                <Input.TextArea autoSize={{minRows: 3, maxRows: 5}} placeholder="每行一个选项，例如： test:测试环境"/>
+                <Input.TextArea autoSize={{minRows: 3, maxRows: 5}} placeholder="每行一个选项，例如：&#13;&#10;test:测试环境&#13;&#10;prod:生产环境"/>
               </Form.Item>
             ) : null
           }
