@@ -3,11 +3,23 @@
 # Released under the AGPL-3.0 License.
 from paramiko.client import SSHClient, AutoAddPolicy
 from paramiko.rsakey import RSAKey
+from paramiko.transport import Transport
 from paramiko.ssh_exception import AuthenticationException
 from io import StringIO
 from uuid import uuid4
 import time
 import re
+
+Transport._preferred_pubkeys = (
+    "ssh-ed25519",
+    "ecdsa-sha2-nistp256",
+    "ecdsa-sha2-nistp384",
+    "ecdsa-sha2-nistp521",
+    "ssh-rsa",
+    "rsa-sha2-256",
+    "rsa-sha2-512",
+    "ssh-dss",
+)
 
 
 class SSH:
