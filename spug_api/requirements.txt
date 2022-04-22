@@ -1,5 +1,5 @@
 apscheduler==3.7.0
-Django==2.2.27
+Django==2.2.28
 asgiref==3.2.10
 channels==2.3.1
 channels_redis==2.4.1
