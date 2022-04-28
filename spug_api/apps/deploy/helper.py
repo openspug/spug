@@ -188,7 +188,7 @@ class Helper:
     @classmethod
     def send_deploy_notify(cls, req, action=None):
         rst_notify = json.loads(req.deploy.rst_notify)
-        host_ids = req.host_ids
+        host_ids = json.loads(req.host_ids) if isinstance(req.host_ids, str) else req.host_ids
         if rst_notify['mode'] != '0' and rst_notify.get('value'):
             url = rst_notify['value']
             version = req.version
