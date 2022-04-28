@@ -24,7 +24,7 @@ function WebSSH(props) {
     term.write('WebSocket connecting ... ');
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/ssh/${props.id}/?x-token=${X_TOKEN}`);
-    socket.onmessage = e => _read_as_text(e.data);
+    socket.onmessage = e => term.write(e.data)
     socket.onopen = () => {
       term.write('ok')
       term.focus();
@@ -66,12 +66,6 @@ function WebSSH(props) {
         term.resize(dims.cols, dims.rows);
       }
     }
-  }
-
-  function _read_as_text(data) {
-    const reader = new window.FileReader();
-    reader.onload = () => term.write(reader.result);
-    reader.readAsText(data, 'utf-8')
   }
 
   return (

@@ -93,7 +93,11 @@ class SSHConsumer(WebsocketConsumer):
             if not data:
                 self.close(3333)
                 break
-            self.send(bytes_data=data)
+            try:
+                text = data.decode()
+            except UnicodeDecodeError:
+                text = data.decode(encoding='GBK', errors='ignore')
+            self.send(text_data=text)
 
     def receive(self, text_data=None, bytes_data=None):
         data = text_data or bytes_data
@@ -120,7 +124,7 @@ class SSHConsumer(WebsocketConsumer):
             self.close()
 
     def _init(self):
-        self.send(bytes_data=b'\r\33[KConnecting ...\r')
+        self.send(text_data='\r\33[KConnecting ...\r')
         host = Host.objects.filter(pk=self.id).first()
         if not host:
             self.send(text_data='Unknown host\r\n')
@@ -128,7 +132,7 @@ class SSHConsumer(WebsocketConsumer):
         try:
             self.ssh = host.get_ssh().get_client()
         except Exception as e:
-            self.send(bytes_data=f'Exception: {e}\r\n'.encode())
+            self.send(text_data=f'Exception: {e}\r\n'.encode())
             self.close()
             return
         self.chan = self.ssh.invoke_shell(term='xterm')
