@@ -213,7 +213,6 @@ function WebSSH(props) {
     '/____// .___/ \\__,_/ \\__, /    |__/|__/ \\___//_.___/   \\__/ \\___//_/   /_/ /_/ /_//_//_/ /_/ \\__,_//_/   \n' +
     '     /_/            /____/                                                                               \n'
 
-  console.log(sshMode)
   return hasPermission('host.console.view|host.console.list') ? (
     <div className={styles.container} onMouseUp={() => posX = 0} onMouseMove={handleMouseMove}>
       <div className={styles.sider} style={{width}}>

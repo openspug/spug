@@ -20,6 +20,16 @@ function WebSSH(props) {
     term.loadAddon(fitPlugin);
     term.setOption('fontFamily', 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei')
     term.setOption('theme', {background: '#2b2b2b', foreground: '#A9B7C6'})
+    term.attachCustomKeyEventHandler((arg) => {
+      if (arg.code === 'PageUp' && arg.type === 'keydown') {
+        term.scrollPages(-1)
+        return false
+      } else if (arg.code === 'PageDown' && arg.type === 'keydown') {
+        term.scrollPages(1)
+        return false
+      }
+      return true
+    })
     term.open(container.current);
     term.write('WebSocket connecting ... ');
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
