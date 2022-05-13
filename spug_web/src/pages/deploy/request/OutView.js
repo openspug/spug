@@ -17,6 +17,13 @@ function OutView(props) {
       term.setOption('fontFamily', 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei')
       term.loadAddon(fitPlugin)
       term.setOption('theme', {background: '#fff', foreground: '#000', selection: '#999'})
+      term.attachCustomKeyEventHandler((arg) => {
+        if (arg.ctrlKey && arg.code === 'KeyC' && arg.type === 'keydown') {
+          document.execCommand('copy')
+          return false
+        }
+        return true
+      })
       term.open(el.current)
       fitPlugin.fit()
       props.setTerm(term)

@@ -73,6 +73,13 @@ export default observer(function Console() {
     term.loadAddon(fitPlugin)
     term.setOption('fontFamily', 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei')
     term.setOption('theme', {background: '#fafafa', foreground: '#000', selection: '#999'})
+    term.attachCustomKeyEventHandler((arg) => {
+      if (arg.ctrlKey && arg.code === 'KeyC' && arg.type === 'keydown') {
+        document.execCommand('copy')
+        return false
+      }
+      return true
+    })
     term.open(el.current)
     term.fit = () => fitPlugin.fit()
     fitPlugin.fit()

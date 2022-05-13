@@ -33,6 +33,13 @@ function OutView(props) {
     term.setOption('disableStdin', true)
     term.setOption('fontFamily', 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei')
     term.setOption('theme', {background: '#2b2b2b', foreground: '#A9B7C6', cursor: '#2b2b2b'})
+    term.attachCustomKeyEventHandler((arg) => {
+      if (arg.ctrlKey && arg.code === 'KeyC' && arg.type === 'keydown') {
+        document.execCommand('copy')
+        return false
+      }
+      return true
+    })
     term.loadAddon(fitPlugin)
     term.open(el.current)
     fitPlugin.fit()
