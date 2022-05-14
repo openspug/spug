@@ -62,7 +62,7 @@ export default [{
     label: '应用管理',
     perms: [
       {key: 'view', label: '查看应用'},
-      // {key: 'add', label: '新建应用'},
+      {key: 'add', label: '新建应用'},
       {key: 'edit', label: '编辑应用'},
       {key: 'del', label: '删除应用'},
       {key: 'config', label: '查看配置'},

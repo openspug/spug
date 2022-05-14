@@ -2,7 +2,7 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
-from django.db.models import F
+from django.db.models import F, Q
 from libs import JsonParser, Argument, json_response, auth
 from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
 from apps.config.models import Config, ConfigHistory
@@ -13,15 +13,15 @@ import re
 
 
 class AppView(View):
-    @auth('deploy.app.view|deploy.repository.view|deploy.request.view|config.app.view')
     def get(self, request):
-        query = {}
-        if not request.user.is_supper:
-            query['id__in'] = request.user.deploy_perms['apps']
-        apps = App.objects.filter(**query)
+        if request.user.is_supper:
+            apps = App.objects.all()
+        else:
+            ids = request.user.deploy_perms['apps']
+            apps = App.objects.filter(Q(id__in=ids) | Q(created_by=request.user))
         return json_response(apps)
 
-    @auth('deploy.app.edit|config.app.add|config.app.edit')
+    @auth('deploy.app.add|deploy.app.edit|config.app.add|config.app.edit')
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),

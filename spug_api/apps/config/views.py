@@ -11,7 +11,6 @@ import re
 
 
 class EnvironmentView(View):
-    @auth('deploy.repository.view|deploy.request.view|config.env.view')
     def get(self, request):
         query = {}
         if not request.user.is_supper:
