@@ -38,7 +38,10 @@ def host_executor(host, command):
 
 
 def schedule_worker_handler(job):
-    history_id, host_id, command = json.loads(job)
+    history_id, host_id, interpreter, command = json.loads(job)
+    if interpreter == 'python':
+        attach = 'INTERPRETER=python\ncommand -v python3 &> /dev/null && INTERPRETER=python3'
+        command = f'{attach}\n$INTERPRETER << EOF\n# -*- coding: UTF-8 -*-\n{command}\nEOF'
     if host_id == 'local':
         code, duration, out = local_executor(command)
     else:

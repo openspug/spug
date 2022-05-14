@@ -27,6 +27,7 @@ class Schedule(View):
             Argument('id', type=int, required=False),
             Argument('type', help='请输入任务类型'),
             Argument('name', help='请输入任务名称'),
+            Argument('interpreter', help='请选择执行解释器'),
             Argument('command', help='请输入任务内容'),
             Argument('rst_notify', type=dict, help='请选择执行失败通知方式'),
             Argument('targets', type=list, filter=lambda x: len(x), help='请选择执行对象'),

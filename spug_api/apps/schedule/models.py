@@ -37,6 +37,7 @@ class Task(models.Model, ModelMixin):
     )
     name = models.CharField(max_length=50)
     type = models.CharField(max_length=50)
+    interpreter = models.CharField(max_length=20, default='sh')
     command = models.TextField()
     targets = models.TextField()
     trigger = models.CharField(max_length=20, choices=TRIGGERS)

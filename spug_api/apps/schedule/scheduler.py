@@ -62,7 +62,7 @@ class Scheduler:
         self.scheduler.add_job(auto_run_by_day, 'cron', hour=1, minute=20)
         self.scheduler.add_job(auto_run_by_minute, 'interval', minutes=1)
 
-    def _dispatch(self, task_id, command, targets):
+    def _dispatch(self, task_id, interpreter, command, targets):
         output = {x: None for x in targets}
         history = History.objects.create(
             task_id=task_id,
@@ -73,7 +73,7 @@ class Scheduler:
         Task.objects.filter(pk=task_id).update(latest_id=history.id)
         rds_cli = get_redis_connection()
         for t in targets:
-            rds_cli.rpush(SCHEDULE_WORKER_KEY, json.dumps([history.id, t, command]))
+            rds_cli.rpush(SCHEDULE_WORKER_KEY, json.dumps([history.id, t, interpreter, command]))
         connections.close_all()
 
     def _init(self):
@@ -86,7 +86,7 @@ class Scheduler:
                     self._dispatch,
                     trigger,
                     id=str(task.id),
-                    args=(task.id, task.command, json.loads(task.targets)),
+                    args=(task.id, task.interpreter, task.command, json.loads(task.targets)),
                 )
             connections.close_all()
         except DatabaseError:
@@ -106,7 +106,7 @@ class Scheduler:
                     self._dispatch,
                     trigger,
                     id=str(task.id),
-                    args=(task.id, task.command, task.targets),
+                    args=(task.id, task.interpreter, task.command, task.targets),
                     replace_existing=True
                 )
             elif task.action == 'remove':
