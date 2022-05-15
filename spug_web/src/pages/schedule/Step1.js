@@ -11,7 +11,6 @@ export default observer(function () {
   const [form] = Form.useForm();
   const [showTmp, setShowTmp] = useState(false);
   const [command, setCommand] = useState(store.record.command || '');
-  const [interpreter, setInterpreter] = useState(store.record.interpreter || 'sh');
 
   function handleAddZone() {
     let type;
@@ -42,6 +41,12 @@ export default observer(function () {
   function handleNext() {
     store.page += 1;
     Object.assign(store.record, form.getFieldsValue(), {command: cleanCommand(command)})
+  }
+
+  function handleSelect(tpl) {
+    const {interpreter, body} = tpl;
+    setCommand(body)
+    form.setFieldsValue({interpreter})
   }
 
   let modePlaceholder;
@@ -80,13 +85,18 @@ export default observer(function () {
         <Input placeholder="请输入任务名称"/>
       </Form.Item>
       <Form.Item required label="任务内容" extra={<LinkButton onClick={() => setShowTmp(true)}>从模板添加</LinkButton>}>
-        <Form.Item noStyle name="interpreter" initialValue="sh">
-          <Radio.Group buttonStyle="solid" style={{marginBottom: 12}} onChange={e => setInterpreter(e.target.value)}>
+        <Form.Item noStyle name="interpreter">
+          <Radio.Group buttonStyle="solid" style={{marginBottom: 12}}>
             <Radio.Button value="sh" style={{width: 80, textAlign: 'center'}}>Shell</Radio.Button>
             <Radio.Button value="python" style={{width: 80, textAlign: 'center'}}>Python</Radio.Button>
           </Radio.Group>
         </Form.Item>
-        <ACEditor mode={interpreter} value={command} width="100%" height="150px" onChange={setCommand}/>
+        <Form.Item noStyle shouldUpdate>
+          {({getFieldValue}) => (
+            <ACEditor mode={getFieldValue('interpreter')} value={command} width="100%" height="150px"
+                      onChange={setCommand}/>
+          )}
+        </Form.Item>
       </Form.Item>
       <Form.Item label="失败通知" extra={(
         <span>
@@ -116,7 +126,7 @@ export default observer(function () {
       <Form.Item shouldUpdate wrapperCol={{span: 14, offset: 6}}>
         {() => <Button disabled={canNext()} type="primary" onClick={handleNext}>下一步</Button>}
       </Form.Item>
-      {showTmp && <TemplateSelector onOk={({body}) => setCommand(body)} onCancel={() => setShowTmp(false)}/>}
+      {showTmp && <TemplateSelector onOk={handleSelect} onCancel={() => setShowTmp(false)}/>}
     </Form>
   )
 })

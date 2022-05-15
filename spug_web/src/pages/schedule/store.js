@@ -56,7 +56,7 @@ class Store {
 
   showForm = (info) => {
     this.page = 0;
-    this.record = info || {rst_notify: {mode: '0'}, trigger: 'interval'};
+    this.record = info || {interpreter: 'sh', rst_notify: {mode: '0'}, trigger: 'interval'};
     this.formVisible = true
   };
 
