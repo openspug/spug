@@ -7,7 +7,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apps.schedule.scheduler import Scheduler
 from apps.schedule.models import Task, History
-from apps.schedule.executors import local_executor, host_executor
+from apps.schedule.executors import dispatch_job
 from apps.host.models import Host
 from django.conf import settings
 from libs import json_response, JsonParser, Argument, human_datetime, auth
@@ -121,14 +121,7 @@ class HistoryView(View):
             return json_response(error='未找到指定任务')
         outputs, status = {}, 1
         for host_id in json.loads(task.targets):
-            if host_id == 'local':
-                code, duration, out = local_executor(task.command)
-            else:
-                host = Host.objects.filter(pk=host_id).first()
-                if not host:
-                    code, duration, out = 1, 0, f'unknown host id for {host_id!r}'
-                else:
-                    code, duration, out = host_executor(host, task.command)
+            code, duration, out = dispatch_job(host_id, task.interpreter, task.command)
             if code != 0:
                 status = 2
             outputs[host_id] = [code, duration, out]

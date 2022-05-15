@@ -37,8 +37,7 @@ def host_executor(host, command):
     return code, round(time.time() - now, 3), out
 
 
-def schedule_worker_handler(job):
-    history_id, host_id, interpreter, command = json.loads(job)
+def dispatch_job(host_id, interpreter, command):
     if interpreter == 'python':
         attach = 'INTERPRETER=python\ncommand -v python3 &> /dev/null && INTERPRETER=python3'
         command = f'{attach}\n$INTERPRETER << EOF\n# -*- coding: UTF-8 -*-\n{command}\nEOF'
@@ -50,6 +49,12 @@ def schedule_worker_handler(job):
             code, duration, out = 1, 0, f'unknown host id for {host_id!r}'
         else:
             code, duration, out = host_executor(host, command)
+    return code, duration, out
+
+
+def schedule_worker_handler(job):
+    history_id, host_id, interpreter, command = json.loads(job)
+    code, duration, out = dispatch_job(host_id, interpreter, command)
 
     close_old_connections()
     with transaction.atomic():
