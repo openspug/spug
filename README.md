@@ -49,33 +49,27 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
 
 ## 预览
 
-#### 主机批量执行
-![image](https://cdn.spug.cc/img/host-exec-2.0.png)
+### 主机管理
+![image](https://cdn.spug.cc/img/3.0/host.jpg)
 
 #### 主机在线终端
-![image](https://cdn.spug.cc/img/host-console-2.0.png)
+![image](https://cdn.spug.cc/img/3.0/web-terminal.jpg)
 
 #### 文件在线上传下载
-![文件管理](https://cdn.spug.cc/img/spug-host-file.png)
+![image](https://cdn.spug.cc/img/3.0/file-manager.jpg)
 
-#### 应用管理
-![image](https://cdn.spug.cc/img/app-2.0.png)
-![image](https://cdn.spug.cc/img/app-apply-2.0.png)
+#### 主机批量执行
+![image](https://cdn.spug.cc/img/3.0/host-exec.jpg)
+![image](https://cdn.spug.cc/img/3.0/host-exec2.jpg)
 
-#### 任务管理
-![image](https://cdn.spug.cc/img/task-2.0.png)
-![image](https://cdn.spug.cc/img/task-detail-2.0.png)
-#### 配置管理(支持KV,txt,json等格式)
-![image](https://cdn.spug.cc/img/service-conf-2.0.png)
-![image](https://cdn.spug.cc/img/service-conf-json-2.0.png)
-![image](https://cdn.spug.cc/img/conf-history-2.0.png)
+#### 应用发布
+![image](https://cdn.spug.cc/img/3.0/deploy.jpg)
 
 #### 监控报警
-![image](https://cdn.spug.cc/img/monitor-alarm-2.0.png)
-![image](https://cdn.spug.cc/img/monitor-add-2.0.png)
+![image](https://cdn.spug.cc/img/3.0/monitor.jpg)
 
 #### 角色权限
-![image](https://cdn.spug.cc/img/role-2.0.png)
+![image](https://cdn.spug.cc/img/3.0/user-role.jpg)
 
 
 ## 赞助
