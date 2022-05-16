@@ -38,6 +38,13 @@ class FileManager extends React.Component {
     this.fetchFiles()
   }
 
+  componentDidUpdate(prevProps) {
+    if (this.props.id !== prevProps.id) {
+      this.fetchFiles()
+      this.setState({objects: []})
+    }
+  }
+
   columns = [{
     title: '名称',
     key: 'name',
