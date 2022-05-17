@@ -312,7 +312,7 @@ def post_request_ext2(request):
         if form.id:
             req = DeployRequest.objects.get(pk=form.id)
             is_required_notify = deploy.is_audit and req.status == '-1'
-            DeployRequest.objects.filter(pk=form.id).update(created_by=request.user, reason=None, **form)
+            req.update_by_dict(created_by=request.user, reason=None, **form)
         else:
             req = DeployRequest.objects.create(created_by=request.user, **form)
             is_required_notify = deploy.is_audit
