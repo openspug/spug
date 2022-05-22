@@ -152,7 +152,7 @@ class SSH:
 
         counter = 0
         self.channel = self.client.invoke_shell()
-        command = 'set +o zle\nset -o no_nomatch\nexport PS1= && stty -echo\n'
+        command = 'set +o history\nset +o zle\nset -o no_nomatch\nexport PS1= && stty -echo\n'
         if self.default_env:
             command += f'{self.default_env}\n'
         command += f'echo {self.eof} $?\n'
