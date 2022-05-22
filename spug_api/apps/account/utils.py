@@ -2,6 +2,7 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from apps.host.models import Group
+import re
 
 
 def get_host_perms(user):
@@ -19,3 +20,11 @@ def has_host_perm(user, target):
     if isinstance(target, (list, set, tuple)):
         return set(target).issubset(host_ids)
     return int(target) in host_ids
+
+
+def verify_password(password):
+    if len(password) < 8:
+        return False
+    if not all(map(lambda x: re.findall(x, password), ['[0-9]', '[a-z]', '[A-Z]'])):
+        return False
+    return True

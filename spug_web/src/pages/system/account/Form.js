@@ -49,8 +49,8 @@ export default observer(function () {
         <Form.Item required name="nickname" label="姓名">
           <Input placeholder="请输入姓名"/>
         </Form.Item>
-        <Form.Item required hidden={store.record.id} name="password" label="密码">
-          <Input type="password" placeholder="请输入密码"/>
+        <Form.Item required hidden={store.record.id} name="password" label="密码" extra="至少8位包含数字、小写和大写字母。">
+          <Input.Password placeholder="请输入密码"/>
         </Form.Item>
         <Form.Item hidden={store.record.is_supper} label="角色" style={{marginBottom: 0}}>
           <Form.Item name="role_ids" style={{display: 'inline-block', width: '80%'}} extra="权限最大化原则，组合多个角色权限。">

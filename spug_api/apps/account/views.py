@@ -8,6 +8,7 @@ from libs.utils import get_request_real_ip, generate_random_str
 from libs.spug import send_login_wx_code
 from apps.account.models import User, Role, History
 from apps.setting.utils import AppSetting
+from apps.account.utils import verify_password
 from libs.ldap import LDAP
 import ipaddress
 import time
@@ -40,6 +41,9 @@ class UserView(AdminView):
                 return json_response(error=f'已存在登录名为【{form.username}】的用户')
 
             role_ids, password = form.pop('role_ids'), form.pop('password')
+            if not verify_password(password):
+                return json_response(error='请设置至少8位包含数字、小写和大写字母的新密码')
+
             if form.id:
                 user = User.objects.get(pk=form.id)
                 user.update_by_dict(form)
@@ -62,6 +66,8 @@ class UserView(AdminView):
         if error is None:
             user = User.objects.get(pk=form.id)
             if form.password:
+                if not verify_password(form.password):
+                    return json_response(error='请设置至少8位包含数字、小写和大写字母的新密码')
                 user.token_expired = 0
                 user.password_hash = User.make_password(form.pop('password'))
             if form.is_active is not None:
@@ -157,8 +163,10 @@ class SelfView(View):
             if form.old_password and form.new_password:
                 if request.user.type == 'ldap':
                     return json_response(error='LDAP账户无法修改密码')
-                if len(form.new_password) < 6:
-                    return json_response(error='请设置至少6位的新密码')
+
+                if not verify_password(form.new_password):
+                    return json_response(error='请设置至少8位包含数字、小写和大写字母的新密码')
+
                 if request.user.verify_password(form.old_password):
                     request.user.password_hash = User.make_password(form.new_password)
                     request.user.token_expired = 0
