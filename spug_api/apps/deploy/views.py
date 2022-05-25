@@ -211,6 +211,7 @@ def post_request_ext1(request):
         Argument('type', default='1'),
         Argument('plan', required=False),
         Argument('desc', required=False),
+        Argument('module', required=False),
     ).parse(request.body)
     if error is None:
         deploy = Deploy.objects.get(pk=form.deploy_id)
@@ -293,6 +294,7 @@ def post_request_ext2(request):
         Argument('type', default='1'),
         Argument('plan', required=False),
         Argument('desc', required=False),
+        Argument('module', required=False),
     ).parse(request.body)
     if error is None:
         deploy = Deploy.objects.filter(pk=form.deploy_id).first()

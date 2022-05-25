@@ -47,6 +47,7 @@ def dispatch(req, fail_mode=False):
             SPUG_DEPLOY_TYPE=req.type,
             SPUG_API_TOKEN=api_token,
             SPUG_REPOS_DIR=REPOS_DIR,
+            SPUG_MODULE=req.module,
         )
         # append configs
         configs = compose_configs(req.deploy.app, req.deploy.env_id)

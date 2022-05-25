@@ -96,7 +96,7 @@ export default observer(function () {
           <Input placeholder="请输入环境变量 SPUG_RELEASE 的值"/>
         </Form.Item>
         {module && (
-          <Form.Item required name="module1" label="模块选择" tooltip="会覆盖SPUG_RELEASE的值">
+          <Form.Item required name="module1" label="模块选择" tooltip="使用SPUG_MODULE">
             <Checkbox.Group options={module_list}></Checkbox.Group>
           </Form.Item>
         )}

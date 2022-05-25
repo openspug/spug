@@ -45,7 +45,7 @@ class DeployRequest(models.Model, ModelMixin):
     approve_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)
     do_at = models.CharField(max_length=20, null=True)
     do_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)
-
+    module = models.CharField(max_length=255, null=True)
     @property
     def is_quick_deploy(self):
         if self.type in ('1', '3') and self.deploy.extend == '1' and self.extra:
