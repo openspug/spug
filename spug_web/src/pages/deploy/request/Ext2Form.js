@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { UploadOutlined } from '@ant-design/icons';
-import { Modal, Form, Input, Upload, DatePicker, message, Button } from 'antd';
+import { Modal, Form, Input, Upload, DatePicker, message, Button ,Checkbox} from 'antd';
 import hostStore from 'pages/host/store';
 import HostSelector from './HostSelector';
 import { http, clsNames, X_TOKEN } from 'libs';
@@ -42,6 +42,7 @@ export default observer(function () {
     formData['deploy_id'] = store.record.deploy_id;
     if (plan) formData.plan = plan.format('YYYY-MM-DD HH:mm:00');
     if (fileList.length > 0) formData['extra'] = lds.pick(fileList[0], ['path', 'name']);
+    formData['module'] = formData['module1'].join(',');
     http.post('/api/deploy/request/ext2/', formData)
       .then(res => {
         message.success('操作成功');
@@ -70,7 +71,11 @@ export default observer(function () {
     return false
   }
 
-  const {app_host_ids, deploy_id, type, require_upload} = store.record;
+  const { app_host_ids, deploy_id, type, require_upload, module } = store.record;
+  let module_list = [];
+  if (module) {
+    module_list = module.split(',');
+  }
   return (
     <Modal
       visible
@@ -90,6 +95,11 @@ export default observer(function () {
           tooltip="可以在自定义脚本中引用该变量，用于设置本次发布相关的动态变量，在脚本中通过 $SPUG_RELEASE 来使用该值。">
           <Input placeholder="请输入环境变量 SPUG_RELEASE 的值"/>
         </Form.Item>
+        {module && (
+          <Form.Item required name="module1" label="模块选择" tooltip="会覆盖SPUG_RELEASE的值">
+            <Checkbox.Group options={module_list}></Checkbox.Group>
+          </Form.Item>
+        )}
         {require_upload && (
           <Form.Item required label="上传数据" tooltip="通过数据传输动作来使用上传的文件。"
                      className={clsNames(styles.upload, fileList.length ? styles.uploadHide : null)}>

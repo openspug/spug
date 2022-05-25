@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, Select, DatePicker, Button, message } from 'antd';
+import { Modal, Form, Input, Select, DatePicker, Button, message,Checkbox } from 'antd';
 import { LoadingOutlined, SyncOutlined } from '@ant-design/icons';
 import HostSelector from './HostSelector';
 import hostStore from 'pages/host/store';
@@ -75,6 +75,7 @@ export default observer(function () {
     formData['type'] = store.record.type;
     formData['extra'] = [git_type, extra1, extra2];
     if (plan) formData.plan = plan.format('YYYY-MM-DD HH:mm:00');
+    formData['module'] = formData['module1'].join(',');
     http.post('/api/deploy/request/ext1/', formData)
       .then(res => {
         message.success('操作成功');
@@ -138,7 +139,11 @@ export default observer(function () {
     }
   }
 
-  const {app_host_ids, type, rb_id} = store.record;
+  const {app_host_ids, type, rb_id ,module} = store.record;
+  let module_list = [];
+  if (module) {
+    module_list = module.split(',');
+  }
   const {branches, tags} = versions;
   return (
     <Modal
@@ -225,6 +230,11 @@ export default observer(function () {
             </Select>
           </Form.Item>
         )}
+        {module && (
+          <Form.Item required name="module1" label="模块选择" tooltip="会覆盖SPUG_RELEASE的值">
+            <Checkbox.Group options={module_list}></Checkbox.Group>
+          </Form.Item>
+        )}
         <Form.Item required label="目标主机" tooltip="可以通过创建多个发布申请单，选择主机分批发布。">
           {host_ids.length > 0 && (
             <span style={{marginRight: 16}}>已选择 {host_ids.length} 台（可选{app_host_ids.length}）</span>
@@ -233,7 +243,7 @@ export default observer(function () {
         </Form.Item>
         <Form.Item name="desc" label="备注信息">
           <Input placeholder="请输入备注信息"/>
-        </Form.Item>
+        </Form.Item>   
         {type !== '2' && (
           <Form.Item label="定时发布" tooltip="在到达指定时间后自动发布，会有最多1分钟的延迟。">
             <DatePicker

@@ -45,6 +45,9 @@ export default observer(function () {
           extra="可以由字母、数字、-和下划线组成。">
           <Input placeholder="请输入唯一标识符，例如：api_order"/>
         </Form.Item>
+        <Form.Item name="module" label="模块名称">
+            <Input.TextArea placeholder="请输入模块名称,号分割" />
+          </Form.Item>
         <Form.Item name="desc" label="备注信息">
           <Input.TextArea placeholder="请输入备注信息"/>
         </Form.Item>

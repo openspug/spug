@@ -167,6 +167,11 @@ function ComTable() {
           return null
       }
     }
+  },
+  {
+    title: '模块',
+    dataIndex: 'module',
+    hide: true
   }];
 
   function DoAction(props) {
