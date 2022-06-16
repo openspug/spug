@@ -10,11 +10,15 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
 - 使用文档：https://spug.cc/docs/about-spug/
 - 更新日志：https://spug.cc/docs/change-log/
 - 常见问题：https://spug.cc/docs/faq/
+- 推送助手：https://push.spug.cc
 
 ## 演示环境
 
-演示地址：https://demo.spug.dev
+演示地址：https://demo.spug.cc
 
+## 推送助手
+
+[推送助手是一个集成了电话、短信、邮件、飞书、钉钉、微信、企业微信等多通道的消息推送平台，用户只需要调用一个简单的URL，就可以完成多通道的消息推送，点击体验：https://push.spug.cc](https://push.spug.cc)
 
 
 ## 特性
