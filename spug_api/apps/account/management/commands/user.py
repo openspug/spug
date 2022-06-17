@@ -52,10 +52,9 @@ class Command(BaseCommand):
                 self.echo_error('缺少参数')
                 self.print_help()
             user = User.objects.filter(username=options['u'], deleted_by_id__isnull=True).first()
-            if not user:
-                return self.echo_error(f'未找到登录名为【{options["u"]}】的账户')
-            user.is_active = True
-            user.save()
+            if user:
+                user.is_active = True
+                user.save()
             cache.delete(user.username)
             self.echo_success('账户已启用')
         elif action == 'reset':
