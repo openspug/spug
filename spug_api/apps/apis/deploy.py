@@ -6,6 +6,7 @@ from apps.setting.utils import AppSetting
 from apps.deploy.models import Deploy, DeployRequest
 from apps.repository.models import Repository
 from apps.deploy.utils import dispatch as deploy_dispatch
+from libs.utils import human_datetime
 from threading import Thread
 import hashlib
 import hmac
@@ -119,4 +120,7 @@ def _dispatch(deploy_id, ref, commit_id=None, message=None):
 
     req.save()
     if req.status == '2':
+        req.do_at = human_datetime()
+        req.do_by = deploy.created_by
+        req.save()
         deploy_dispatch(req)
