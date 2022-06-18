@@ -84,7 +84,7 @@ class HostExtend(models.Model, ModelMixin):
 
 
 class Group(models.Model, ModelMixin):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=50)
     parent_id = models.IntegerField(default=0)
     sort_id = models.IntegerField(default=0)
     hosts = models.ManyToManyField(Host, related_name='groups')
