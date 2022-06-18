@@ -162,6 +162,24 @@
     height: 24px;
   }
 
+  .bread:hover {
+    .edit {
+      display: inline-block;
+    }
+  }
+
+  .input {
+    width: 60%;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  }
+
+  .edit {
+    display: none;
+    color: #2563fcbb;
+    margin-left: 24px;
+    cursor: pointer;
+  }
+
   .progress {
     width: 94px;
     margin-left: 12px;
@@ -173,6 +191,15 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     margin-right: 24px;
+  }
+
+  :global(.ant-breadcrumb-separator) {
+    margin: 0 4px;
+    color: rgba(0, 0, 0, 0.85);
+  }
+
+  :global(.ant-breadcrumb-link) {
+    color: rgba(0, 0, 0, 0.85);
   }
 }
 
