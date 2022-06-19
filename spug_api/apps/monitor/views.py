@@ -114,6 +114,7 @@ def get_overview(request):
     for item in Detection.objects.all():
         data = {}
         for key in json.loads(item.targets):
+            key = str(key)
             data[key] = {
                 'id': f'{item.id}_{key}',
                 'group': item.group,
