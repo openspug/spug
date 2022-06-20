@@ -41,13 +41,12 @@ class UserView(AdminView):
                 return json_response(error=f'已存在登录名为【{form.username}】的用户')
 
             role_ids, password = form.pop('role_ids'), form.pop('password')
-            if not verify_password(password):
-                return json_response(error='请设置至少8位包含数字、小写和大写字母的新密码')
-
             if form.id:
                 user = User.objects.get(pk=form.id)
                 user.update_by_dict(form)
             else:
+                if not verify_password(password):
+                    return json_response(error='请设置至少8位包含数字、小写和大写字母的新密码')
                 user = User.objects.create(
                     password_hash=User.make_password(password),
                     created_by=request.user,
