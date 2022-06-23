@@ -11,6 +11,7 @@ import { http, hasPermission } from 'libs';
 import { Action, AuthButton, TableCard } from 'components';
 import S from './index.module.less';
 import store from './store';
+import moment from 'moment';
 
 function DeployConfirm() {
   return (
@@ -72,7 +73,7 @@ function ComTable() {
     className: S.min120,
     dataIndex: 'created_at',
     sorter: (a, b) => a['created_at'].localeCompare(b['created_at']),
-    render: v => <Tooltip title={v}>{v ? v.substring(0, 10) : null}</Tooltip>,
+    render: v => <Tooltip title={v}>{v ? moment(v).fromNow() : null}</Tooltip>,
     hide: true
   }, {
     title: '审核人',
@@ -83,7 +84,7 @@ function ComTable() {
     title: '审核时间',
     className: S.min120,
     dataIndex: 'approve_at',
-    render: v => <Tooltip title={v}>{v ? v.substring(0, 10) : null}</Tooltip>,
+    render: v => <Tooltip title={v}>{v ? moment(v).fromNow() : null}</Tooltip>,
   }, {
     title: '发布人',
     className: S.min120,
@@ -93,7 +94,7 @@ function ComTable() {
     title: '发布时间',
     className: S.min120,
     dataIndex: 'do_at',
-    render: v => <Tooltip title={v}>{v ? v.substring(0, 10) : null}</Tooltip>,
+    render: v => <Tooltip title={v}>{v ? moment(v).fromNow() : null}</Tooltip>,
     hide: true
   }, {
     title: '备注',

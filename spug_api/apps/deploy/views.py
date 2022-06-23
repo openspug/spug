@@ -130,6 +130,10 @@ class RequestDetailView(View):
                         outputs[item['key']]['status'] = item['status']
             data = rds.lrange(key, counter, counter + 9)
         response['index'] = counter
+        if counter == 0:
+            for item in outputs:
+                outputs[item]['data'] += '\r\n\r\n未读取到数据，Spug 仅保存最近2周的日志信息。'
+
         if req.is_quick_deploy:
             if outputs['local']['data']:
                 outputs['local']['data'] = f'{human_time()} 读取数据...        ' + outputs['local']['data']

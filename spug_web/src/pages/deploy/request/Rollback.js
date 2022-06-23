@@ -55,12 +55,12 @@ export default observer(function () {
         <Form.Item required name="name" label="申请标题">
           <Input placeholder="请输入申请标题"/>
         </Form.Item>
-        <Form.Item required name="request_id" label="选择版本">
+        <Form.Item required name="request_id" label="选择版本" tooltip="可选择回滚版本与发布配置中的版本数量配置相关。">
           <Select
             showSearch
             placeholder="请选择回滚至哪个版本"
             filterOption={(input, option) => includes(option.props.children, input)}>
-            {store.records.filter(x => x.deploy_id === deploy_id && ['3', '-3'].includes(x.status)).map((item, index) => (
+            {store.records.filter(x => x.repository_id && x.deploy_id === deploy_id && ['3', '-3'].includes(x.status)).map((item, index) => (
               <Select.Option key={item.id} value={item.id} record={item} disabled={index === 0}>
                 <div style={{display: 'flex', justifyContent: 'space-between'}}>
                   <span>{`${item.name} (${item.version})`}</span>
