@@ -106,13 +106,19 @@ def _do_sync(rds, task, host):
         fp.flush()
 
         options = '-azv' if task.host_id else '-rzv'
-        target = f'{host.username}@{host.hostname}:{task.dst_dir}'
-        command = f'rsync {options} -h -e "ssh -p {host.port} -i {fp.name}" {task.src_dir}/ {target}'
+        argument = f'{task.src_dir}/ {host.username}@{host.hostname}:{task.dst_dir}'
+        command = f'rsync {options} -h -e "ssh -p {host.port} -o StrictHostKeyChecking=no -i {fp.name}" {argument}'
         task = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         while True:
             message = task.stdout.readline()
             if not message:
                 break
             message = message.decode().rstrip('\r\n')
+            if 'rsync: command not found' in message:
+                data = '\r\n\x1b[31m检测到该主机未安装rsync，可通过批量执行/执行任务模块进行以下命令批量安装\x1b[0m'
+                data += '\r\nCentos/Redhat: yum install -y rsync'
+                data += '\r\nUbuntu/Debian: apt install -y rsync'
+                rds.publish(token, json.dumps({'key': host.id, 'data': data}))
+                break
             rds.publish(token, json.dumps({'key': host.id, 'data': message + '\r\n'}))
         rds.publish(token, json.dumps({'key': host.id, 'status': task.wait()}))
