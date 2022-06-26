@@ -46,19 +46,28 @@ export default observer(function (props) {
   }
 
   function handleClickRow(record) {
-    const index = selectedRowKeys.indexOf(record.id);
+    let tmp = [...selectedRowKeys]
+    const index = tmp.indexOf(record.id);
     if (index !== -1) {
-      selectedRowKeys.splice(index, 1)
+      tmp.splice(index, 1)
+    } else if (props.onlyOne) {
+      tmp = [record.id]
     } else {
-      selectedRowKeys.push(record.id)
+      tmp.push(record.id)
     }
-    setSelectedRowKeys([...selectedRowKeys])
+    setSelectedRowKeys(tmp)
   }
 
   function handleSubmit() {
     if (props.onOk) {
       setLoading(true);
-      const res = props.onOk(group, selectedRowKeys);
+      let res
+      const selectedRows = store.records.filter(x => selectedRowKeys.includes(x.id))
+      if (props.onlyOne) {
+        res = props.onOk(group, selectedRowKeys[0], selectedRows[0])
+      } else {
+        res = props.onOk(group, selectedRowKeys, selectedRows);
+      }
       if (res && res.then) {
         res.then(props.onCancel, () => setLoading(false))
       } else {
@@ -80,11 +89,14 @@ export default observer(function (props) {
       className={styles.selector}
       title={props.title || '主机列表'}
       onOk={handleSubmit}
+      okButtonProps={{disabled: selectedRowKeys.length === 0}}
       confirmLoading={loading}
       onCancel={props.onCancel}>
       <Row gutter={12}>
         <Col span={6}>
           <Tree.DirectoryTree
+            defaultExpandAll
+            expandAction="doubleClick"
             selectedKeys={[group.key]}
             treeData={store.treeData}
             titleRender={treeRender}

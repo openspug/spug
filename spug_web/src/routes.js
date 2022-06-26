@@ -22,6 +22,7 @@ import DashboardIndex from './pages/dashboard';
 import HostIndex from './pages/host';
 import ExecTask from './pages/exec/task';
 import ExecTemplate from './pages/exec/template';
+import ExecTransfer from './pages/exec/transfer';
 import DeployApp from './pages/deploy/app';
 import DeployRepository from './pages/deploy/repository';
 import DeployRequest from './pages/deploy/request';
@@ -54,6 +55,7 @@ export default [
     icon: <CodeOutlined/>, title: '批量执行', auth: 'exec.task.do|exec.template.view', child: [
       {title: '执行任务', auth: 'exec.task.do', path: '/exec/task', component: ExecTask},
       {title: '模板管理', auth: 'exec.template.view', path: '/exec/template', component: ExecTemplate},
+      {title: '文件分发', auth: 'exec.transfer.view', path: '/exec/transfer', component: ExecTransfer},
     ]
   },
   {

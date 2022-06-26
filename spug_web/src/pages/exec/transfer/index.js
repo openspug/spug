@@ -1,0 +1,175 @@
+/**
+ * Copyright (c) OpenSpug Organization. https://github.com/openspug/spug
+ * Copyright (c) <spug.dev@gmail.com>
+ * Released under the AGPL-3.0 License.
+ */
+import React, { useState, useEffect } from 'react';
+import { observer } from 'mobx-react';
+import {
+  PlusOutlined, ThunderboltOutlined, QuestionCircleOutlined, UploadOutlined, CloudServerOutlined
+} from '@ant-design/icons';
+import { Form, Button, Alert, Tooltip, Space, Card, Table, Input, Upload, message } from 'antd';
+import { AuthDiv, Breadcrumb } from 'components';
+import Selector from 'pages/host/Selector';
+import Output from './Output';
+import { http, uniqueId } from 'libs';
+import moment from 'moment';
+import store from './store';
+import style from './index.module.less';
+
+function TransferIndex() {
+  const [loading, setLoading] = useState(false)
+  const [files, setFiles] = useState([])
+  const [dir, setDir] = useState('')
+  const [hosts, setHosts] = useState([])
+  const [sProps, setSProps] = useState({visible: false})
+  const [token, setToken] = useState()
+  const [histories, setHistories] = useState([])
+
+
+  useEffect(() => {
+    if (!loading) {
+      http.get('/api/exec/transfer/')
+        .then(res => setHistories(res))
+    }
+  }, [loading])
+
+  function handleSubmit() {
+    const formData = new FormData();
+    if (files.length === 0) return message.error('请添加数据源')
+    if (!dir) return message.error('请输入目标路径')
+    if (hosts.length === 0) return message.error('请选择目标主机')
+    const data = {dst_dir: dir, host_ids: hosts.map(x => x.id)}
+    for (let index in files) {
+      const item = files[index]
+      if (item.type === 'host') {
+        data.host = JSON.stringify([item.host_id, item.path])
+      } else {
+        formData.append(`file${index}`, item.path)
+      }
+    }
+    formData.append('data', JSON.stringify(data))
+    setLoading(true)
+    http.post('/api/exec/transfer/', formData)
+      .then(res => {
+        const tmp = {}
+        for (let host of hosts) {
+          tmp[host.id] = {
+            title: `${host.name}(${host.hostname}:${host.port})`,
+            data: '\x1b[36m### WebSocket connecting ...\x1b[0m',
+            status: -2
+          }
+        }
+        store.outputs = tmp
+        setToken(res)
+      })
+      .finally(() => setLoading(false))
+  }
+
+  function _handleAdd(type, name, path, host_id) {
+    let tmp = []
+    if (type === 'upload' && files.length > 0 && files[0].type === type) {
+      tmp = [...files]
+    }
+    tmp.push({id: uniqueId(), type, name, path, host_id})
+    setFiles(tmp)
+  }
+
+  function handleAddHostFile() {
+    setSProps({
+      visible: true,
+      onlyOne: true,
+      selectedRowKeys: [],
+      onCancel: () => setSProps({visible: false}),
+      onOk: (_, __, row) => _handleAdd('host', row.name, '', row.id),
+    })
+  }
+
+  function handleAddHost() {
+    setSProps({
+      visible: true,
+      selectedRowKeys: hosts.map(x => x.id),
+      onCancel: () => setSProps({visible: false}),
+      onOk: (_, __, rows) => setHosts(rows),
+    })
+  }
+
+  function handleUpload(file) {
+    _handleAdd('upload', '本地上传', file)
+    return Upload.LIST_IGNORE
+  }
+
+  function handleRemove(index) {
+    files.splice(index, 1)
+    setFiles([...files])
+  }
+
+  return (<AuthDiv auth="exec.task.do">
+    <Breadcrumb>
+      <Breadcrumb.Item>首页</Breadcrumb.Item>
+      <Breadcrumb.Item>批量执行</Breadcrumb.Item>
+      <Breadcrumb.Item>文件分发</Breadcrumb.Item>
+    </Breadcrumb>
+    <div className={style.index} hidden={token}>
+      <div className={style.left}>
+        <Card type="inner" title="数据源" extra={(<Space size={24}>
+          <Upload beforeUpload={handleUpload}><Space className="btn"><UploadOutlined/>上传本地文件</Space></Upload>
+          <Space className="btn" onClick={handleAddHostFile}><CloudServerOutlined/>添加主机文件</Space>
+        </Space>)}>
+          <Table rowKey="id" showHeader={false} pagination={false} size="small" dataSource={files}>
+            <Table.Column title="文件来源" dataIndex="name"/>
+            <Table.Column title="文件名称/路径" render={info => info.type === 'upload' ? info.path.name : (
+              <Input onChange={e => info.path = e.target.value} placeholder="请输入文件路径"/>)}/>
+            <Table.Column title="操作" render={(_, __, index) => (
+              <Button danger type="link" onClick={() => handleRemove(index)}>移除</Button>)}/>
+          </Table>
+        </Card>
+        <Card type="inner" title="分发目标" style={{margin: '24px 0'}} bodyStyle={{paddingBottom: 0}}>
+          <Form>
+            <Form.Item required label="目标路径">
+              <Input value={dir} onChange={e => setDir(e.target.value)} placeholder="请输入目标路径"/>
+            </Form.Item>
+            <Form.Item required label="目标主机">
+              {hosts.length > 0 ? (<Alert
+                type="info"
+                className={style.area}
+                message={<div>已选择 <b style={{fontSize: 18, color: '#1890ff'}}>{hosts.length}</b> 台主机</div>}
+                onClick={handleAddHost}/>) : (<Button icon={<PlusOutlined/>} onClick={handleAddHost}>
+                添加目标主机
+              </Button>)}
+            </Form.Item>
+          </Form>
+        </Card>
+
+        <Button loading={loading} icon={<ThunderboltOutlined/>} type="primary"
+                onClick={() => handleSubmit()}>开始执行</Button>
+      </div>
+
+      <div className={style.right}>
+        <div className={style.title}>
+          执行记录
+          <Tooltip title="每天自动清理，保留最近30条记录。">
+            <QuestionCircleOutlined style={{color: '#999', marginLeft: 8}}/>
+          </Tooltip>
+        </div>
+        <div className={style.inner}>
+          {histories.map((item, index) => (<div key={index} className={style.item}>
+            {item.host_id ? (
+              <CloudServerOutlined className={style.host}/>
+            ) : (
+              <UploadOutlined className={style.upload}/>
+            )}
+            <div className={style[item.interpreter]}>{item.interpreter}</div>
+            <div className={style.number}>{item.host_ids.length}</div>
+            <div className={style.command}>{item.dst_dir}</div>
+            <div className={style.desc}>{moment(item.updated_at).format('MM.DD HH:mm')}</div>
+          </div>))}
+        </div>
+      </div>
+    </div>
+    <Selector {...sProps}/>
+    {token ? <Output token={token} onBack={() => setToken()}/> : null}
+  </AuthDiv>)
+}
+
+export default observer(TransferIndex)

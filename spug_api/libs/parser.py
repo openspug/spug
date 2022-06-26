@@ -118,7 +118,6 @@ class JsonParser(BaseParser):
     def _init(self, data):
         try:
             if isinstance(data, (str, bytes)):
-                data = data.decode('utf-8')
                 self.__data = json.loads(data) if data else {}
             else:
                 assert hasattr(data, '__contains__')

@@ -2,17 +2,22 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.db import connections
-from apps.account.models import History
+from django.conf import settings
+from apps.account.models import History, User
 from apps.alarm.models import Alarm
 from apps.schedule.models import Task, History as TaskHistory
 from apps.deploy.models import DeployRequest
 from apps.app.models import DeployExtend1
-from apps.exec.models import ExecHistory
+from apps.exec.models import ExecHistory, Transfer
 from apps.notify.models import Notify
 from apps.deploy.utils import dispatch
 from libs.utils import parse_time, human_datetime, human_date
 from datetime import datetime, timedelta
 from threading import Thread
+from collections import defaultdict
+from pathlib import Path
+import time
+import os
 
 
 def auto_run_by_day():
@@ -28,17 +33,33 @@ def auto_run_by_day():
                 if index > item.versions and req.repository_id:
                     req.repository.delete()
                 index += 1
-        try:
-            record = ExecHistory.objects.all()[50]
-            ExecHistory.objects.filter(id__lt=record.id).delete()
-        except IndexError:
-            pass
+
+        timer = defaultdict(int)
+        for item in ExecHistory.objects.all():
+            if timer[item.user_id] >= 10:
+                item.delete()
+            else:
+                timer[item.user_id] += 1
+
+        timer = defaultdict(int)
+        for item in Transfer.objects.all():
+            if timer[item.user_id] >= 10:
+                item.delete()
+            else:
+                timer[item.user_id] += 1
+
         for task in Task.objects.all():
             try:
                 record = TaskHistory.objects.filter(task_id=task.id)[50]
                 TaskHistory.objects.filter(task_id=task.id, id__lt=record.id).delete()
             except IndexError:
                 pass
+
+        timestamp = time.time() - 24 * 3600
+        for item in Path(settings.TRANSFER_DIR).iterdir():
+            if item.name != '.gitkeep':
+                if item.stat().st_atime < timestamp:
+                    os.system(f'rm -rf {item.absolute()}')
     finally:
         connections.close_all()
 

@@ -56,3 +56,22 @@ class ExecHistory(models.Model, ModelMixin):
     class Meta:
         db_table = 'exec_histories'
         ordering = ('-updated_at',)
+
+
+class Transfer(models.Model, ModelMixin):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    digest = models.CharField(max_length=32, db_index=True)
+    host_id = models.IntegerField(null=True)
+    src_dir = models.CharField(max_length=255)
+    dst_dir = models.CharField(max_length=255)
+    host_ids = models.TextField()
+    updated_at = models.CharField(max_length=20, default=human_datetime)
+
+    def to_view(self):
+        tmp = self.to_dict()
+        tmp['host_ids'] = json.loads(self.host_ids)
+        return tmp
+
+    class Meta:
+        db_table = 'exec_transfer'
+        ordering = ('-id',)

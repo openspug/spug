@@ -153,3 +153,27 @@ class NotifyConsumer(WebsocketConsumer):
 
     def notify_message(self, event):
         self.send(text_data=json.dumps(event))
+
+
+class PubSubConsumer(WebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.token = self.scope['url_route']['kwargs']['token']
+        self.rds = get_redis_connection()
+        self.p = self.rds.pubsub(ignore_subscribe_messages=True)
+        self.p.subscribe(self.token)
+
+    def connect(self):
+        self.accept()
+
+    def disconnect(self, code):
+        self.p.close()
+        self.rds.close()
+
+    def receive(self, **kwargs):
+        response = self.p.get_message(timeout=10)
+        while response:
+            data = response['data'].decode()
+            self.send(text_data=data)
+            response = self.p.get_message(timeout=10)
+        self.send(text_data='pong')

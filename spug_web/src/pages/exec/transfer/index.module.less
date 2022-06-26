@@ -1,0 +1,259 @@
+.index {
+  display: flex;
+  height: calc(100vh - 218px);
+  min-height: 500px;
+  background-color: #fff;
+  overflow: hidden;
+
+  .left {
+    padding: 24px;
+    width: 60%;
+
+    .area {
+      cursor: pointer;
+      width: 200px;
+      height: 32px;
+    }
+
+    .tips {
+      position: absolute;
+      top: 10px;
+      left: 180px;
+      color: #999;
+    }
+
+    .tips:hover {
+      color: #777;
+    }
+
+    .editor {
+      height: calc(100vh - 482px) !important;
+      min-height: 152px;
+    }
+
+    :global(.ant-empty-normal) {
+      margin: 12px 0;
+    }
+  }
+
+  .right {
+    width: 40%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    background-color: #fafafa;
+    padding: 24px 24px 0 24px;
+
+    .title {
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .inner {
+      flex: 1;
+      overflow: auto;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      border-radius: 2px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+
+      .host {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 20px;
+        height: 20px;
+        color: #fff;
+        border-radius: 2px;
+        background-color: #1890ff;
+      }
+
+      .upload {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        width: 20px;
+        height: 20px;
+        border-radius: 2px;
+        background-color: #dca900;
+      }
+
+      .number {
+        width: 24px;
+        text-align: center;
+        margin-left: 12px;
+        border-radius: 2px;
+        font-weight: 500;
+        background-color: #dfdfdf;
+      }
+
+      .command {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin: 0 12px;
+      }
+
+      .desc {
+        color: #999;
+      }
+    }
+
+    .item:hover {
+      border-color: #1890ff;
+      background-color: #e6f7ff;
+    }
+  }
+}
+
+.output {
+  display: flex;
+  background-color: #fff;
+  height: calc(100vh - 218px);
+  overflow: hidden;
+
+  .side {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    border-right: 1px solid #dfdfdf;
+
+    .tags {
+      padding: 0 24px 24px;
+      display: flex;
+      justify-content: space-between;
+
+      .item {
+        width: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        border-radius: 35px;
+        padding: 2px 8px;
+        cursor: pointer;
+        background-color: #f3f3f3;
+        color: #666;
+        user-select: none;
+      }
+
+      .pendingOn {
+        background-color: #1890ff;
+        color: #fff;
+      }
+
+      .pending {
+        color: #1890ff;
+      }
+
+      .pending:hover {
+        background-color: #1890ff;
+        opacity: 0.7;
+        color: #fff;
+      }
+
+      .successOn {
+        background-color: #52c41a;
+        color: #fff;
+      }
+
+      .success {
+        color: #52c41a;
+      }
+
+      .success:hover {
+        background-color: #52c41a;
+        opacity: 0.7;
+        color: #fff;
+      }
+
+      .failOn {
+        background-color: red;
+        color: #fff;
+      }
+
+      .fail {
+        color: red;
+      }
+
+      .fail:hover {
+        background-color: red;
+        opacity: 0.6;
+        color: #fff;
+      }
+    }
+
+    .list {
+      flex: 1;
+      overflow: auto;
+      padding-bottom: 8px;
+
+      .item {
+        display: flex;
+        align-items: center;
+        padding: 8px 24px;
+        cursor: pointer;
+
+        &.active {
+          background: #e6f7ff;
+        }
+
+        :global(.anticon) {
+          margin-right: 4px;
+        }
+
+        .text {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          user-select: none;
+        }
+      }
+
+      .item:hover {
+        background: #e6f7ff;
+      }
+    }
+  }
+
+  .body {
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - 300px);
+    padding: 22px;
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+
+      .icon {
+        font-size: 18px;
+        color: #1890ff;
+        cursor: pointer;
+      }
+
+      .title {
+        font-weight: 500;
+      }
+    }
+
+
+    .termContainer {
+      background-color: #2b2b2b;
+      padding: 8px 0 4px 12px;
+      border-radius: 4px;
+
+      .term {
+        width: 100%;
+        height: calc(100vh - 300px);
+      }
+    }
+  }
+}
