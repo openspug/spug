@@ -226,7 +226,7 @@ function WebSSH(props) {
             <Button icon={<SyncOutlined/>} type="link" loading={fetching} onClick={fetchNodes}/>
             {treeData.length > 0 ? (
               <Tree.DirectoryTree
-                defaultExpandAll
+                defaultExpandAll={treeData.length > 0 && treeData < 5}
                 expandAction="doubleClick"
                 treeData={treeData}
                 icon={renderIcon}

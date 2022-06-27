@@ -36,7 +36,8 @@ export default observer(function () {
   }, [loading])
 
   useEffect(() => {
-    if (store.treeData.length > 0 && expands === undefined) {
+    const length = store.treeData.length
+    if (length > 0 && length < 5 && expands === undefined) {
       const tmp = store.treeData.filter(x => x.children.length)
       setExpands(tmp.map(x => x.key))
     }

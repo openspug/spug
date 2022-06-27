@@ -95,7 +95,7 @@ export default observer(function (props) {
       <Row gutter={12}>
         <Col span={6}>
           <Tree.DirectoryTree
-            defaultExpandAll
+            defaultExpandAll={store.treeData.length > 0 && store.treeData.length < 5}
             expandAction="doubleClick"
             selectedKeys={[group.key]}
             treeData={store.treeData}
