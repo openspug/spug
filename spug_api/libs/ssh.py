@@ -31,7 +31,7 @@ class SSH:
         self.sftp = None
         self.exec_file = None
         self.eof = 'Spug EOF 2108111926'
-        self.default_env = self._make_env_command(default_env)
+        self.default_env = default_env
         self.regex = re.compile(r'Spug EOF 2108111926 (-?\d+)[\r\n]?')
         self.arguments = {
             'hostname': hostname,
@@ -83,7 +83,7 @@ class SSH:
     def exec_command(self, command, environment=None):
         channel = self._get_channel()
         command = self._handle_command(command, environment)
-        channel.send(command)
+        channel.sendall(command)
         out, exit_code = '', -1
         for line in self.stdout:
             match = self.regex.search(line)
@@ -112,7 +112,7 @@ class SSH:
     def exec_command_with_stream(self, command, environment=None):
         channel = self._get_channel()
         command = self._handle_command(command, environment)
-        channel.send(command)
+        channel.sendall(command)
         exit_code, line = -1, ''
         while True:
             line = self._decode(channel.recv(8196))
@@ -153,14 +153,14 @@ class SSH:
         counter = 0
         self.channel = self.client.invoke_shell()
         command = 'set +o history\nset +o zle\nset -o no_nomatch\nexport PS1= && stty -echo\n'
-        if self.default_env:
-            command += f'{self.default_env}\n'
-        command += f'echo {self.eof} $?\n'
-        self.channel.send(command.encode())
+        command = self._handle_command(command, self.default_env)
+        self.channel.sendall(command)
+        out = line = ''
         while True:
             if self.channel.recv_ready():
                 line = self._decode(self.channel.recv(8196))
-                if self.regex.search(line):
+                out += line
+                if self.regex.search(out):
                     self.stdout = self.channel.makefile('r')
                     break
             elif counter >= 100:
