@@ -155,11 +155,10 @@ class SSH:
         command = 'set +o history\nset +o zle\nset -o no_nomatch\nexport PS1= && stty -echo\n'
         command = self._handle_command(command, self.default_env)
         self.channel.sendall(command)
-        out = line = ''
+        out = ''
         while True:
             if self.channel.recv_ready():
-                line = self._decode(self.channel.recv(8196))
-                out += line
+                out += self._decode(self.channel.recv(8196))
                 if self.regex.search(out):
                     self.stdout = self.channel.makefile('r')
                     break

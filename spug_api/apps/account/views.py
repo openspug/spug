@@ -2,6 +2,7 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.core.cache import cache
+from django.conf import settings
 from libs.mixins import AdminView, View
 from libs import JsonParser, Argument, human_datetime, json_response
 from libs.utils import get_request_real_ip, generate_random_str
@@ -245,7 +246,7 @@ def handle_user_info(request, user, captcha):
     x_real_ip = get_request_real_ip(request.headers)
     token_isvalid = user.access_token and len(user.access_token) == 32 and user.token_expired >= time.time()
     user.access_token = user.access_token if token_isvalid else uuid.uuid4().hex
-    user.token_expired = time.time() + 8 * 60 * 60
+    user.token_expired = time.time() + settings.TOKEN_TTL
     user.last_login = human_datetime()
     user.last_ip = x_real_ip
     user.save()

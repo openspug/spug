@@ -102,6 +102,7 @@ TEMPLATES = [
     },
 ]
 
+TOKEN_TTL = 8 * 3600
 SCHEDULE_KEY = 'spug:schedule'
 SCHEDULE_WORKER_KEY = 'spug:schedule:worker'
 MONITOR_KEY = 'spug:monitor'
