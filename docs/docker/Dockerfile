@@ -1,7 +1,7 @@
 FROM centos:7.8.2003
 
 ENV TZ=Asia/Shanghai
-RUN yum install -y epel-release https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm && yum install -y --setopt=tsflags=nodocs nginx redis mariadb-server mariadb-devel python36 python36-devel openldap-devel supervisor git gcc wget sshpass && yum -y clean all --enablerepo='*'
+RUN yum install -y epel-release https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm && yum install -y --setopt=tsflags=nodocs nginx redis mariadb-server mariadb-devel python36 python36-devel openldap-devel supervisor git gcc wget sshpass rsync sshfs && yum -y clean all --enablerepo='*'
 
 RUN pip3 install --upgrade pip -i https://pypi.doubanio.com/simple/
 RUN pip3 install --no-cache-dir -i https://pypi.doubanio.com/simple/ \
