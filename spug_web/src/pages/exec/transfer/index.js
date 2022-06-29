@@ -147,7 +147,7 @@ function TransferIndex() {
 
       <div className={style.right}>
         <div className={style.title}>
-          执行记录
+          分发记录
           <Tooltip title="每天自动清理，保留最近30条记录。">
             <QuestionCircleOutlined style={{color: '#999', marginLeft: 8}}/>
           </Tooltip>
