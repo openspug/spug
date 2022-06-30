@@ -229,6 +229,7 @@ class FileManager extends React.Component {
             <Input ref={ref => this.input2 = ref} size="small" className={styles.input}
                    suffix={<div style={{color: '#999', fontSize: 12}}>回车确认</div>}
                    value={this.state.inputPath} onChange={e => this.setState({inputPath: e.target.value})}
+                   onBlur={this.handleInputEnter}
                    onPressEnter={this.handleInputEnter}/>
           ) : (
             <Breadcrumb className={styles.bread}>

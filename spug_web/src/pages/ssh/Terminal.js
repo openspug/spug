@@ -9,7 +9,7 @@ import { FitAddon } from 'xterm-addon-fit';
 import { X_TOKEN } from 'libs';
 import 'xterm/css/xterm.css';
 import styles from './index.module.less';
-
+import gStore from 'gStore';
 
 function WebSSH(props) {
   const container = useRef();
@@ -18,8 +18,9 @@ function WebSSH(props) {
 
   useEffect(() => {
     term.loadAddon(fitPlugin);
-    term.setOption('fontFamily', 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei')
-    term.setOption('theme', {background: '#2b2b2b', foreground: '#A9B7C6'})
+    term.setOption('fontSize', gStore.terminal.fontSize)
+    term.setOption('fontFamily', gStore.terminal.fontFamily)
+    term.setOption('theme', gStore.terminal.styles)
     term.attachCustomKeyEventHandler((arg) => {
       if (arg.code === 'PageUp' && arg.type === 'keydown') {
         term.scrollPages(-1)
@@ -59,6 +60,14 @@ function WebSSH(props) {
   }, [])
 
   useEffect(() => {
+    term.setOption('fontSize', gStore.terminal.fontSize)
+    term.setOption('fontFamily', gStore.terminal.fontFamily)
+    term.setOption('theme', gStore.terminal.styles)
+    fitTerminal()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gStore.terminal])
+
+  useEffect(() => {
     if (props.vId === props.activeId) {
       setTimeout(() => term.focus())
     }
@@ -79,9 +88,7 @@ function WebSSH(props) {
   }
 
   return (
-    <div className={styles.termContainer}>
-      <div className={styles.terminal} ref={container}/>
-    </div>
+    <div className={styles.terminal} ref={container}/>
   )
 }
 

@@ -2,6 +2,7 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.db import models
+from apps.account.models import User
 from libs import ModelMixin
 import json
 
@@ -40,3 +41,13 @@ class Setting(models.Model, ModelMixin):
 
     class Meta:
         db_table = 'settings'
+
+
+class UserSetting(models.Model, ModelMixin):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    key = models.CharField(max_length=32)
+    value = models.TextField()
+
+    class Meta:
+        db_table = 'user_settings'
+        unique_together = ('user', 'key')

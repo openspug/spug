@@ -18,11 +18,14 @@ import {
   VerticalAlignMiddleOutlined,
   CloseOutlined,
   LeftOutlined,
+  SkinFilled,
 } from '@ant-design/icons';
 import { NotFound, AuthButton } from 'components';
 import Terminal from './Terminal';
 import FileManager from './FileManager';
+import Setting from './Setting';
 import { http, hasPermission, includes } from 'libs';
+import gStore from 'gStore';
 import styles from './index.module.less';
 import LogoSpugText from 'layout/logo-spug-white.png';
 import lds from 'lodash';
@@ -31,6 +34,7 @@ let posX = 0
 
 function WebSSH(props) {
   const [visible, setVisible] = useState(false);
+  const [visible2, setVisible2] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [rawTreeData, setRawTreeData] = useState([]);
   const [rawHostList, setRawHostList] = useState([]);
@@ -46,6 +50,7 @@ function WebSSH(props) {
     window.document.title = 'Spug web terminal'
     window.addEventListener('beforeunload', leaveTips)
     fetchNodes()
+    gStore.fetchUserSettings()
     return () => window.removeEventListener('beforeunload', leaveTips)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -222,11 +227,11 @@ function WebSSH(props) {
         <div className={styles.hosts}>
           <Spin spinning={fetching}>
             <Input allowClear className={styles.search} prefix={<SearchOutlined style={{color: '#999'}}/>}
-                   placeholder="输入检索" onChange={e => setSearchValue(e.target.value)}/>
+                   placeholder="输入主机名/IP检索" onChange={e => setSearchValue(e.target.value)}/>
             <Button icon={<SyncOutlined/>} type="link" loading={fetching} onClick={fetchNodes}/>
             {treeData.length > 0 ? (
               <Tree.DirectoryTree
-                defaultExpandAll={treeData.length > 0 && treeData < 5}
+                defaultExpandAll={treeData.length > 0 && treeData.length < 5}
                 expandAction="doubleClick"
                 treeData={treeData}
                 icon={renderIcon}
@@ -247,13 +252,15 @@ function WebSSH(props) {
           tabBarExtraContent={hosts.length === 0 ? (
             <div className={styles.tips}>小提示：双击标签快速复制窗口，右击标签展开更多操作。</div>
           ) : sshMode ? (
-            <AuthButton
-              auth="host.console.list"
-              type="link"
-              disabled={!activeId}
-              style={{marginRight: 5}}
-              onClick={handleOpenFileManager}
-              icon={<LeftOutlined/>}>文件管理器</AuthButton>
+            <React.Fragment>
+              <AuthButton
+                auth="host.console.list"
+                type="link"
+                disabled={!activeId}
+                onClick={handleOpenFileManager}
+                icon={<LeftOutlined/>}>文件管理器</AuthButton>
+              <SkinFilled className={styles.setting} onClick={() => setVisible2(true)}/>
+            </React.Fragment>
           ) : null}>
           {hosts.map(item => (
             <Tabs.TabPane key={item.vId} tab={<TabRender host={item}/>}>
@@ -280,6 +287,7 @@ function WebSSH(props) {
         onClose={() => setVisible(false)}>
         <FileManager id={hostId}/>
       </Drawer>
+      <Setting visible={visible2} onClose={() => setVisible2(false)}/>
     </div>
   ) : (
     <div style={{height: '100vh'}}>
