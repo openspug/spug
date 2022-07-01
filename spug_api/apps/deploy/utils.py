@@ -121,7 +121,7 @@ def _ext1_deploy(req, helper, env):
                 _deploy_ext1_host(req, helper, h_id, new_env)
                 req.fail_host_ids.remove(h_id)
             except Exception as e:
-                helper.send_error(h_id,  f'Exception: {e}', False)
+                helper.send_error(h_id, f'Exception: {e}', False)
                 for h_id in host_ids:
                     helper.send_error(h_id, '终止发布', False)
                 raise e
@@ -147,7 +147,7 @@ def _ext2_deploy(req, helper, env):
         if action.get('type') == 'transfer':
             action['src'] = render_str(action.get('src', '').strip().rstrip('/'), env)
             action['dst'] = render_str(action['dst'].strip().rstrip('/'), env)
-            if action.get('src_mode') == '1':   # upload when publish
+            if action.get('src_mode') == '1':  # upload when publish
                 extra = json.loads(req.extra)
                 if 'name' in extra:
                     action['name'] = extra['name']
@@ -245,7 +245,12 @@ def _deploy_ext1_host(req, helper, h_id, env):
             # transfer files
             tar_gz_file = f'{req.spug_version}.tar.gz'
             try:
-                ssh.put_file(os.path.join(REPOS_DIR, 'build', tar_gz_file), os.path.join(extend.dst_repo, tar_gz_file))
+                callback = helper.progress_callback(host.id)
+                ssh.put_file(
+                    os.path.join(REPOS_DIR, 'build', tar_gz_file),
+                    os.path.join(extend.dst_repo, tar_gz_file),
+                    callback
+                )
             except Exception as e:
                 helper.send_error(host.id, f'Exception: {e}')
 
@@ -289,11 +294,12 @@ def _deploy_ext2_host(helper, h_id, actions, env, spug_version):
                         dst = action['dst']
                         command = f'[ -e {dst} ] || mkdir -p $(dirname {dst}); [ -d {dst} ]'
                         code, _ = ssh.exec_command_raw(command)
-                        if code == 0:    # is dir
+                        if code == 0:  # is dir
                             if not action.get('name'):
                                 raise RuntimeError('internal error 1002')
                             dst = dst.rstrip('/') + '/' + action['name']
-                        ssh.put_file(os.path.join(REPOS_DIR, env.SPUG_DEPLOY_ID, spug_version), dst)
+                        callback = helper.progress_callback(host.id)
+                        ssh.put_file(os.path.join(REPOS_DIR, env.SPUG_DEPLOY_ID, spug_version), dst, callback)
                     except Exception as e:
                         helper.send_error(host.id, f'Exception: {e}')
                     helper.send_info(host.id, 'transfer completed\r\n')
@@ -302,7 +308,8 @@ def _deploy_ext2_host(helper, h_id, actions, env, spug_version):
                     sp_dir, sd_dst = os.path.split(action['src'])
                     tar_gz_file = f'{spug_version}.tar.gz'
                     try:
-                        ssh.put_file(os.path.join(sp_dir, tar_gz_file), f'/tmp/{tar_gz_file}')
+                        callback = helper.progress_callback(host.id)
+                        ssh.put_file(os.path.join(sp_dir, tar_gz_file), f'/tmp/{tar_gz_file}', callback)
                     except Exception as e:
                         helper.send_error(host.id, f'Exception: {e}')
 

@@ -1,9 +1,11 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
+from django.template.defaultfilters import filesizeformat
 from libs.utils import human_datetime, render_str
 from libs.spug import Notification
 from apps.host.models import Host
+from functools import partial
 import subprocess
 import json
 import os
@@ -258,6 +260,14 @@ class Helper:
         # callback
         for func in self.callback:
             func()
+
+    def progress_callback(self, key):
+        def func(k, n, t):
+            message = f'\r         {filesizeformat(n):<8}/{filesizeformat(t):>8}  '
+            self.send_info(k, message)
+
+        self.send_info(key, '\r\n')
+        return partial(func, key)
 
     def local(self, command, env=None):
         if env:
