@@ -1,6 +1,6 @@
 export default {
-  solarized_dark: {
-    foreground: '#839496', background: '#2b2b2b', cursor: '#839496',
+  gray: {
+    foreground: '#A9B7C6', background: '#2b2b2b', cursor: '#A9B7C6',
 
     black: '#1b1b1b', brightBlack: '#626262',
 

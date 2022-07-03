@@ -19,7 +19,13 @@ class Store {
   _handleSettings = (res) => {
     if (res.terminal) {
       const terminal = JSON.parse(res.terminal)
-      terminal.styles = themes[terminal.theme]
+      const styles = themes[terminal.theme]
+      if (styles) {
+        terminal.styles = styles
+      } else {
+        terminal.styles = themes['dark']
+        terminal.theme = 'dark'
+      }
       this.terminal = terminal
     }
   }
