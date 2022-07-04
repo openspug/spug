@@ -186,68 +186,67 @@ def fetch_host_extend(ssh):
     public_ip_address = set()
     private_ip_address = set()
     response = {'disk': []}
-    with ssh:
-        code, out = ssh.exec_command_raw('nproc')
-        if code != 0:
-            code, out = ssh.exec_command_raw("grep -c '^processor' /proc/cpuinfo")
-        if code == 0:
-            response['cpu'] = int(out.strip())
+    code, out = ssh.exec_command_raw('nproc')
+    if code != 0:
+        code, out = ssh.exec_command_raw("grep -c '^processor' /proc/cpuinfo")
+    if code == 0:
+        response['cpu'] = int(out.strip())
 
-        code, out = ssh.exec_command_raw("cat /etc/os-release | grep PRETTY_NAME | awk -F \\\" '{print $2}'")
-        if '/etc/os-release' in out:
-            code, out = ssh.exec_command_raw("cat /etc/issue | head -1 | awk '{print $1,$2,$3}'")
-        if code == 0:
-            response['os_name'] = out.strip()[:50]
+    code, out = ssh.exec_command_raw("cat /etc/os-release | grep PRETTY_NAME | awk -F \\\" '{print $2}'")
+    if '/etc/os-release' in out:
+        code, out = ssh.exec_command_raw("cat /etc/issue | head -1 | awk '{print $1,$2,$3}'")
+    if code == 0:
+        response['os_name'] = out.strip()[:50]
 
-        code, out = ssh.exec_command_raw('hostname -I')
-        if code == 0:
-            for ip in out.strip().split():
-                if len(ip) > 15:   # ignore ipv6
-                    continue
-                if ipaddress.ip_address(ip).is_global:
-                    if len(public_ip_address) < 10:
-                        public_ip_address.add(ip)
-                elif len(private_ip_address) < 10:
-                    private_ip_address.add(ip)
+    code, out = ssh.exec_command_raw('hostname -I')
+    if code == 0:
+        for ip in out.strip().split():
+            if len(ip) > 15:   # ignore ipv6
+                continue
+            if ipaddress.ip_address(ip).is_global:
+                if len(public_ip_address) < 10:
+                    public_ip_address.add(ip)
+            elif len(private_ip_address) < 10:
+                private_ip_address.add(ip)
 
-        ssh_hostname = ssh.arguments.get('hostname')
-        if ip_validator(ssh_hostname):
-            if ipaddress.ip_address(ssh_hostname).is_global:
-                if ssh_hostname in public_ip_address:
-                    public_ip_address.remove(ssh_hostname)
-                public_ip_address = [ssh_hostname] + list(public_ip_address)
+    ssh_hostname = ssh.arguments.get('hostname')
+    if ip_validator(ssh_hostname):
+        if ipaddress.ip_address(ssh_hostname).is_global:
+            if ssh_hostname in public_ip_address:
+                public_ip_address.remove(ssh_hostname)
+            public_ip_address = [ssh_hostname] + list(public_ip_address)
+        else:
+            if ssh_hostname in private_ip_address:
+                private_ip_address.remove(ssh_hostname)
+            private_ip_address = [ssh_hostname] + list(private_ip_address)
+
+    code, out = ssh.exec_command_raw('lsblk -dbn -o SIZE -e 11 2> /dev/null')
+    if code == 0:
+        disks = []
+        for item in out.strip().splitlines():
+            item = item.strip()
+            size = math.ceil(int(item) / 1024 / 1024 / 1024)
+            if size > 10:
+                disks.append(size)
+        response['disk'] = disks[:10]
+
+    code, out = ssh.exec_command_raw("dmidecode -t 17 | grep -E 'Size: [0-9]+' | awk '{s+=$2} END {print s,$3}'")
+    if code == 0:
+        fields = out.strip().split()
+        if len(fields) == 2 and fields[1] in ('GB', 'MB'):
+            size, unit = out.strip().split()
+            if unit == 'GB':
+                response['memory'] = size
             else:
-                if ssh_hostname in private_ip_address:
-                    private_ip_address.remove(ssh_hostname)
-                private_ip_address = [ssh_hostname] + list(private_ip_address)
-
-        code, out = ssh.exec_command_raw('lsblk -dbn -o SIZE -e 11 2> /dev/null')
+                response['memory'] = round(int(size) / 1024, 0)
+    if 'memory' not in response:
+        code, out = ssh.exec_command_raw("free -m | awk 'NR==2{print $2}'")
         if code == 0:
-            disks = []
-            for item in out.strip().splitlines():
-                item = item.strip()
-                size = math.ceil(int(item) / 1024 / 1024 / 1024)
-                if size > 10:
-                    disks.append(size)
-            response['disk'] = disks[:10]
+            response['memory'] = math.ceil(int(out) / 1024)
 
-        code, out = ssh.exec_command_raw("dmidecode -t 17 | grep -E 'Size: [0-9]+' | awk '{s+=$2} END {print s,$3}'")
-        if code == 0:
-            fields = out.strip().split()
-            if len(fields) == 2 and fields[1] in ('GB', 'MB'):
-                size, unit = out.strip().split()
-                if unit == 'GB':
-                    response['memory'] = size
-                else:
-                    response['memory'] = round(int(size) / 1024, 0)
-        if 'memory' not in response:
-            code, out = ssh.exec_command_raw("free -m | awk 'NR==2{print $2}'")
-            if code == 0:
-                response['memory'] = math.ceil(int(out) / 1024)
-
-        response['public_ip_address'] = list(public_ip_address)
-        response['private_ip_address'] = list(private_ip_address)
-        return response
+    response['public_ip_address'] = list(public_ip_address)
+    response['private_ip_address'] = list(private_ip_address)
+    return response
 
 
 def batch_sync_host(token, hosts, password=None):
@@ -275,7 +274,8 @@ def batch_sync_host(token, hosts, password=None):
 def _sync_host_extend(host, private_key=None, public_key=None, password=None, ssh=None):
     if not ssh:
         kwargs = host.to_dict(selects=('hostname', 'port', 'username'))
-        ssh = _get_ssh(kwargs, host.pkey, private_key, public_key, password)
+        with _get_ssh(kwargs, host.pkey, private_key, public_key, password) as ssh:
+            return _sync_host_extend(host, ssh=ssh)
     form = AttrDict(fetch_host_extend(ssh))
     form.disk = json.dumps(form.disk)
     form.public_ip_address = json.dumps(form.public_ip_address)

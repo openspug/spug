@@ -20,8 +20,8 @@ class ExtendView(View):
                 return json_response(error='未找到指定主机')
             if not host.is_verified:
                 return json_response(error='该主机还未验证')
-            ssh = host.get_ssh()
-            response = fetch_host_extend(ssh)
+            with host.get_ssh() as ssh:
+                response = fetch_host_extend(ssh)
             return json_response(response)
         return json_response(error=error)
 

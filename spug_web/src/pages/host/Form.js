@@ -48,17 +48,20 @@ export default observer(function () {
           message.success('验证成功');
           store.formVisible = false;
           store.fetchRecords();
+          store.fetchExtend(res.id)
         }
       }, () => setLoading(false))
   }
 
   function handleConfirm(formData) {
     if (formData.password) {
-      return http.post('/api/host/', formData).then(res => {
-        message.success('验证成功');
-        store.formVisible = false;
-        store.fetchRecords();
-      })
+      return http.post('/api/host/', formData)
+        .then(res => {
+          message.success('验证成功');
+          store.formVisible = false;
+          store.fetchRecords();
+          store.fetchExtend(res.id)
+        })
     }
     message.error('请输入授权密码')
   }
@@ -134,7 +137,7 @@ export default observer(function () {
           <Input.TextArea placeholder="请输入主机备注信息"/>
         </Form.Item>
         <Form.Item wrapperCol={{span: 17, offset: 5}}>
-          <Alert showIcon type="info" message="首次验证时需要输入登录用户名对应的密码，该密码会用于配置密钥连接，不会存储该密码。"/>
+          <Alert showIcon type="info" message="首次验证时需要输入登录用户名对应的密码，该密码会用于配置SSH密钥认证，不会存储该密码。"/>
         </Form.Item>
       </Form>
     </Modal>

@@ -51,6 +51,11 @@ class Store {
       .finally(() => this.isFetching = false)
   };
 
+  fetchExtend = (id) => {
+    http.put('/api/host/', {id})
+      .then(() => this.fetchRecords())
+  }
+
   fetchGroups = () => {
     this.grpFetching = true;
     return http.get('/api/host/group/')
