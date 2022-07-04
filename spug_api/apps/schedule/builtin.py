@@ -11,6 +11,7 @@ from apps.app.models import DeployExtend1
 from apps.exec.models import ExecHistory, Transfer
 from apps.notify.models import Notify
 from apps.deploy.utils import dispatch
+from apps.repository.models import Repository
 from libs.utils import parse_time, human_datetime, human_date
 from datetime import datetime, timedelta
 from threading import Thread
@@ -71,6 +72,12 @@ def auto_run_by_minute():
             if (now - parse_time(req.do_at)).seconds > 3600:
                 req.status = '-3'
                 req.save()
+
+        for rep in Repository.objects.filter(status='1'):
+            if (now - parse_time(rep.created_at)).seconds > 3600:
+                rep.status = '2'
+                rep.save()
+
         for req in DeployRequest.objects.filter(status='1', plan__lte=now):
             req.status = '2'
             req.do_at = human_datetime()
