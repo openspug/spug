@@ -66,22 +66,13 @@ function TransferIndex() {
       .finally(() => setLoading(false))
   }
 
-  function _handleAdd(type, name, path, host_id) {
-    let tmp = []
-    if (type === 'upload' && files.length > 0 && files[0].type === type) {
-      tmp = [...files]
-    }
-    tmp.push({id: uniqueId(), type, name, path, host_id})
-    setFiles(tmp)
-  }
-
   function handleAddHostFile() {
     setSProps({
       visible: true,
       onlyOne: true,
       selectedRowKeys: [],
       onCancel: () => setSProps({visible: false}),
-      onOk: (_, __, row) => _handleAdd('host', row.name, '', row.id),
+      onOk: (_, __, row) => setFiles([{id: uniqueId(), type: 'host', name: row.name, path: '', host_id: row.id}]),
     })
   }
 
@@ -94,8 +85,12 @@ function TransferIndex() {
     })
   }
 
-  function handleUpload(file) {
-    _handleAdd('upload', '本地上传', file)
+  function handleUpload(_, fileList) {
+    const tmp = files.length > 0 && files[0].type === 'upload' ? [...files] : []
+    for (let file of fileList) {
+      tmp.push({id: uniqueId(), type: 'upload', name: '本地上传', path: file})
+    }
+    setFiles(tmp)
     return Upload.LIST_IGNORE
   }
 
@@ -113,7 +108,7 @@ function TransferIndex() {
     <div className={style.index} hidden={token}>
       <div className={style.left}>
         <Card type="inner" title="数据源" extra={(<Space size={24}>
-          <Upload beforeUpload={handleUpload}><Space className="btn"><UploadOutlined/>上传本地文件</Space></Upload>
+          <Upload multiple beforeUpload={handleUpload}><Space className="btn"><UploadOutlined/>上传本地文件</Space></Upload>
           <Space className="btn" onClick={handleAddHostFile}><CloudServerOutlined/>添加主机文件</Space>
         </Space>)}>
           <Table rowKey="id" showHeader={false} pagination={false} size="small" dataSource={files}>
