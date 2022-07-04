@@ -15,6 +15,7 @@ import Output from './Output';
 import { http, cleanCommand } from 'libs';
 import moment from 'moment';
 import store from './store';
+import gStore from 'gStore';
 import style from './index.module.less';
 
 function TaskIndex() {
@@ -28,7 +29,7 @@ function TaskIndex() {
 
   useEffect(() => {
     if (!loading) {
-      http.get('/api/exec/history/')
+      http.get('/api/exec/do/')
         .then(res => setHistories(res))
     }
   }, [loading])
@@ -40,6 +41,7 @@ function TaskIndex() {
   }, [command])
 
   useEffect(() => {
+    gStore.fetchUserSettings()
     return () => {
       store.host_ids = []
       if (store.showConsole) {

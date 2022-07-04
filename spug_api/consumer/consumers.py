@@ -1,43 +1,18 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
-from channels.generic.websocket import WebsocketConsumer
 from django.conf import settings
 from django_redis import get_redis_connection
 from asgiref.sync import async_to_sync
 from apps.host.models import Host
+from consumer.utils import BaseConsumer
 from apps.account.utils import has_host_perm
 from threading import Thread
 import time
 import json
 
 
-class ExecConsumer(WebsocketConsumer):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.token = self.scope['url_route']['kwargs']['token']
-        self.rds = get_redis_connection()
-
-    def connect(self):
-        self.accept()
-
-    def disconnect(self, code):
-        self.rds.close()
-
-    def get_response(self):
-        response = self.rds.brpop(self.token, timeout=5)
-        return response[1] if response else None
-
-    def receive(self, **kwargs):
-        response = self.get_response()
-        while response:
-            data = response.decode()
-            self.send(text_data=data)
-            response = self.get_response()
-        self.send(text_data='pong')
-
-
-class ComConsumer(WebsocketConsumer):
+class ComConsumer(BaseConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         token = self.scope['url_route']['kwargs']['token']
@@ -51,9 +26,6 @@ class ComConsumer(WebsocketConsumer):
         else:
             raise TypeError(f'unknown module for {module}')
         self.rds = get_redis_connection()
-
-    def connect(self):
-        self.accept()
 
     def disconnect(self, code):
         self.rds.close()
@@ -78,18 +50,17 @@ class ComConsumer(WebsocketConsumer):
         self.send(text_data='pong')
 
 
-class SSHConsumer(WebsocketConsumer):
+class SSHConsumer(BaseConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.user = self.scope['user']
         self.id = self.scope['url_route']['kwargs']['id']
         self.chan = None
         self.ssh = None
 
     def loop_read(self):
+        is_ready = False
         while True:
             data = self.chan.recv(32 * 1024)
-            # print('read: {!r}'.format(data))
             if not data:
                 self.close(3333)
                 break
@@ -97,6 +68,9 @@ class SSHConsumer(WebsocketConsumer):
                 text = data.decode()
             except UnicodeDecodeError:
                 text = data.decode(encoding='GBK', errors='ignore')
+            if not is_ready:
+                self.send(text_data='\033[2J\033[3J\033[1;1H')
+                is_ready = True
             self.send(text_data=text)
 
     def receive(self, text_data=None, bytes_data=None):
@@ -116,34 +90,28 @@ class SSHConsumer(WebsocketConsumer):
         if self.ssh:
             self.ssh.close()
 
-    def connect(self):
+    def init(self):
         if has_host_perm(self.user, self.id):
-            self.accept()
-            self._init()
+            self.send(text_data='\r\n正在连接至主机 ...')
+            host = Host.objects.filter(pk=self.id).first()
+            if not host:
+                return self.close_with_message('未找到指定主机，请刷新页面重试。')
+
+            try:
+                self.ssh = host.get_ssh().get_client()
+            except Exception as e:
+                return self.close_with_message(f'连接主机失败: {e}')
+
+            self.chan = self.ssh.invoke_shell(term='xterm')
+            self.chan.transport.set_keepalive(30)
+            Thread(target=self.loop_read).start()
         else:
-            self.close()
-
-    def _init(self):
-        self.send(text_data='\r\33[KConnecting ...\r')
-        host = Host.objects.filter(pk=self.id).first()
-        if not host:
-            self.send(text_data='Unknown host\r\n')
-            self.close()
-        try:
-            self.ssh = host.get_ssh().get_client()
-        except Exception as e:
-            self.send(text_data=f'Exception: {e}\r\n'.encode())
-            self.close()
-            return
-        self.chan = self.ssh.invoke_shell(term='xterm')
-        self.chan.transport.set_keepalive(30)
-        Thread(target=self.loop_read).start()
+            self.close_with_message('你当前无权限操作该主机，请联系管理员授权。')
 
 
-class NotifyConsumer(WebsocketConsumer):
-    def connect(self):
+class NotifyConsumer(BaseConsumer):
+    def init(self):
         async_to_sync(self.channel_layer.group_add)('notify', self.channel_name)
-        self.accept()
 
     def disconnect(self, code):
         async_to_sync(self.channel_layer.group_discard)('notify', self.channel_name)
@@ -155,16 +123,13 @@ class NotifyConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps(event))
 
 
-class PubSubConsumer(WebsocketConsumer):
+class PubSubConsumer(BaseConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.token = self.scope['url_route']['kwargs']['token']
         self.rds = get_redis_connection()
         self.p = self.rds.pubsub(ignore_subscribe_messages=True)
         self.p.subscribe(self.token)
-
-    def connect(self):
-        self.accept()
 
     def disconnect(self, code):
         self.p.close()

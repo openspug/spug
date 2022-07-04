@@ -70,11 +70,15 @@ export default function () {
     ws.onmessage = e => {
       if (e.data !== 'pong') {
         fetch();
-        const {title, content} = JSON.parse(e.data);
-        const key = `open${Date.now()}`;
-        const description = <div style={{whiteSpace: 'pre-wrap'}}>{content}</div>;
-        const btn = <Button type="primary" size="small" onClick={() => notification.close(key)}>知道了</Button>;
-        notification.warning({message: title, description, btn, key, top: 64, duration: null})
+        try {
+          const {title, content} = JSON.parse(e.data);
+          const key = `open${Date.now()}`;
+          const description = <div style={{whiteSpace: 'pre-wrap'}}>{content}</div>;
+          const btn = <Button type="primary" size="small" onClick={() => notification.close(key)}>知道了</Button>;
+          notification.warning({message: title, description, btn, key, top: 64, duration: null})
+        } catch (e) {
+
+        }
       }
     }
   }

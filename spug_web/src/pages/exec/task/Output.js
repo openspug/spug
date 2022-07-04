@@ -16,7 +16,7 @@ import {
 import { FitAddon } from 'xterm-addon-fit';
 import { Terminal } from 'xterm';
 import style from './index.module.less';
-import { X_TOKEN } from 'libs';
+import { http, X_TOKEN } from 'libs';
 import store from './store';
 import gStore from 'gStore';
 
@@ -55,7 +55,7 @@ function OutView(props) {
 
   useEffect(() => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${store.token}/?x-token=${X_TOKEN}`);
+    const socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/subscribe/${store.token}/?x-token=${X_TOKEN}`);
     socket.onopen = () => {
       const message = '\r\x1b[K\x1b[36m### Waiting for scheduling ...\x1b[0m'
       for (let key of Object.keys(store.outputs)) {
@@ -64,6 +64,7 @@ function OutView(props) {
       term.write(message)
       socket.send('ok');
       fitPlugin.fit()
+      http.patch('/api/exec/do/', {token: store.token})
     }
     socket.onmessage = e => {
       if (e.data === 'pong') {

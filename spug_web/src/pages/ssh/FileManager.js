@@ -174,7 +174,7 @@ class FileManager extends React.Component {
 
   _updatePercent = token => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${token}/?x-token=${X_TOKEN}`);
+    this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/subscribe/${token}/?x-token=${X_TOKEN}`);
     this.socket.onopen = () => this.socket.send('ok');
     this.socket.onmessage = e => {
       if (e.data === 'pong') {
