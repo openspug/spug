@@ -3,6 +3,7 @@
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
 from django.conf import settings
+from django.db import close_old_connections
 from django_redis import get_redis_connection
 from apps.exec.models import Transfer
 from apps.account.utils import has_host_perm
@@ -10,6 +11,7 @@ from apps.host.models import Host
 from apps.setting.utils import AppSetting
 from libs import json_response, JsonParser, Argument, auth
 from concurrent import futures
+from threading import Thread
 import subprocess
 import tempfile
 import uuid
@@ -76,26 +78,31 @@ class TransferView(View):
             Argument('token', help='参数错误')
         ).parse(request.body)
         if error is None:
-            rds = get_redis_connection()
             task = Transfer.objects.get(digest=form.token)
-            threads = []
-            max_workers = max(10, os.cpu_count() * 5)
-            with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-                for host in Host.objects.filter(id__in=json.loads(task.host_ids)):
-                    t = executor.submit(_do_sync, rds, task, host)
-                    t.token = task.digest
-                    t.key = host.id
-                    threads.append(t)
-                for t in futures.as_completed(threads):
-                    exc = t.exception()
-                    if exc:
-                        rds.publish(t.token, json.dumps({'key': t.key, 'status': -1, 'data': f'Exception: {exc}'}))
-            if task.host_id:
-                command = f'umount -f {task.src_dir} && rm -rf {task.src_dir}'
-            else:
-                command = f'rm -rf {task.src_dir}'
-            subprocess.run(command, shell=True)
+            Thread(target=_dispatch_sync, args=(task,)).start()
         return json_response(error=error)
+
+
+def _dispatch_sync(task):
+    rds = get_redis_connection()
+    threads = []
+    max_workers = max(10, os.cpu_count() * 5)
+    with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for host in Host.objects.filter(id__in=json.loads(task.host_ids)):
+            t = executor.submit(_do_sync, rds, task, host)
+            t.token = task.digest
+            t.key = host.id
+            threads.append(t)
+        for t in futures.as_completed(threads):
+            exc = t.exception()
+            if exc:
+                rds.publish(t.token, json.dumps({'key': t.key, 'status': -1, 'data': f'Exception: {exc}'}))
+    if task.host_id:
+        command = f'umount -f {task.src_dir} && rm -rf {task.src_dir}'
+    else:
+        command = f'rm -rf {task.src_dir}'
+    subprocess.run(command, shell=True)
+    close_old_connections()
 
 
 def _do_sync(rds, task, host):

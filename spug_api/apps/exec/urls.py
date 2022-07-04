@@ -8,7 +8,6 @@ from apps.exec.transfer import TransferView
 
 urlpatterns = [
     url(r'template/$', TemplateView.as_view()),
-    url(r'history/$', get_histories),
-    url(r'do/$', do_task),
+    url(r'do/$', TaskView.as_view()),
     url(r'transfer/$', TransferView.as_view()),
 ]

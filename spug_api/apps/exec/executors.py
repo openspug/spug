@@ -19,7 +19,7 @@ class Job:
         self.key = key
         self.command = self._handle_command(command, interpreter)
         self.token = token
-        self.rds_cli = None
+        self.rds = get_redis_connection()
         self.env = dict(
             SPUG_HOST_ID=str(self.key),
             SPUG_HOST_NAME=name,
@@ -31,12 +31,8 @@ class Job:
         if isinstance(params, dict):
             self.env.update({f'_SPUG_{k}': str(v) for k, v in params.items()})
 
-    def _send(self, message, with_expire=False):
-        if self.rds_cli is None:
-            self.rds_cli = get_redis_connection()
-        self.rds_cli.lpush(self.token, json.dumps(message))
-        if with_expire:
-            self.rds_cli.expire(self.token, 300)
+    def _send(self, message):
+        self.rds.publish(self.token, json.dumps(message))
 
     def _handle_command(self, command, interpreter):
         if interpreter == 'python':
@@ -45,12 +41,10 @@ class Job:
         return command
 
     def send(self, data):
-        message = {'key': self.key, 'data': data}
-        self._send(message)
+        self._send({'key': self.key, 'data': data})
 
     def send_status(self, code):
-        message = {'key': self.key, 'status': code}
-        self._send(message, True)
+        self._send({'key': self.key, 'status': code})
 
     def run(self):
         if not self.token:

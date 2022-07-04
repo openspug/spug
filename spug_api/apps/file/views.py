@@ -89,5 +89,4 @@ class ObjectView(View):
 
     def _compute_progress(self, rds_cli, token, total, value, *args):
         percent = '%.1f' % (value / total * 100)
-        rds_cli.lpush(token, percent)
-        rds_cli.expire(token, 300)
+        rds_cli.publish(token, percent)

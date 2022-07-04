@@ -4,12 +4,10 @@
 from django.views.generic import View
 from django_redis import get_redis_connection
 from django.conf import settings
-from django.db.models import F
 from libs import json_response, JsonParser, Argument, human_datetime, auth
 from apps.exec.models import ExecTemplate, ExecHistory
 from apps.host.models import Host
 from apps.account.utils import has_host_perm
-import hashlib
 import uuid
 import json
 
@@ -54,60 +52,66 @@ class TemplateView(View):
         return json_response(error=error)
 
 
-@auth('exec.task.do')
-def do_task(request):
-    form, error = JsonParser(
-        Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择执行主机'),
-        Argument('command', help='请输入执行命令内容'),
-        Argument('interpreter', default='sh'),
-        Argument('template_id', type=int, required=False),
-        Argument('params', type=dict, required=False)
-    ).parse(request.body)
-    if error is None:
-        if not has_host_perm(request.user, form.host_ids):
-            return json_response(error='无权访问主机，请联系管理员')
-        token, rds = uuid.uuid4().hex, get_redis_connection()
-        for host in Host.objects.filter(id__in=form.host_ids):
-            data = dict(
-                key=host.id,
-                name=host.name,
-                token=token,
-                interpreter=form.interpreter,
-                hostname=host.hostname,
-                port=host.port,
-                username=host.username,
-                command=form.command,
-                pkey=host.private_key,
-                params=form.params
-            )
-            rds.rpush(settings.EXEC_WORKER_KEY, json.dumps(data))
-        form.host_ids.sort()
-        host_ids = json.dumps(form.host_ids)
-        tmp_str = f'{form.interpreter},{host_ids},{form.command}'
-        digest = hashlib.md5(tmp_str.encode()).hexdigest()
-        record = ExecHistory.objects.filter(user=request.user, digest=digest).first()
-        if form.template_id:
-            template = ExecTemplate.objects.filter(pk=form.template_id).first()
-            if not template or template.body != form.command:
-                form.template_id = None
-        if record:
-            record.template_id = form.template_id
-            record.updated_at = human_datetime()
-            record.save()
-        else:
+class TaskView(View):
+    @auth('exec.task.do')
+    def get(self, request):
+        records = ExecHistory.objects.filter(user=request.user).select_related('template')
+        return json_response([x.to_view() for x in records])
+
+    @auth('exec.task.do')
+    def post(self, request):
+        form, error = JsonParser(
+            Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择执行主机'),
+            Argument('command', help='请输入执行命令内容'),
+            Argument('interpreter', default='sh'),
+            Argument('template_id', type=int, required=False),
+            Argument('params', type=dict, handler=json.dumps, default={})
+        ).parse(request.body)
+        if error is None:
+            if not has_host_perm(request.user, form.host_ids):
+                return json_response(error='无权访问主机，请联系管理员')
+            token, rds = uuid.uuid4().hex, get_redis_connection()
+            form.host_ids.sort()
+            if form.template_id:
+                template = ExecTemplate.objects.filter(pk=form.template_id).first()
+                if not template or template.body != form.command:
+                    form.template_id = None
+
             ExecHistory.objects.create(
                 user=request.user,
-                digest=digest,
+                digest=token,
                 interpreter=form.interpreter,
                 template_id=form.template_id,
                 command=form.command,
                 host_ids=json.dumps(form.host_ids),
+                params=form.params
             )
-        return json_response(token)
-    return json_response(error=error)
+            return json_response(token)
+        return json_response(error=error)
+
+    @auth('exec.task.do')
+    def patch(self, request):
+        form, error = JsonParser(
+            Argument('token', help='参数错误')
+        ).parse(request.body)
+        if error is None:
+            rds = get_redis_connection()
+            task = ExecHistory.objects.get(digest=form.token)
+            for host in Host.objects.filter(id__in=json.loads(task.host_ids)):
+                data = dict(
+                    key=host.id,
+                    name=host.name,
+                    token=task.digest,
+                    interpreter=task.interpreter,
+                    hostname=host.hostname,
+                    port=host.port,
+                    username=host.username,
+                    command=task.command,
+                    pkey=host.private_key,
+                    params=json.loads(task.params)
+                )
+                rds.rpush(settings.EXEC_WORKER_KEY, json.dumps(data))
+        return json_response(error=error)
 
 
-@auth('exec.task.do')
-def get_histories(request):
-    records = ExecHistory.objects.filter(user=request.user).select_related('template')
-    return json_response([x.to_view() for x in records])
+
