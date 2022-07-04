@@ -3,23 +3,51 @@
 # Released under the AGPL-3.0 License.
 from paramiko.client import SSHClient, AutoAddPolicy
 from paramiko.rsakey import RSAKey
-from paramiko.transport import Transport
-from paramiko.ssh_exception import AuthenticationException
+from paramiko.auth_handler import AuthHandler
+from paramiko.ssh_exception import AuthenticationException, SSHException
+from paramiko.py3compat import b, u
 from io import StringIO
 from uuid import uuid4
 import time
 import re
 
-Transport._preferred_pubkeys = (
-    "ssh-ed25519",
-    "ecdsa-sha2-nistp256",
-    "ecdsa-sha2-nistp384",
-    "ecdsa-sha2-nistp521",
-    "ssh-rsa",
-    "rsa-sha2-256",
-    "rsa-sha2-512",
-    "ssh-dss",
-)
+
+def _finalize_pubkey_algorithm(self, key_type):
+    if "rsa" not in key_type:
+        return key_type
+    if re.search(r"-OpenSSH_(?:[1-6]|7\.[0-7])", self.transport.remote_version):
+        pubkey_algo = "ssh-rsa"
+        if key_type.endswith("-cert-v01@openssh.com"):
+            pubkey_algo += "-cert-v01@openssh.com"
+
+        self.transport._agreed_pubkey_algorithm = pubkey_algo
+        return pubkey_algo
+    my_algos = [x for x in self.transport.preferred_pubkeys if "rsa" in x]
+    if not my_algos:
+        raise SSHException(
+            "An RSA key was specified, but no RSA pubkey algorithms are configured!"  # noqa
+        )
+    server_algo_str = u(
+        self.transport.server_extensions.get("server-sig-algs", b(""))
+    )
+    if server_algo_str:
+        server_algos = server_algo_str.split(",")
+        agreement = list(filter(server_algos.__contains__, my_algos))
+        if agreement:
+            pubkey_algo = agreement[0]
+        else:
+            err = "Unable to agree on a pubkey algorithm for signing a {!r} key!"  # noqa
+            raise AuthenticationException(err.format(key_type))
+    else:
+        pubkey_algo = my_algos[0]
+        msg = "Server did not send a server-sig-algs list; defaulting to our first preferred algo ({!r})"  # noqa
+    if key_type.endswith("-cert-v01@openssh.com"):
+        pubkey_algo += "-cert-v01@openssh.com"
+    self.transport._agreed_pubkey_algorithm = pubkey_algo
+    return pubkey_algo
+
+
+AuthHandler._finalize_pubkey_algorithm = _finalize_pubkey_algorithm
 
 
 class SSH:
@@ -126,9 +154,9 @@ class SSH:
             yield exit_code, line
         yield exit_code, line
 
-    def put_file(self, local_path, remote_path):
+    def put_file(self, local_path, remote_path, callback=None):
         sftp = self._get_sftp()
-        sftp.put(local_path, remote_path, confirm=False)
+        sftp.put(local_path, remote_path, callback=callback, confirm=False)
 
     def put_file_by_fl(self, fl, remote_path, callback=None):
         sftp = self._get_sftp()
