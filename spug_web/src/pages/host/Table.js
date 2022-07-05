@@ -51,7 +51,7 @@ function ComTable() {
     <TableCard
       tKey="hi"
       rowKey="id"
-      title={<Input placeholder="输入检索" style={{maxWidth: 250}} onChange={e => store.f_word = e.target.value}/>}
+      title={<Input placeholder="输入名称/IP检索" style={{maxWidth: 250}} onChange={e => store.f_word = e.target.value}/>}
       loading={store.isFetching}
       dataSource={store.dataSource}
       onReload={store.fetchRecords}
