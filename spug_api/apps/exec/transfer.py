@@ -112,7 +112,7 @@ def _do_sync(rds, task, host):
         fp.write(host.pkey or AppSetting.get('private_key'))
         fp.flush()
 
-        options = '-azv' if task.host_id else '-rzv'
+        options = '-azv --progress' if task.host_id else '-rzv --progress'
         argument = f'{task.src_dir}/ {host.username}@{host.hostname}:{task.dst_dir}'
         command = f'rsync {options} -h -e "ssh -p {host.port} -o StrictHostKeyChecking=no -i {fp.name}" {argument}'
         task = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)

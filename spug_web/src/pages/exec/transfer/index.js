@@ -6,7 +6,12 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import {
-  PlusOutlined, ThunderboltOutlined, QuestionCircleOutlined, UploadOutlined, CloudServerOutlined
+  PlusOutlined,
+  ThunderboltOutlined,
+  QuestionCircleOutlined,
+  UploadOutlined,
+  CloudServerOutlined,
+  BulbOutlined,
 } from '@ant-design/icons';
 import { Form, Button, Alert, Tooltip, Space, Card, Table, Input, Upload, message } from 'antd';
 import { AuthDiv, Breadcrumb } from 'components';
@@ -119,7 +124,11 @@ function TransferIndex() {
               <Button danger type="link" onClick={() => handleRemove(index)}>移除</Button>)}/>
           </Table>
         </Card>
-        <Card type="inner" title="分发目标" style={{margin: '24px 0'}} bodyStyle={{paddingBottom: 0}}>
+        <Card type="inner" title="分发目标" style={{margin: '24px 0'}} bodyStyle={{paddingBottom: 0}} extra={(
+          <Tooltip className={style.tips} title="文件分发功能依赖rsync，大部分linux发行版默认都已安装，如未安装可通过「批量执行/执行任务」进行批量安装。">
+            <BulbOutlined/> 小提示
+          </Tooltip>
+        )}>
           <Form>
             <Form.Item required label="目标路径">
               <Input value={dir} onChange={e => setDir(e.target.value)} placeholder="请输入目标路径"/>

@@ -16,19 +16,16 @@
     }
 
     .tips {
-      position: absolute;
-      top: 10px;
-      left: 180px;
+      font-size: 12px;
       color: #999;
     }
 
-    .tips:hover {
-      color: #777;
-    }
-
-    .editor {
-      height: calc(100vh - 482px) !important;
-      min-height: 152px;
+    :global(.ant-table-tbody) {
+      tr:last-child {
+        td {
+          border: none;
+        }
+      }
     }
 
     :global(.ant-empty-normal) {
