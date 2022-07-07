@@ -19,7 +19,7 @@ import os
 
 def check_os_type(os_name):
     os_name = os_name.lower()
-    types = ('centos', 'coreos', 'debian', 'suse', 'ubuntu', 'windows', 'freebsd', 'tencent', 'alibaba')
+    types = ('centos', 'coreos', 'debian', 'suse', 'ubuntu', 'windows', 'freebsd', 'tencent', 'alibaba', 'fedora')
     for t in types:
         if t in os_name:
             return t

@@ -8,6 +8,8 @@ import iconSuse from './suse.png';
 import iconTencent from './tencent.png';
 import iconUbuntu from './ubuntu.png';
 import iconWindows from './windows.png';
+import iconFedora from './fedora.png';
+import iconLinux from './linux.png';
 
 export default {
   excel: iconExcel,
@@ -19,5 +21,7 @@ export default {
   suse: iconSuse,
   tencent: iconTencent,
   ubuntu: iconUbuntu,
+  fedora: iconFedora,
   windows: iconWindows,
+  unknown: iconLinux,
 }
