@@ -255,7 +255,7 @@ def batch_sync_host(token, hosts, password=None):
     max_workers = max(10, os.cpu_count() * 5)
     with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         for host in hosts:
-            if hasattr(host, 'password'):
+            if getattr(host, 'password'):
                 password = host.password
             t = executor.submit(_sync_host_extend, host, private_key, public_key, password)
             t.host = host
