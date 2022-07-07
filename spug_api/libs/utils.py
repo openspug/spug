@@ -37,6 +37,14 @@ def human_time(date=None):
     return date.strftime('%H:%M:%S')
 
 
+def str_decode(data):
+    try:
+        data = data.decode()
+    except UnicodeDecodeError:
+        data = data.decode(encoding='GBK', errors='ignore')
+    return data
+
+
 # 解析时间类型的数据
 def parse_time(value):
     if isinstance(value, datetime):

@@ -10,6 +10,7 @@ from apps.account.utils import has_host_perm
 from apps.host.models import Host
 from apps.setting.utils import AppSetting
 from libs import json_response, JsonParser, Argument, auth
+from libs.utils import str_decode
 from concurrent import futures
 from threading import Thread
 import subprocess
@@ -96,7 +97,7 @@ def _dispatch_sync(task):
         for t in futures.as_completed(threads):
             exc = t.exception()
             if exc:
-                rds.publish(t.token, json.dumps({'key': t.key, 'status': -1, 'data': f'Exception: {exc}'}))
+                rds.publish(t.token, json.dumps({'key': t.key, 'status': -1, 'data': f'\x1b[31mException: {exc}\x1b[0m'}))
     if task.host_id:
         command = f'umount -f {task.src_dir} && rm -rf {task.src_dir}'
     else:
@@ -120,7 +121,7 @@ def _do_sync(rds, task, host):
             message = task.stdout.readline()
             if not message:
                 break
-            message = message.decode().rstrip('\r\n')
+            message = str_decode(message).rstrip('\r\n')
             if 'rsync: command not found' in message:
                 data = '\r\n\x1b[31m检测到该主机未安装rsync，可通过批量执行/执行任务模块进行以下命令批量安装\x1b[0m'
                 data += '\r\nCentos/Redhat: yum install -y rsync'

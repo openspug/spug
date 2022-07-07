@@ -7,6 +7,7 @@ from asgiref.sync import async_to_sync
 from apps.host.models import Host
 from consumer.utils import BaseConsumer
 from apps.account.utils import has_host_perm
+from libs.utils import str_decode
 from threading import Thread
 import time
 import json
@@ -64,10 +65,7 @@ class SSHConsumer(BaseConsumer):
             if not data:
                 self.close(3333)
                 break
-            try:
-                text = data.decode()
-            except UnicodeDecodeError:
-                text = data.decode(encoding='GBK', errors='ignore')
+            text = str_decode(data)
             if not is_ready:
                 self.send(text_data='\033[2J\033[3J\033[1;1H')
                 is_ready = True
@@ -138,7 +136,7 @@ class PubSubConsumer(BaseConsumer):
     def receive(self, **kwargs):
         response = self.p.get_message(timeout=10)
         while response:
-            data = response['data'].decode()
+            data = str_decode(response['data'])
             self.send(text_data=data)
             response = self.p.get_message(timeout=10)
         self.send(text_data='pong')
