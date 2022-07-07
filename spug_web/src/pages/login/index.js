@@ -30,9 +30,6 @@ export default function () {
     requestStore.records = [];
     requestStore.deploys = [];
     hostStore.rawRecords = [];
-    hostStore.rawTreeData = [];
-    hostStore.groups = {};
-    hostStore.group = {};
     execStore.hosts = [];
   }, [])
 
