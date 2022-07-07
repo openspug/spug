@@ -40,7 +40,7 @@ function ComTable() {
   function IpAddress(props) {
     if (props.ip && props.ip.length > 0) {
       return (
-        <div>{props.ip[0]}<span style={{color: '#999'}}>（{props.isPublic ? '公' : '私有'}）</span></div>
+        <div>{props.ip[0]}<span style={{color: '#999'}}>（{props.isPublic ? '公' : '私'}）</span></div>
       )
     } else {
       return null
@@ -51,7 +51,8 @@ function ComTable() {
     <TableCard
       tKey="hi"
       rowKey="id"
-      title={<Input placeholder="输入名称/IP检索" style={{maxWidth: 250}} onChange={e => store.f_word = e.target.value}/>}
+      title={<Input allowClear value={store.f_word} placeholder="输入名称/IP检索" style={{maxWidth: 250}}
+                    onChange={e => store.f_word = e.target.value}/>}
       loading={store.isFetching}
       dataSource={store.dataSource}
       onReload={store.fetchRecords}

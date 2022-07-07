@@ -8,7 +8,6 @@ import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, DatePicker, Button, message } from 'antd';
 import { LoadingOutlined, SyncOutlined } from '@ant-design/icons';
 import HostSelector from './HostSelector';
-import hostStore from 'pages/host/store';
 import { http, history } from 'libs';
 import store from './store';
 import lds from 'lodash';
@@ -44,7 +43,6 @@ export default observer(function () {
   useEffect(() => {
     const {app_host_ids, host_ids} = store.record;
     setHostIds(lds.clone(host_ids || app_host_ids));
-    if (!hostStore.records || hostStore.records.length === 0) hostStore.fetchRecords()
     fetchVersions()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

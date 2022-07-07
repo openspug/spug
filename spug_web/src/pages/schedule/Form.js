@@ -15,8 +15,8 @@ import hostStore from '../host/store';
 
 export default observer(function () {
   useEffect(() => {
+    hostStore.initial()
     store.targets = store.record.id ? store.record['targets'] : [undefined];
-    if (!hostStore.records || hostStore.records.length === 0) hostStore.fetchRecords()
   }, [])
   return (
     <Modal

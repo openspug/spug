@@ -30,7 +30,7 @@ export default observer(function () {
                 filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                 onChange={v => store.editTarget(index, v)}>
                 <Select.Option value="local" disabled={store.targets.includes('local')}>本机</Select.Option>
-                {hostStore.records.map(item => (
+                {hostStore.rawRecords.map(item => (
                   <Select.Option key={item.id} value={item.id} disabled={store.targets.includes(item.id)}>
                     {`${item.name}(${item['hostname']}:${item['port']})`}
                   </Select.Option>

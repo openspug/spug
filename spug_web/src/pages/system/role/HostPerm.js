@@ -17,9 +17,7 @@ export default observer(function () {
   const [groups, setGroups] = useState([...store.record.group_perms]);
 
   useEffect(() => {
-    if (hostStore.treeData.length === 0) {
-      hostStore.initial()
-    }
+    hostStore.initial()
   }, [])
 
   function handleSubmit() {
@@ -63,7 +61,7 @@ export default observer(function () {
                 value={id}
                 showSearch={false}
                 treeNodeLabelProp="name"
-                treeData={hostStore.treeData}
+                treeData={hostStore.rawTreeData}
                 onChange={value => handleChange(index, value)}
                 placeholder="请选择分组"/>
               {groups.length > 1 && (

@@ -9,6 +9,7 @@ import { Input, Card, Tree, Dropdown, Menu, Switch, Tooltip, Spin, Modal } from 
 import {
   FolderOutlined,
   FolderAddOutlined,
+  FolderOpenOutlined,
   EditOutlined,
   DeleteOutlined,
   CopyOutlined,
@@ -24,11 +25,12 @@ import store from './store';
 import lds from 'lodash';
 
 export default observer(function () {
+  const [isReady, setIsReady] = useState(false);
   const [loading, setLoading] = useState();
   const [visible, setVisible] = useState(false);
   const [draggable, setDraggable] = useState(false);
   const [action, setAction] = useState('');
-  const [expands, setExpands] = useState();
+  const [expands, setExpands] = useState([]);
   const [bakTreeData, setBakTreeData] = useState();
 
   useEffect(() => {
@@ -36,10 +38,13 @@ export default observer(function () {
   }, [loading])
 
   useEffect(() => {
-    const length = store.treeData.length
-    if (length > 0 && length < 5 && expands === undefined) {
-      const tmp = store.treeData.filter(x => x.children.length)
-      setExpands(tmp.map(x => x.key))
+    if (!isReady) {
+      const length = store.treeData.length
+      if (length > 0 && length < 5) {
+        const tmp = store.treeData.filter(x => x.children.length)
+        setExpands(tmp.map(x => x.key))
+        setIsReady(true)
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.treeData])
@@ -50,10 +55,10 @@ export default observer(function () {
       <Menu.Item key="1" icon={<FolderAddOutlined/>} onClick={handleAdd}>新建子分组</Menu.Item>
       <Menu.Item key="2" icon={<EditOutlined/>} onClick={() => setAction('edit')}>重命名</Menu.Item>
       <Menu.Divider/>
-      <Menu.Item key="3" icon={<CopyOutlined/>} onClick={() => store.showSelector(true)}>添加至分组</Menu.Item>
-      <Menu.Item key="4" icon={<ScissorOutlined/>} onClick={() => store.showSelector(false)}>移动至分组</Menu.Item>
-      <Menu.Divider/>
+      <Menu.Item key="3" icon={<CopyOutlined/>} onClick={() => store.showSelector(true)}>添加主机</Menu.Item>
+      <Menu.Item key="4" icon={<ScissorOutlined/>} onClick={() => store.showSelector(false)}>移动主机</Menu.Item>
       <Menu.Item key="5" icon={<CloseOutlined/>} danger onClick={handleRemoveHosts}>删除主机</Menu.Item>
+      <Menu.Divider/>
       <Menu.Item key="6" icon={<DeleteOutlined/>} danger onClick={handleRemove}>删除此分组</Menu.Item>
     </Menu>
   )
@@ -66,7 +71,7 @@ export default observer(function () {
         .then(() => setAction(''))
         .finally(() => setLoading(false))
     } else {
-      if (store.group.key === 0) store.treeData = bakTreeData
+      if (store.group.key === 0) store.rawTreeData = bakTreeData
       setAction('')
     }
   }
@@ -75,9 +80,9 @@ export default observer(function () {
     const group = store.group;
     Modal.confirm({
       title: '操作确认',
-      content: `批量删除【${group.title}】分组内的 ${group.all_host_ids.length} 个主机？`,
+      content: `批量删除【${group.title}】分组内的 ${store.counter[group.key].size} 个主机？`,
       onOk: () => http.delete('/api/host/', {params: {group_id: group.key}})
-        .then(store.initial)
+        .then(store.fetchRecords)
     })
   }
 
@@ -92,22 +97,32 @@ export default observer(function () {
   }
 
   function handleAddRoot() {
-    setBakTreeData(lds.cloneDeep(store.treeData));
-    const current = {key: 0, parent_id: 0, title: ''};
-    store.treeData.unshift(current);
-    store.treeData = lds.cloneDeep(store.treeData);
+    setBakTreeData(lds.cloneDeep(store.rawTreeData));
+    const current = {key: 0, parent_id: 0, title: '', children: []};
+    store.rawTreeData.unshift(current);
+    store.rawTreeData = lds.cloneDeep(store.rawTreeData);
     store.group = current;
     setAction('edit')
   }
 
   function handleAdd() {
-    setBakTreeData(lds.cloneDeep(store.treeData));
-    const current = {key: 0, parent_id: store.group.key, title: ''};
-    store.group.children.unshift(current);
-    store.treeData = lds.cloneDeep(store.treeData);
+    setBakTreeData(lds.cloneDeep(store.rawTreeData));
+    const current = {key: 0, parent_id: store.group.key, title: '', children: []};
+    const node = _find_node(store.rawTreeData, store.group.key)
+    node.children.unshift(current)
+    store.rawTreeData = lds.cloneDeep(store.rawTreeData);
     if (!expands.includes(store.group.key)) setExpands([store.group.key, ...expands]);
     store.group = current;
     setAction('edit')
+  }
+
+  function _find_node(list, key) {
+    let node = lds.find(list, {key})
+    if (node) return node
+    for (let item of list) {
+      node = _find_node(item.children, key)
+      if (node) return node
+    }
   }
 
   function handleDrag(v) {
@@ -138,6 +153,7 @@ export default observer(function () {
         size="small"
         style={{width: 'calc(100% - 24px)'}}
         defaultValue={nodeData.title}
+        placeholder="请输入"
         suffix={loading ? <LoadingOutlined/> : <span/>}
         onClick={e => e.stopPropagation()}
         onBlur={handleSubmit}
@@ -146,9 +162,13 @@ export default observer(function () {
     } else if (action === 'del' && nodeData.key === store.group.key) {
       return <LoadingOutlined style={{marginLeft: '4px'}}/>
     } else {
-      const extend = nodeData.all_host_ids && nodeData.all_host_ids.length ? `（${nodeData.all_host_ids.length}）` : null
+      const length = store.counter[nodeData.key]?.size
       return (
-        <span style={{lineHeight: '24px'}}>{nodeData.title}{extend}</span>
+        <div className={styles.treeNode}>
+          {expands.includes(nodeData.key) ? <FolderOpenOutlined/> : <FolderOutlined/>}
+          <div className={styles.title}>{nodeData.title}</div>
+          {length ? <div className={styles.number}>{length}</div> : null}
+        </div>
       )
     }
   }
@@ -165,7 +185,7 @@ export default observer(function () {
             onChange={setDraggable}
             checkedChildren="排版"
             unCheckedChildren="浏览"/>
-          <Tooltip title="排版模式下，可通过拖拽分组实现快速排序。">
+          <Tooltip title="排版模式下，可通过拖拽分组实现快速排序，右键点击分组进行分组管理。">
             <QuestionCircleOutlined style={{marginLeft: 8, color: '#999'}}/>
           </Tooltip>
         </AuthFragment>)}>
@@ -176,6 +196,7 @@ export default observer(function () {
           trigger={['contextMenu']}
           onVisibleChange={v => v || setVisible(v)}>
           <Tree.DirectoryTree
+            showIcon={false}
             autoExpandParent
             expandAction="doubleClick"
             draggable={draggable}

@@ -50,7 +50,11 @@ export default observer(function () {
       {store.cloudImport && <CloudImport/>}
       {store.syncVisible && <BatchSync/>}
       {store.selectorVisible &&
-        <Selector oneGroup={!store.addByCopy} onCancel={() => store.selectorVisible = false} onOk={store.updateGroup}/>}
+        <Selector
+          onlySelf={!store.addByCopy}
+          onCancel={() => store.selectorVisible = false}
+          onOk={store.updateGroup}
+        />}
     </AuthDiv>
   );
 })

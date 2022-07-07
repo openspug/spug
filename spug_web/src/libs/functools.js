@@ -39,15 +39,29 @@ export function clsNames(...args) {
   return args.filter(x => x).join(' ')
 }
 
-export function includes(s, key) {
-  key = key.toLowerCase();
-  if (Array.isArray(s)) {
-    for (let i of s) {
-      if (i && i.toLowerCase().includes(key)) return true
+function isInclude(s, keys) {
+  if (!s) return false
+  if (Array.isArray(keys)) {
+    for (let k of keys) {
+      k = k.toLowerCase()
+      if (s.toLowerCase().includes(k)) return true
     }
     return false
   } else {
-    return s && s.toLowerCase().includes(key)
+    let k = keys.toLowerCase()
+    return s.toLowerCase().includes(k)
+  }
+}
+
+// 字符串包含判断
+export function includes(s, keys) {
+  if (Array.isArray(s)) {
+    for (let i of s) {
+      if (isInclude(i, keys)) return true
+    }
+    return false
+  } else {
+    return isInclude(s, keys)
   }
 }
 

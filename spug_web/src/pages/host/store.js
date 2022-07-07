@@ -3,15 +3,13 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import { observable, computed } from 'mobx';
+import { observable, computed, toJS } from 'mobx';
 import { message } from 'antd';
 import { http, includes } from 'libs';
-import lds from 'lodash';
 
 class Store {
-  counter = {};
-  @observable records = null;
-  @observable treeData = [];
+  @observable rawTreeData = [];
+  @observable rawRecords = [];
   @observable groups = {};
   @observable group = {};
   @observable record = {};
@@ -29,12 +27,51 @@ class Store {
   @observable f_word;
   @observable f_status = '';
 
+  @computed get records() {
+    let records = this.rawRecords;
+    if (this.f_word) {
+      records = records.filter(x => {
+        if (includes(x.name, this.f_word)) return true
+        if (x.public_ip_address && includes(x.public_ip_address[0], this.f_word)) return true
+        return !!(x.private_ip_address && includes(x.private_ip_address[0], this.f_word));
+      });
+    }
+    return records
+  }
+
   @computed get dataSource() {
     let records = [];
-    if (this.group.all_host_ids) records = this.records ? this.records.filter(x => this.group.all_host_ids.includes(x.id)) : [];
-    if (this.f_word) records = records.filter(x => includes(x.name, this.f_word) || includes(x.public_ip_address, this.f_word) || includes(x.private_ip_address, this.f_word));
+    if (this.group.key) {
+      const host_ids = this.counter[this.group.key]
+      records = this.records.filter(x => host_ids && host_ids.has(x.id));
+    }
     if (this.f_status !== '') records = records.filter(x => this.f_status === x.is_verified);
     return records
+  }
+
+  @computed get counter() {
+    const counter = {}
+    for (let host of this.records) {
+      for (let id of host.group_ids) {
+        if (counter[id]) {
+          counter[id].add(host.id)
+        } else {
+          counter[id] = new Set([host.id])
+        }
+      }
+    }
+    for (let item of this.rawTreeData) {
+      this._handler_counter(item, counter)
+    }
+    return counter
+  }
+
+  @computed get treeData() {
+    let treeData = toJS(this.rawTreeData)
+    if (this.f_word) {
+      treeData = this._handle_filter_group(treeData)
+    }
+    return treeData
   }
 
   fetchRecords = () => {
@@ -42,11 +79,9 @@ class Store {
     return http.get('/api/host/')
       .then(res => {
         const tmp = {};
-        this.records = res;
-        this.records.map(item => tmp[item.id] = item);
+        this.rawRecords = res;
+        this.rawRecords.map(item => tmp[item.id] = item);
         this.idMap = tmp;
-        this._makeCounter();
-        this.refreshCounter()
       })
       .finally(() => this.isFetching = false)
   };
@@ -61,22 +96,22 @@ class Store {
     return http.get('/api/host/group/')
       .then(res => {
         this.groups = res.groups;
-        this.refreshCounter(res.treeData)
+        this.rawTreeData = res.treeData
       })
       .finally(() => this.grpFetching = false)
   }
 
   initial = () => {
+    if (this.rawRecords.length > 0) return Promise.resolve()
     this.isFetching = true;
     this.grpFetching = true;
     return http.all([http.get('/api/host/'), http.get('/api/host/group/')])
       .then(http.spread((res1, res2) => {
-        this.records = res1;
-        this.records.map(item => this.idMap[item.id] = item);
-        this.group = res2.treeData[0] || {};
+        this.rawRecords = res1;
+        this.rawRecords.map(item => this.idMap[item.id] = item);
         this.groups = res2.groups;
-        this._makeCounter();
-        this.refreshCounter(res2.treeData)
+        this.rawTreeData = res2.treeData;
+        this.group = this.treeData[0];
       }))
       .finally(() => {
         this.isFetching = false;
@@ -112,39 +147,24 @@ class Store {
     this.selectorVisible = true;
   }
 
-  refreshCounter = (treeData) => {
-    treeData = treeData || lds.cloneDeep(this.treeData);
-    if (treeData.length && this.records !== null) {
-      for (let item of treeData) {
-        this._refreshCounter(item)
-      }
-      this.treeData = treeData
-    }
-  }
-
-  _refreshCounter = (item) => {
-    item.all_host_ids = item.self_host_ids = this.counter[item.key] || [];
+  _handler_counter = (item, counter) => {
+    if (!counter[item.key]) counter[item.key] = new Set()
     for (let child of item.children) {
-      const ids = this._refreshCounter(child)
-      item.all_host_ids = item.all_host_ids.concat(ids)
+      this._handler_counter(child, counter)
+      counter[child.key].forEach(x => counter[item.key].add(x))
     }
-    item.all_host_ids = Array.from(new Set(item.all_host_ids));
-    if (this.group.key === item.key) this.group = item;
-    return item.all_host_ids
   }
 
-  _makeCounter = () => {
-    const counter = {};
-    for (let host of this.records) {
-      for (let id of host.group_ids) {
-        if (counter[id]) {
-          counter[id].push(host.id)
-        } else {
-          counter[id] = [host.id]
-        }
+  _handle_filter_group = (treeData) => {
+    const data = []
+    for (let item of treeData) {
+      const host_ids = this.counter[item.key]
+      if (host_ids.size > 0 || item.key === this.group.key) {
+        item.children = this._handle_filter_group(item.children)
+        data.push(item)
       }
     }
-    this.counter = counter
+    return data
   }
 }
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Table, Button, Alert } from 'antd';
 import hostStore from 'pages/host/store';
@@ -6,6 +6,10 @@ import lds from 'lodash';
 
 export default observer(function (props) {
   const [selectedRowKeys, setSelectedRowKeys] = useState(props.host_ids || []);
+
+  useEffect(() => {
+    hostStore.initial()
+  }, [])
 
   function handleClickRow(record) {
     const index = selectedRowKeys.indexOf(record.id);
