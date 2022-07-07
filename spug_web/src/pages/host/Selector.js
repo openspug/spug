@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Row, Col, Tree, Table, Button, Space, Input } from 'antd';
 import { FolderOpenOutlined, FolderOutlined } from '@ant-design/icons';
+import IPAddress from './IPAddress';
 import hStore from './store';
 import store from './store2';
 import styles from './index.module.less';
@@ -45,7 +46,7 @@ export default observer(function (props) {
   }, [props.selectedRowKeys])
 
   useEffect(() => {
-    if (props.oneGroup) {
+    if (props.onlySelf) {
       setSelectedRowKeys([])
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -118,8 +119,9 @@ export default observer(function (props) {
       okButtonProps={{disabled: selectedRowKeys.length === 0}}
       confirmLoading={loading}
       onCancel={props.onCancel}>
-      <Row gutter={12}>
-        <Col span={6}>
+      <Row>
+        <Col span={6} style={{borderRight: '8px solid #f0f0f0', paddingRight: 12}}>
+          <div className={styles.gTitle}>分组列表</div>
           <Tree.DirectoryTree
             showIcon={false}
             autoExpandParent
@@ -132,7 +134,7 @@ export default observer(function (props) {
             onSelect={(_, {node}) => store.group = node}
           />
         </Col>
-        <Col span={18}>
+        <Col span={18} style={{paddingLeft: 12}}>
           <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: 12}}>
             <Input allowClear style={{width: 260}} placeholder="输入名称/IP检索"
                    onChange={e => store.f_word = e.target.value}/>
@@ -157,9 +159,14 @@ export default observer(function (props) {
               onSelect: handleClickRow,
               onSelectAll: handleSelectAll
             }}>
-            <Table.Column title="主机名称" dataIndex="name" sorter={(a, b) => a.name.localeCompare(b.name)}/>
-            <Table.Column title="IP地址" dataIndex="hostname" sorter={(a, b) => a.name.localeCompare(b.name)}/>
-            <Table.Column hide ellipsis title="备注信息" dataIndex="desc"/>
+            <Table.Column ellipsis width={170} title="主机名称" dataIndex="name"/>
+            <Table.Column width={320} title="IP地址" render={info => (
+              <Space>
+                <IPAddress ip={info.public_ip_address} isPublic/>
+                <IPAddress ip={info.private_ip_address}/>
+              </Space>
+            )}/>
+            <Table.Column title="备注信息" dataIndex="desc"/>
           </Table>
         </Col>
       </Row>

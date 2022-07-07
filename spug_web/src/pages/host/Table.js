@@ -8,6 +8,7 @@ import { observer } from 'mobx-react';
 import { Table, Modal, Dropdown, Button, Menu, Avatar, Tooltip, Space, Tag, Radio, Input, message } from 'antd';
 import { PlusOutlined, DownOutlined, SyncOutlined, FormOutlined } from '@ant-design/icons';
 import { Action, TableCard, AuthButton, AuthFragment } from 'components';
+import IPAddress from './IPAddress';
 import { http, hasPermission } from 'libs';
 import store from './store';
 import icons from './icons';
@@ -34,16 +35,6 @@ function ComTable() {
       store.showForm({group_ids: [store.group.value]})
     } else {
       store.cloudImport = menu.key
-    }
-  }
-
-  function IpAddress(props) {
-    if (props.ip && props.ip.length > 0) {
-      return (
-        <div>{props.ip[0]}<span style={{color: '#999'}}>（{props.isPublic ? '公' : '私'}）</span></div>
-      )
-    } else {
-      return null
     }
   }
 
@@ -113,8 +104,8 @@ function ComTable() {
         sorter={(a, b) => a.name.localeCompare(b.name)}/>
       <Table.Column title="IP地址" render={info => (
         <div>
-          <IpAddress ip={info.public_ip_address} isPublic/>
-          <IpAddress ip={info.private_ip_address}/>
+          <IPAddress ip={info.public_ip_address} isPublic/>
+          <IPAddress ip={info.private_ip_address}/>
         </div>
       )}/>
       <Table.Column title="配置信息" render={info => (
