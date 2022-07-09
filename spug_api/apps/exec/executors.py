@@ -14,8 +14,9 @@ def exec_worker_handler(job):
 
 
 class Job:
-    def __init__(self, key, name, hostname, port, username, pkey, command, interpreter, params=None, token=None):
-        self.ssh = SSH(hostname, port, username, pkey)
+    def __init__(self, key, name, hostname, port, username, pkey, command, interpreter, params=None, token=None,
+                 term=None):
+        self.ssh = SSH(hostname, port, username, pkey, term=term)
         self.key = key
         self.command = self._handle_command(command, interpreter)
         self.token = token

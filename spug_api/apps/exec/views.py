@@ -92,9 +92,14 @@ class TaskView(View):
     @auth('exec.task.do')
     def patch(self, request):
         form, error = JsonParser(
-            Argument('token', help='参数错误')
+            Argument('token', help='参数错误'),
+            Argument('cols', type=int, required=False),
+            Argument('rows', type=int, required=False)
         ).parse(request.body)
         if error is None:
+            term = None
+            if form.cols and form.rows:
+                term = {'width': form.cols, 'height': form.rows}
             rds = get_redis_connection()
             task = ExecHistory.objects.get(digest=form.token)
             for host in Host.objects.filter(id__in=json.loads(task.host_ids)):
@@ -108,7 +113,8 @@ class TaskView(View):
                     username=host.username,
                     command=task.command,
                     pkey=host.private_key,
-                    params=json.loads(task.params)
+                    params=json.loads(task.params),
+                    term=term
                 )
                 rds.rpush(settings.EXEC_WORKER_KEY, json.dumps(data))
         return json_response(error=error)

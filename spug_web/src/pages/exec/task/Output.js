@@ -64,7 +64,9 @@ function OutView(props) {
       term.write(message)
       socket.send('ok');
       fitPlugin.fit()
-      http.patch('/api/exec/do/', {token: store.token})
+      const formData = fitPlugin.proposeDimensions()
+      formData.token = store.token
+      http.patch('/api/exec/do/', formData)
     }
     socket.onmessage = e => {
       if (e.data === 'pong') {

@@ -52,12 +52,13 @@ AuthHandler._finalize_pubkey_algorithm = _finalize_pubkey_algorithm
 
 class SSH:
     def __init__(self, hostname, port=22, username='root', pkey=None, password=None, default_env=None,
-                 connect_timeout=10):
+                 connect_timeout=10, term=None):
         self.stdout = None
         self.client = None
         self.channel = None
         self.sftp = None
         self.exec_file = None
+        self.term = term or {}
         self.eof = 'Spug EOF 2108111926'
         self.default_env = default_env
         self.regex = re.compile(r'Spug EOF 2108111926 (-?\d+)[\r\n]?')
@@ -179,7 +180,7 @@ class SSH:
             return self.channel
 
         counter = 0
-        self.channel = self.client.invoke_shell()
+        self.channel = self.client.invoke_shell(**self.term)
         command = 'set +o history\nset +o zle\nset -o no_nomatch\nexport PS1= && stty -echo\n'
         command = self._handle_command(command, self.default_env)
         self.channel.sendall(command)
