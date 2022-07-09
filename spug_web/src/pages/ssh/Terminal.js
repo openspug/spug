@@ -42,7 +42,7 @@ function WebSSH(props) {
       fitPlugin.fit();
     };
     socket.onclose = e => {
-      setTimeout(() => term.write('\r\nConnection is closed.\r\n'), 200)
+      setTimeout(() => term.write('\r\n\r\n\x1b[31mConnection is closed.\x1b[0m\r\n'), 200)
     };
     term.onData(data => socket.send(JSON.stringify({data})));
     term.onResize(({cols, rows}) => {
