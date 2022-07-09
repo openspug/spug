@@ -2,7 +2,7 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.template.defaultfilters import filesizeformat
-from libs.utils import human_datetime, render_str
+from libs.utils import human_datetime, render_str, str_decode
 from libs.spug import Notification
 from apps.host.models import Host
 from functools import partial
@@ -274,12 +274,18 @@ class Helper:
             env = dict(env.items())
             env.update(os.environ)
         task = subprocess.Popen(command, env=env, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        message = b''
         while True:
-            message = task.stdout.readline()
-            if not message:
+            output = task.stdout.read(1)
+            if not output:
                 break
-            message = message.decode().rstrip('\r\n')
-            self.send_info('local', message + '\r\n')
+            if output in (b'\r', b'\n'):
+                message += b'\r\n' if output == b'\n' else b'\r'
+                message = str_decode(message)
+                self.send_info('local', message)
+                message = b''
+            else:
+                message += output
         if task.wait() != 0:
             self.send_error('local', f'exit code: {task.returncode}')
 
