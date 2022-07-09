@@ -58,17 +58,20 @@ def parse_time(value):
 
 
 # 传两个时间得到一个时间差
-def human_diff_time(time1, time2):
-    time1 = parse_time(time1)
-    time2 = parse_time(time2)
-    delta = time1 - time2 if time1 > time2 else time2 - time1
-    if delta.seconds < 60:
-        text = '%d秒' % delta.seconds
-    elif delta.seconds < 3600:
-        text = '%d分' % (delta.seconds / 60)
-    else:
-        text = '%d小时' % (delta.seconds / 3600)
-    return '%d天%s' % (delta.days, text) if delta.days else text
+def human_seconds_time(seconds):
+    text = ''
+    if seconds >= 3600:
+        text += '%d小时' % (seconds / 3600)
+        seconds = seconds % 3600
+    if seconds >= 60:
+        text += '%d分' % (seconds / 60)
+        seconds = seconds % 60
+    if seconds > 0:
+        if text or isinstance(seconds, int):
+            text += '%.d秒' % seconds
+        else:
+            text += '%.1f秒' % seconds
+    return text
 
 
 # 字符串模版渲染

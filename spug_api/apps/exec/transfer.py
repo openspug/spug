@@ -10,13 +10,14 @@ from apps.account.utils import has_host_perm
 from apps.host.models import Host
 from apps.setting.utils import AppSetting
 from libs import json_response, JsonParser, Argument, auth
-from libs.utils import str_decode
+from libs.utils import str_decode, human_seconds_time
 from concurrent import futures
 from threading import Thread
 import subprocess
 import tempfile
 import uuid
 import json
+import time
 import os
 
 
@@ -97,7 +98,10 @@ def _dispatch_sync(task):
         for t in futures.as_completed(threads):
             exc = t.exception()
             if exc:
-                rds.publish(t.token, json.dumps({'key': t.key, 'status': -1, 'data': f'\x1b[31mException: {exc}\x1b[0m'}))
+                rds.publish(
+                    t.token,
+                    json.dumps({'key': t.key, 'status': -1, 'data': f'\x1b[31mException: {exc}\x1b[0m'})
+                )
     if task.host_id:
         command = f'umount -f {task.src_dir} && rm -rf {task.src_dir}'
     else:
@@ -113,20 +117,31 @@ def _do_sync(rds, task, host):
         fp.write(host.pkey or AppSetting.get('private_key'))
         fp.flush()
 
+        flag = time.time()
         options = '-azv --progress' if task.host_id else '-rzv --progress'
         argument = f'{task.src_dir}/ {host.username}@{host.hostname}:{task.dst_dir}'
         command = f'rsync {options} -h -e "ssh -p {host.port} -o StrictHostKeyChecking=no -i {fp.name}" {argument}'
         task = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        message = b''
         while True:
-            message = task.stdout.readline()
-            if not message:
+            output = task.stdout.read(1)
+            if not output:
                 break
-            message = str_decode(message).rstrip('\r\n')
-            if 'rsync: command not found' in message:
-                data = '\r\n\x1b[31m检测到该主机未安装rsync，可通过批量执行/执行任务模块进行以下命令批量安装\x1b[0m'
-                data += '\r\nCentos/Redhat: yum install -y rsync'
-                data += '\r\nUbuntu/Debian: apt install -y rsync'
-                rds.publish(token, json.dumps({'key': host.id, 'data': data}))
-                break
-            rds.publish(token, json.dumps({'key': host.id, 'data': message + '\r\n'}))
+            if output in (b'\r', b'\n'):
+                message += b'\r\n' if output == b'\n' else b'\r'
+                message = str_decode(message)
+                if 'rsync: command not found' in message:
+                    data = '\r\n\x1b[31m检测到该主机未安装rsync，可通过批量执行/执行任务模块进行以下命令批量安装\x1b[0m'
+                    data += '\r\nCentos/Redhat: yum install -y rsync'
+                    data += '\r\nUbuntu/Debian: apt install -y rsync'
+                    rds.publish(token, json.dumps({'key': host.id, 'data': data}))
+                    break
+                rds.publish(token, json.dumps({'key': host.id, 'data': message}))
+                message = b''
+            else:
+                message += output
+        status = task.wait()
+        if status == 0:
+            human_time = human_seconds_time(time.time() - flag)
+            rds.publish(token, json.dumps({'key': host.id, 'data': f'\r\n\x1b[32m** 分发完成，总耗时：{human_time} **\x1b[0m'}))
         rds.publish(token, json.dumps({'key': host.id, 'status': task.wait()}))
