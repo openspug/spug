@@ -28,9 +28,9 @@ function TransferIndex() {
   const [dir, setDir] = useState('')
   const [hosts, setHosts] = useState([])
   const [sProps, setSProps] = useState({visible: false})
+  const [percent, setPercent] = useState()
   const [token, setToken] = useState()
   const [histories, setHistories] = useState([])
-
 
   useEffect(() => {
     if (!loading) {
@@ -38,6 +38,12 @@ function TransferIndex() {
         .then(res => setHistories(res))
     }
   }, [loading])
+
+  function _handleProgress(e) {
+    const data = e.loaded / e.total * 100
+    if (!percent && data === 100) return
+    setPercent(String(data).replace(/(\d+\.\d).*/, '$1'))
+  }
 
   function handleSubmit() {
     const formData = new FormData();
@@ -55,7 +61,7 @@ function TransferIndex() {
     }
     formData.append('data', JSON.stringify(data))
     setLoading(true)
-    http.post('/api/exec/transfer/', formData)
+    http.post('/api/exec/transfer/', formData, {timeout: 600000, onUploadProgress: _handleProgress})
       .then(res => {
         const tmp = {}
         for (let host of hosts) {
@@ -68,7 +74,10 @@ function TransferIndex() {
         store.outputs = tmp
         setToken(res)
       })
-      .finally(() => setLoading(false))
+      .finally(() => {
+        setLoading(false)
+        setPercent()
+      })
   }
 
   function handleAddHostFile() {
@@ -145,8 +154,9 @@ function TransferIndex() {
           </Form>
         </Card>
 
-        <Button loading={loading} icon={<ThunderboltOutlined/>} type="primary"
-                onClick={() => handleSubmit()}>开始执行</Button>
+        <Button loading={loading} icon={<ThunderboltOutlined/>} type="primary" onClick={() => handleSubmit()}>
+          {percent ? `上传中 ${percent}%` : '开始执行'}
+        </Button>
       </div>
 
       <div className={style.right}>

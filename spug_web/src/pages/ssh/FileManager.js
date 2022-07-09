@@ -123,12 +123,6 @@ class FileManager extends React.Component {
     this.fetchFiles(pwd)
   };
 
-  handlePathInput = (e) => {
-    const value = e.target.value;
-    const pwd = value.substring(1).split('/')
-    this.setState({pwd})
-  };
-
   handleInputEnter = () => {
     if (this.state.inputPath === null) {
       if (this.state.pwd.length > 0) {
