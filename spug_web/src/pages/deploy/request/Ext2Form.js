@@ -59,7 +59,7 @@ export default observer(function () {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('deploy_id', store.record.deploy_id);
-    http.post('/api/deploy/request/upload/', formData, {timeout: 120000})
+    http.post('/api/deploy/request/upload/', formData, {timeout: 300000})
       .then(res => {
         file.path = res;
         setFileList([file])
