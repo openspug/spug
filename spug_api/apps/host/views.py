@@ -189,6 +189,7 @@ def batch_valid(request):
 
 
 def _do_host_verify(form):
+    password = form.pop('password')
     if form.pkey:
         try:
             with SSH(form.hostname, form.port, form.username, form.pkey) as ssh:
@@ -202,7 +203,6 @@ def _do_host_verify(form):
             raise Exception('连接主机超时，请检查网络')
 
     private_key, public_key = AppSetting.get_ssh_key()
-    password = form.pop('password')
     if password:
         try:
             with SSH(form.hostname, form.port, form.username, password=password) as ssh:
