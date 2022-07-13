@@ -81,10 +81,8 @@ class DeployPerm extends React.Component {
           closable
           showIcon
           type="info"
-          style={{width: 600, margin: '0 auto 20px', color: '#31708f !important'}}
-          message="小提示"
-          description={[<div key="1">发布权限仅影响发布功能的发布对象，页面功能权限请在功能权限中设置。</div>,
-            <div key="2">如果需要发布权限，请至少设置一个有权限操作的环境，否则无法正常发布。</div>]}/>
+          style={{marginBottom: 24}}
+          message="环境权限和应用权限都需要设置，否则无法正常发布。"/>
         <Tabs tabPosition="left">
           <Tabs.TabPane tab="环境权限" key="env">
             <Form.Item label="设置可发布至哪个环境">
