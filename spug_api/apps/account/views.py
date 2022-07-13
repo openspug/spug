@@ -11,6 +11,8 @@ from apps.account.models import User, Role, History
 from apps.setting.utils import AppSetting
 from apps.account.utils import verify_password
 from libs.ldap import LDAP
+from functools import partial
+import user_agents
 import ipaddress
 import time
 import uuid
@@ -190,59 +192,76 @@ def login(request):
         Argument('type', required=False)
     ).parse(request.body)
     if error is None:
+        handle_response = partial(handle_login_record, request, form.username, form.type)
         user = User.objects.filter(username=form.username, type=form.type).first()
         if user and not user.is_active:
-            return json_response(error="账户已被系统禁用")
+            return handle_response(error="账户已被系统禁用")
         if form.type == 'ldap':
             config = AppSetting.get_default('ldap_service')
             if not config:
-                return json_response(error='请在系统设置中配置LDAP后再尝试通过该方式登录')
+                return handle_response(error='请在系统设置中配置LDAP后再尝试通过该方式登录')
             ldap = LDAP(**config)
             is_success, message = ldap.valid_user(form.username, form.password)
             if is_success:
                 if not user:
                     user = User.objects.create(username=form.username, nickname=form.username, type=form.type)
-                return handle_user_info(request, user, form.captcha)
+                return handle_user_info(handle_response, request, user, form.captcha)
             elif message:
-                return json_response(error=message)
+                return handle_response(error=message)
         else:
             if user and user.deleted_by is None:
                 if user.verify_password(form.password):
-                    return handle_user_info(request, user, form.captcha)
+                    return handle_user_info(handle_response, request, user, form.captcha)
 
         value = cache.get_or_set(form.username, 0, 86400)
         if value >= 3:
             if user and user.is_active:
                 user.is_active = False
                 user.save()
-            return json_response(error='账户已被系统禁用')
+            return handle_response(error='账户已被系统禁用')
         cache.set(form.username, value + 1, 86400)
-        return json_response(error="用户名或密码错误，连续多次错误账户将会被禁用")
+        return handle_response(error="用户名或密码错误，连续多次错误账户将会被禁用")
     return json_response(error=error)
 
 
-def handle_user_info(request, user, captcha):
+def handle_login_record(request, username, login_type, error=None):
+    x_real_ip = get_request_real_ip(request.headers)
+    user_agent = user_agents.parse(request.headers.get('User-Agent'))
+    History.objects.create(
+        username=username,
+        type=login_type,
+        ip=x_real_ip,
+        agent=user_agent,
+        is_success=False if error else True,
+        message=error
+    )
+    if error:
+        return json_response(error=error)
+
+
+def handle_user_info(handle_response, request, user, captcha):
     cache.delete(user.username)
     key = f'{user.username}:code'
     if captcha:
         code = cache.get(key)
         if not code:
-            return json_response(error='验证码已失效，请重新获取')
+            return handle_response(error='验证码已失效，请重新获取')
         if code != captcha:
             ttl = cache.ttl(key)
             cache.expire(key, ttl - 100)
-            return json_response(error='验证码错误')
+            return handle_response(error='验证码错误')
         cache.delete(key)
     else:
         mfa = AppSetting.get_default('MFA', {'enable': False})
         if mfa['enable']:
             if not user.wx_token:
-                return json_response(error='已启用登录双重认证，但您的账户未配置微信Token，请联系管理员')
+                return handle_response(error='已启用登录双重认证，但您的账户未配置微信Token，请联系管理员')
             code = generate_random_str(6)
             send_login_wx_code(user.wx_token, code)
             cache.set(key, code, 300)
             return json_response({'required_mfa': True})
 
+    handle_response()
     x_real_ip = get_request_real_ip(request.headers)
     token_isvalid = user.access_token and len(user.access_token) == 32 and user.token_expired >= time.time()
     user.access_token = user.access_token if token_isvalid else uuid.uuid4().hex
@@ -250,7 +269,6 @@ def handle_user_info(request, user, captcha):
     user.last_login = human_datetime()
     user.last_ip = x_real_ip
     user.save()
-    History.objects.create(user=user, ip=x_real_ip)
     verify_ip = AppSetting.get_default('verify_ip', True)
     return json_response({
         'id': user.id,

@@ -38,6 +38,7 @@ import AlarmContact from './pages/alarm/contact';
 import SystemAccount from './pages/system/account';
 import SystemRole from './pages/system/role';
 import SystemSetting from './pages/system/setting';
+import SystemLogin from './pages/system/login';
 import WelcomeIndex from './pages/welcome/index';
 import WelcomeInfo from './pages/welcome/info';
 
@@ -90,6 +91,7 @@ export default [
   },
   {
     icon: <SettingOutlined/>, title: '系统管理', auth: "system.account.view|system.role.view|system.setting.view", child: [
+      {title: '登录日志', auth: 'system.login.view', path: '/system/login', component: SystemLogin},
       {title: '账户管理', auth: 'system.account.view', path: '/system/account', component: SystemAccount},
       {title: '角色管理', auth: 'system.role.view', path: '/system/role', component: SystemRole},
       {title: '系统设置', auth: 'system.setting.view', path: '/system/setting', component: SystemSetting},

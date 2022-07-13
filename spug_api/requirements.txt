@@ -9,3 +9,4 @@ requests==2.22.0
 GitPython==3.0.8
 python-ldap==3.4.0
 openpyxl==3.0.3
+user_agents==2.2.0

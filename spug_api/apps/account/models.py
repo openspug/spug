@@ -123,8 +123,12 @@ class Role(models.Model, ModelMixin):
 
 
 class History(models.Model, ModelMixin):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    username = models.CharField(max_length=100, null=True)
+    type = models.CharField(max_length=20, default='default')
     ip = models.CharField(max_length=50)
+    agent = models.CharField(max_length=255, null=True)
+    message = models.CharField(max_length=255, null=True)
+    is_success = models.BooleanField(default=True)
     created_at = models.CharField(max_length=20, default=human_datetime)
 
     class Meta:
