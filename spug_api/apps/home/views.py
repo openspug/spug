@@ -62,7 +62,7 @@ def get_request(request):
         data = {x.id: {'name': x.name, 'count': 0} for x in App.objects.all()}
         for req in DeployRequest.objects.filter(created_at__gt=s_date, created_at__lt=e_date):
             data[req.deploy.app_id]['count'] += 1
-        data = sorted(data.values(), key=lambda x: x['count'], reverse=True)[:10]
+        data = sorted(data.values(), key=lambda x: x['count'], reverse=True)[:20]
         return json_response(data)
     return json_response(error=error)
 
