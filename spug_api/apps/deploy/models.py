@@ -34,7 +34,7 @@ class DeployRequest(models.Model, ModelMixin):
     desc = models.CharField(max_length=255, null=True)
     status = models.CharField(max_length=2, choices=STATUS)
     reason = models.CharField(max_length=255, null=True)
-    version = models.CharField(max_length=50, null=True)
+    version = models.CharField(max_length=100, null=True)
     spug_version = models.CharField(max_length=50, null=True)
     plan = models.DateTimeField(null=True)
     fail_host_ids = models.TextField(default='[]')

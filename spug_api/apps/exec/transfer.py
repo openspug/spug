@@ -115,6 +115,7 @@ def _do_sync(rds, task, host):
     rds.publish(token, json.dumps({'key': host.id, 'data': '\r\n\x1b[36m### Executing ...\x1b[0m\r\n'}))
     with tempfile.NamedTemporaryFile(mode='w') as fp:
         fp.write(host.pkey or AppSetting.get('private_key'))
+        fp.write('\n')
         fp.flush()
 
         flag = time.time()
