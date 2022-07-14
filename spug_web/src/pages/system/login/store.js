@@ -10,11 +10,13 @@ class Store {
   @observable records = [];
   @observable isFetching = false;
 
+  @observable f_ip;
   @observable f_name;
   @observable f_status = '';
 
   @computed get dataSource() {
     let records = this.records;
+    if (this.f_ip) records = records.filter(x => includes(x.ip, this.f_ip));
     if (this.f_name) records = records.filter(x => includes(x.username, this.f_name));
     if (this.f_status) records = records.filter(x => String(x.is_success) === this.f_status);
     return records
