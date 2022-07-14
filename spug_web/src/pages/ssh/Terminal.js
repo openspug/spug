@@ -39,7 +39,7 @@ function WebSSH(props) {
     socket.onopen = () => {
       term.write('ok')
       term.focus();
-      fitPlugin.fit();
+      fitTerminal();
     };
     socket.onclose = e => {
       setTimeout(() => term.write('\r\n\r\n\x1b[31mConnection is closed.\x1b[0m\r\n'), 200)
@@ -63,7 +63,6 @@ function WebSSH(props) {
     term.setOption('fontSize', gStore.terminal.fontSize)
     term.setOption('fontFamily', gStore.terminal.fontFamily)
     term.setOption('theme', gStore.terminal.styles)
-    fitTerminal()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gStore.terminal])
 
