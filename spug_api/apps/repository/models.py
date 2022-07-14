@@ -21,7 +21,7 @@ class Repository(models.Model, ModelMixin):
     app = models.ForeignKey(App, on_delete=models.PROTECT)
     env = models.ForeignKey(Environment, on_delete=models.PROTECT)
     deploy = models.ForeignKey(Deploy, on_delete=models.PROTECT)
-    version = models.CharField(max_length=50)
+    version = models.CharField(max_length=100)
     spug_version = models.CharField(max_length=50)
     remarks = models.CharField(max_length=255, null=True)
     extra = models.TextField()
