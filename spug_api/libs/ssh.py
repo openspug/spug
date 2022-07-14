@@ -181,7 +181,8 @@ class SSH:
 
         counter = 0
         self.channel = self.client.invoke_shell(**self.term)
-        command = 'set +o history\nset +o zle\nset -o no_nomatch\nexport PS1= && stty -echo\n'
+        command = 'set +o zle\n[ -n "$BASH_VERSION" ] && set +o history\n[ -n "$ZSH_VERSION" ] && set -o no_nomatch\n'
+        command += 'export PS1= && stty -echo\n'
         command = self._handle_command(command, self.default_env)
         self.channel.sendall(command)
         out = ''
