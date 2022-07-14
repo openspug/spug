@@ -41,7 +41,10 @@ def str_decode(data):
     try:
         data = data.decode()
     except UnicodeDecodeError:
-        data = data.decode(encoding='GBK', errors='ignore')
+        try:
+            data = data.decode(encoding='GBK')
+        except UnicodeDecodeError:
+            data = data.decode(errors='ignore')
     return data
 
 
