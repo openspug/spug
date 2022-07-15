@@ -111,7 +111,7 @@ class Store {
         this.rawRecords.map(item => this.idMap[item.id] = item);
         this.groups = res2.groups;
         this.rawTreeData = res2.treeData;
-        this.group = this.treeData[0];
+        this.group = this.treeData[0] || {};
       }))
       .finally(() => {
         this.isFetching = false;
