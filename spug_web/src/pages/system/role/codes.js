@@ -53,6 +53,12 @@ export default [{
       {key: 'edit', label: '编辑模板'},
       {key: 'del', label: '删除模板'},
     ]
+  }, {
+    key: 'transfer',
+    label: '文件分发',
+    perms: [
+      {key: 'do', label: '文件分发'}
+    ]
   }]
 }, {
   key: 'deploy',

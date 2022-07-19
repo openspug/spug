@@ -22,7 +22,7 @@ import os
 
 
 class TransferView(View):
-    @auth('exec.task.do')
+    @auth('exec.transfer.do')
     def get(self, request):
         records = Transfer.objects.filter(user=request.user)
         return json_response([x.to_view() for x in records])

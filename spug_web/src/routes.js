@@ -56,7 +56,7 @@ export default [
     icon: <CodeOutlined/>, title: '批量执行', auth: 'exec.task.do|exec.template.view', child: [
       {title: '执行任务', auth: 'exec.task.do', path: '/exec/task', component: ExecTask},
       {title: '模板管理', auth: 'exec.template.view', path: '/exec/template', component: ExecTemplate},
-      {title: '文件分发', auth: 'exec.transfer.view', path: '/exec/transfer', component: ExecTransfer},
+      {title: '文件分发', auth: 'exec.transfer.do', path: '/exec/transfer', component: ExecTransfer},
     ]
   },
   {

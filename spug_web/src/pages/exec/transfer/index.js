@@ -113,7 +113,7 @@ function TransferIndex() {
     setFiles([...files])
   }
 
-  return (<AuthDiv auth="exec.task.do">
+  return (<AuthDiv auth="exec.transfer.do">
     <Breadcrumb>
       <Breadcrumb.Item>首页</Breadcrumb.Item>
       <Breadcrumb.Item>批量执行</Breadcrumb.Item>
