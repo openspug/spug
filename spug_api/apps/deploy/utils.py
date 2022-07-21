@@ -18,6 +18,7 @@ import uuid
 import os
 
 REPOS_DIR = settings.REPOS_DIR
+BUILD_DIR = settings.BUILD_DIR
 
 
 def dispatch(req, fail_mode=False):
@@ -247,7 +248,7 @@ def _deploy_ext1_host(req, helper, h_id, env):
             try:
                 callback = helper.progress_callback(host.id)
                 ssh.put_file(
-                    os.path.join(REPOS_DIR, 'build', tar_gz_file),
+                    os.path.join(BUILD_DIR, tar_gz_file),
                     os.path.join(extend.dst_repo, tar_gz_file),
                     callback
                 )
