@@ -39,8 +39,7 @@ def _finalize_pubkey_algorithm(self, key_type):
             err = "Unable to agree on a pubkey algorithm for signing a {!r} key!"  # noqa
             raise AuthenticationException(err.format(key_type))
     else:
-        pubkey_algo = my_algos[0]
-        msg = "Server did not send a server-sig-algs list; defaulting to our first preferred algo ({!r})"  # noqa
+        pubkey_algo = "ssh-rsa"
     if key_type.endswith("-cert-v01@openssh.com"):
         pubkey_algo += "-cert-v01@openssh.com"
     self.transport._agreed_pubkey_algorithm = pubkey_algo
