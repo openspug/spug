@@ -40,7 +40,7 @@ class ExecHistory(models.Model, ModelMixin):
     digest = models.CharField(max_length=32, db_index=True)
     interpreter = models.CharField(max_length=20)
     command = models.TextField()
-    params = models.CharField(max_length=500, default='{}')
+    params = models.TextField(default='{}')
     host_ids = models.TextField()
     updated_at = models.CharField(max_length=20, default=human_datetime)
 
