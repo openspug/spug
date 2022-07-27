@@ -2,7 +2,7 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
-from django.db.models import F, Q
+from django.db.models import F
 from libs import JsonParser, Argument, json_response, auth
 from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
 from apps.config.models import Config, ConfigHistory
@@ -18,7 +18,7 @@ class AppView(View):
             apps = App.objects.all()
         else:
             ids = request.user.deploy_perms['apps']
-            apps = App.objects.filter(Q(id__in=ids) | Q(created_by=request.user))
+            apps = App.objects.filter(id__in=ids)
         return json_response(apps)
 
     @auth('deploy.app.add|deploy.app.edit|config.app.add|config.app.edit')

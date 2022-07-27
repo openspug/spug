@@ -62,6 +62,7 @@ class User(models.Model, ModelMixin):
                 perms = json.loads(item.deploy_perms)
                 data['apps'].update(perms.get('apps', []))
                 data['envs'].update(perms.get('envs', []))
+        data['apps'].update(x.id for x in self.app_set.all())
         return data
 
     @property
