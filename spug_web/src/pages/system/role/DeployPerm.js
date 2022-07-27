@@ -81,8 +81,8 @@ class DeployPerm extends React.Component {
           closable
           showIcon
           type="info"
-          style={{marginBottom: 24}}
-          message="环境权限和应用权限都需要设置，否则无法正常发布。"/>
+          style={{margin: '0 24px 24px 24px'}}
+          message="环境权限和应用权限都需要设置，应用的创建者将默认拥有该应用的发布权限。"/>
         <Tabs tabPosition="left">
           <Tabs.TabPane tab="环境权限" key="env">
             <Form.Item label="设置可发布至哪个环境">
