@@ -77,7 +77,7 @@ class Schedule(View):
                 task.latest_id = None
                 if form.is_active:
                     message = {'id': form.id, 'action': 'add'}
-                    message.update(task.to_dict(selects=('trigger', 'trigger_args', 'command', 'targets')))
+                    message.update(task.to_dict(selects=('interpreter', 'trigger', 'trigger_args', 'command', 'targets')))
                 else:
                     message = {'id': form.id, 'action': 'remove'}
                 rds_cli = get_redis_connection()
