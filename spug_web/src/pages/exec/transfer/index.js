@@ -128,7 +128,7 @@ function TransferIndex() {
           <Table rowKey="id" showHeader={false} pagination={false} size="small" dataSource={files}>
             <Table.Column title="文件来源" dataIndex="name"/>
             <Table.Column title="文件名称/路径" render={info => info.type === 'upload' ? info.path.name : (
-              <Input onChange={e => info.path = e.target.value} placeholder="请输入文件路径"/>)}/>
+              <Input onChange={e => info.path = e.target.value} placeholder="请输入要同步的目录路径"/>)}/>
             <Table.Column title="操作" render={(_, __, index) => (
               <Button danger type="link" onClick={() => handleRemove(index)}>移除</Button>)}/>
           </Table>
