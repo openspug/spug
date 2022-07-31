@@ -5,6 +5,7 @@ from django.views.generic import View
 from django.db.models import F
 from libs import json_response, JsonParser, Argument, auth
 from apps.app.models import Deploy, App
+from apps.repository.models import Repository
 from apps.config.models import *
 import json
 import re
@@ -70,6 +71,8 @@ class EnvironmentView(View):
         if error is None:
             if Deploy.objects.filter(env_id=form.id).exists():
                 return json_response(error='该环境已关联了发布配置，请删除相关发布配置后再尝试删除')
+            if Repository.objects.filter(env_id=form.id).exists():
+                return json_response(error='该环境关联了构建记录，请在删除应用发布/构建仓库中相关记录后再尝试')
             # auto delete configs
             Config.objects.filter(env_id=form.id).delete()
             ConfigHistory.objects.filter(env_id=form.id).delete()

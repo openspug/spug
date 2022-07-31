@@ -41,10 +41,16 @@ class TransferView(View):
             host_id = None
             token = uuid.uuid4().hex
             base_dir = os.path.join(settings.TRANSFER_DIR, token)
-            os.makedirs(base_dir)
             if form.host:
                 host_id, path = json.loads(form.host)
+                if not path.strip('/'):
+                    return json_response(error='请输入正确的数据源路径')
                 host = Host.objects.get(pk=host_id)
+                with host.get_ssh() as ssh:
+                    code, _ = ssh.exec_command_raw(f'[ -d {path} ]')
+                    if code != 0:
+                        return json_response(error='数据源路径必须为该主机上已存在的目录')
+                os.makedirs(base_dir)
                 with tempfile.NamedTemporaryFile(mode='w') as fp:
                     fp.write(host.pkey or AppSetting.get('private_key'))
                     fp.flush()
@@ -52,8 +58,10 @@ class TransferView(View):
                     command = f'sshfs -o ro -o ssh_command="ssh -p {host.port} -i {fp.name}" {target} {base_dir}'
                     task = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                     if task.returncode != 0:
+                        os.system(f'umount -f {base_dir} &> /dev/null ; rm -rf {base_dir}')
                         return json_response(error=task.stdout.decode())
             else:
+                os.makedirs(base_dir)
                 index = 0
                 while True:
                     file = request.FILES.get(f'file{index}')

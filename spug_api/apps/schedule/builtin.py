@@ -56,11 +56,12 @@ def auto_run_by_day():
             except IndexError:
                 pass
 
-        timestamp = time.time() - 24 * 3600
+        timestamp = time.time() - 2 * 3600
         for item in Path(settings.TRANSFER_DIR).iterdir():
             if item.name != '.gitkeep':
                 if item.stat().st_atime < timestamp:
-                    os.system(f'rm -rf {item.absolute()}')
+                    transfer_dir = item.absolute()
+                    os.system(f'umount -f {transfer_dir} &> /dev/null ; rm -rf {transfer_dir}')
     finally:
         connections.close_all()
 
