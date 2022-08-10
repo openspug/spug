@@ -1,0 +1,34 @@
+version: "3.3"
+services:
+  db:
+    image: mariadb:10.8
+    container_name: spug-db
+    restart: always
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - /data/spug/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=spug
+      - MYSQL_USER=spug
+      - MYSQL_PASSWORD=spug.cc
+      - MYSQL_ROOT_PASSWORD=spug.cc
+  spug:
+    image: openspug/spug-service
+    container_name: spug
+    privileged: true
+    restart: always
+    volumes:
+      - /data/spug/service:/data/spug
+      - /data/spug/repos:/data/repos
+    ports:
+      # 如果80端口被占用可替换为其他端口，例如: - "8000:80"
+      - "80:80"
+    environment:
+      - SPUG_DOCKER_VERSION=v3.2.4
+      - MYSQL_DATABASE=spug
+      - MYSQL_USER=spug
+      - MYSQL_PASSWORD=spug.cc
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+    depends_on:
+      - db
