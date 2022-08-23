@@ -50,7 +50,7 @@ export default observer(function () {
   function fetchVersions() {
     setFetching(true);
     const deploy_id = store.record.deploy_id
-    const p1 = http.get(`/api/app/deploy/${deploy_id}/versions/`, {timeout: 120000})
+    const p1 = http.get(`/api/app/deploy/${deploy_id}/versions/`, {timeout: 300000})
     const p2 = http.get('/api/repository/', {params: {deploy_id}})
     Promise.all([p1, p2])
       .then(([res1, res2]) => {
