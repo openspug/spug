@@ -100,7 +100,7 @@ class Role(models.Model, ModelMixin):
         tmp['page_perms'] = json.loads(self.page_perms) if self.page_perms else {}
         tmp['deploy_perms'] = json.loads(self.deploy_perms) if self.deploy_perms else {}
         tmp['group_perms'] = json.loads(self.group_perms) if self.group_perms else []
-        tmp['used'] = self.user_set.count()
+        tmp['used'] = self.user_set.filter(deleted_by_id__isnull=True).count()
         return tmp
 
     def add_deploy_perm(self, target, value):
