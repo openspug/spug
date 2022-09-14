@@ -180,7 +180,8 @@ class SSH:
 
         counter = 0
         self.channel = self.client.invoke_shell(**self.term)
-        command = 'set +o zle\n[ -n "$BASH_VERSION" ] && set +o history\n[ -n "$ZSH_VERSION" ] && set -o no_nomatch\n'
+        command = '[ -n "$BASH_VERSION" ] && set +o history\n'
+        command += '[ -n "$ZSH_VERSION" ] && set +o zle && set -o no_nomatch\n'
         command += 'export PS1= && stty -echo\n'
         command = self._handle_command(command, self.default_env)
         self.channel.sendall(command)
@@ -221,7 +222,7 @@ class SSH:
     def _handle_command(self, command, environment):
         new_command = commands = ''
         if not self.exec_file:
-            self.exec_file = f'/tmp/{uuid4().hex}'
+            self.exec_file = f'/tmp/spug.{uuid4().hex}'
             commands += f'trap \'rm -f {self.exec_file}\' EXIT\n'
 
         env_command = self._make_env_command(environment)
@@ -230,7 +231,7 @@ class SSH:
         new_command += command
         new_command += f'\necho {self.eof} $?\n'
         self.put_file_by_fl(StringIO(new_command), self.exec_file)
-        commands += f'source {self.exec_file}\n'
+        commands += f'. {self.exec_file}\n'
         return commands
 
     def _decode(self, content):
