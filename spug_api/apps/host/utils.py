@@ -122,7 +122,7 @@ def fetch_ali_instances(ak, ac, region_id, page_number=1):
             instance_charge_type=check_instance_charge_type(item['InstanceChargeType'], 'ali'),
             internet_charge_type=check_internet_charge_type(item['InternetChargeType'], 'ali'),
             public_ip_address=item['PublicIpAddress']['IpAddress'],
-            private_ip_address=list(map(lambda x: x['PrimaryIpAddress'], network_interface)),
+            private_ip_address=[x['PrimaryIpAddress'] for x in network_interface if x.get('PrimaryIpAddress')],
             zone_id=item['ZoneId']
         )
     if len(res['Instances']['Instance']) == page_size:
