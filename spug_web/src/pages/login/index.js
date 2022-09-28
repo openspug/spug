@@ -20,7 +20,7 @@ export default function () {
   const [form] = Form.useForm();
   const [counter, setCounter] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [loginType, setLoginType] = useState('default');
+  const [loginType, setLoginType] = useState(localStorage.getItem('login_type') || 'default');
   const [codeVisible, setCodeVisible] = useState(false);
   const [codeLoading, setCodeLoading] = useState(false);
 
@@ -76,6 +76,7 @@ export default function () {
     localStorage.setItem('nickname', data['nickname']);
     localStorage.setItem('is_supper', data['is_supper']);
     localStorage.setItem('permissions', JSON.stringify(data['permissions']));
+    localStorage.setItem('login_type', loginType);
     updatePermissions();
     if (history.location.state && history.location.state['from']) {
       history.push(history.location.state['from'])
@@ -100,7 +101,7 @@ export default function () {
         <div className={styles.desc}>灵活、强大、易用的开源运维平台</div>
       </div>
       <div className={styles.formContainer}>
-        <Tabs className={styles.tabs} onTabClick={v => setLoginType(v)}>
+        <Tabs activeKey={loginType} className={styles.tabs} onTabClick={v => setLoginType(v)}>
           <Tabs.TabPane tab="普通登录" key="default"/>
           <Tabs.TabPane tab="LDAP登录" key="ldap"/>
         </Tabs>
