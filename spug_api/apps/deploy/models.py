@@ -27,7 +27,7 @@ class DeployRequest(models.Model, ModelMixin):
     )
     deploy = models.ForeignKey(Deploy, on_delete=models.CASCADE)
     repository = models.ForeignKey(Repository, null=True, on_delete=models.SET_NULL)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=100)
     type = models.CharField(max_length=2, choices=TYPES, default='1')
     extra = models.TextField()
     host_ids = models.TextField()
