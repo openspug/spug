@@ -58,6 +58,7 @@ class SSH:
         self.sftp = None
         self.exec_file = None
         self.term = term or {}
+        self.pid = None
         self.eof = 'Spug EOF 2108111926'
         self.default_env = default_env
         self.regex = re.compile(r'Spug EOF 2108111926 (-?\d+)[\r\n]?')
@@ -174,6 +175,12 @@ class SSH:
         sftp = self._get_sftp()
         sftp.remove(path)
 
+    def get_pid(self):
+        if self.pid:
+            return self.pid
+        self._get_channel()
+        return self.pid
+
     def _get_channel(self):
         if self.channel:
             return self.channel
@@ -183,13 +190,17 @@ class SSH:
         command = '[ -n "$BASH_VERSION" ] && set +o history\n'
         command += '[ -n "$ZSH_VERSION" ] && set +o zle && set -o no_nomatch\n'
         command += 'export PS1= && stty -echo\n'
-        command = self._handle_command(command, self.default_env)
+        command += f'echo {self.eof} $$\n'
         self.channel.sendall(command)
         out = ''
         while True:
             if self.channel.recv_ready():
                 out += self._decode(self.channel.recv(8196))
-                if self.regex.search(out):
+                match = self.regex.search(out)
+                if match:
+                    self.pid = int(match.group(1))
+                    if self.pid <= 1:
+                        raise Exception('Failed to get process pid')
                     self.stdout = self.channel.makefile('r')
                     break
             elif counter >= 100:

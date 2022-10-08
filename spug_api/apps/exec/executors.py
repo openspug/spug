@@ -16,13 +16,13 @@ def exec_worker_handler(job):
 
 
 class Job:
-    def __init__(self, key, name, hostname, port, username, pkey, command, interpreter, params=None, token=None,
-                 term=None):
+    def __init__(self, token, key, name, hostname, port, username, pkey, command, interpreter, params=None, term=None):
         self.ssh = SSH(hostname, port, username, pkey, term=term)
         self.key = key
         self.command = self._handle_command(command, interpreter)
         self.token = token
         self.rds = get_redis_connection()
+        self.rds_key = f'PID:{self.token}:{self.key}'
         self.env = dict(
             SPUG_HOST_ID=str(self.key),
             SPUG_HOST_NAME=name,
@@ -50,14 +50,12 @@ class Job:
         self._send({'key': self.key, 'status': code})
 
     def run(self):
-        if not self.token:
-            with self.ssh:
-                return self.ssh.exec_command(self.command, self.env)
         flag = time.time()
         self.send('\r\n\x1b[36m### Executing ...\x1b[0m\r\n')
         code = -1
         try:
             with self.ssh:
+                self.rds.set(self.rds_key, self.ssh.get_pid(), 7200)
                 for code, out in self.ssh.exec_command_with_stream(self.command, self.env):
                     self.send(out)
             human_time = human_seconds_time(time.time() - flag)
@@ -70,4 +68,5 @@ class Job:
             self.send(f'\r\n\x1b[31m### Exception {e}\x1b[0m')
             raise e
         finally:
+            self.rds.delete(self.rds_key)
             self.send_status(code)

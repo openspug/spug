@@ -120,4 +120,19 @@ class TaskView(View):
         return json_response(error=error)
 
 
-
+@auth('exec.task.do')
+def handle_terminate(request):
+    form, error = JsonParser(
+        Argument('token', help='参数错误'),
+        Argument('host_id', type=int, help='参数错误')
+    ).parse(request.body)
+    if error is None:
+        host = Host.objects.get(pk=form.host_id)
+        rds = get_redis_connection()
+        rds_key = f'PID:{form.token}:{host.id}'
+        pid = rds.get(rds_key)
+        if pid:
+            with host.get_ssh() as ssh:
+                ssh.exec_command_raw(f'kill -9 {pid.decode()}')
+                rds.delete(rds_key)
+    return json_response(error=error)
