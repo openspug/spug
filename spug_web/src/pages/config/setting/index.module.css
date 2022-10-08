@@ -29,3 +29,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+.value {
+    word-break: break-all;
+}

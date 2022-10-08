@@ -11,6 +11,7 @@ import { Action } from 'components';
 import ComForm from './Form';
 import { http, hasPermission } from 'libs';
 import store from './store';
+import styles from './index.module.css';
 
 @observer
 class TableView extends React.Component {
@@ -32,6 +33,7 @@ class TableView extends React.Component {
   }, {
     title: 'Value',
     dataIndex: 'value',
+    className: styles.value
   }, {
     title: '修改人',
     width: 120,
