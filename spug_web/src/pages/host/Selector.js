@@ -24,7 +24,7 @@ export default observer(function (props) {
     hStore.initial().then(() => {
       store.rawRecords = hStore.rawRecords;
       store.rawTreeData = hStore.rawTreeData;
-      store.group = store.treeData[0]
+      store.group = store.treeData[0] || {}
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
