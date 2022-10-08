@@ -5,13 +5,14 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
-import { PageHeader } from 'antd';
+import { PageHeader, Tooltip } from 'antd';
 import {
   LoadingOutlined,
   CheckCircleOutlined,
   ExclamationCircleOutlined,
   CodeOutlined,
   ClockCircleOutlined,
+  StopOutlined,
 } from '@ant-design/icons';
 import { FitAddon } from 'xterm-addon-fit';
 import { Terminal } from 'xterm';
@@ -26,7 +27,8 @@ function OutView(props) {
   const el = useRef()
   const [term] = useState(new Terminal());
   const [fitPlugin] = useState(new FitAddon());
-  const [current, setCurrent] = useState(Object.keys(store.outputs)[0])
+  const [current, setCurrent] = useState(Object.keys(store.outputs)[0]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     store.tag = ''
@@ -106,11 +108,18 @@ function OutView(props) {
     term.write(store.outputs[key].data)
   }
 
-  function openTerminal(key) {
-    window.open(`/ssh?id=${key}`)
+  function handleTerminate() {
+    setLoading(true)
+    http.post('/api/exec/terminate/', {token: store.token, host_id: current})
+      .finally(() => setLoading(false))
+  }
+
+  function openTerminal() {
+    window.open(`/ssh?id=${current}`)
   }
 
   const {tag, items, counter} = store
+  const cItem = store.outputs[current] || {}
   return (
     <div className={style.output}>
       <div className={style.side}>
@@ -154,8 +163,21 @@ function OutView(props) {
       </div>
       <div className={style.body}>
         <div className={style.header}>
-          <div className={style.title}>{store.outputs[current].title}</div>
-          <CodeOutlined className={style.icon} onClick={() => openTerminal(current)}/>
+          <div className={style.title}>{cItem.title}</div>
+          {loading ? (
+            <LoadingOutlined className={style.icon} style={{color: '#faad14'}}/>
+          ) : (
+            <Tooltip title="终止执行">
+              {cItem.status === -2 ? (
+                <StopOutlined className={style.icon} style={{color: '#faad14'}} onClick={handleTerminate}/>
+              ) : (
+                <StopOutlined className={style.icon} style={{color: '#dfdfdf'}}/>
+              )}
+            </Tooltip>
+          )}
+          <Tooltip title="打开web终端">
+            <CodeOutlined className={style.icon} onClick={() => openTerminal(current)}/>
+          </Tooltip>
         </div>
         <div className={style.termContainer}>
           <div ref={el} className={style.term}/>
