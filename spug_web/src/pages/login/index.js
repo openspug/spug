@@ -114,9 +114,8 @@ export default function () {
               prefix={<UserOutlined className={styles.icon}/>}/>
           </Form.Item>
           <Form.Item name="password" className={styles.formItem}>
-            <Input
+            <Input.Password
               size="large"
-              type="password"
               autoComplete="off"
               placeholder="请输入密码"
               onPressEnter={handleSubmit}
