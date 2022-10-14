@@ -131,4 +131,5 @@ def get_request_real_ip(headers: dict):
     x_real_ip = headers.get('x-forwarded-for')
     if not x_real_ip:
         x_real_ip = headers.get('x-real-ip', '')
-    return x_real_ip.split(',')[0]
+    x_real_ip = x_real_ip.split(',')[0]
+    return x_real_ip.split(':')[0]
