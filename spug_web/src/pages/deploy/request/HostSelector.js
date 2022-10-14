@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Table, Button, Alert } from 'antd';
 import hostStore from 'pages/host/store';
-import lds from 'lodash';
 
 export default observer(function (props) {
   const [selectedRowKeys, setSelectedRowKeys] = useState(props.host_ids || []);
@@ -47,7 +46,7 @@ export default observer(function (props) {
       )}
       <Table
         rowKey="id"
-        dataSource={props.app_host_ids.map(id => ({id}))}
+        dataSource={hostStore.records.filter(x => props.app_host_ids.includes(x.id))}
         pagination={false}
         scroll={{y: 480}}
         onRow={record => {
@@ -60,14 +59,8 @@ export default observer(function (props) {
           onSelect: handleClickRow,
           onSelectAll: (_, __, changeRows) => changeRows.map(x => handleClickRow(x))
         }}>
-        <Table.Column
-          title="主机名称"
-          dataIndex="id"
-          render={id => lds.get(hostStore.idMap, `${id}.name`)}/>
-        <Table.Column
-          title="连接地址"
-          dataIndex="id"
-          render={id => lds.get(hostStore.idMap, `${id}.hostname`)}/>
+        <Table.Column title="主机名称" dataIndex="name"/>
+        <Table.Column title="连接地址" dataIndex="hostname"/>
       </Table>
     </Modal>
   )
