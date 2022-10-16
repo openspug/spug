@@ -33,6 +33,14 @@ class Repository(models.Model, ModelMixin):
     def make_spug_version(deploy_id):
         return f'{deploy_id}_{datetime.now().strftime("%Y%m%d%H%M%S")}'
 
+    @property
+    def deploy_key(self):
+        if self.remarks == 'SPUG AUTO MAKE':
+            req = self.deployrequest_set.last()
+            if req:
+                return f'{settings.REQUEST_KEY}:{req.id}'
+        return f'{settings.BUILD_KEY}:{self.id}'
+
     def to_view(self):
         tmp = self.to_dict()
         tmp['extra'] = json.loads(self.extra)

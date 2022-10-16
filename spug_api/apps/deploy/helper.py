@@ -1,46 +1,25 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
+from django.conf import settings
 from django.template.defaultfilters import filesizeformat
+from django_redis import get_redis_connection
 from libs.utils import human_datetime, render_str, str_decode
 from libs.spug import Notification
 from apps.host.models import Host
 from functools import partial
+from collections import defaultdict
 import subprocess
 import json
 import os
+import re
 
 
 class SpugError(Exception):
     pass
 
 
-class Helper:
-    def __init__(self, rds, key):
-        self.rds = rds
-        self.key = key
-        self.callback = []
-
-    @classmethod
-    def make(cls, rds, key, host_ids=None):
-        if host_ids:
-            counter, tmp_key = 0, f'{key}_tmp'
-            data = rds.lrange(key, counter, counter + 9)
-            while data:
-                for item in data:
-                    counter += 1
-                    print(item)
-                    tmp = json.loads(item.decode())
-                    if tmp['key'] not in host_ids:
-                        rds.rpush(tmp_key, item)
-                data = rds.lrange(key, counter, counter + 9)
-            rds.delete(key)
-            if rds.exists(tmp_key):
-                rds.rename(tmp_key, key)
-        else:
-            rds.delete(key)
-        return cls(rds, key)
-
+class NotifyMixin:
     @classmethod
     def _make_dd_notify(cls, url, action, req, version, host_str):
         texts = [
@@ -224,8 +203,97 @@ class Helper:
             else:
                 raise NotImplementedError
 
+
+class KitMixin:
+    regex = re.compile(r'^((\r\n)*)(.*?)((\r\n)*)$', re.DOTALL)
+
+    @classmethod
+    def term_message(cls, message, color_mode='info', with_time=False):
+        prefix = f'{human_datetime()} ' if with_time else ''
+        if color_mode == 'info':
+            mode = '36m'
+        elif color_mode == 'warn':
+            mode = '33m'
+        elif color_mode == 'error':
+            mode = '31m'
+        elif color_mode == 'success':
+            mode = '32m'
+        else:
+            raise TypeError
+
+        return cls.regex.sub(fr'\1\033[{mode}{prefix}\3\033[0m\4', message)
+
+
+class Helper(NotifyMixin, KitMixin):
+    def __init__(self, rds, rds_key):
+        self.rds = rds
+        self.rds_key = rds_key
+        self.callback = []
+        self.buffers = defaultdict(str)
+        self.flags = defaultdict(bool)
+        self.files = {}
+        self.already_clear = False
+
+    def __del__(self):
+        self.clear()
+
+    @classmethod
+    def make(cls, rds, rds_key, keys):
+        rds.delete(rds_key)
+        instance = cls(rds, rds_key)
+        for key in keys:
+            instance.get_file(key)
+        return instance
+
+    @classmethod
+    def fill_outputs(cls, outputs, deploy_key):
+        rds = get_redis_connection()
+        key_ttl = rds.ttl(deploy_key)
+        counter, hit_keys = 0, set()
+        if key_ttl > 30 or key_ttl == -1:
+            data = rds.lrange(deploy_key, counter, counter + 9)
+            while data:
+                for item in data:
+                    counter += 1
+                    item = json.loads(item.decode())
+                    key = item['key']
+                    if key in outputs:
+                        hit_keys.add(key)
+                        if 'data' in item:
+                            outputs[key]['data'] += item['data']
+                        if 'status' in item:
+                            outputs[key]['status'] = item['status']
+                data = rds.lrange(deploy_key, counter, counter + 9)
+
+        for key in outputs.keys():
+            if key in hit_keys:
+                continue
+            file_name = os.path.join(settings.DEPLOY_DIR, f'{deploy_key}:{key}')
+            if not os.path.exists(file_name):
+                continue
+            with open(file_name, newline='\r\n') as f:
+                line = f.readline()
+                while line:
+                    status, data = line.split(',', 1)
+                    if data:
+                        outputs[key]['data'] += data
+                    if status:
+                        outputs[key]['status'] = status
+                    line = f.readline()
+        return counter
+
+    def get_file(self, key):
+        if key in self.files:
+            return self.files[key]
+        file = open(os.path.join(settings.DEPLOY_DIR, f'{self.rds_key}:{key}'), 'w')
+        self.files[key] = file
+        return file
+
     def add_callback(self, func):
         self.callback.append(func)
+
+    def save_pid(self, pid, key):
+        self.rds.set(f'PID:{self.rds_key}:{key}', pid, 3600)
 
     def parse_filter_rule(self, data: str, sep='\n', env=None):
         data, files = data.strip(), []
@@ -236,44 +304,89 @@ class Helper:
                     files.append(render_str(line, env))
         return files
 
-    def _send(self, message):
-        self.rds.rpush(self.key, json.dumps(message))
+    def _send(self, key, data, *, status=''):
+        message = {'key': key, 'data': data}
+        if status:
+            message['status'] = status
+        self.rds.rpush(self.rds_key, json.dumps(message))
 
-    def send_info(self, key, message):
-        if message:
-            self._send({'key': key, 'data': message})
+        for idx, line in enumerate(data.split('\r\n')):
+            if idx != 0:
+                tmp = [status, self.buffers[key] + '\r\n']
+                file = self.get_file(key)
+                file.write(','.join(tmp))
+                file.flush()
+                self.buffers[key] = ''
+                self.flags[key] = False
+            if line:
+                for idx2, item in enumerate(line.split('\r')):
+                    if idx2 != 0:
+                        self.flags[key] = True
+                    if item:
+                        if self.flags[key]:
+                            self.buffers[key] = item
+                            self.flags[key] = False
+                        else:
+                            self.buffers[key] += item
+
+    def send_clear(self, key):
+        self._send(key, '\033[2J\033[3J\033[1;1H')
+
+    def send_info(self, key, message, status='', with_time=True):
+        message = self.term_message(message, 'info', with_time)
+        self._send(key, message, status=status)
+
+    def send_warn(self, key, message, status=''):
+        message = self.term_message(message, 'warn')
+        self._send(key, message, status=status)
+
+    def send_success(self, key, message, status=''):
+        message = self.term_message(message, 'success')
+        self._send(key, message, status=status)
 
     def send_error(self, key, message, with_break=True):
-        message = f'\r\n\033[31m{message}\033[0m'
-        self._send({'key': key, 'status': 'error', 'data': message})
+        message = self.term_message(message, 'error')
+        if not message.endswith('\r\n'):
+            message += '\r\n'
+        self._send(key, message, status='error')
         if with_break:
             raise SpugError
 
-    def send_step(self, key, step, data):
-        self._send({'key': key, 'step': step, 'data': data})
-
     def clear(self):
-        self.rds.delete(f'{self.key}_tmp')
-        # save logs for two weeks
-        self.rds.expire(self.key, 14 * 24 * 60 * 60)
-        self.rds.close()
-        # callback
-        for func in self.callback:
-            func()
+        if self.already_clear:
+            return
+        self.already_clear = True
+        for key, value in self.buffers.items():
+            if value:
+                file = self.get_file(key)
+                file.write(f',{value}')
+        for file in self.files.values():
+            file.close()
+        if self.rds.ttl(self.rds_key) == -1:
+            self.rds.expire(self.rds_key, 60)
+        while self.callback:
+            self.callback.pop()()
 
     def progress_callback(self, key):
         def func(k, n, t):
             message = f'\r         {filesizeformat(n):<8}/{filesizeformat(t):>8}  '
-            self.send_info(k, message)
+            self._send(k, message)
 
-        self.send_info(key, '\r\n')
+        self._send(key, '\r\n')
         return partial(func, key)
 
     def local(self, command, env=None):
         if env:
             env = dict(env.items())
             env.update(os.environ)
-        task = subprocess.Popen(command, env=env, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        task = subprocess.Popen(
+            command,
+            env=env,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            preexec_fn=os.setsid)
+        self.save_pid(task.pid, 'local')
         message = b''
         while True:
             output = task.stdout.read(1)
@@ -282,7 +395,7 @@ class Helper:
             if output in (b'\r', b'\n'):
                 message += b'\r\n' if output == b'\n' else b'\r'
                 message = str_decode(message)
-                self.send_info('local', message)
+                self._send('local', message)
                 message = b''
             else:
                 message += output
@@ -292,7 +405,7 @@ class Helper:
     def remote(self, key, ssh, command, env=None):
         code = -1
         for code, out in ssh.exec_command_with_stream(command, environment=env):
-            self.send_info(key, out)
+            self._send(key, out)
         if code != 0:
             self.send_error(key, f'exit code: {code}')
 

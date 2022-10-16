@@ -111,7 +111,7 @@ function OutView(props) {
 
   function handleTerminate() {
     setLoading(true)
-    http.post('/api/exec/terminate/', {token: store.token, host_id: current})
+    http.post('/api/exec/terminate/', {token: store.token, target: current})
       .finally(() => setLoading(false))
   }
 

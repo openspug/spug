@@ -113,6 +113,7 @@ BUILD_KEY = 'spug:build'
 REPOS_DIR = os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'repos')
 BUILD_DIR = os.path.join(REPOS_DIR, 'build')
 TRANSFER_DIR = os.path.join(BASE_DIR, 'storage', 'transfer')
+DEPLOY_DIR = os.path.join(BASE_DIR, 'storage', 'deploy')
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/

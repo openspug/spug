@@ -17,12 +17,33 @@
     color: #000;
   }
 
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: -12px 0 12px 0;
+
+
+    .title {
+      font-size: 14px;
+      font-weight: bold;
+      margin-right: 12px;
+    }
+
+    :global(.anticon) {
+      font-size: 18px;
+    }
+  }
+
   .out {
-    margin-top: 24px;
     padding: 8px 0 8px 15px;
-    border: 1px solid #d9d9d9;
     border-radius: 4px;
-    background-color: #fafafa;
+    background-color: #2b2b2b;
+
+    .term {
+      width: 100%;
+      height: calc(100vh - 370px);
+    }
   }
 }
 

@@ -132,14 +132,12 @@ class Store {
   showConsole = (info, isClose) => {
     const index = lds.findIndex(this.tabs, x => x.id === info.id);
     if (isClose) {
-      if (index !== -1) {
-        this.tabs[index] = {}
-      }
+      if (index !== -1) this.tabs.splice(index, 1)
       this.fetchInfo(info.id)
     } else if (index === -1) {
       this.tabs.push(info)
     }
-  };
+  }
 
   readConsole = (info) => {
     const index = lds.findIndex(this.tabs, x => x.id === info.id);

@@ -55,7 +55,7 @@ class Job:
         code = -1
         try:
             with self.ssh:
-                self.rds.set(self.rds_key, self.ssh.get_pid(), 7200)
+                self.rds.set(self.rds_key, self.ssh.get_pid(), 3600)
                 for code, out in self.ssh.exec_command_with_stream(self.command, self.env):
                     self.send(out)
             human_time = human_seconds_time(time.time() - flag)

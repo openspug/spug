@@ -4,7 +4,7 @@
 from django_redis import get_redis_connection
 from django.conf import settings
 from django.db import close_old_connections
-from libs.utils import AttrDict, human_time, render_str
+from libs.utils import AttrDict, render_str
 from apps.host.models import Host
 from apps.config.utils import compose_configs
 from apps.repository.models import Repository
@@ -23,13 +23,14 @@ BUILD_DIR = settings.BUILD_DIR
 
 def dispatch(req, fail_mode=False):
     rds = get_redis_connection()
-    rds_key = f'{settings.REQUEST_KEY}:{req.id}'
+    rds_key = req.deploy_key
     if fail_mode:
         req.host_ids = req.fail_host_ids
     req.fail_mode = fail_mode
     req.host_ids = json.loads(req.host_ids)
     req.fail_host_ids = req.host_ids[:]
-    helper = Helper.make(rds, rds_key, req.host_ids if fail_mode else None)
+    keys = req.host_ids if fail_mode else req.host_ids + ['local']
+    helper = Helper.make(rds, rds_key, keys)
 
     try:
         api_token = uuid.uuid4().hex
@@ -61,7 +62,8 @@ def dispatch(req, fail_mode=False):
         req.status = '3'
     except Exception as e:
         req.status = '-3'
-        raise e
+        if not isinstance(e, SpugError):
+            raise e
     finally:
         close_old_connections()
         DeployRequest.objects.filter(pk=req.id).update(
@@ -108,7 +110,7 @@ def _ext1_deploy(req, helper, env):
                 if exception:
                     latest_exception = exception
                     if not isinstance(exception, SpugError):
-                        helper.send_error(t.h_id, f'Exception: {exception}', False)
+                        helper.send_error(t.h_id, f'Exception: {exception}', with_break=False)
                 else:
                     req.fail_host_ids.remove(t.h_id)
         if latest_exception:
@@ -122,9 +124,9 @@ def _ext1_deploy(req, helper, env):
                 _deploy_ext1_host(req, helper, h_id, new_env)
                 req.fail_host_ids.remove(h_id)
             except Exception as e:
-                helper.send_error(h_id, f'Exception: {e}', False)
+                helper.send_error(h_id, f'Exception: {e}', with_break=False)
                 for h_id in host_ids:
-                    helper.send_error(h_id, '终止发布', False)
+                    helper.send_error(h_id, '终止发布', with_break=False)
                 raise e
 
 
@@ -137,23 +139,32 @@ def _ext2_deploy(req, helper, env):
         for index, value in enumerate(req.version.split()):
             env.update({f'SPUG_RELEASE_{index + 1}': value})
 
-    if not req.fail_mode:
-        helper.send_info('local', f'\033[32m完成√\033[0m\r\n')
-        for action in server_actions:
-            helper.send_step('local', step, f'{human_time()} {action["title"]}...\r\n')
-            helper.local(f'cd /tmp && {action["data"]}', env)
-            step += 1
-
+    transfer_action = None
     for action in host_actions:
         if action.get('type') == 'transfer':
             action['src'] = render_str(action.get('src', '').strip().rstrip('/'), env)
             action['dst'] = render_str(action['dst'].strip().rstrip('/'), env)
             if action.get('src_mode') == '1':  # upload when publish
+                if not req.extra:
+                    helper.send_error('local', '\r\n未找到上传的文件信息，请尝试新建发布申请')
                 extra = json.loads(req.extra)
                 if 'name' in extra:
                     action['name'] = extra['name']
-                break
-            helper.send_step('local', step, f'{human_time()} 检测到来源为本地路径的数据传输动作，执行打包...   \r\n')
+            else:
+                transfer_action = action
+            break
+
+    if not req.fail_mode:
+        helper.send_success('local', '', status='doing')
+        if server_actions or transfer_action:
+            helper.send_clear('local')
+        for action in server_actions:
+            helper.send_info('local', f'{action["title"]}...\r\n')
+            helper.local(f'cd /tmp && {action["data"]}', env)
+            step += 1
+        if transfer_action:
+            action = transfer_action
+            helper.send_info('local', '检测到来源为本地路径的数据传输动作，执行打包...   \r\n')
             action['src'] = action['src'].rstrip('/ ')
             action['dst'] = action['dst'].rstrip('/ ')
             if not action['src'] or not action['dst']:
@@ -178,17 +189,16 @@ def _ext2_deploy(req, helper, env):
                         exclude = ' '.join(excludes)
             tar_gz_file = f'{req.spug_version}.tar.gz'
             helper.local(f'cd {sp_dir} && tar -zcf {tar_gz_file} {exclude} {contain}')
-            helper.send_info('local', f'{human_time()} \033[32m完成√\033[0m\r\n')
+            helper.send_info('local', '打包完成\r\n')
             helper.add_callback(partial(os.remove, os.path.join(sp_dir, tar_gz_file)))
-            break
-    helper.send_step('local', 100, '')
 
     if host_actions:
+        helper.send_success('local', '\r\n** 执行完成 **', status='success')
         if req.deploy.is_parallel:
             threads, latest_exception = [], None
             max_workers = max(10, os.cpu_count() * 5)
             with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-                for h_id in req.host_ids:
+                for h_id in sorted(req.host_ids, reverse=True):
                     new_env = AttrDict(env.items())
                     t = executor.submit(_deploy_ext2_host, helper, h_id, host_actions, new_env, req.spug_version)
                     t.h_id = h_id
@@ -198,13 +208,13 @@ def _ext2_deploy(req, helper, env):
                     if exception:
                         latest_exception = exception
                         if not isinstance(exception, SpugError):
-                            helper.send_error(t.h_id, f'Exception: {exception}', False)
+                            helper.send_error(t.h_id, f'Exception: {exception}', with_break=False)
                     else:
                         req.fail_host_ids.remove(t.h_id)
             if latest_exception:
                 raise latest_exception
         else:
-            host_ids = sorted(req.host_ids, reverse=True)
+            host_ids = sorted(req.host_ids)
             while host_ids:
                 h_id = host_ids.pop()
                 new_env = AttrDict(env.items())
@@ -212,17 +222,20 @@ def _ext2_deploy(req, helper, env):
                     _deploy_ext2_host(helper, h_id, host_actions, new_env, req.spug_version)
                     req.fail_host_ids.remove(h_id)
                 except Exception as e:
-                    helper.send_error(h_id, f'Exception: {e}', False)
+                    if not isinstance(e, SpugError):
+                        helper.send_error(h_id, f'Exception: {e}', with_break=False)
                     for h_id in host_ids:
-                        helper.send_error(h_id, '终止发布', False)
+                        helper.send_clear(h_id)
+                        helper.send_error(h_id, '串行模式，终止发布', with_break=False)
                     raise e
     else:
         req.fail_host_ids = []
-        helper.send_step('local', 100, f'\r\n{human_time()} ** 发布成功 **')
+        helper.send_success('local', '\r\n** 发布成功 **', status='success')
 
 
 def _deploy_ext1_host(req, helper, h_id, env):
-    helper.send_step(h_id, 1, f'\033[32m就绪√\033[0m\r\n{human_time()} 数据准备...        ')
+    helper.send_clear(h_id)
+    helper.send_info(h_id, '数据准备...        ', status='doing')
     host = Host.objects.filter(pk=h_id).first()
     if not host:
         helper.send_error(h_id, 'no such host')
@@ -232,13 +245,15 @@ def _deploy_ext1_host(req, helper, h_id, env):
     extend.dst_repo = render_str(extend.dst_repo, env)
     env.update(SPUG_DST_DIR=extend.dst_dir)
     with host.get_ssh(default_env=env) as ssh:
+        helper.save_pid(ssh.get_pid(), h_id)
         base_dst_dir = os.path.dirname(extend.dst_dir)
         code, _ = ssh.exec_command_raw(
             f'mkdir -p {extend.dst_repo} {base_dst_dir} && [ -e {extend.dst_dir} ] && [ ! -L {extend.dst_dir} ]')
         if code == 0:
-            helper.send_error(host.id, f'检测到该主机的发布目录 {extend.dst_dir!r} 已存在，为了数据安全请自行备份后删除该目录，Spug 将会创建并接管该目录。')
+            helper.send_error(host.id,
+                              f'\r\n检测到该主机的发布目录 {extend.dst_dir!r} 已存在，为了数据安全请自行备份后删除该目录，Spug 将会创建并接管该目录。')
         if req.type == '2':
-            helper.send_step(h_id, 1, '\033[33m跳过√\033[0m\r\n')
+            helper.send_warn(h_id, '跳过√\r\n')
         else:
             # clean
             clean_command = f'ls -d {extend.deploy_id}_* 2> /dev/null | sort -t _ -rnk2 | tail -n +{extend.versions + 1} | xargs rm -rf'
@@ -257,39 +272,41 @@ def _deploy_ext1_host(req, helper, h_id, env):
 
             command = f'cd {extend.dst_repo} && rm -rf {req.spug_version} && tar xf {tar_gz_file} && rm -f {req.deploy_id}_*.tar.gz'
             helper.remote_raw(host.id, ssh, command)
-            helper.send_step(h_id, 1, '\033[32m完成√\033[0m\r\n')
+            helper.send_success(h_id, '完成√\r\n')
 
         # pre host
         repo_dir = os.path.join(extend.dst_repo, req.spug_version)
         if extend.hook_pre_host:
-            helper.send_step(h_id, 2, f'{human_time()} 发布前任务...       \r\n')
+            helper.send_info(h_id, '发布前任务...       \r\n')
             command = f'cd {repo_dir} && {extend.hook_pre_host}'
             helper.remote(host.id, ssh, command)
 
         # do deploy
-        helper.send_step(h_id, 3, f'{human_time()} 执行发布...        ')
+        helper.send_info(h_id, '执行发布...        ')
         helper.remote_raw(host.id, ssh, f'rm -f {extend.dst_dir} && ln -sfn {repo_dir} {extend.dst_dir}')
-        helper.send_step(h_id, 3, '\033[32m完成√\033[0m\r\n')
+        helper.send_success(h_id, '完成√\r\n')
 
         # post host
         if extend.hook_post_host:
-            helper.send_step(h_id, 4, f'{human_time()} 发布后任务...       \r\n')
+            helper.send_info(h_id, '发布后任务...       \r\n')
             command = f'cd {extend.dst_dir} && {extend.hook_post_host}'
             helper.remote(host.id, ssh, command)
 
-        helper.send_step(h_id, 100, f'\r\n{human_time()} ** \033[32m发布成功\033[0m **')
+        helper.send_success(h_id, '\r\n** 发布成功 **', status='success')
 
 
 def _deploy_ext2_host(helper, h_id, actions, env, spug_version):
-    helper.send_info(h_id, '\033[32m就绪√\033[0m\r\n')
     host = Host.objects.filter(pk=h_id).first()
     if not host:
         helper.send_error(h_id, 'no such host')
     env.update({'SPUG_HOST_ID': h_id, 'SPUG_HOST_NAME': host.hostname})
     with host.get_ssh(default_env=env) as ssh:
-        for index, action in enumerate(actions):
-            helper.send_step(h_id, 1 + index, f'{human_time()} {action["title"]}...\r\n')
+        helper.send_clear(h_id)
+        helper.save_pid(ssh.get_pid(), h_id)
+        helper.send_success(h_id, '', status='doing')
+        for index, action in enumerate(actions, start=1):
             if action.get('type') == 'transfer':
+                helper.send_info(h_id, f'{action["title"]}...')
                 if action.get('src_mode') == '1':
                     try:
                         dst = action['dst']
@@ -302,8 +319,8 @@ def _deploy_ext2_host(helper, h_id, actions, env, spug_version):
                         callback = helper.progress_callback(host.id)
                         ssh.put_file(os.path.join(REPOS_DIR, env.SPUG_DEPLOY_ID, spug_version), dst, callback)
                     except Exception as e:
-                        helper.send_error(host.id, f'Exception: {e}')
-                    helper.send_info(host.id, 'transfer completed\r\n')
+                        helper.send_error(host.id, f'\r\nException: {e}')
+                    helper.send_success(host.id, '完成√\r\n')
                     continue
                 else:
                     sp_dir, sd_dst = os.path.split(action['src'])
@@ -312,13 +329,15 @@ def _deploy_ext2_host(helper, h_id, actions, env, spug_version):
                         callback = helper.progress_callback(host.id)
                         ssh.put_file(os.path.join(sp_dir, tar_gz_file), f'/tmp/{tar_gz_file}', callback)
                     except Exception as e:
-                        helper.send_error(host.id, f'Exception: {e}')
+                        helper.send_error(host.id, f'\r\nException: {e}')
 
-                    command = f'mkdir -p /tmp/{spug_version} && tar xf /tmp/{tar_gz_file} -C /tmp/{spug_version}/ '
+                    command = f'mkdir -p /tmp/{spug_version} '
+                    command += f'&& tar xf /tmp/{tar_gz_file} -C /tmp/{spug_version}/ 2> /dev/null '
                     command += f'&& rm -rf {action["dst"]} && mv /tmp/{spug_version}/{sd_dst} {action["dst"]} '
-                    command += f'&& rm -rf /tmp/{spug_version}* && echo "transfer completed"'
+                    command += f'&& rm -rf /tmp/{spug_version}* && echo "\033[32m完成√\033[0m"'
             else:
+                helper.send_info(h_id, f'{action["title"]}...\r\n')
                 command = f'cd /tmp && {action["data"]}'
             helper.remote(host.id, ssh, command)
 
-    helper.send_step(h_id, 100, f'\r\n{human_time()} ** \033[32m发布成功\033[0m **')
+    helper.send_success(h_id, f'\r\n** 发布成功 **', status='success')

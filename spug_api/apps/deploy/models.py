@@ -53,6 +53,10 @@ class DeployRequest(models.Model, ModelMixin):
             return extra[0] in ('branch', 'tag')
         return False
 
+    @property
+    def deploy_key(self):
+        return f'{settings.REQUEST_KEY}:{self.id}'
+
     def delete(self, using=None, keep_parents=False):
         super().delete(using, keep_parents)
         if self.repository_id:

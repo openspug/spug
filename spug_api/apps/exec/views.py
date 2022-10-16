@@ -10,6 +10,7 @@ from apps.host.models import Host
 from apps.account.utils import has_host_perm
 import uuid
 import json
+import os
 
 
 class TemplateView(View):
@@ -120,19 +121,25 @@ class TaskView(View):
         return json_response(error=error)
 
 
-@auth('exec.task.do')
+@auth('exec.task.do|deploy.request.do')
 def handle_terminate(request):
     form, error = JsonParser(
         Argument('token', help='参数错误'),
-        Argument('host_id', type=int, help='参数错误')
+        Argument('target', help='参数错误')
     ).parse(request.body)
     if error is None:
-        host = Host.objects.get(pk=form.host_id)
         rds = get_redis_connection()
-        rds_key = f'PID:{form.token}:{host.id}'
+        rds_key = f'PID:{form.token}:{form.target}'
         pid = rds.get(rds_key)
-        if pid:
+        if not pid:
+            return json_response(error='未找到关联进程')
+        if form.target.isdigit():
+            host = Host.objects.get(pk=form.target)
             with host.get_ssh() as ssh:
                 ssh.exec_command_raw(f'kill -9 {pid.decode()}')
-                rds.delete(rds_key)
+        elif form.target == 'local':
+            gid = os.getpgid(int(pid))
+            if gid:
+                os.killpg(gid, 9)
+        rds.delete(rds_key)
     return json_response(error=error)

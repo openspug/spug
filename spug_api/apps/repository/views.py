@@ -5,10 +5,11 @@ from django.views.generic import View
 from django.db.models import F
 from django.conf import settings
 from django_redis import get_redis_connection
-from libs import json_response, JsonParser, Argument, human_time, AttrDict, auth
+from libs import json_response, JsonParser, Argument, AttrDict, auth
 from apps.repository.models import Repository
 from apps.deploy.models import DeployRequest
 from apps.repository.utils import dispatch
+from apps.deploy.helper import Helper
 from apps.app.models import Deploy
 from threading import Thread
 import json
@@ -109,31 +110,14 @@ def get_detail(request, r_id):
     repository = Repository.objects.filter(pk=r_id).first()
     if not repository:
         return json_response(error='未找到指定构建记录')
-    rds, counter = get_redis_connection(), 0
-    if repository.remarks == 'SPUG AUTO MAKE':
-        req = repository.deployrequest_set.last()
-        key = f'{settings.REQUEST_KEY}:{req.id}'
-    else:
-        key = f'{settings.BUILD_KEY}:{repository.spug_version}'
-    data = rds.lrange(key, counter, counter + 9)
-    response = AttrDict(data='', step=0, s_status='process', status=repository.status)
-    while data:
-        for item in data:
-            counter += 1
-            item = json.loads(item.decode())
-            if item['key'] == 'local':
-                if 'data' in item:
-                    response.data += item['data']
-                if 'step' in item:
-                    response.step = item['step']
-                if 'status' in item:
-                    response.status = item['status']
-        data = rds.lrange(key, counter, counter + 9)
-    response.index = counter
+    deploy_key = repository.deploy_key
+    response = AttrDict(status=repository.status, token=deploy_key)
+    output = {'data': ''}
+    response.index = Helper.fill_outputs({'local': output}, deploy_key)
+
     if repository.status in ('0', '1'):
-        response.data = f'{human_time()} 建立连接...        ' + response.data
-    elif not response.data:
-        response.data = f'{human_time()} 读取数据...        \r\n\r\n未读取到数据，Spug 仅保存最近2周的构建日志。'
-    else:
-        response.data = f'{human_time()} 读取数据...        ' + response.data
+        output['data'] = Helper.term_message('等待初始化...') + output['data']
+    elif not output['data']:
+        output['data'] = Helper.term_message('未读取到数据，可能已被清理', 'warn', with_time=False)
+    response.output = output
     return json_response(response)
