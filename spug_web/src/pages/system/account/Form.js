@@ -3,23 +3,18 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react';
 import { Modal, Form, Select, Input, message } from 'antd';
 import http from 'libs/http';
 import store from './store';
-import roleStore from '../role/store';
-import { Link } from "react-router-dom";
+import rStore from '../role/store';
+
 
 export default observer(function () {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (roleStore.records.length === 0) {
-      roleStore.fetchRecords()
-    }
-  }, [])
 
   function handleSubmit() {
     setLoading(true);
@@ -55,7 +50,7 @@ export default observer(function () {
         <Form.Item hidden={store.record.is_supper} label="角色" style={{marginBottom: 0}}>
           <Form.Item name="role_ids" style={{display: 'inline-block', width: '80%'}} extra="权限最大化原则，组合多个角色权限。">
             <Select mode="multiple" placeholder="请选择">
-              {roleStore.records.map(item => (
+              {rStore.records.map(item => (
                 <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
               ))}
             </Select>

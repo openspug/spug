@@ -3,15 +3,22 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Input } from 'antd';
 import { SearchForm, AuthDiv, Breadcrumb } from 'components';
 import ComTable from './Table';
 import ComForm from './Form';
 import store from './store';
+import rStore from '../role/store';
 
 export default observer(function () {
+  useEffect(() => {
+    if (rStore.records.length === 0) {
+      rStore.fetchRecords()
+    }
+  }, [])
+
   return (
     <AuthDiv auth="system.account.view">
       <Breadcrumb>
