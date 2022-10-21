@@ -5,7 +5,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { observer, useLocalStore } from 'mobx-react';
-import { Tooltip, Modal, Spin, Card, Progress } from 'antd';
+import { Tooltip, Modal, Spin, Card } from 'antd';
 import {
   LoadingOutlined,
   CheckCircleOutlined,

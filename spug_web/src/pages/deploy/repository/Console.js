@@ -68,6 +68,7 @@ export default observer(function Console() {
     window.addEventListener('resize', resize)
 
     return () => window.removeEventListener('resize', resize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function _makeSocket(index = 0) {
