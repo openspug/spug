@@ -32,7 +32,8 @@ function OutView(props) {
     store.tag = ''
     gCurrent = current
     term.setOption('disableStdin', true)
-    term.setOption('fontSize', gStore.terminal.fontSize)
+    term.setOption('fontSize', 14)
+    term.setOption('lineHeight', 1.2)
     term.setOption('fontFamily', gStore.terminal.fontFamily)
     term.setOption('theme', {background: '#2b2b2b', foreground: '#A9B7C6', cursor: '#2b2b2b'})
     term.attachCustomKeyEventHandler((arg) => {
