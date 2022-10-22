@@ -4,13 +4,14 @@
 from django_redis import get_redis_connection
 from django.conf import settings
 from django.db import close_old_connections
-from libs.utils import AttrDict, human_datetime, render_str
+from libs.utils import AttrDict, human_datetime, render_str, human_seconds_time
 from apps.repository.models import Repository
 from apps.app.utils import fetch_repo
 from apps.config.utils import compose_configs
 from apps.deploy.helper import Helper
 import json
 import uuid
+import time
 import os
 
 REPOS_DIR = settings.REPOS_DIR
@@ -77,6 +78,7 @@ def dispatch(rep: Repository, helper=None):
 
 
 def _build(rep: Repository, helper, env):
+    flag = time.time()
     extend = rep.deploy.extend_obj
     git_dir = os.path.join(REPOS_DIR, str(rep.deploy_id))
     build_dir = os.path.join(REPOS_DIR, rep.spug_version)
@@ -115,4 +117,5 @@ def _build(rep: Repository, helper, env):
             contain = ' '.join(f'{rep.spug_version}/{x}' for x in files)
     helper.local(f'mkdir -p {BUILD_DIR} && cd {REPOS_DIR} && tar zcf {tar_file} {exclude} {contain}')
     helper.send_success('local', '完成√\r\n')
-    helper.send_success('local', '\r\n** 构建成功 **\r\n', status='success')
+    human_time = human_seconds_time(time.time() - flag)
+    helper.send_success('local', f'\r\n** 构建成功，耗时：{human_time} **\r\n', status='success')

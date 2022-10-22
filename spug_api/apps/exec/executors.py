@@ -59,7 +59,7 @@ class Job:
                 for code, out in self.ssh.exec_command_with_stream(self.command, self.env):
                     self.send(out)
             human_time = human_seconds_time(time.time() - flag)
-            self.send(f'\r\n\x1b[36m** 执行结束，总耗时：{human_time} **\x1b[0m')
+            self.send(f'\r\n\x1b[36m** 执行结束，耗时：{human_time} **\x1b[0m')
         except socket.timeout:
             code = 130
             self.send('\r\n\x1b[31m### Time out\x1b[0m')

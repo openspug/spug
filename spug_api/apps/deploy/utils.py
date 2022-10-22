@@ -4,7 +4,7 @@
 from django_redis import get_redis_connection
 from django.conf import settings
 from django.db import close_old_connections
-from libs.utils import AttrDict, render_str
+from libs.utils import AttrDict, render_str, human_seconds_time
 from apps.host.models import Host
 from apps.config.utils import compose_configs
 from apps.repository.models import Repository
@@ -15,6 +15,7 @@ from concurrent import futures
 from functools import partial
 import json
 import uuid
+import time
 import os
 
 REPOS_DIR = settings.REPOS_DIR
@@ -131,6 +132,7 @@ def _ext1_deploy(req, helper, env):
 
 
 def _ext2_deploy(req, helper, env):
+    flag = time.time()
     extend, step = req.deploy.extend_obj, 1
     host_actions = json.loads(extend.host_actions)
     server_actions = json.loads(extend.server_actions)
@@ -192,8 +194,9 @@ def _ext2_deploy(req, helper, env):
             helper.send_info('local', '打包完成\r\n')
             helper.add_callback(partial(os.remove, os.path.join(sp_dir, tar_gz_file)))
 
+    human_time = human_seconds_time(time.time() - flag)
     if host_actions:
-        helper.send_success('local', '\r\n** 执行完成 **', status='success')
+        helper.send_success('local', f'\r\n** 执行完成，耗时：{human_time} **', status='success')
         if req.deploy.is_parallel:
             threads, latest_exception = [], None
             max_workers = max(10, os.cpu_count() * 5)
@@ -230,10 +233,11 @@ def _ext2_deploy(req, helper, env):
                     raise e
     else:
         req.fail_host_ids = []
-        helper.send_success('local', '\r\n** 发布成功 **', status='success')
+        helper.send_success('local', f'\r\n** 发布成功，耗时：{human_time} **', status='success')
 
 
 def _deploy_ext1_host(req, helper, h_id, env):
+    flag = time.time()
     helper.send_clear(h_id)
     helper.send_info(h_id, '数据准备...        ', status='doing')
     host = Host.objects.filter(pk=h_id).first()
@@ -292,10 +296,12 @@ def _deploy_ext1_host(req, helper, h_id, env):
             command = f'cd {extend.dst_dir} && {extend.hook_post_host}'
             helper.remote(host.id, ssh, command)
 
-        helper.send_success(h_id, '\r\n** 发布成功 **', status='success')
+        human_time = human_seconds_time(time.time() - flag)
+        helper.send_success(h_id, f'\r\n** 发布成功，耗时：{human_time} **', status='success')
 
 
 def _deploy_ext2_host(helper, h_id, actions, env, spug_version):
+    flag = time.time()
     host = Host.objects.filter(pk=h_id).first()
     if not host:
         helper.send_error(h_id, 'no such host')
@@ -339,5 +345,5 @@ def _deploy_ext2_host(helper, h_id, actions, env, spug_version):
                 helper.send_info(h_id, f'{action["title"]}...\r\n')
                 command = f'cd /tmp && {action["data"]}'
             helper.remote(host.id, ssh, command)
-
-    helper.send_success(h_id, f'\r\n** 发布成功 **', status='success')
+    human_time = human_seconds_time(time.time() - flag)
+    helper.send_success(h_id, f'\r\n** 发布成功，耗时：{human_time} **', status='success')

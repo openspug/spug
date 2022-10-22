@@ -239,9 +239,11 @@ function Console(props) {
                     )}
                   </Tooltip>
                 )}
-                <Tooltip title="打开web终端">
-                  <CodeOutlined className={styles.icon} onClick={() => openTerminal(current)}/>
-                </Tooltip>
+                {cItem.id !== 'local' && (
+                  <Tooltip title="打开web终端">
+                    <CodeOutlined className={styles.icon} onClick={() => openTerminal(current)}/>
+                  </Tooltip>
+                )}
               </div>
               <div className={styles.termContainer}>
                 <div ref={el} className={styles.term}/>
