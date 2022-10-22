@@ -3,17 +3,19 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { observer } from 'mobx-react';
 import { Table, Modal, Dropdown, Button, Menu, Avatar, Tooltip, Space, Tag, Radio, Input, message } from 'antd';
-import { PlusOutlined, DownOutlined, SyncOutlined, FormOutlined } from '@ant-design/icons';
+import { PlusOutlined, DownOutlined, SyncOutlined, FormOutlined, ExportOutlined } from '@ant-design/icons';
 import { Action, TableCard, AuthButton, AuthFragment } from 'components';
 import IPAddress from './IPAddress';
-import { http, hasPermission } from 'libs';
+import { http, hasPermission, blobToExcel, humanDate } from 'libs';
 import store from './store';
 import icons from './icons';
 
 function ComTable() {
+  const [loading, setLoading] = useState(false)
+
   function handleDelete(text) {
     Modal.confirm({
       title: '删除确认',
@@ -36,6 +38,13 @@ function ComTable() {
     } else {
       store.cloudImport = menu.key
     }
+  }
+
+  function handleExport() {
+    setLoading(true)
+    http.post('/api/host/export/', {ids: store.dataSource.map(x => x.id)}, {responseType: 'blob', timeout: 60000})
+      .then(res => blobToExcel(res.data, `${humanDate()}_主机列表.xlsx`))
+      .finally(() => setLoading(false))
   }
 
   return (
@@ -80,6 +89,12 @@ function ComTable() {
             <Button type="primary" icon={<PlusOutlined/>}>新建 <DownOutlined/></Button>
           </Dropdown>
         </AuthFragment>,
+        <AuthButton
+          auth="host.host.view"
+          type="primary"
+          loading={loading}
+          icon={<ExportOutlined/>}
+          onClick={handleExport}>导出</AuthButton>,
         <AuthButton
           auth="host.host.add"
           type="primary"

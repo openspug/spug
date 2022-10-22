@@ -3,7 +3,7 @@
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
 from django.db.models import F
-from django.http.response import HttpResponseBadRequest
+from django.http.response import HttpResponseBadRequest, HttpResponse
 from libs import json_response, JsonParser, Argument, AttrDict, auth
 from apps.setting.utils import AppSetting
 from apps.account.utils import get_host_perms
@@ -14,10 +14,11 @@ from apps.schedule.models import Task
 from apps.monitor.models import Detection
 from libs.ssh import SSH, AuthenticationException
 from paramiko.ssh_exception import BadAuthenticationType
-from openpyxl import load_workbook
+from openpyxl import load_workbook, Workbook
 from threading import Thread
 import socket
 import uuid
+import json
 
 
 class HostView(View):
@@ -110,13 +111,16 @@ class HostView(View):
                 deploy = Deploy.objects.filter(host_ids__regex=regex) \
                     .annotate(app_name=F('app__name'), env_name=F('env__name')).first()
                 if deploy:
-                    return json_response(error=f'应用【{deploy.app_name}】在【{deploy.env_name}】的发布配置关联了该主机，请解除关联后再尝试删除该主机')
+                    return json_response(
+                        error=f'应用【{deploy.app_name}】在【{deploy.env_name}】的发布配置关联了该主机，请解除关联后再尝试删除该主机')
                 task = Task.objects.filter(targets__regex=regex).first()
                 if task:
-                    return json_response(error=f'任务计划中的任务【{task.name}】关联了该主机，请解除关联后再尝试删除该主机')
+                    return json_response(
+                        error=f'任务计划中的任务【{task.name}】关联了该主机，请解除关联后再尝试删除该主机')
                 detection = Detection.objects.filter(type__in=('3', '4'), targets__regex=regex).first()
                 if detection:
-                    return json_response(error=f'监控中心的任务【{detection.name}】关联了该主机，请解除关联后再尝试删除该主机')
+                    return json_response(
+                        error=f'监控中心的任务【{detection.name}】关联了该主机，请解除关联后再尝试删除该主机')
             Host.objects.filter(id__in=host_ids).delete()
         return json_response(error=error)
 
@@ -159,6 +163,37 @@ def post_import(request):
     if hosts:
         Thread(target=batch_sync_host, args=(token, hosts)).start()
     return json_response({'summary': summary, 'token': token, 'hosts': {x.id: {'name': x.name} for x in hosts}})
+
+
+@auth('host.host.view')
+def post_export(request):
+    hosts = Host.objects.select_related('hostextend')
+    if not request.user.is_supper:
+        hosts = hosts.filter(id__in=get_host_perms(request.user))
+    wb = Workbook()
+    ws = wb.active
+    ws.append(('主机名称', 'SSH地址', 'SSH端口', 'SSH用户', 'SSH密码', '备注信息', '实例ID', '操作系统', 'CPU核心数', '内存GB', '磁盘GB', '内网IP'
+               '公网IP', '实例计费方式', '网络计费方式', '创建时间', '到期时间'))
+    for item in hosts:
+        data = [item.name, item.hostname, item.port, item.username, '', item.desc]
+        if hasattr(item, 'hostextend'):
+            data.extend([
+                item.hostextend.instance_id,
+                item.hostextend.os_name,
+                item.hostextend.cpu,
+                item.hostextend.memory,
+                ','.join(str(x) for x in json.loads(item.hostextend.disk)),
+                ','.join(json.loads(item.hostextend.private_ip_address)),
+                ','.join(json.loads(item.hostextend.public_ip_address)),
+                item.hostextend.get_instance_charge_type_display(),
+                item.hostextend.get_internet_charge_type_display(),
+                item.hostextend.created_time,
+                item.hostextend.expired_time
+            ])
+        ws.append(data)
+    response = HttpResponse(content_type='application/octet-stream')
+    wb.save(response)
+    return response
 
 
 @auth('host.host.add')

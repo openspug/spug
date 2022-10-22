@@ -86,7 +86,7 @@ export function trimFixed(data, bit) {
 }
 
 // 日期
-export function human_date(date) {
+export function humanDate(date) {
   const now = date || new Date();
   let month = now.getMonth() + 1;
   let day = now.getDate();
@@ -94,7 +94,7 @@ export function human_date(date) {
 }
 
 // 时间
-export function human_time(date) {
+export function humanTime(date) {
   const now = date || new Date();
   const hour = now.getHours() < 10 ? '0' + now.getHours() : now.getHours();
   const minute = now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes();
@@ -102,8 +102,8 @@ export function human_time(date) {
   return `${hour}:${minute}:${second}`
 }
 
-export function human_datetime(date) {
-  return `${human_date(date)} ${human_time(date)}`
+export function humanDatetime(date) {
+  return `${humanDate(date)} ${humanTime(date)}`
 }
 
 // 生成唯一id
@@ -112,4 +112,16 @@ export function uniqueId() {
     const r = Math.random() * 16 | 0;
     return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
   });
+}
+
+export function blobToExcel(data, filename) {
+  const blob = new Blob([data], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  document.body.appendChild(link);
+  const evt = document.createEvent("MouseEvents");
+  evt.initEvent("click", false, false);
+  link.dispatchEvent(evt);
+  document.body.removeChild(link);
 }

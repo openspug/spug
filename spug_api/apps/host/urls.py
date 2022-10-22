@@ -13,6 +13,7 @@ urlpatterns = [
     path('extend/', ExtendView.as_view()),
     path('group/', GroupView.as_view()),
     path('import/', post_import),
+    path('export/', post_export),
     path('import/cloud/', cloud_import),
     path('import/region/', get_regions),
     path('parse/', post_parse),
