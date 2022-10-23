@@ -78,7 +78,12 @@ function Console(props) {
 
   function doDeploy() {
     let socket;
-    http.post(`/api/deploy/request/${props.request.id}/`, {mode: props.request.mode})
+    const formData = {mode: props.request.mode}
+    if (Array.isArray(props.request.mode)) {
+      formData.mode = 'gray'
+      formData.host_ids = props.request.mode
+    }
+    http.post(`/api/deploy/request/${props.request.id}/`, formData)
       .then(res => {
         _handleResponse(res)
         socket = _makeSocket()

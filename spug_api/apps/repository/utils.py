@@ -26,6 +26,7 @@ def dispatch(rep: Repository, helper=None):
         helper = Helper.make(rds, rep.deploy_key, ['local'])
         rep.save()
     try:
+        helper.set_deploy_process('local')
         api_token = uuid.uuid4().hex
         helper.rds.setex(api_token, 60 * 60, f'{rep.app_id},{rep.env_id}')
         env = AttrDict(
@@ -63,8 +64,10 @@ def dispatch(rep: Repository, helper=None):
 
         _build(rep, helper, env)
         rep.status = '5'
+        helper.set_deploy_success('local')
     except Exception as e:
         rep.status = '2'
+        helper.set_deploy_fail('local')
         raise e
     finally:
         helper.local(f'cd {REPOS_DIR} && rm -rf {rep.spug_version}')

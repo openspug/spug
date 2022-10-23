@@ -39,7 +39,7 @@ export default observer(function () {
       }, () => setLoading(false))
   }
 
-  const {app_host_ids, deploy_id} = store.record;
+  const {app_host_ids, deploy_id, deploy_status} = store.record;
   return (
     <Modal
       visible
@@ -79,8 +79,10 @@ export default observer(function () {
         </Form.Item>
       </Form>
       {visible && <HostSelector
+        title="选择回滚发布的主机"
         host_ids={host_ids}
         app_host_ids={app_host_ids}
+        deploy_status={deploy_status}
         onCancel={() => setVisible(false)}
         onOk={ids => setHostIds(ids)}/>}
     </Modal>

@@ -5,7 +5,6 @@ from django.views.generic import View
 from django.db.models import F
 from django.conf import settings
 from django.http.response import HttpResponseBadRequest
-from django_redis import get_redis_connection
 from libs import json_response, JsonParser, Argument, human_datetime, human_time, auth, AttrDict
 from apps.deploy.models import DeployRequest
 from apps.app.models import Deploy, DeployExtend2
@@ -46,7 +45,7 @@ class RequestView(View):
             tmp['app_name'] = item.app_name
             tmp['app_extend'] = item.app_extend
             tmp['host_ids'] = json.loads(item.host_ids)
-            tmp['fail_host_ids'] = json.loads(item.fail_host_ids)
+            tmp['deploy_status'] = json.loads(item.deploy_status)
             tmp['extra'] = json.loads(item.extra) if item.extra else None
             tmp['rep_extra'] = json.loads(item.rep_extra) if item.rep_extra else None
             tmp['app_host_ids'] = json.loads(item.app_host_ids)
@@ -125,49 +124,72 @@ class RequestDetailView(View):
 
     @auth('deploy.request.do')
     def post(self, request, r_id):
-        form, _ = JsonParser(Argument('mode', default='all')).parse(request.body)
-        query, is_fail_mode = {'pk': r_id}, form.mode == 'fail'
-        if not request.user.is_supper:
-            perms = request.user.deploy_perms
-            query['deploy__app_id__in'] = perms['apps']
-            query['deploy__env_id__in'] = perms['envs']
-        req = DeployRequest.objects.filter(**query).first()
-        if not req:
-            return json_response(error='未找到指定发布申请')
-        if req.status not in ('1', '-3'):
-            return json_response(error='该申请单当前状态还不能执行发布')
-        host_ids = req.fail_host_ids if is_fail_mode else req.host_ids
+        form, error = JsonParser(
+            Argument('mode', filter=lambda x: x in ('fail', 'gray', 'all'), help='参数错误'),
+            Argument('host_ids', type=list, required=False)
+        ).parse(request.body)
+        if error is None:
+            query, is_fail_mode = {'pk': r_id}, form.mode == 'fail'
+            if not request.user.is_supper:
+                perms = request.user.deploy_perms
+                query['deploy__app_id__in'] = perms['apps']
+                query['deploy__env_id__in'] = perms['envs']
+            req = DeployRequest.objects.filter(**query).first()
+            if not req:
+                return json_response(error='未找到指定发布申请')
+            if req.status not in ('1', '-3', '4'):
+                return json_response(error='该申请单当前状态还不能执行发布')
 
-        req.status = '2'
-        req.do_at = human_datetime()
-        req.do_by = request.user
-        req.save()
-        Thread(target=dispatch, args=(req, is_fail_mode)).start()
-
-        hosts = Host.objects.filter(id__in=json.loads(host_ids))
-        message = Helper.term_message('等待调度...        ')
-        outputs = {x.id: {'id': x.id, 'title': x.name, 'data': message} for x in hosts}
-        if req.is_quick_deploy:
-            if req.repository_id:
-                outputs['local'] = {
-                    'id': 'local',
-                    'status': 'success',
-                    'data': Helper.term_message('已构建完成忽略执行', 'warn')
-                }
+            deploy_status = json.loads(req.deploy_status)
+            if form.mode == 'gray':
+                if not form.host_ids:
+                    return json_response(error='请选择灰度发布的主机')
+                host_ids = form.host_ids
+            elif form.mode == 'fail':
+                host_ids = [int(k) for k, v in deploy_status.items() if v != '2' and k != 'local']
             else:
-                outputs['local'] = {'id': 'local', 'data': Helper.term_message('等待初始化...        ')}
-        if req.deploy.extend == '2':
-            message = Helper.term_message('等待初始化...        ')
-            if is_fail_mode:
-                message = Helper.term_message('已完成本地动作忽略执行', 'warn')
-            outputs['local'] = {'id': 'local', 'data': message}
-            s_actions = json.loads(req.deploy.extend_obj.server_actions)
-            h_actions = json.loads(req.deploy.extend_obj.host_actions)
-            if not s_actions:
-                outputs.pop('local')
-            if not h_actions:
-                outputs = {'local': outputs['local']}
-        return json_response({'outputs': outputs, 'token': req.deploy_key})
+                host_ids = json.loads(req.host_ids)
+
+            with_local = False
+            hosts = Host.objects.filter(id__in=host_ids)
+            message = Helper.term_message('等待调度...        ')
+            outputs = {x.id: {'id': x.id, 'title': x.name, 'data': message} for x in hosts}
+            if req.deploy.extend == '1':
+                if req.repository_id:
+                    if req.is_quick_deploy:
+                        outputs['local'] = {
+                            'id': 'local',
+                            'status': 'success',
+                            'data': Helper.term_message('已构建完成忽略执行', 'warn')
+                        }
+                else:
+                    with_local = True
+                    outputs['local'] = {'id': 'local', 'data': Helper.term_message('等待初始化...        ')}
+            elif req.deploy.extend == '2':
+                s_actions = json.loads(req.deploy.extend_obj.server_actions)
+                h_actions = json.loads(req.deploy.extend_obj.host_actions)
+                if s_actions:
+                    if deploy_status.get('local') == '2':
+                        outputs['local'] = {
+                            'id': 'local',
+                            'status': 'success',
+                            'data': Helper.term_message('已完成本地动作忽略执行', 'warn')
+                        }
+                    else:
+                        with_local = True
+                        outputs['local'] = {'id': 'local', 'data': Helper.term_message('等待初始化...        ')}
+                if not h_actions:
+                    outputs = {'local': outputs['local']}
+            else:
+                raise NotImplementedError
+
+            req.status = '2'
+            req.do_at = human_datetime()
+            req.do_by = request.user
+            req.save()
+            Thread(target=dispatch, args=(req, host_ids, with_local)).start()
+            return json_response({'outputs': outputs, 'token': req.deploy_key})
+        return json_response(error=error)
 
     @auth('deploy.request.approve')
     def patch(self, request, r_id):
@@ -323,7 +345,7 @@ def get_request_info(request):
     if error is None:
         req = DeployRequest.objects.get(pk=form.id)
         response = req.to_dict(selects=('status', 'reason'))
-        response['fail_host_ids'] = json.loads(req.fail_host_ids)
+        response['deploy_status'] = json.loads(req.deploy_status)
         response['status_alias'] = req.get_status_display()
         return json_response(response)
     return json_response(error=error)

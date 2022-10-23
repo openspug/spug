@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Table, Button, Alert } from 'antd';
+import { Modal, Table, Button, Alert, Tag } from 'antd';
 import hostStore from 'pages/host/store';
 
 export default observer(function (props) {
@@ -31,19 +31,34 @@ export default observer(function (props) {
     }
   }
 
+  function DeployStatus(props) {
+    switch (props.status) {
+      case '0':
+        return <Tag color="blue">待调度</Tag>
+      case '1':
+        return <Tag color="orange">发布中</Tag>
+      case '2':
+        return <Tag color="green">发布成功</Tag>
+      case '3':
+        return <Tag color="red">发布失败</Tag>
+      default:
+        return <Tag color="blue">待发布</Tag>
+    }
+  }
+
   return (
     <Modal
       visible
-      width={600}
-      title='可选主机列表'
+      width={800}
+      title={props.title}
       onOk={handleSubmit}
+      okButtonProps={{disabled: selectedRowKeys.length === 0}}
       onCancel={props.onCancel}>
-      {selectedRowKeys.length > 0 && (
-        <Alert
-          style={{marginBottom: 12}}
-          message={`已选择 ${selectedRowKeys.length} 台主机`}
-          action={<Button type="link" onClick={() => setSelectedRowKeys([])}>取消选择</Button>}/>
-      )}
+      <Alert
+        style={{marginBottom: 12}}
+        message={<span>已选择 <b style={{color: '#2563fc', fontSize: 18}}>{selectedRowKeys.length}</b> 台主机</span>}
+        action={<Button type="link" disabled={selectedRowKeys.length === 0}
+                        onClick={() => setSelectedRowKeys([])}>取消选择</Button>}/>
       <Table
         rowKey="id"
         dataSource={hostStore.records.filter(x => props.app_host_ids.includes(x.id))}
@@ -61,6 +76,10 @@ export default observer(function (props) {
         }}>
         <Table.Column title="主机名称" dataIndex="name"/>
         <Table.Column title="连接地址" dataIndex="hostname"/>
+        <Table.Column title="备注信息" dataIndex="desc"/>
+        {props.deploy_status ? (
+          <Table.Column title="发布状态" render={v => <DeployStatus status={props.deploy_status[v.id]}/>}/>
+        ) : null}
       </Table>
     </Modal>
   )

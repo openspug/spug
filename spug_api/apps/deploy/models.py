@@ -19,6 +19,7 @@ class DeployRequest(models.Model, ModelMixin):
         ('1', '待发布'),
         ('2', '发布中'),
         ('3', '发布成功'),
+        ('4', '灰度成功'),
     )
     TYPES = (
         ('1', '正常发布'),
@@ -37,8 +38,7 @@ class DeployRequest(models.Model, ModelMixin):
     version = models.CharField(max_length=100, null=True)
     spug_version = models.CharField(max_length=50, null=True)
     plan = models.DateTimeField(null=True)
-    fail_host_ids = models.TextField(default='[]')
-
+    deploy_status = models.TextField(default='{}')
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
     approve_at = models.CharField(max_length=20, null=True)
@@ -67,6 +67,7 @@ class DeployRequest(models.Model, ModelMixin):
                 os.remove(os.path.join(settings.REPOS_DIR, str(self.deploy_id), self.spug_version))
             except FileNotFoundError:
                 pass
+        #TODO: 清理日志文件, 删除自定义发布tar.gz文件
 
     def __repr__(self):
         return f'<DeployRequest name={self.name}>'

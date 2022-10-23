@@ -120,6 +120,7 @@ export default observer(function () {
         )}
       </Form>
       {visible && <HostSelector
+        title="可选主机列表"
         host_ids={host_ids}
         app_host_ids={app_host_ids}
         onCancel={() => setVisible(false)}

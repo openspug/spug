@@ -231,6 +231,8 @@ class Helper(NotifyMixin, KitMixin):
         self.callback = []
         self.buffers = defaultdict(str)
         self.flags = defaultdict(bool)
+        self.deploy_status = {}
+        self.deploy_host_ids = []
         self.files = {}
         self.already_clear = False
 
@@ -242,6 +244,9 @@ class Helper(NotifyMixin, KitMixin):
         rds.delete(rds_key)
         instance = cls(rds, rds_key)
         for key in keys:
+            if key != 'local':
+                instance.deploy_host_ids.append(key)
+            instance.deploy_status[key] = '0'
             instance.get_file(key)
         return instance
 
@@ -281,6 +286,15 @@ class Helper(NotifyMixin, KitMixin):
                         outputs[key]['status'] = status
                     line = f.readline()
         return counter
+
+    def set_deploy_process(self, key):
+        self.deploy_status[key] = '1'
+
+    def set_deploy_success(self, key):
+        self.deploy_status[key] = '2'
+
+    def set_deploy_fail(self, key):
+        self.deploy_status[key] = '3'
 
     def get_file(self, key):
         if key in self.files:
