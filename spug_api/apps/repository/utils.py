@@ -6,7 +6,6 @@ from django.conf import settings
 from django.db import close_old_connections
 from libs.utils import AttrDict, human_datetime, render_str, human_seconds_time
 from apps.repository.models import Repository
-from apps.app.utils import fetch_repo
 from apps.config.utils import compose_configs
 from apps.deploy.helper import Helper
 import json
