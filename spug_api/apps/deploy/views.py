@@ -5,7 +5,7 @@ from django.views.generic import View
 from django.db.models import F
 from django.conf import settings
 from django.http.response import HttpResponseBadRequest
-from libs import json_response, JsonParser, Argument, human_datetime, human_time, auth, AttrDict
+from libs import json_response, JsonParser, Argument, human_datetime, auth, AttrDict
 from apps.deploy.models import DeployRequest
 from apps.app.models import Deploy, DeployExtend2
 from apps.repository.models import Repository
@@ -68,9 +68,7 @@ class RequestView(View):
         ).parse(request.GET)
         if error is None:
             if form.id:
-                deploy = DeployRequest.objects.filter(pk=form.id).first()
-                if not deploy or deploy.status not in ('0', '1', '-1'):
-                    return json_response(error='未找到指定发布申请或当前状态不允许删除')
+                deploy = DeployRequest.objects.get(pk=form.id)
                 deploy.delete()
                 return json_response()
 

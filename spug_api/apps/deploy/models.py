@@ -58,9 +58,8 @@ class DeployRequest(models.Model, ModelMixin):
         return f'{settings.REQUEST_KEY}:{self.id}'
 
     def delete(self, using=None, keep_parents=False):
-        super().delete(using, keep_parents)
         if self.repository_id:
-            if not DeployRequest.objects.filter(repository=self.repository).exists():
+            if not self.repository.deployrequest_set.exclude(id=self.id).exists():
                 self.repository.delete()
         if self.deploy.extend == '2':
             for p in Path(settings.REPOS_DIR, str(self.deploy_id)).glob(f'{self.spug_version}*'):
@@ -73,6 +72,7 @@ class DeployRequest(models.Model, ModelMixin):
                 p.unlink()
             except FileNotFoundError:
                 pass
+        super().delete(using, keep_parents)
 
     def __repr__(self):
         return f'<DeployRequest name={self.name}>'

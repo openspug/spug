@@ -94,7 +94,6 @@ export default observer(function () {
     formData['extra'] = [git_type, extra1, extra2];
     http.post('/api/repository/', formData)
       .then(res => {
-        message.success('操作成功');
         store.formVisible = false;
         store.showConsole(res)
       }, () => setLoading(false))

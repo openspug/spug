@@ -54,7 +54,6 @@ class Repository(models.Model, ModelMixin):
         return tmp
 
     def delete(self, using=None, keep_parents=False):
-        super().delete(using, keep_parents)
         try:
             Path(settings.BUILD_DIR, f'{self.spug_version}.tar.gz').unlink()
         except FileNotFoundError:
@@ -65,6 +64,7 @@ class Repository(models.Model, ModelMixin):
                 p.unlink()
             except FileNotFoundError:
                 pass
+        super().delete(using, keep_parents)
 
     class Meta:
         db_table = 'repositories'

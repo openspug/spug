@@ -97,7 +97,7 @@ function ComTable() {
   }, {
     title: '状态',
     fixed: 'right',
-    className: S.min120,
+    width: 120,
     render: info => {
       if (info.status === '-1' && info.reason) {
         return <Popover title="驳回原因:" content={info.reason}>
@@ -120,6 +120,7 @@ function ComTable() {
   }, {
     title: '操作',
     fixed: 'right',
+    width: 220,
     className: hasPermission('deploy.request.do|deploy.request.edit|deploy.request.approve|deploy.request.del') ? S.min180 : 'none',
     render: info => {
       switch (info.status) {
@@ -130,6 +131,7 @@ function ComTable() {
             {info.visible_rollback && (
               <Action.Button auth="deploy.request.do" onClick={() => store.rollback(info)}>回滚</Action.Button>
             )}
+            <Action.Button danger auth="deploy.request.del" onClick={() => handleDelete(info)}>删除</Action.Button>
           </Action>;
         case '3':
           return <Action>
@@ -137,6 +139,7 @@ function ComTable() {
             {info.visible_rollback && (
               <Action.Button auth="deploy.request.do" onClick={() => store.rollback(info)}>回滚</Action.Button>
             )}
+            <Action.Button danger auth="deploy.request.del" onClick={() => handleDelete(info)}>删除</Action.Button>
           </Action>;
         case '4':
           return <Action>
@@ -145,11 +148,13 @@ function ComTable() {
             {info.visible_rollback && (
               <Action.Button auth="deploy.request.do" onClick={() => store.rollback(info)}>回滚</Action.Button>
             )}
+            <Action.Button danger auth="deploy.request.del" onClick={() => handleDelete(info)}>删除</Action.Button>
           </Action>;
         case '-1':
           return <Action>
             <Action.Button auth="deploy.request.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
             <Action.Button auth="deploy.request.del" onClick={() => handleDelete(info)}>删除</Action.Button>
+            <Action.Button danger auth="deploy.request.del" onClick={() => handleDelete(info)}>删除</Action.Button>
           </Action>;
         case '0':
           return <Action>
@@ -165,6 +170,7 @@ function ComTable() {
         case '2':
           return <Action>
             <Action.Button auth="deploy.request.do" onClick={() => store.readConsole(info)}>查看</Action.Button>
+            <Action.Button danger auth="deploy.request.del" onClick={() => handleDelete(info)}>删除</Action.Button>
           </Action>;
         default:
           return null
@@ -196,7 +202,7 @@ function ComTable() {
   function handleDelete(info) {
     Modal.confirm({
       title: '删除确认',
-      content: `确定要删除【${info['name']}】?`,
+      content: `确定要删除发布申请【${info['name']}】?`,
       onOk: () => {
         return http.delete('/api/deploy/request/', {params: {id: info.id}})
           .then(() => {
