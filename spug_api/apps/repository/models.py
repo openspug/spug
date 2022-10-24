@@ -7,8 +7,8 @@ from libs.mixins import ModelMixin
 from apps.app.models import App, Environment, Deploy
 from apps.account.models import User
 from datetime import datetime
+from pathlib import Path
 import json
-import os
 
 
 class Repository(models.Model, ModelMixin):
@@ -56,10 +56,15 @@ class Repository(models.Model, ModelMixin):
     def delete(self, using=None, keep_parents=False):
         super().delete(using, keep_parents)
         try:
-            build_file = f'{self.spug_version}.tar.gz'
-            os.remove(os.path.join(settings.BUILD_DIR, build_file))
+            Path(settings.BUILD_DIR, f'{self.spug_version}.tar.gz').unlink()
         except FileNotFoundError:
             pass
+
+        for p in Path(settings.DEPLOY_DIR).glob(f'{self.deploy_key}:*'):
+            try:
+                p.unlink()
+            except FileNotFoundError:
+                pass
 
     class Meta:
         db_table = 'repositories'

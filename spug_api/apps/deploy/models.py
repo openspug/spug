@@ -7,8 +7,8 @@ from libs import ModelMixin, human_datetime
 from apps.account.models import User
 from apps.app.models import Deploy
 from apps.repository.models import Repository
+from pathlib import Path
 import json
-import os
 
 
 class DeployRequest(models.Model, ModelMixin):
@@ -63,11 +63,16 @@ class DeployRequest(models.Model, ModelMixin):
             if not DeployRequest.objects.filter(repository=self.repository).exists():
                 self.repository.delete()
         if self.deploy.extend == '2':
+            for p in Path(settings.REPOS_DIR, str(self.deploy_id)).glob(f'{self.spug_version}*'):
+                try:
+                    p.unlink()
+                except FileNotFoundError:
+                    pass
+        for p in Path(settings.DEPLOY_DIR).glob(f'{self.deploy_key}:*'):
             try:
-                os.remove(os.path.join(settings.REPOS_DIR, str(self.deploy_id), self.spug_version))
+                p.unlink()
             except FileNotFoundError:
                 pass
-        #TODO: 清理日志文件, 删除自定义发布tar.gz文件
 
     def __repr__(self):
         return f'<DeployRequest name={self.name}>'

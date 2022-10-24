@@ -190,6 +190,7 @@ class SSH:
         command = '[ -n "$BASH_VERSION" ] && set +o history\n'
         command += '[ -n "$ZSH_VERSION" ] && set +o zle && set -o no_nomatch\n'
         command += 'export PS1= && stty -echo\n'
+        command += self._make_env_command(self.default_env)
         command += f'echo {self.eof} $$\n'
         self.channel.sendall(command)
         out = ''
@@ -220,7 +221,7 @@ class SSH:
 
     def _make_env_command(self, environment):
         if not environment:
-            return None
+            return ''
         str_envs = []
         for k, v in environment.items():
             k = k.replace('-', '_')
@@ -228,7 +229,7 @@ class SSH:
                 v = v.replace("'", "'\"'\"'")
             str_envs.append(f"{k}='{v}'")
         str_envs = ' '.join(str_envs)
-        return f'export {str_envs}'
+        return f'export {str_envs}\n'
 
     def _handle_command(self, command, environment):
         new_command = commands = ''
@@ -236,9 +237,7 @@ class SSH:
             self.exec_file = f'/tmp/spug.{uuid4().hex}'
             commands += f'trap \'rm -f {self.exec_file}\' EXIT\n'
 
-        env_command = self._make_env_command(environment)
-        if env_command:
-            new_command += f'{env_command}\n'
+        new_command += self._make_env_command(environment)
         new_command += command
         new_command += f'\necho {self.eof} $?\n'
         self.put_file_by_fl(StringIO(new_command), self.exec_file)
