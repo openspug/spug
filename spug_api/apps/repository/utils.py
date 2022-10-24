@@ -87,7 +87,6 @@ def _build(rep: Repository, helper, env):
     build_dir = os.path.join(REPOS_DIR, rep.spug_version)
     tar_file = os.path.join(BUILD_DIR, f'{rep.spug_version}.tar.gz')
     env.update(SPUG_DST_DIR=render_str(extend.dst_dir, env))
-    fetch_repo(rep.deploy_id, extend.git_repo)
     helper.send_success('local', '完成√\r\n')
 
     if extend.hook_pre_server:
