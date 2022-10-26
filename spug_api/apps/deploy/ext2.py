@@ -3,6 +3,7 @@
 # Released under the AGPL-3.0 License.
 from django.conf import settings
 from libs.utils import AttrDict, render_str, human_seconds_time
+from libs.executor import Executor
 from apps.host.models import Host
 from apps.deploy.helper import SpugError
 from concurrent import futures
@@ -38,48 +39,52 @@ def ext2_deploy(req, helper, env, with_local):
                 transfer_action = action
             break
 
-    if with_local:
-        helper.set_deploy_process('local')
-        helper.send_success('local', '', status='doing')
-        if server_actions or transfer_action:
-            helper.send_clear('local')
-        for action in server_actions:
-            helper.send_info('local', f'{action["title"]}...\r\n')
-            helper.local(f'cd /tmp && {action["data"]}', env)
-            step += 1
-        if transfer_action:
-            action = transfer_action
-            helper.send_info('local', '检测到来源为本地路径的数据传输动作，执行打包...   \r\n')
-            action['src'] = action['src'].rstrip('/ ')
-            action['dst'] = action['dst'].rstrip('/ ')
-            if not action['src'] or not action['dst']:
-                helper.send_error('local', f'Invalid path for transfer, src: {action["src"]} dst: {action["dst"]}')
-            if not os.path.exists(action['src']):
-                helper.send_error('local', f'No such file or directory: {action["src"]}')
-            is_dir, exclude = os.path.isdir(action['src']), ''
-            sp_dir, sd_dst = os.path.split(action['src'])
-            contain = sd_dst
-            if action['mode'] != '0' and is_dir:
-                files = helper.parse_filter_rule(action['rule'], ',', env)
-                if files:
-                    if action['mode'] == '1':
-                        contain = ' '.join(f'{sd_dst}/{x}' for x in files)
-                    else:
-                        excludes = []
-                        for x in files:
-                            if x.startswith('/'):
-                                excludes.append(f'--exclude={sd_dst}{x}')
-                            else:
-                                excludes.append(f'--exclude={x}')
-                        exclude = ' '.join(excludes)
-            tar_gz_file = os.path.join(REPOS_DIR, env.SPUG_DEPLOY_ID, f'{req.spug_version}.tar.gz')
-            helper.local(f'cd {sp_dir} && tar -zcf {tar_gz_file} {exclude} {contain}')
-            helper.send_info('local', '打包完成\r\n')
-        helper.set_deploy_success('local')
-        human_time = human_seconds_time(time.time() - flag)
-        helper.send_success('local', f'\r\n** 执行完成，耗时：{human_time} **', status='success')
+    if with_local or True:
+        with Executor(env) as et:
+            helper.save_pid(et.pid, 'local')
+            helper.set_deploy_process('local')
+            helper.send_success('local', '', status='doing')
+            if server_actions or transfer_action:
+                helper.send_clear('local')
+            for action in server_actions:
+                helper.send_info('local', f'{action["title"]}...\r\n')
+                helper.local(et, f'cd /tmp && {action["data"]}')
+                step += 1
+            if transfer_action:
+                action = transfer_action
+                helper.send_info('local', '检测到来源为本地路径的数据传输动作，执行打包...   \r\n')
+                action['src'] = action['src'].rstrip('/ ')
+                action['dst'] = action['dst'].rstrip('/ ')
+                if not action['src'] or not action['dst']:
+                    helper.send_error('local', f'Invalid path for transfer, src: {action["src"]} dst: {action["dst"]}')
+                if not os.path.exists(action['src']):
+                    helper.send_error('local', f'No such file or directory: {action["src"]}')
+                is_dir, exclude = os.path.isdir(action['src']), ''
+                sp_dir, sd_dst = os.path.split(action['src'])
+                contain = sd_dst
+                if action['mode'] != '0' and is_dir:
+                    files = helper.parse_filter_rule(action['rule'], ',', env)
+                    if files:
+                        if action['mode'] == '1':
+                            contain = ' '.join(f'{sd_dst}/{x}' for x in files)
+                        else:
+                            excludes = []
+                            for x in files:
+                                if x.startswith('/'):
+                                    excludes.append(f'--exclude={sd_dst}{x}')
+                                else:
+                                    excludes.append(f'--exclude={x}')
+                            exclude = ' '.join(excludes)
+                tar_gz_file = os.path.join(REPOS_DIR, env.SPUG_DEPLOY_ID, f'{req.spug_version}.tar.gz')
+                helper.local_raw(f'cd {sp_dir} && tar -zcf {tar_gz_file} {exclude} {contain}')
+                helper.send_info('local', '打包完成\r\n')
+            helper.set_deploy_success('local')
+            human_time = human_seconds_time(time.time() - flag)
+            helper.send_success('local', f'\r\n** 执行完成，耗时：{human_time} **', status='success')
+            helper.set_cross_env(req.spug_version, et.get_envs())
 
     if host_actions:
+        env.update(helper.get_cross_env(req.spug_version))
         if req.deploy.is_parallel:
             threads, latest_exception = [], None
             max_workers = max(10, os.cpu_count() * 5)

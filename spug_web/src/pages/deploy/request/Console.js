@@ -124,12 +124,10 @@ function Console(props) {
       }
     }
     socket.onerror = () => {
-      for (let key of Object.keys(store.outputs)) {
-        if (outputs[key].status === -2) {
-          outputs[key].status = -1
-        }
-        outputs[key].data += '\r\n\x1b[31mWebsocket connection failed!\x1b[0m'
-        term.write('\r\n\x1b[31mWebsocket connection failed!\x1b[0m')
+      const data = '\r\n\x1b[31mWebsocket connection failed!\x1b[0m'
+      for (let key of Object.keys(outputs)) {
+        if (key === gCurrent) term.write(data)
+        outputs[key].data += data
       }
     }
     return socket

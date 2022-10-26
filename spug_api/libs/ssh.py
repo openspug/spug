@@ -61,7 +61,7 @@ class SSH:
         self.pid = None
         self.eof = 'Spug EOF 2108111926'
         self.default_env = default_env
-        self.regex = re.compile(r'Spug EOF 2108111926 (-?\d+)[\r\n]?')
+        self.regex = re.compile(r'(?<!echo )Spug EOF 2108111926 (-?\d+)[\r\n]?')
         self.arguments = {
             'hostname': hostname,
             'port': port,

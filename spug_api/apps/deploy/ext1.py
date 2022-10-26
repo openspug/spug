@@ -29,6 +29,8 @@ def ext1_deploy(req, helper, env):
         )
         build_repository(rep, helper)
         req.repository = rep
+    env.update(SPUG_BUILD_ID=str(req.repository_id))
+    env.update(helper.get_cross_env(req.spug_version))
     extras = json.loads(req.extra)
     if extras[0] == 'repository':
         extras = extras[1:]

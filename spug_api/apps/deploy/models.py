@@ -72,6 +72,10 @@ class DeployRequest(models.Model, ModelMixin):
                 p.unlink()
             except FileNotFoundError:
                 pass
+        try:
+            Path(settings.DEPLOY_DIR, self.spug_version).unlink()
+        except FileNotFoundError:
+            pass
         super().delete(using, keep_parents)
 
     def __repr__(self):

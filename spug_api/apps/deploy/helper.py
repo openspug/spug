@@ -303,6 +303,18 @@ class Helper(NotifyMixin, KitMixin):
         self.files[key] = file
         return file
 
+    def get_cross_env(self, key):
+        file = os.path.join(settings.DEPLOY_DIR, key)
+        if os.path.exists(file):
+            with open(file, 'r') as f:
+                return json.loads(f.read())
+        return {}
+
+    def set_cross_env(self, key, envs):
+        file = os.path.join(settings.DEPLOY_DIR, key)
+        with open(file, 'w') as f:
+            f.write(json.dumps(envs))
+
     def add_callback(self, func):
         self.callback.append(func)
 
@@ -389,7 +401,14 @@ class Helper(NotifyMixin, KitMixin):
         self._send(key, '\r\n')
         return partial(func, key)
 
-    def local(self, command, env=None):
+    def local(self, executor, command):
+        code = -1
+        for code, out in executor.exec_command_with_stream(command):
+            self._send('local', out)
+        if code != 0:
+            self.send_error('local', f'exit code: {code}')
+
+    def local_raw(self, command, env=None):
         if env:
             env = dict(env.items())
             env.update(os.environ)
@@ -398,9 +417,7 @@ class Helper(NotifyMixin, KitMixin):
             env=env,
             shell=True,
             stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            preexec_fn=os.setsid)
-        self.save_pid(task.pid, 'local')
+            stderr=subprocess.STDOUT)
         message = b''
         while True:
             output = task.stdout.read(1)

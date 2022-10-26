@@ -5,6 +5,7 @@ from django_redis import get_redis_connection
 from django.conf import settings
 from django.db import close_old_connections
 from libs.utils import AttrDict, human_datetime, render_str, human_seconds_time
+from libs.executor import Executor
 from apps.repository.models import Repository
 from apps.config.utils import compose_configs
 from apps.deploy.helper import Helper
@@ -69,7 +70,7 @@ def dispatch(rep: Repository, helper=None):
         helper.set_deploy_fail('local')
         raise e
     finally:
-        helper.local(f'cd {REPOS_DIR} && rm -rf {rep.spug_version}')
+        helper.local_raw(f'cd {REPOS_DIR} && rm -rf {rep.spug_version}')
         close_old_connections()
         if alone_build:
             helper.clear()
@@ -88,35 +89,38 @@ def _build(rep: Repository, helper, env):
     env.update(SPUG_DST_DIR=render_str(extend.dst_dir, env))
     helper.send_success('local', '完成√\r\n')
 
-    if extend.hook_pre_server:
-        helper.send_info('local', '检出前任务...\r\n')
-        helper.local(f'cd {git_dir} && {extend.hook_pre_server}', env)
+    with Executor(env) as et:
+        helper.save_pid(et.pid, 'local')
+        if extend.hook_pre_server:
+            helper.send_info('local', '检出前任务...\r\n')
+            helper.local(et, f'cd {git_dir} && {extend.hook_pre_server}')
 
-    helper.send_info('local', '执行检出...        ')
-    tree_ish = env.get('SPUG_GIT_COMMIT_ID') or env.get('SPUG_GIT_TAG')
-    command = f'cd {git_dir} && git archive --prefix={rep.spug_version}/ {tree_ish} | (cd .. && tar xf -)'
-    helper.local(command)
-    helper.send_success('local', '完成√\r\n')
+        helper.send_info('local', '执行检出...        ')
+        tree_ish = env.get('SPUG_GIT_COMMIT_ID') or env.get('SPUG_GIT_TAG')
+        command = f'cd {git_dir} && git archive --prefix={rep.spug_version}/ {tree_ish} | (cd .. && tar xf -)'
+        helper.local_raw(command)
+        helper.send_success('local', '完成√\r\n')
 
-    if extend.hook_post_server:
-        helper.send_info('local', '检出后任务...\r\n')
-        helper.local(f'cd {build_dir} && {extend.hook_post_server}', env)
+        if extend.hook_post_server:
+            helper.send_info('local', '检出后任务...\r\n')
+            helper.local(et, f'cd {build_dir} && {extend.hook_post_server}')
 
-    helper.send_info('local', '执行打包...        ')
-    filter_rule, exclude, contain = json.loads(extend.filter_rule), '', rep.spug_version
-    files = helper.parse_filter_rule(filter_rule['data'], env=env)
-    if files:
-        if filter_rule['type'] == 'exclude':
-            excludes = []
-            for x in files:
-                if x.startswith('/'):
-                    excludes.append(f'--exclude={rep.spug_version}{x}')
-                else:
-                    excludes.append(f'--exclude={x}')
-            exclude = ' '.join(excludes)
-        else:
-            contain = ' '.join(f'{rep.spug_version}/{x}' for x in files)
-    helper.local(f'mkdir -p {BUILD_DIR} && cd {REPOS_DIR} && tar zcf {tar_file} {exclude} {contain}')
-    helper.send_success('local', '完成√\r\n')
-    human_time = human_seconds_time(time.time() - flag)
-    helper.send_success('local', f'\r\n** 构建成功，耗时：{human_time} **\r\n', status='success')
+        helper.send_info('local', '执行打包...        ')
+        filter_rule, exclude, contain = json.loads(extend.filter_rule), '', rep.spug_version
+        files = helper.parse_filter_rule(filter_rule['data'], env=env)
+        if files:
+            if filter_rule['type'] == 'exclude':
+                excludes = []
+                for x in files:
+                    if x.startswith('/'):
+                        excludes.append(f'--exclude={rep.spug_version}{x}')
+                    else:
+                        excludes.append(f'--exclude={x}')
+                exclude = ' '.join(excludes)
+            else:
+                contain = ' '.join(f'{rep.spug_version}/{x}' for x in files)
+        helper.local_raw(f'mkdir -p {BUILD_DIR} && cd {REPOS_DIR} && tar zcf {tar_file} {exclude} {contain}')
+        helper.send_success('local', '完成√\r\n')
+        human_time = human_seconds_time(time.time() - flag)
+        helper.send_success('local', f'\r\n** 构建成功，耗时：{human_time} **\r\n', status='success')
+        helper.set_cross_env(rep.spug_version, et.get_envs())
