@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { LoadingOutlined, SyncOutlined } from '@ant-design/icons';
-import { Modal, Form, Input, Select, Button, message } from 'antd';
+import { Modal, Form, Input, Select, Button } from 'antd';
 import http from 'libs/http';
 import store from './store';
 import lds from 'lodash';
