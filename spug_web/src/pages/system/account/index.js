@@ -10,15 +10,8 @@ import { SearchForm, AuthDiv, Breadcrumb } from 'components';
 import ComTable from './Table';
 import ComForm from './Form';
 import store from './store';
-import rStore from '../role/store';
 
 export default observer(function () {
-  useEffect(() => {
-    if (rStore.records.length === 0) {
-      rStore.fetchRecords()
-    }
-  }, [])
-
   return (
     <AuthDiv auth="system.account.view">
       <Breadcrumb>
