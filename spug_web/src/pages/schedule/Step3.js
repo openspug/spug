@@ -83,7 +83,7 @@ export default observer(function () {
   }
 
   return (
-    <Form layout="vertical" wrapperCol={{span: 14, offset: 6}}>
+    <Form layout="vertical" wrapperCol={{span: 14, offset: 5}}>
       <Form.Item>
         <Tabs activeKey={trigger} onChange={setTrigger} tabPosition="left" style={{minHeight: 200}}>
           <Tabs.TabPane tab="普通间隔" key="interval">
