@@ -22,7 +22,12 @@ class ComTable extends React.Component {
   }
 
   componentDidMount() {
-    store.fetchRecords()
+    if (rStore.records.length === 0) {
+      rStore.fetchRecords()
+        .then(() => store.fetchRecords())
+    } else {
+      store.fetchRecords()
+    }
   }
 
   columns = [{

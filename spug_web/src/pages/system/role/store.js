@@ -43,7 +43,7 @@ class Store {
 
   fetchRecords = () => {
     this.isFetching = true;
-    http.get('/api/account/role/')
+    return http.get('/api/account/role/')
       .then(res => this.records = res)
       .finally(() => this.isFetching = false)
   };
