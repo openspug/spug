@@ -49,9 +49,9 @@ export default observer(function () {
 
   function fetchVersions() {
     setFetching(true);
-    const deploy_id = store.record.deploy_id
+    const {app_id, deploy_id} = store.record
     const p1 = http.get(`/api/app/deploy/${deploy_id}/versions/`, {timeout: 300000})
-    const p2 = http.get('/api/repository/', {params: {deploy_id}})
+    const p2 = http.get('/api/repository/', {params: {app_id}})
     Promise.all([p1, p2])
       .then(([res1, res2]) => {
         if (!versions.branches) _initial(res1, res2)
@@ -193,7 +193,7 @@ export default observer(function () {
                     <Select.Option key={item.id} value={item.id} content={item.version}
                                    disabled={type === '2' && item.id >= rb_id}>
                       <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <span>{item.version}</span>
+                        <span>{item.env_name} - {item.version}</span>
                         <span style={{color: '#999', fontSize: 12}}>构建于 {moment(item.created_at).fromNow()}</span>
                       </div>
                     </Select.Option>

@@ -18,13 +18,13 @@ import json
 class RepositoryView(View):
     @auth('deploy.repository.view|deploy.request.add|deploy.request.edit')
     def get(self, request):
-        deploy_id = request.GET.get('deploy_id')
+        app_id = request.GET.get('app_id')
         data = Repository.objects.annotate(
             app_name=F('app__name'),
             env_name=F('env__name'),
             created_by_user=F('created_by__nickname'))
-        if deploy_id:
-            data = data.filter(deploy_id=deploy_id, status='5')
+        if app_id:
+            data = data.filter(app_id=app_id, status='5')
             return json_response([x.to_view() for x in data])
 
         response = dict()

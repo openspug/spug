@@ -97,8 +97,8 @@ class Store {
   };
 
   confirmAdd = (deploy) => {
-    const {id, host_ids, require_upload} = deploy;
-    this.record = {deploy_id: id, app_host_ids: host_ids, require_upload};
+    const {id, app_id, host_ids, require_upload} = deploy;
+    this.record = {app_id, deploy_id: id, app_host_ids: host_ids, require_upload};
     if (deploy.extend === '1') {
       this.ext1Visible = true
     } else {
@@ -108,7 +108,7 @@ class Store {
   };
 
   rollback = (info) => {
-    this.record = lds.pick(info, ['deploy_id', 'host_ids', 'deploy_status']);
+    this.record = lds.pick(info, ['app_id', 'deploy_id', 'host_ids', 'deploy_status']);
     this.record.app_host_ids = info.host_ids;
     this.record.name = `${info.name} - 回滚`;
     this.rollbackVisible = true
