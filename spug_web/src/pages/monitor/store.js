@@ -42,9 +42,22 @@ class Store {
     return records
   }
 
+  @computed get cascaderOptions() {
+    let data = {}
+    for (let i of this.records) {
+      const tmp = {value: i.id, label: i.name}
+      if (data[i.group]) {
+        data[i.group]['children'].push(tmp)
+      } else {
+        data[i.group] = {value: i.group, label: i.group, children: [tmp]}
+      }
+    }
+    return Object.values(data)
+  }
+
   fetchRecords = () => {
     this.isFetching = true;
-    http.get('/api/monitor/')
+    return http.get('/api/monitor/')
       .then(({groups, detections}) => {
         const tmp = new Set();
         detections.map(item => {

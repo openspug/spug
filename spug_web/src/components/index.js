@@ -16,6 +16,7 @@ import TableCard from './TableCard';
 import Breadcrumb from './Breadcrumb';
 import AppSelector from './AppSelector';
 import NotFound from './NotFound';
+import Container from './Container';
 
 export {
   StatisticsCard,
@@ -31,4 +32,5 @@ export {
   Breadcrumb,
   AppSelector,
   NotFound,
+  Container,
 }

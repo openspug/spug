@@ -31,9 +31,9 @@ class History(models.Model, ModelMixin):
 class Task(models.Model, ModelMixin):
     TRIGGERS = (
         ('date', '一次性'),
-        ('calendarinterval', '日历间隔'),
         ('cron', 'UNIX cron'),
-        ('interval', '普通间隔')
+        ('interval', '普通间隔'),
+        ('monitor', '监控告警'),
     )
     name = models.CharField(max_length=50)
     type = models.CharField(max_length=50)
@@ -54,12 +54,13 @@ class Task(models.Model, ModelMixin):
 
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
+        tmp['trigger_alias'] = self.get_trigger_display()
         tmp['targets'] = json.loads(self.targets)
         tmp['latest_status'] = self.latest.status if self.latest else None
         tmp['latest_run_time'] = self.latest.run_time if self.latest else None
         tmp['latest_status_alias'] = self.latest.get_status_display() if self.latest else None
         tmp['rst_notify'] = json.loads(self.rst_notify) if self.rst_notify else {'mode': '0'}
-        if self.trigger == 'cron':
+        if self.trigger in ('cron', 'monitor'):
             tmp['trigger_args'] = json.loads(self.trigger_args)
         return tmp
 

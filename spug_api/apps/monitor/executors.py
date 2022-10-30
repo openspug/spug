@@ -3,7 +3,7 @@
 # Released under the AGPL-3.0 License.
 from django_redis import get_redis_connection
 from apps.host.models import Host
-from apps.monitor.utils import handle_notify
+from apps.monitor.utils import handle_notify, handle_trigger_event
 from socket import socket
 import subprocess
 import platform
@@ -105,6 +105,7 @@ def monitor_worker_handler(job):
         if not v_time or int(time.time()) - int(v_time) >= quiet * 60:
             rds.hset(key, f_time, int(time.time()))
             logging.warning('send fault alarm notification')
+            handle_trigger_event(task_id, addr if tp in ('3', '4') else None)
             handle_notify(task_id, target, is_ok, message, v_count)
 
 

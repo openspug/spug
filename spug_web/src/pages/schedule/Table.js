@@ -47,6 +47,9 @@ class ComTable extends React.Component {
     title: '任务类型',
     dataIndex: 'type',
   }, {
+    title: '触发方式',
+    dataIndex: 'trigger_alias'
+  }, {
     title: '最新状态',
     render: info => {
       if (info.is_active) {

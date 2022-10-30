@@ -58,11 +58,8 @@ class Scheduler:
         else:
             raise TypeError(f'unknown schedule policy: {trigger!r}')
 
-    def _init_builtin_jobs(self):
-        self.scheduler.add_job(auto_run_by_day, 'cron', hour=1, minute=20)
-        self.scheduler.add_job(auto_run_by_minute, 'interval', minutes=1)
-
-    def _dispatch(self, task_id, interpreter, command, targets):
+    @classmethod
+    def dispatch(cls, task_id, interpreter, command, targets):
         output = {x: None for x in targets}
         history = History.objects.create(
             task_id=task_id,
@@ -76,14 +73,18 @@ class Scheduler:
             rds_cli.rpush(SCHEDULE_WORKER_KEY, json.dumps([history.id, t, interpreter, command]))
         connections.close_all()
 
+    def _init_builtin_jobs(self):
+        self.scheduler.add_job(auto_run_by_day, 'cron', hour=1, minute=20)
+        self.scheduler.add_job(auto_run_by_minute, 'interval', minutes=1)
+
     def _init(self):
         self.scheduler.start()
         self._init_builtin_jobs()
         try:
-            for task in Task.objects.filter(is_active=True):
+            for task in Task.objects.filter(is_active=True).exclude(trigger='monitor'):
                 trigger = self.parse_trigger(task.trigger, task.trigger_args)
                 self.scheduler.add_job(
-                    self._dispatch,
+                    self.dispatch,
                     trigger,
                     id=str(task.id),
                     args=(task.id, task.interpreter, task.command, json.loads(task.targets)),
@@ -103,7 +104,7 @@ class Scheduler:
             if task.action in ('add', 'modify'):
                 trigger = self.parse_trigger(task.trigger, task.trigger_args)
                 self.scheduler.add_job(
-                    self._dispatch,
+                    self.dispatch,
                     trigger,
                     id=str(task.id),
                     args=(task.id, task.interpreter, task.command, task.targets),

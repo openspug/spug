@@ -10,7 +10,7 @@ import Step1 from './Step1';
 import Step2 from './Step2';
 import Step3 from './Step3';
 import store from './store';
-import styles from './index.module.css';
+import styles from './index.module.less';
 import hostStore from '../host/store';
 
 export default observer(function () {
@@ -28,12 +28,12 @@ export default observer(function () {
       footer={null}>
       <Steps current={store.page} className={styles.steps}>
         <Steps.Step key={0} title="创建任务"/>
-        <Steps.Step key={1} title="选择执行对象"/>
-        <Steps.Step key={2} title="设置触发器"/>
+        <Steps.Step key={1} title="设置触发器"/>
+        <Steps.Step key={2} title="选择执行对象"/>
       </Steps>
-      {store.page === 0 && <Step1/>}
-      {store.page === 1 && <Step2/>}
-      {store.page === 2 && <Step3/>}
+      <Step1 visible={store.page === 0}/>
+      <Step2 visible={store.page === 1}/>
+      <Step3 visible={store.page === 2}/>
     </Modal>
   )
 })

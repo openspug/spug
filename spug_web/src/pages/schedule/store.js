@@ -13,6 +13,8 @@ class Store {
   @observable record = {};
   @observable page = 0;
   @observable targets = [undefined];
+  @observable trigger = 'interval';
+  @observable trigger_args = {};
   @observable isFetching = false;
   @observable formVisible = false;
   @observable infoVisible = false;
@@ -56,7 +58,24 @@ class Store {
 
   showForm = (info) => {
     this.page = 0;
-    this.record = info || {interpreter: 'sh', rst_notify: {mode: '0'}, trigger: 'interval'};
+    if (info) {
+      this.record = info
+      this.trigger = info.trigger
+      if (info.trigger === 'date') {
+        this.trigger_args = {date: moment(info.trigger_args)}
+      } else if (info.trigger === 'cron') {
+        const args = info.trigger_args
+        if (args.start) args.start = moment(args.start)
+        if (args.stop) args.stop = moment(args.stop)
+        this.trigger_args = {cron: args}
+      } else {
+        this.trigger_args = {[info.trigger]: info.trigger_args}
+      }
+    } else {
+      this.record = {interpreter: 'sh', rst_notify: {mode: '0'}, trigger: 'interval'}
+      this.trigger = 'interval'
+      this.trigger_args = {}
+    }
     this.formVisible = true
   };
 

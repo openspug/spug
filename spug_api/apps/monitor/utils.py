@@ -4,6 +4,8 @@
 from django.db import close_old_connections
 from apps.alarm.models import Alarm
 from apps.monitor.models import Detection
+from apps.schedule.models import Task
+from apps.schedule.scheduler import Scheduler
 from libs.spug import Notification
 import json
 
@@ -41,3 +43,17 @@ def handle_notify(task_id, target, is_ok, out, fault_times):
     grp = json.loads(det.notify_grp)
     notify = Notification(grp, event, target, det.name, out, duration)
     notify.dispatch_monitor(json.loads(det.notify_mode))
+
+
+def handle_trigger_event(task_id, target):
+    query = dict(is_active=True, trigger='monitor', trigger_args__regex=fr'[^0-9]{task_id}[^0-9]')
+    for item in Task.objects.filter(**query):
+        targets = []
+        for t in json.loads(item.targets):
+            if t == 'monitor':
+                if target:
+                    targets.append(target)
+            else:
+                targets.append(t)
+        if targets:
+            Scheduler.dispatch(item.id, item.interpreter, item.command, targets)
