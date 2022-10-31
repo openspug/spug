@@ -12,6 +12,7 @@ import IPAddress from './IPAddress';
 import { http, hasPermission } from 'libs';
 import store from './store';
 import icons from './icons';
+import moment from 'moment';
 
 function ComTable() {
   function handleDelete(text) {
@@ -35,6 +36,21 @@ function ComTable() {
       store.showForm({group_ids: [store.group.value]})
     } else {
       store.cloudImport = menu.key
+    }
+  }
+
+  function ExpTime(props) {
+    if (!props.value) return null
+    let value = moment(props.value)
+    const days = value.diff(moment(), 'days')
+    if (days > 30) {
+      return <span>剩余 <b style={{color: '#389e0d'}}>{days}</b> 天</span>
+    } else if (days > 7) {
+      return <span>剩余 <b style={{color: '#faad14'}}>{days}</b> 天</span>
+    } else if (days >= 0) {
+      return <span>剩余 <b style={{color: '#d9363e'}}>{days}</b> 天</span>
+    } else {
+      return <span>过期 <b style={{color: '#d9363e'}}>{Math.abs(days)}</b> 天</span>
     }
   }
 
@@ -116,6 +132,7 @@ function ComTable() {
           <span>{info.cpu}核 {info.memory}GB</span>
         </Space>
       )}/>
+      <Table.Column hide title="到期信息" dataIndex="expired_time" render={v => <ExpTime value={v}/>}/>
       <Table.Column hide title="备注信息" dataIndex="desc"/>
       <Table.Column
         title="状态"
