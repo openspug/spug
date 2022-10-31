@@ -17,7 +17,7 @@ export default observer(function () {
       <Breadcrumb>
         <Breadcrumb.Item>首页</Breadcrumb.Item>
         <Breadcrumb.Item>配置中心</Breadcrumb.Item>
-        <Breadcrumb.Item>应用配置</Breadcrumb.Item>
+        <Breadcrumb.Item>服务配置</Breadcrumb.Item>
       </Breadcrumb>
       <SearchForm>
         <SearchForm.Item span={8} title="服务名称">

@@ -42,7 +42,7 @@ export default observer(function () {
           name="key"
           label="唯一标识符"
           tooltip="环境的唯一标识符，会在配置中心API中使用，具体请参考官方文档。"
-          extra="可以由字母、数字、-和下划线组成。">
+          extra="可以由字母、数字和下划线组成。">
           <Input placeholder="请输入唯一标识符，例如：dev"/>
         </Form.Item>
         <Form.Item name="desc" label="备注信息">

@@ -51,26 +51,16 @@ class Rel extends React.Component {
     return (
       <Modal
         visible
-        width={800}
+        width={700}
         maskClosable={false}
-        title="配置依赖关系"
+        title="配置服务依赖"
         onCancel={() => store.relVisible = false}
         confirmLoading={this.state.loading}
         footer={hasPermission('config.app.edit_config') ? undefined : null}
         onOk={this.handleSubmit}>
-        <Alert
-          closable
-          showIcon
-          type="info"
-          message="小提示"
-          style={{margin: '0 80px 20px'}}
-          description={[
-            <p key={1}>设置依赖的应用仅会获取到其<span style={{color: 'red'}}>公共</span>配置，私有配置并不会被其他应用所获取。</p>,
-            <p key={2}>服务不存在公共和私有配置的概念，所以会获取到依赖服务的所有配置信息。</p>
-          ]}/>
         <Tabs tabPosition="left">
           <Tabs.TabPane tab="应用依赖" key="app">
-            <Form.Item label="设置依赖的应用">
+            <Form.Item extra="设置依赖后，该应用将能够获取到所依赖应用的配置。">
               <Transfer
                 listStyle={{width: 280, minHeight: 300}}
                 titles={['所有应用', '已选应用']}
@@ -81,7 +71,7 @@ class Rel extends React.Component {
             </Form.Item>
           </Tabs.TabPane>
           <Tabs.TabPane tab="服务依赖" key="service">
-            <Form.Item label="设置依赖的服务">
+            <Form.Item extra="设置依赖后，该应用将能够获取到所依赖服务的配置。">
               <Transfer
                 listStyle={{width: 280, minHeight: 300}}
                 titles={['所有服务', '已选服务']}
