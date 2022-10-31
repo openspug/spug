@@ -121,6 +121,6 @@ def _build(rep: Repository, helper, env):
                 contain = ' '.join(f'{rep.spug_version}/{x}' for x in files)
         helper.local_raw(f'mkdir -p {BUILD_DIR} && cd {REPOS_DIR} && tar zcf {tar_file} {exclude} {contain}')
         helper.send_success('local', '完成√\r\n')
+        helper.set_cross_env(rep.spug_version, et.get_envs())
         human_time = human_seconds_time(time.time() - flag)
         helper.send_success('local', f'\r\n** 构建成功，耗时：{human_time} **\r\n', status='success')
-        helper.set_cross_env(rep.spug_version, et.get_envs())

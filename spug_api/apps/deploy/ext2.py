@@ -78,10 +78,10 @@ def ext2_deploy(req, helper, env, with_local):
                 tar_gz_file = os.path.join(REPOS_DIR, env.SPUG_DEPLOY_ID, f'{req.spug_version}.tar.gz')
                 helper.local_raw(f'cd {sp_dir} && tar -zcf {tar_gz_file} {exclude} {contain}')
                 helper.send_info('local', '打包完成\r\n')
+            helper.set_cross_env(req.spug_version, et.get_envs())
             helper.set_deploy_success('local')
             human_time = human_seconds_time(time.time() - flag)
             helper.send_success('local', f'\r\n** 执行完成，耗时：{human_time} **', status='success')
-            helper.set_cross_env(req.spug_version, et.get_envs())
 
     if host_actions:
         env.update(helper.get_cross_env(req.spug_version))

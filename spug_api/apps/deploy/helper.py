@@ -4,19 +4,16 @@
 from django.conf import settings
 from django.template.defaultfilters import filesizeformat
 from django_redis import get_redis_connection
-from libs.utils import human_datetime, render_str, str_decode
+from libs.utils import SpugError, human_datetime, render_str, str_decode
 from libs.spug import Notification
 from apps.host.models import Host
+from apps.config.utils import update_config_by_var
 from functools import partial
 from collections import defaultdict
 import subprocess
 import json
 import os
 import re
-
-
-class SpugError(Exception):
-    pass
 
 
 class NotifyMixin:
@@ -311,9 +308,19 @@ class Helper(NotifyMixin, KitMixin):
         return {}
 
     def set_cross_env(self, key, envs):
+        file_envs = {}
+        for k, v in envs.items():
+            if k == 'SPUG_SET':
+                try:
+                    update_config_by_var(v)
+                except SpugError as e:
+                    self.send_error('local', f'{e}')
+            elif k.startswith('SPUG_GEV_'):
+                file_envs[k] = v
+
         file = os.path.join(settings.DEPLOY_DIR, key)
         with open(file, 'w') as f:
-            f.write(json.dumps(envs))
+            f.write(json.dumps(file_envs))
 
     def add_callback(self, func):
         self.callback.append(func)

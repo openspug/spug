@@ -18,7 +18,7 @@ class Executor:
 
     def get_envs(self):
         envs = {}
-        _, output = self.exec_command('env | grep SPUG_GEV_')
+        _, output = self.exec_command('env | grep SPUG_')
         if output:
             for item in output.splitlines():
                 if '=' in item:

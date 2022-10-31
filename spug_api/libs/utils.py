@@ -11,6 +11,10 @@ import random
 import json
 
 
+class SpugError(Exception):
+    pass
+
+
 # 转换时间格式到字符串
 def human_datetime(date=None):
     if date:
