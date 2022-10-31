@@ -5,7 +5,7 @@ from django.views.generic import View
 from django.db.models import F
 from libs import JsonParser, Argument, json_response, auth
 from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
-from apps.config.models import Config, ConfigHistory
+from apps.config.models import Config, ConfigHistory, Service
 from apps.app.utils import fetch_versions, remove_repo
 from apps.setting.utils import AppSetting
 import json
@@ -14,12 +14,21 @@ import re
 
 class AppView(View):
     def get(self, request):
-        if request.user.is_supper:
-            apps = App.objects.all()
-        else:
-            ids = request.user.deploy_perms['apps']
-            apps = App.objects.filter(id__in=ids)
-        return json_response(apps)
+        form, error = JsonParser(
+            Argument('id', type=int, required=False)
+        ).parse(request.GET)
+        if error is None:
+            if request.user.is_supper:
+                apps = App.objects.all()
+            else:
+                ids = request.user.deploy_perms['apps']
+                apps = App.objects.filter(id__in=ids)
+
+            if form.id:
+                app = apps.filter(pk=form.id).first()
+                return json_response(app)
+            return json_response(apps)
+        return json_response(error=error)
 
     @auth('deploy.app.add|deploy.app.edit|config.app.add|config.app.edit')
     def post(self, request):
@@ -30,12 +39,15 @@ class AppView(View):
             Argument('desc', required=False)
         ).parse(request.body)
         if error is None:
-            if not re.fullmatch(r'[-\w]+', form.key, re.ASCII):
-                return json_response(error='标识符必须为字母、数字、-和下划线的组合')
+            if not re.fullmatch(r'\w+', form.key, re.ASCII):
+                return json_response(error='标识符必须为字母、数字和下划线的组合')
 
             app = App.objects.filter(key=form.key).first()
             if app and app.id != form.id:
-                return json_response(error=f'唯一标识符 {form.key} 已存在，请更改后重试')
+                return json_response(error='该识符已存在，请更改后重试')
+            service = Service.objects.filter(key=form.key).first()
+            if service:
+                return json_response(error=f'该标识符已被服务 {service.name} 使用，请更改后重试')
             if form.id:
                 App.objects.filter(pk=form.id).update(**form)
             else:
