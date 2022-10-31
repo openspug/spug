@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Menu, Input, Button, PageHeader, Modal, Space, Radio, Form } from 'antd';
+import { Menu, Input, Button, PageHeader, Modal, Space, Radio, Form, Alert } from 'antd';
 import {
   DiffOutlined,
   HistoryOutlined,
@@ -24,8 +24,6 @@ import TextView from './TextView';
 import JSONView from './JSONView';
 import Record from './Record';
 import store from './store';
-import appStore from '../app/store';
-import srcStore from '../service/store';
 
 @observer
 class Index extends React.Component {
@@ -40,22 +38,23 @@ class Index extends React.Component {
 
   componentDidMount() {
     const {type, id} = this.props.match.params;
-    store.type = type;
-    store.id = id;
-    if (envStore.records.length === 0) {
-      envStore.fetchRecords().then(() => {
+    store.initial(type, id)
+      .then(() => {
         if (envStore.records.length === 0) {
-          Modal.error({
-            title: '无可用环境',
-            content: <div>配置依赖应用的运行环境，请在 <a href="/config/environment">环境管理</a> 中创建环境。</div>
+          envStore.fetchRecords().then(() => {
+            if (envStore.records.length === 0) {
+              Modal.error({
+                title: '无可用环境',
+                content: <div>配置依赖应用的运行环境，请在 <a href="/config/environment">环境管理</a> 中创建环境。</div>
+              })
+            } else {
+              this.updateEnv()
+            }
           })
         } else {
           this.updateEnv()
         }
       })
-    } else {
-      this.updateEnv()
-    }
   }
 
   updateEnv = (env) => {
@@ -73,13 +72,12 @@ class Index extends React.Component {
   render() {
     const {view} = this.state;
     const isApp = store.type === 'app';
-    const record = isApp ? appStore.record : srcStore.record;
     return (
       <AuthDiv auth={`config.${store.type}.view_config`}>
-        <Breadcrumb>
+        <Breadcrumb extra={<Alert message="4.0将移除公共/私有配置概念，所有配置将被视为公共配置。" banner/>}>
           <Breadcrumb.Item>配置中心</Breadcrumb.Item>
           <Breadcrumb.Item onClick={() => history.goBack()}>{isApp ? '应用配置' : '服务配置'}</Breadcrumb.Item>
-          <Breadcrumb.Item>{record.name}</Breadcrumb.Item>
+          <Breadcrumb.Item>{store.obj.name}</Breadcrumb.Item>
         </Breadcrumb>
         <div className={styles.container}>
           <div className={styles.left}>
@@ -108,7 +106,8 @@ class Index extends React.Component {
                 </Radio.Group>
               </Form.Item>
               <Form.Item label="Key">
-                <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
+                <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value}
+                       placeholder="请输入"/>
               </Form.Item>
               <Space style={{flex: 1, justifyContent: 'flex-end'}}>
                 <AuthButton
