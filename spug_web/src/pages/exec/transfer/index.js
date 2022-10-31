@@ -113,6 +113,13 @@ function TransferIndex() {
     setFiles([...files])
   }
 
+  function handleCloseOutput() {
+    setToken()
+    if (!store.counter['0'] && !store.counter['2']) {
+      setFiles([])
+    }
+  }
+
   return (<AuthDiv auth="exec.transfer.do">
     <Breadcrumb>
       <Breadcrumb.Item>首页</Breadcrumb.Item>
@@ -185,7 +192,7 @@ function TransferIndex() {
       </div>
     </div>
     <Selector {...sProps}/>
-    {token ? <Output token={token} onBack={() => setToken()}/> : null}
+    {token ? <Output token={token} onBack={handleCloseOutput}/> : null}
   </AuthDiv>)
 }
 
