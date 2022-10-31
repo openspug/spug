@@ -28,8 +28,8 @@ class EnvironmentView(View):
             Argument('desc', required=False)
         ).parse(request.body)
         if error is None:
-            if not re.fullmatch(r'[-\w]+', form.key, re.ASCII):
-                return json_response(error='标识符必须为字母、数字、-和下划线的组合')
+            if not re.fullmatch(r'\w+', form.key, re.ASCII):
+                return json_response(error='标识符必须为字母、数字和下划线的组合')
 
             env = Environment.objects.filter(key=form.key).first()
             if env and env.id != form.id:
@@ -83,8 +83,16 @@ class EnvironmentView(View):
 class ServiceView(View):
     @auth('config.src.view')
     def get(self, request):
-        services = Service.objects.all()
-        return json_response(services)
+        form, error = JsonParser(
+            Argument('id', type=int, required=False)
+        ).parse(request.GET)
+        if error is None:
+            if form.id:
+                service = Service.objects.get(pk=form.id)
+                return json_response(service)
+            services = Service.objects.all()
+            return json_response(services)
+        return json_response(error=error)
 
     @auth('config.src.add|config.src.edit')
     def post(self, request):
@@ -95,12 +103,15 @@ class ServiceView(View):
             Argument('desc', required=False)
         ).parse(request.body)
         if error is None:
-            if not re.fullmatch(r'[-\w]+', form.key, re.ASCII):
-                return json_response(error='标识符必须为字母、数字、-和下划线的组合')
+            if not re.fullmatch(r'\w+', form.key, re.ASCII):
+                return json_response(error='标识符必须为字母、数字和下划线的组合')
 
             service = Service.objects.filter(key=form.key).first()
             if service and service.id != form.id:
-                return json_response(error=f'唯一标识符 {form.key} 已存在，请更改后重试')
+                return json_response(error='该标识符已存在，请更改后重试')
+            app = App.objects.filter(key=form.key).first()
+            if app:
+                return json_response(error=f'该标识符已被应用 {app.name} 使用，请更改后重试')
             if form.id:
                 Service.objects.filter(pk=form.id).update(**form)
             else:
@@ -119,7 +130,8 @@ class ServiceView(View):
                 if form.id in rel_services:
                     rel_apps.append(app.name)
             if rel_apps:
-                return json_response(error=f'该服务在配置中心已被 "{", ".join(rel_apps)}" 依赖，请解除依赖关系后再尝试删除。')
+                return json_response(
+                    error=f'该服务在配置中心已被 "{", ".join(rel_apps)}" 依赖，请解除依赖关系后再尝试删除。')
             # auto delete configs
             Config.objects.filter(type='src', o_id=form.id).delete()
             ConfigHistory.objects.filter(type='src', o_id=form.id).delete()
@@ -151,7 +163,6 @@ class ConfigView(View):
             Argument('type', filter=lambda x: x in dict(Config.TYPES), help='缺少必要参数'),
             Argument('envs', type=list, filter=lambda x: len(x), help='请选择环境'),
             Argument('key', help='请输入Key'),
-            Argument('is_public', type=bool, help='缺少必要参数'),
             Argument('value', type=str, default=''),
             Argument('desc', required=False)
         ).parse(request.body)
@@ -173,7 +184,6 @@ class ConfigView(View):
         form, error = JsonParser(
             Argument('id', type=int, help='缺少必要参数'),
             Argument('value', type=str, default=''),
-            Argument('is_public', type=bool, help='缺少必要参数'),
             Argument('desc', required=False)
         ).parse(request.body)
         if error is None:
@@ -182,7 +192,6 @@ class ConfigView(View):
             if not config:
                 return json_response(error='未找到指定对象')
             config.desc = form.desc
-            config.is_public = form.is_public
             if config.value != form.value:
                 old_value = config.value
                 config.value = form.value
@@ -314,7 +323,6 @@ def _parse(request, query, data):
             item.delete()
     for key, value in data.items():
         query.key = key
-        query.is_public = False
         query.value = _filter_value(value)
         query.updated_at = human_datetime()
         query.updated_by = request.user
