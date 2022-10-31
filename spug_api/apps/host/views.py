@@ -208,7 +208,7 @@ def _do_host_verify(form):
             with SSH(form.hostname, form.port, form.username, password=password) as ssh:
                 ssh.add_public_key(public_key)
         except BadAuthenticationType:
-            raise Exception('该主机不支持密钥认证，请参考官方文档，错误代码：E01')
+            raise Exception('该主机不支持密码认证，请参考官方文档，错误代码：E00')
         except AuthenticationException:
             raise Exception('密码连接认证失败，请检查密码是否正确')
         except socket.timeout:
