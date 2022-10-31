@@ -160,12 +160,12 @@ function ComTable() {
           return <Action>
             <Action.Button auth="deploy.request.approve" onClick={() => store.showApprove(info)}>审核</Action.Button>
             <Action.Button auth="deploy.request.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-            <Action.Button auth="deploy.request.del" onClick={() => handleDelete(info)}>删除</Action.Button>
+            <Action.Button danger auth="deploy.request.del" onClick={() => handleDelete(info)}>删除</Action.Button>
           </Action>;
         case '1':
           return <Action>
             <DoAction info={info}/>
-            <Action.Button auth="deploy.request.del" onClick={() => handleDelete(info)}>删除</Action.Button>
+            <Action.Button danger auth="deploy.request.del" onClick={() => handleDelete(info)}>删除</Action.Button>
           </Action>;
         case '2':
           return <Action>
