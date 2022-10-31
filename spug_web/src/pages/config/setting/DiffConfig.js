@@ -9,7 +9,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Modal, Form, Table, Row, Col, Checkbox, Button, Alert } from 'antd';
 import http from 'libs/http';
 import envStore from '../environment/store';
-import styles from './index.module.css';
+import styles from './index.module.less';
 import store from './store';
 
 @observer
@@ -76,9 +76,8 @@ class Record extends React.Component {
                 onClick={() => this.handleEnvCheck(item)}
                 style={{cursor: 'pointer', borderTop: index ? '1px solid #e8e8e8' : ''}}>
                 <Col span={2}><Checkbox checked={envs.map(x => x.id).includes(item.id)}/></Col>
-                <Col span={4} className={styles.ellipsis}>{item.key}</Col>
-                <Col span={9} className={styles.ellipsis}>{item.name}</Col>
-                <Col span={9} className={styles.ellipsis}>{item.desc}</Col>
+                <Col span={10} className={styles.ellipsis}>{item.key}</Col>
+                <Col span={10} className={styles.ellipsis}>{item.name}</Col>
               </Row>
             ))}
           </Form.Item>

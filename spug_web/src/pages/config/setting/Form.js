@@ -5,11 +5,11 @@
  */
 import React, { useState } from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, Checkbox, Switch, Row, Col, message } from 'antd';
+import { Modal, Form, Input, Checkbox, Row, Col, message } from 'antd';
 import http from 'libs/http';
 import store from './store';
 import envStore from '../environment/store'
-import styles from './index.module.css';
+import styles from './index.module.less';
 import lds from 'lodash';
 
 export default observer(function () {
@@ -21,7 +21,6 @@ export default observer(function () {
   function handleSubmit() {
     setLoading(true);
     const formData = form.getFieldsValue();
-    formData['is_public'] = store.type === 'src' ? false : formData['is_public'];
     let request;
     if (isModify) {
       formData['id'] = store.record.id;
@@ -62,38 +61,29 @@ export default observer(function () {
       confirmLoading={loading}
       onOk={handleSubmit}>
       <Form form={form} initialValues={store.record} labelCol={{span: 6}} wrapperCol={{span: 14}}>
-        <Form.Item required name="key" label="Key">
-          <Input disabled={isModify} placeholder="请输入"/>
+        <Form.Item required name="key" label="Key" tooltip="变量前缀由_SPUG_加唯一标识符组成，用于防止变量名冲突。" extra="可以由字母、数字和下划线组成。">
+          <Input addonBefore={`_SPUG_${store.obj.key.toUpperCase()}_`} placeholder="请输入变量名"/>
         </Form.Item>
         <Form.Item name="value" label="Value">
-          <Input.TextArea placeholder="请输入"/>
+          <Input.TextArea placeholder="请输入变量值"/>
         </Form.Item>
         <Form.Item name="desc" label="备注">
           <Input.TextArea placeholder="请输入备注信息"/>
         </Form.Item>
-        {store.type === 'app' && (
-          <Form.Item
-            label="类型"
-            name="is_public"
-            valuePropName="checked"
-            initialValue={store.record.is_public === undefined || store.record.is_public}
-            tooltip={<a target="_blank" rel="noopener noreferrer" href="https://spug.cc/docs/conf-app">什么是公共/私有配置？</a>}>
-            <Switch checkedChildren="公共" unCheckedChildren="私有"/>
+        {isModify ? null : (
+          <Form.Item label="选择环境" style={{lineHeight: '40px'}} tooltip="可多选环境，复制到所有选择的环境内。">
+            {envStore.records.map((item, index) => (
+              <Row
+                key={item.id}
+                onClick={() => handleEnvCheck(item.id)}
+                style={{cursor: 'pointer', borderTop: index ? '1px solid #e8e8e8' : ''}}>
+                <Col span={2}><Checkbox checked={envs.includes(item.id)}/></Col>
+                <Col span={10} className={styles.ellipsis}>{item.key}</Col>
+                <Col span={10} className={styles.ellipsis}>{item.name}</Col>
+              </Row>
+            ))}
           </Form.Item>
         )}
-        <Form.Item label="选择环境" style={{lineHeight: '40px'}}>
-          {envStore.records.map((item, index) => (
-            <Row
-              key={item.id}
-              onClick={() => handleEnvCheck(item.id)}
-              style={{cursor: 'pointer', borderTop: index ? '1px solid #e8e8e8' : ''}}>
-              <Col span={2}><Checkbox disabled={isModify} checked={envs.includes(item.id)}/></Col>
-              <Col span={4} className={styles.ellipsis}>{item.key}</Col>
-              <Col span={9} className={styles.ellipsis}>{item.name}</Col>
-              <Col span={9} className={styles.ellipsis}>{item.desc}</Col>
-            </Row>
-          ))}
-        </Form.Item>
       </Form>
     </Modal>
   )

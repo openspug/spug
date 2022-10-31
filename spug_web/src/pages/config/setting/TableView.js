@@ -5,30 +5,25 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { LockOutlined } from '@ant-design/icons';
 import { Table, Modal, Tooltip, message } from 'antd';
 import { Action } from 'components';
 import ComForm from './Form';
-import { http, hasPermission } from 'libs';
+import { http, hasPermission, includes } from 'libs';
 import store from './store';
-import styles from './index.module.css';
+import styles from './index.module.less';
 
 @observer
 class TableView extends React.Component {
-  lockIcon = <Tooltip title="私有配置应用专用，不会被其他应用获取到">
-    <LockOutlined style={{marginRight: 5}}/>
-  </Tooltip>;
-
   columns = [{
     title: 'Key',
     key: 'key',
     render: info => {
-      let prefix = (store.type === 'app' && info.is_public === false) ? this.lockIcon : null;
-      let content = info.desc ? <span style={{color: '#1890ff'}}>{info.key}</span> : info.key;
-      return <React.Fragment>
-        {prefix}
-        <Tooltip title={info.desc}>{content}</Tooltip>
-      </React.Fragment>
+      const value = `_SPUG_${store.obj.key}_${info.key}`.toUpperCase()
+      return info.desc ? (
+        <Tooltip title={info.desc}>
+          <span style={{color: '#2563fc'}}>{value}</span>
+        </Tooltip>
+      ) : value
     }
   }, {
     title: 'Value',
@@ -48,7 +43,8 @@ class TableView extends React.Component {
     className: hasPermission(`config.${store.type}.edit_config`) ? null : 'none',
     render: info => (
       <Action>
-        <Action.Button auth={`config.${store.type}.edit_config`} onClick={() => store.showForm(info)}>编辑</Action.Button>
+        <Action.Button auth={`config.${store.type}.edit_config`}
+                       onClick={() => store.showForm(info)}>编辑</Action.Button>
         <Action.Button
           danger
           auth={`config.${store.type}.edit_config`}
@@ -73,9 +69,7 @@ class TableView extends React.Component {
 
   render() {
     let data = store.records;
-    if (store.f_name) {
-      data = data.filter(item => item['key'].toLowerCase().includes(store.f_name.toLowerCase()))
-    }
+    if (store.f_name) data = data.filter(x => includes(x.key, store.f_name))
     return (
       <React.Fragment>
         <Table

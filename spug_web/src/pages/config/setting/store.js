@@ -10,6 +10,7 @@ class Store {
   @observable records = [];
   @observable record = {};
   @observable env = {};
+  @observable obj = {};
   @observable type;
   @observable id;
   @observable isFetching = false;
@@ -18,6 +19,15 @@ class Store {
   @observable diffVisible = false;
 
   @observable f_name;
+
+  initial = (type, id) => {
+    this.type = type
+    this.id = id
+    const url = type === 'app' ? '/api/app/' : '/api/config/service/'
+    this.isFetching = true
+    return http.get(url, {params: {id}})
+      .then(res => this.obj = res)
+  }
 
   fetchRecords = () => {
     const params = {type: this.type, id: this.id, env_id: this.env.id};

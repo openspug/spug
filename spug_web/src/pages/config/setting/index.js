@@ -12,10 +12,12 @@ import {
   NumberOutlined,
   TableOutlined,
   UnorderedListOutlined,
-  PlusOutlined
+  PlusOutlined,
+  EditOutlined,
+  SaveOutlined
 } from '@ant-design/icons';
 import envStore from '../environment/store';
-import styles from './index.module.css';
+import styles from './index.module.less';
 import history from 'libs/history';
 import { AuthDiv, AuthButton, Breadcrumb } from 'components';
 import DiffConfig from './DiffConfig';
@@ -24,8 +26,6 @@ import TextView from './TextView';
 import JSONView from './JSONView';
 import Record from './Record';
 import store from './store';
-import appStore from '../app/store';
-import srcStore from '../service/store';
 
 @observer
 class Index extends React.Component {
@@ -34,28 +34,36 @@ class Index extends React.Component {
     this.textView = null;
     this.JSONView = null;
     this.state = {
-      view: '1'
+      view: '1',
+      editable: false,
+      loading: false,
     }
   }
 
   componentDidMount() {
     const {type, id} = this.props.match.params;
-    store.type = type;
-    store.id = id;
-    if (envStore.records.length === 0) {
-      envStore.fetchRecords().then(() => {
+    store.initial(type, id)
+      .then(() => {
         if (envStore.records.length === 0) {
-          Modal.error({
-            title: '无可用环境',
-            content: <div>配置依赖应用的运行环境，请在 <a href="/config/environment">环境管理</a> 中创建环境。</div>
+          envStore.fetchRecords().then(() => {
+            if (envStore.records.length === 0) {
+              Modal.error({
+                title: '无可用环境',
+                content: <div>配置依赖应用的运行环境，请在 <a href="/config/environment">环境管理</a> 中创建环境。</div>
+              })
+            } else {
+              this.updateEnv()
+            }
           })
         } else {
           this.updateEnv()
         }
       })
-    } else {
-      this.updateEnv()
-    }
+  }
+
+  componentWillUnmount() {
+    store.obj = {}
+    store.records = []
   }
 
   updateEnv = (env) => {
@@ -70,16 +78,25 @@ class Index extends React.Component {
     })
   };
 
+  handleSubmit = () => {
+    this.setState({loading: true})
+    const ref = this.state.view === '2' ? this.textView : this.JSONView
+    ref.handleSubmit()
+      .then(() => this.setState({editable: false}))
+      .finally(() => this.setState({loading: false}))
+  }
+
   render() {
-    const {view} = this.state;
+    const {view, editable, loading} = this.state;
     const isApp = store.type === 'app';
-    const record = isApp ? appStore.record : srcStore.record;
     return (
       <AuthDiv auth={`config.${store.type}.view_config`}>
-        <Breadcrumb>
+        <Breadcrumb extra={(<Button type="primary" className={styles.historyBtn} icon={<HistoryOutlined/>}
+                                    onClick={store.showRecord}>更改历史</Button>)}>
+          <Breadcrumb.Item>首页</Breadcrumb.Item>
           <Breadcrumb.Item>配置中心</Breadcrumb.Item>
           <Breadcrumb.Item onClick={() => history.goBack()}>{isApp ? '应用配置' : '服务配置'}</Breadcrumb.Item>
-          <Breadcrumb.Item>{record.name}</Breadcrumb.Item>
+          <Breadcrumb.Item>{store.obj.name}</Breadcrumb.Item>
         </Breadcrumb>
         <div className={styles.container}>
           <div className={styles.left}>
@@ -108,26 +125,37 @@ class Index extends React.Component {
                 </Radio.Group>
               </Form.Item>
               <Form.Item label="Key">
-                <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
+                <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value}
+                       placeholder="请输入"/>
               </Form.Item>
               <Space style={{flex: 1, justifyContent: 'flex-end'}}>
-                <AuthButton
-                  auth="config.app.edit_config|config.service.edit_config"
-                  disabled={view !== '1'}
-                  type="primary"
-                  icon={<PlusOutlined/>}
-                  onClick={() => store.showForm()}>新增配置</AuthButton>
-                <Button
-                  type="primary"
-                  style={{backgroundColor: 'orange', borderColor: 'orange'}}
-                  icon={<HistoryOutlined/>}
-                  onClick={store.showRecord}>更改历史</Button>
+                {['2', '3'].includes(view) ? editable ? (
+                  <Button
+                    icon={<SaveOutlined/>}
+                    type="primary"
+                    loading={loading}
+                    onClick={this.handleSubmit}>保存</Button>
+                ) : (
+                  <AuthButton
+                    icon={<EditOutlined/>}
+                    type="primary"
+                    auth={`config.${store.type}.edit_config`}
+                    onClick={() => this.setState({editable: true})}>编辑</AuthButton>
+                ) : (
+                  <AuthButton
+                    auth="config.app.edit_config|config.service.edit_config"
+                    disabled={view !== '1'}
+                    type="primary"
+                    icon={<PlusOutlined/>}
+                    onClick={() => store.showForm()}>新增配置</AuthButton>
+                )}
+
               </Space>
             </Form>
 
             {view === '1' && <TableView/>}
-            {view === '2' && <TextView ref={ref => this.textView = ref}/>}
-            {view === '3' && <JSONView ref={ref => this.JSONView = ref}/>}
+            {view === '2' && <TextView ref={ref => this.textView = ref} editable={editable}/>}
+            {view === '3' && <JSONView ref={ref => this.JSONView = ref} editable={editable}/>}
           </div>
         </div>
         {store.recordVisible && <Record/>}

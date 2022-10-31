@@ -48,9 +48,8 @@ class Config(models.Model, ModelMixin):
     env = models.ForeignKey(Environment, on_delete=models.PROTECT)
     value = models.TextField(null=True)
     desc = models.CharField(max_length=255, null=True)
-    is_public = models.BooleanField(default=False)
     updated_at = models.CharField(max_length=20)
-    updated_by = models.ForeignKey(User, on_delete=models.PROTECT)
+    updated_by = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
 
     def __repr__(self):
         return f'<Config {self.key!r}>'
@@ -72,11 +71,10 @@ class ConfigHistory(models.Model, ModelMixin):
     env_id = models.IntegerField()
     value = models.TextField(null=True)
     desc = models.CharField(max_length=255, null=True)
-    is_public = models.BooleanField()
     old_value = models.TextField(null=True)
     action = models.CharField(max_length=2, choices=ACTIONS)
     updated_at = models.CharField(max_length=20)
-    updated_by = models.ForeignKey(User, on_delete=models.PROTECT)
+    updated_by = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
 
     def __repr__(self):
         return f'<ConfigHistory {self.key!r}>'
