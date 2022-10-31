@@ -77,23 +77,25 @@ export default observer(function () {
             name="is_public"
             valuePropName="checked"
             initialValue={store.record.is_public === undefined || store.record.is_public}
-            tooltip={<a target="_blank" rel="noopener noreferrer" href="https://spug.cc/docs/conf-app">什么是公共/私有配置？</a>}>
+            tooltip={<a target="_blank" rel="noopener noreferrer"
+                        href="https://spug.cc/docs/conf-app">什么是公共/私有配置？</a>}>
             <Switch checkedChildren="公共" unCheckedChildren="私有"/>
           </Form.Item>
         )}
-        <Form.Item label="选择环境" style={{lineHeight: '40px'}}>
-          {envStore.records.map((item, index) => (
-            <Row
-              key={item.id}
-              onClick={() => handleEnvCheck(item.id)}
-              style={{cursor: 'pointer', borderTop: index ? '1px solid #e8e8e8' : ''}}>
-              <Col span={2}><Checkbox disabled={isModify} checked={envs.includes(item.id)}/></Col>
-              <Col span={4} className={styles.ellipsis}>{item.key}</Col>
-              <Col span={9} className={styles.ellipsis}>{item.name}</Col>
-              <Col span={9} className={styles.ellipsis}>{item.desc}</Col>
-            </Row>
-          ))}
-        </Form.Item>
+        {isModify ? null : (
+          <Form.Item label="选择环境" style={{lineHeight: '40px'}}>
+            {envStore.records.map((item, index) => (
+              <Row
+                key={item.id}
+                onClick={() => handleEnvCheck(item.id)}
+                style={{cursor: 'pointer', borderTop: index ? '1px solid #e8e8e8' : ''}}>
+                <Col span={2}><Checkbox checked={envs.includes(item.id)}/></Col>
+                <Col span={10} className={styles.ellipsis}>{item.key}</Col>
+                <Col span={10} className={styles.ellipsis}>{item.name}</Col>
+              </Row>
+            ))}
+          </Form.Item>
+        )}
       </Form>
     </Modal>
   )
