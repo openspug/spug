@@ -3,7 +3,7 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React  from 'react';
+import React from 'react';
 import { observer } from 'mobx-react';
 import { Input } from 'antd';
 import { SearchForm, AuthDiv, Breadcrumb } from 'components';

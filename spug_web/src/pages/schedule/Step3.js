@@ -17,15 +17,21 @@ import S from './store';
 import styles from './index.module.less';
 
 export default observer(function (props) {
-  const [visible, setVisible] = useState(false)
   const [loading, setLoading] = useState(false)
 
   function handleSubmit() {
-    setLoading(true)
     const formData = lds.pick(S.record, ['id', 'name', 'type', 'interpreter', 'command', 'desc', 'rst_notify']);
     formData['targets'] = S.targets.filter(x => x);
     formData['trigger'] = S.trigger;
     formData['trigger_args'] = _parse_args();
+    if (S.trigger === 'monitor') {
+      if (formData.targets.length > 1) {
+        return message.error('监控告警类触发器，只能选择一个执行对象')
+      }
+    } else if (formData.targets.includes('monitor')) {
+      return message.error('执行对象选择有误，请重新选择')
+    }
+    setLoading(true)
     http.post('/api/schedule/', formData)
       .then(res => {
         message.success('操作成功');
@@ -50,6 +56,13 @@ export default observer(function (props) {
       default:
         return S.trigger_args[S.trigger];
     }
+  }
+
+  function handleChange(_, ids) {
+    if (S.targets.includes('local')) {
+      ids.unshift('local')
+    }
+    S.targets = ids
   }
 
   return (
@@ -82,10 +95,11 @@ export default observer(function (props) {
           ))}
         </Form.Item>
         <Form.Item extra="本机即Spug服务运行所在的容器或主机。">
-          <Button type="dashed" style={{width: '80%'}} disabled={S.trigger === 'monitor'}
-                  onClick={() => setVisible(true)}>
-            <PlusOutlined/>添加执行对象
-          </Button>
+          <HostSelector value={S.targets.filter(x => x !== 'local')} onChange={handleChange}>
+            <Button type="dashed" style={{width: 'calc(100% - 40px)'}} disabled={S.trigger === 'monitor'}>
+              <PlusOutlined/>添加执行对象
+            </Button>
+          </HostSelector>
         </Form.Item>
         <Form.Item>
           <Button loading={loading} disabled={S.targets.filter(x => x).length === 0} type="primary"
@@ -93,11 +107,6 @@ export default observer(function (props) {
           <Button style={{marginLeft: 20}} onClick={() => S.page -= 1}>上一步</Button>
         </Form.Item>
       </Form>
-      <HostSelector
-        visible={visible}
-        selectedRowKeys={[...S.targets]}
-        onCancel={() => setVisible(false)}
-        onOk={(_, ids) => S.targets = ids}/>
     </Container>
   )
 })
