@@ -8,7 +8,7 @@ import { observer } from 'mobx-react';
 import { ExclamationCircleOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Modal, Form, Input, Select, Button, Radio, Table, Tooltip, message } from 'antd';
 import { ACEditor } from 'components';
-import Selector from 'pages/host/Selector';
+import HostSelector from 'pages/host/Selector';
 import Parameter from './Parameter';
 import { http, cleanCommand } from 'libs';
 import lds from 'lodash';
@@ -20,7 +20,6 @@ export default observer(function () {
   const [body, setBody] = useState(S.record.body);
   const [parameter, setParameter] = useState();
   const [parameters, setParameters] = useState([]);
-  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     setParameters(S.record.parameters)
@@ -136,18 +135,12 @@ export default observer(function () {
           <Button type="link" style={{padding: 0}} onClick={() => setParameter({})}>添加参数</Button>
         </Form.Item>
         <Form.Item label="目标主机">
-          {info.host_ids.length > 0 && <span style={{marginRight: 16}}>已选择 {info.host_ids.length} 台</span>}
-          <Button type="link" style={{padding: 0}} onClick={() => setVisible(true)}>选择主机</Button>
+          <HostSelector value={info.host_ids} onChange={(_, ids) => info.host_ids = ids}/>
         </Form.Item>
         <Form.Item name="desc" label="备注信息">
           <Input.TextArea placeholder="请输入模板备注信息"/>
         </Form.Item>
       </Form>
-      <Selector
-        visible={visible}
-        selectedRowKeys={[...info.host_ids]}
-        onCancel={() => setVisible(false)}
-        onOk={(_, ids) => info.host_ids = ids}/>
       {parameter ? (
         <Parameter
           parameter={parameter}

@@ -6,9 +6,9 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { PlusOutlined, ThunderboltOutlined, BulbOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Form, Button, Alert, Radio, Tooltip } from 'antd';
+import { Form, Button, Radio, Tooltip } from 'antd';
 import { ACEditor, AuthDiv, Breadcrumb } from 'components';
-import Selector from 'pages/host/Selector';
+import HostSelector from 'pages/host/Selector';
 import TemplateSelector from './TemplateSelector';
 import Parameter from './Parameter';
 import Output from './Output';
@@ -87,17 +87,7 @@ function TaskIndex() {
       <div className={style.index} hidden={store.showConsole}>
         <Form layout="vertical" className={style.left}>
           <Form.Item required label="目标主机">
-            {store.host_ids.length > 0 ? (
-              <Alert
-                type="info"
-                className={style.area}
-                message={<div>已选择 <b style={{fontSize: 18, color: '#1890ff'}}>{store.host_ids.length}</b> 台主机</div>}
-                onClick={() => store.showHost = true}/>
-            ) : (
-              <Button icon={<PlusOutlined/>} onClick={() => store.showHost = true}>
-                添加目标主机
-              </Button>
-            )}
+            <HostSelector type="button" value={store.host_ids} onChange={(_, ids) => store.host_ids = ids}/>
           </Form.Item>
 
           <Form.Item required label="执行命令" style={{position: 'relative'}}>
@@ -144,12 +134,6 @@ function TaskIndex() {
       {store.showTemplate && <TemplateSelector onCancel={store.switchTemplate} onOk={handleTemplate}/>}
       {store.showConsole && <Output onBack={store.switchConsole}/>}
       {visible && <Parameter parameters={parameters} onCancel={() => setVisible(false)} onOk={v => handleSubmit(v)}/>}
-      <Selector
-        visible={store.showHost}
-        selectedRowKeys={[...store.host_ids]}
-        onCancel={() => store.showHost = false}
-        onOk={(_, ids) => store.host_ids = ids}/>
-
     </AuthDiv>
   )
 }

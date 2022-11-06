@@ -11,7 +11,6 @@ class Store {
   @observable tag = '';
   @observable host_ids = [];
   @observable token = null;
-  @observable showHost = false;
   @observable showConsole = false;
   @observable showTemplate = false;
 
@@ -49,10 +48,6 @@ class Store {
       this.tag = tag
     }
   }
-
-  switchHost = () => {
-    this.showHost = !this.showHost;
-  };
 
   switchTemplate = () => {
     this.showTemplate = !this.showTemplate

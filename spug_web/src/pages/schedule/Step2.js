@@ -3,7 +3,7 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { Form, Select, Button } from 'antd';
@@ -13,7 +13,12 @@ import hostStore from 'pages/host/store';
 import styles from './index.module.css';
 
 export default observer(function () {
-  const [visible, setVisible] = useState(false)
+  function handleChange(_, ids) {
+    if (store.targets.includes('local')) {
+      ids.unshift('local')
+    }
+    store.targets = ids
+  }
 
   return (
     <React.Fragment>
@@ -43,15 +48,10 @@ export default observer(function () {
           ))}
         </Form.Item>
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <Button type="dashed" style={{width: '80%'}} onClick={() => setVisible(true)}>
-            <PlusOutlined/>添加执行对象
-          </Button>
+          <HostSelector value={store.targets.filter(x => x !== 'local')} onChange={handleChange}>
+            <Button type="dashed" style={{width: '80%'}}><PlusOutlined/>添加执行对象</Button>
+          </HostSelector>
         </Form.Item>
-        <HostSelector
-          visible={visible}
-          selectedRowKeys={[...store.targets]}
-          onCancel={() => setVisible(false)}
-          onOk={(_, ids) => store.targets = ids}/>
       </Form>
       <Form.Item wrapperCol={{span: 14, offset: 6}}>
         <Button disabled={store.targets.filter(x => x).length === 0} type="primary"

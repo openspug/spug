@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { Switch, Form, Input, Select, Button, Radio } from 'antd';
 import Repo from './Repo';
 import envStore from 'pages/config/environment/store';
-import Selector from 'pages/host/Selector';
+import HostSelector from 'pages/host/Selector';
 import store from './store';
 
 export default observer(function Ext1Setup1() {
@@ -62,8 +62,7 @@ export default observer(function Ext1Setup1() {
         </Form.Item>
       </Form.Item>
       <Form.Item required label="目标主机" tooltip="该发布配置作用于哪些目标主机。">
-        {info.host_ids.length > 0 && <span style={{marginRight: 16}}>已选择 {info.host_ids.length} 台</span>}
-        <Button type="link" style={{padding: 0}} onClick={() => store.selectorVisible = true}>选择主机</Button>
+        <HostSelector value={info.host_ids} onChange={(_, ids) => info.host_ids = ids}/>
       </Form.Item>
       <Form.Item required label="Git仓库地址" extra={<span className="btn" onClick={() => setVisible(true)}>私有仓库？</span>}>
         <Input disabled={store.isReadOnly} value={info['git_repo']} onChange={e => info['git_repo'] = e.target.value}
@@ -116,11 +115,6 @@ export default observer(function Ext1Setup1() {
           disabled={!(info.env_id && info.git_repo && info.host_ids.length)}
           onClick={() => store.page += 1}>下一步</Button>
       </Form.Item>
-      <Selector
-        visible={store.selectorVisible}
-        selectedRowKeys={[...info.host_ids]}
-        onCancel={() => store.selectorVisible = false}
-        onOk={(_, ids) => info.host_ids = ids}/>
       {visible && <Repo url={info['git_repo']} onOk={v => info['git_repo'] = v} onCancel={() => setVisible(false)}/>}
     </Form>
   )
