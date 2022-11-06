@@ -12,7 +12,7 @@ import 'ace-builds/src-noconflict/mode-space';
 import 'ace-builds/src-noconflict/mode-python';
 import 'ace-builds/src-noconflict/theme-tomorrow';
 
-export default function (props) {
+function ACEditor (props) {
   const style = {fontFamily: 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei', ...props.style}
   return (
     <Editor
@@ -24,3 +24,9 @@ export default function (props) {
     />
   )
 }
+
+ACEditor.defaultProps = {
+  mode: 'sh'
+}
+
+export default ACEditor
