@@ -130,7 +130,7 @@ export default observer(function () {
           notFoundContent={null}/>
       </Form.Item>
       <Form.Item required label="监控主机" style={getStyle(['3', '4'])}>
-        <HostSelector value={targets} onChange={(_, ids) => store.record.targets = ids}/>
+        <HostSelector value={targets} onChange={ids => store.record.targets = ids}/>
       </Form.Item>
       <Form.Item label="响应时间" style={getStyle(['1'])}>
         <Input suffix="ms" value={extra} placeholder="最长响应时间（毫秒），不设置则默认10秒超时"

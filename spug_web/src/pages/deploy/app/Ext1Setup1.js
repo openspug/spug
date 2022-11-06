@@ -62,7 +62,7 @@ export default observer(function Ext1Setup1() {
         </Form.Item>
       </Form.Item>
       <Form.Item required label="目标主机" tooltip="该发布配置作用于哪些目标主机。">
-        <HostSelector value={info.host_ids} onChange={(_, ids) => info.host_ids = ids}/>
+        <HostSelector value={info.host_ids} onChange={ids => info.host_ids = ids}/>
       </Form.Item>
       <Form.Item required label="Git仓库地址" extra={<span className="btn" onClick={() => setVisible(true)}>私有仓库？</span>}>
         <Input disabled={store.isReadOnly} value={info['git_repo']} onChange={e => info['git_repo'] = e.target.value}

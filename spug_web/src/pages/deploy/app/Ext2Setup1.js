@@ -60,7 +60,7 @@ export default observer(function Ext2Setup1() {
         </Form.Item>
       </Form.Item>
       <Form.Item required label="目标主机" tooltip="该发布配置作用于哪些目标主机。">
-        <HostSelector value={info.host_ids} onChange={(_, ids) => info.host_ids = ids}/>
+        <HostSelector value={info.host_ids} onChange={ids => info.host_ids = ids}/>
       </Form.Item>
       <Form.Item label="发布模式" tooltip="串行即发布时一台完成后再发布下一台，期间出现异常则终止发布。并行则每个主机相互独立发布同时进行。">
         <Radio.Group

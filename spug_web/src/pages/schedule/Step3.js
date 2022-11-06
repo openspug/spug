@@ -58,7 +58,7 @@ export default observer(function (props) {
     }
   }
 
-  function handleChange(_, ids) {
+  function handleChange(ids) {
     if (S.targets.includes('local')) {
       ids.unshift('local')
     }
