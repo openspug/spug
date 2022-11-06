@@ -20,7 +20,6 @@ class Store {
   @observable ext1Visible = false;
   @observable ext2Visible = false;
   @observable autoVisible = false;
-  @observable selectorVisible = false;
 
   @observable f_name;
   @observable f_desc;

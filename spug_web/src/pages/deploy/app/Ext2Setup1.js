@@ -8,12 +8,11 @@ import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
 import { Form, Switch, Select, Button, Input, Radio } from 'antd';
 import envStore from 'pages/config/environment/store';
-import Selector from 'pages/host/Selector';
+import HostSelector from 'pages/host/Selector';
 import store from './store';
 
 export default observer(function Ext2Setup1() {
   const [envs, setEnvs] = useState([]);
-  const [selectorVisible, setSelectorVisible] = useState(false);
 
   function updateEnvs() {
     const ids = store.currentRecord['deploys'].map(x => x.env_id);
@@ -61,8 +60,7 @@ export default observer(function Ext2Setup1() {
         </Form.Item>
       </Form.Item>
       <Form.Item required label="目标主机" tooltip="该发布配置作用于哪些目标主机。">
-        {info.host_ids.length > 0 && <span style={{marginRight: 16}}>已选择 {info.host_ids.length} 台</span>}
-        <Button type="link" style={{padding: 0}} onClick={() => setSelectorVisible(true)}>选择主机</Button>
+        <HostSelector value={info.host_ids} onChange={(_, ids) => info.host_ids = ids}/>
       </Form.Item>
       <Form.Item label="发布模式" tooltip="串行即发布时一台完成后再发布下一台，期间出现异常则终止发布。并行则每个主机相互独立发布同时进行。">
         <Radio.Group
@@ -110,11 +108,6 @@ export default observer(function Ext2Setup1() {
           disabled={!(info.env_id && info.host_ids.length)}
           onClick={() => store.page += 1}>下一步</Button>
       </Form.Item>
-      <Selector
-        visible={selectorVisible}
-        selectedRowKeys={[...info.host_ids]}
-        onCancel={() => setSelectorVisible(false)}
-        onOk={(_, ids) => info.host_ids = ids}/>
     </Form>
   )
 })

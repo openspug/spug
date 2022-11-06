@@ -8,7 +8,7 @@ import { observer } from 'mobx-react';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { Modal, Form, Input, Select, Button, message } from 'antd';
 import TemplateSelector from '../exec/task/TemplateSelector';
-import Selector from 'pages/host/Selector';
+import HostSelector from 'pages/host/Selector';
 import { LinkButton, ACEditor } from 'components';
 import { http, cleanCommand } from 'libs';
 import store from './store';
@@ -22,7 +22,6 @@ const helpMap = {
 export default observer(function () {
   const [loading, setLoading] = useState(false);
   const [showTmp, setShowTmp] = useState(false);
-  const [showSelector, setShowSelector] = useState(false);
 
   function handleTest() {
     setLoading(true)
@@ -131,10 +130,7 @@ export default observer(function () {
           notFoundContent={null}/>
       </Form.Item>
       <Form.Item required label="监控主机" style={getStyle(['3', '4'])}>
-        {store.record.targets?.length > 0 && (
-          <span style={{marginRight: 16}}>已选择 {store.record.targets.length} 台</span>
-        )}
-        <Button type="link" style={{padding: 0}} onClick={() => setShowSelector(true)}>选择主机</Button>
+        <HostSelector value={targets} onChange={(_, ids) => store.record.targets = ids}/>
       </Form.Item>
       <Form.Item label="响应时间" style={getStyle(['1'])}>
         <Input suffix="ms" value={extra} placeholder="最长响应时间（毫秒），不设置则默认10秒超时"
@@ -168,11 +164,6 @@ export default observer(function () {
         <span style={{color: '#888', fontSize: 12}}>Tips: 仅测试第一个监控地址</span>
       </Form.Item>
       {showTmp && <TemplateSelector onOk={({body}) => store.record.extra = body} onCancel={() => setShowTmp(false)}/>}
-      <Selector
-        visible={showSelector}
-        selectedRowKeys={[...store.record.targets]}
-        onCancel={() => setShowSelector(false)}
-        onOk={(_, ids) => store.record.targets = ids}/>
     </Form>
   )
 })

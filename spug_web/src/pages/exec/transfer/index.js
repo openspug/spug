@@ -6,16 +6,15 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import {
-  PlusOutlined,
   ThunderboltOutlined,
   QuestionCircleOutlined,
   UploadOutlined,
   CloudServerOutlined,
   BulbOutlined,
 } from '@ant-design/icons';
-import { Form, Button, Alert, Tooltip, Space, Card, Table, Input, Upload, message } from 'antd';
+import { Form, Button, Tooltip, Space, Card, Table, Input, Upload, message } from 'antd';
 import { AuthDiv, Breadcrumb } from 'components';
-import Selector from 'pages/host/Selector';
+import HostSelector from 'pages/host/Selector';
 import Output from './Output';
 import { http, uniqueId } from 'libs';
 import moment from 'moment';
@@ -27,7 +26,6 @@ function TransferIndex() {
   const [files, setFiles] = useState([])
   const [dir, setDir] = useState('')
   const [hosts, setHosts] = useState([])
-  const [sProps, setSProps] = useState({visible: false})
   const [percent, setPercent] = useState()
   const [token, setToken] = useState()
   const [histories, setHistories] = useState([])
@@ -80,23 +78,14 @@ function TransferIndex() {
       })
   }
 
-  function handleAddHostFile() {
-    setSProps({
-      visible: true,
-      onlyOne: true,
-      selectedRowKeys: [],
-      onCancel: () => setSProps({visible: false}),
-      onOk: (_, __, row) => setFiles([{id: uniqueId(), type: 'host', name: row.name, path: '', host_id: row.id}]),
-    })
-  }
-
-  function handleAddHost() {
-    setSProps({
-      visible: true,
-      selectedRowKeys: hosts.map(x => x.id),
-      onCancel: () => setSProps({visible: false}),
-      onOk: (_, __, rows) => setHosts(rows),
-    })
+  function makeFile(row) {
+    setFiles([{
+      id: uniqueId(),
+      type: 'host',
+      name: row.name,
+      path: '',
+      host_id: row.id
+    }])
   }
 
   function handleUpload(_, fileList) {
@@ -131,7 +120,9 @@ function TransferIndex() {
         <Card type="inner" title={`数据源${files.length ? `（${files.length}）` : ''}`} extra={(<Space size={24}>
           <Upload multiple beforeUpload={handleUpload}><Space
             className="btn"><UploadOutlined/>上传本地文件</Space></Upload>
-          <Space className="btn" onClick={handleAddHostFile}><CloudServerOutlined/>添加主机文件</Space>
+          <HostSelector onlyOne onChange={(_, __, row) => makeFile(row)}>
+            <Space className="btn"><CloudServerOutlined/>添加主机文件</Space>
+          </HostSelector>
         </Space>)}>
           <Table rowKey="id" className={style.table} showHeader={false} pagination={false} size="small"
                  dataSource={files}>
@@ -153,13 +144,7 @@ function TransferIndex() {
               <Input value={dir} onChange={e => setDir(e.target.value)} placeholder="请输入目标路径"/>
             </Form.Item>
             <Form.Item required label="目标主机">
-              {hosts.length > 0 ? (<Alert
-                type="info"
-                className={style.area}
-                message={<div>已选择 <b style={{fontSize: 18, color: '#1890ff'}}>{hosts.length}</b> 台主机</div>}
-                onClick={handleAddHost}/>) : (<Button icon={<PlusOutlined/>} onClick={handleAddHost}>
-                添加目标主机
-              </Button>)}
+              <HostSelector type="button" value={hosts.map(x => x.id)} onChange={(_, __, rows) => setHosts(rows)}/>
             </Form.Item>
           </Form>
         </Card>
@@ -191,7 +176,6 @@ function TransferIndex() {
         </div>
       </div>
     </div>
-    <Selector {...sProps}/>
     {token ? <Output token={token} onBack={handleCloseOutput}/> : null}
   </AuthDiv>)
 }
