@@ -6,14 +6,16 @@ from django.core.cache import cache
 from django.conf import settings
 from libs import JsonParser, Argument, json_response, auth
 from libs.utils import generate_random_str
+from libs.ldap import LDAP
 from libs.mail import Mail
 from libs.spug import send_login_wx_code
 from libs.mixins import AdminView
 from apps.setting.utils import AppSetting
 from apps.setting.models import Setting, KEYS_DEFAULT
+from apps.account.models import User
 from copy import deepcopy
 import platform
-import ldap
+import json
 
 
 class SettingView(AdminView):
@@ -68,19 +70,77 @@ class MFAView(AdminView):
 def ldap_test(request):
     form, error = JsonParser(
         Argument('server'),
-        Argument('port', type=int),
         Argument('admin_dn'),
-        Argument('password'),
+        Argument('admin_password'),
+        Argument('user_ou'),
+        Argument('user_filter'),
+        Argument('map_username'),
+        Argument('map_nickname'),
+    ).parse(request.body)
+    print('form', form)
+    if error is None:
+        ldap = LDAP(form.server, form.admin_dn, form.admin_password, form.user_ou, form.user_filter, form.map_username, form.map_nickname)
+        status, ret = ldap.all_user()
+        if status:
+            return json_response(ret)
+        return json_response(error=ret)
+    return json_response(error=error)
+
+
+@auth('admin')
+def ldap_import(request):
+    form, error = JsonParser(
+        Argument('ldap_data', type=list),
+        Argument('username'),
+        Argument('nickname'),
     ).parse(request.body)
     if error is None:
-        try:
-            con = ldap.initialize("ldap://{0}:{1}".format(form.server, form.port), bytes_mode=False)
-            con.simple_bind_s(form.admin_dn, form.password)
-            return json_response()
-        except Exception as e:
-            error = eval(str(e))
-            return json_response(error=error['desc'])
+        for x in form.ldap_data:
+            User.objects.update_or_create(
+                username=x[form.username],
+                defaults={'nickname': x[form.nickname], 'type': 'ldap'}
+            )
+        return json_response()
     return json_response(error=error)
+
+
+class LDAPUserView(AdminView):
+    def get(self, request):
+        ldap_config = AppSetting.get('ldap_service')
+        if not ldap_config:
+            return json_response(error='LDAP服务未配置')
+        ldap = LDAP(**ldap_config)
+        status, ret = ldap.all_user()
+        if status:
+            cn_key, sn_key = ldap_config.get('map_username'), ldap_config.get('map_nickname')
+            system_users = [x.username for x in User.objects.filter(type='ldap', deleted_by_id__isnull=True)]
+            for index, u in enumerate(ret):
+                u['cn'] = u[cn_key]
+                u['sn'] = u[sn_key]
+                u['is_exist'] = u.get(cn_key) in system_users
+                u['id'] = index
+            return json_response(ret)
+        return json_response(error=ret)
+    
+    def post(self, request):
+        form, error = JsonParser(
+            Argument('server'),
+            Argument('admin_dn'),
+            Argument('admin_password'),
+            Argument('user_ou'),
+            Argument('user_filter'),
+            Argument('map_username'),
+            Argument('map_nickname'),
+            Argument('ldap_user', help='LDAP用户不能为空'),
+            Argument('ldap_password', help='LDAP密码不能为空'),
+            ).parse(request.body)
+        if error is None:
+            ldap = LDAP(form.server, form.admin_dn, form.admin_password, form.user_ou, form.user_filter, form.map_username, form.map_nickname)
+            status, msg = ldap.verify_user(form.ldap_user, form.ldap_password)
+            if status:
+                return json_response()
+            return json_response(error=msg)
+        return json_response(error=error)
 
 
 @auth('admin')

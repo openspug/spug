@@ -3,13 +3,23 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import { observable } from "mobx";
+import { observable, computed } from "mobx";
 import http from 'libs/http';
 
 class Store {
   @observable settings = {};
   @observable isFetching = false;
   @observable loading = false;
+  @observable importVisible = false;
+  @observable records = [];
+  @observable f_name;
+
+  @computed get dataSource() {
+    let records = this.records;
+    if (this.f_name) records = records.filter(x => x.cn.toLowerCase().includes(this.f_name.toLowerCase()));
+    return records
+  }
+
 
   fetchSettings = () => {
     this.isFetching = true;
@@ -20,6 +30,22 @@ class Store {
 
   update = (key, value) => {
     this.settings[key] = value
+  }
+
+
+  fetchLdapRecords = () => {
+    this.isFetching = true;
+    http.get('/api/setting/ldap/')
+      .then((res) => {
+        this.records = res;
+      })
+      .finally(() => this.isFetching = false)
+  };
+
+
+  handleLdapImport = () => {
+    this.importVisible = true;
+    this.fetchLdapRecords();
   }
 }
 

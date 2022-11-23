@@ -201,7 +201,7 @@ def login(request):
             if not config:
                 return handle_response(error='请在系统设置中配置LDAP后再尝试通过该方式登录')
             ldap = LDAP(**config)
-            is_success, message = ldap.valid_user(form.username, form.password)
+            is_success, message = ldap.verify_user(form.username, form.password)
             if is_success:
                 if not user:
                     user = User.objects.create(username=form.username, nickname=form.username, type=form.type)
