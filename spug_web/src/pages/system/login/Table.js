@@ -23,11 +23,11 @@ class ComTable extends React.Component {
   }
 
   columns = [{
-    title: '时间',
+    title: '登录时间',
     width: 200,
     dataIndex: 'created_at'
   }, {
-    title: '账户名',
+    title: '账户名称',
     width: 120,
     dataIndex: 'username',
   }, {

@@ -20,7 +20,7 @@ export default observer(function () {
         <Breadcrumb.Item>账户管理</Breadcrumb.Item>
       </Breadcrumb>
       <SearchForm>
-        <SearchForm.Item span={8} title="账户名称">
+        <SearchForm.Item span={8} title="登录名">
           <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
         </SearchForm.Item>
       </SearchForm>

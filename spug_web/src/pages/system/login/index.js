@@ -16,7 +16,7 @@ export default observer(function () {
       <Breadcrumb>
         <Breadcrumb.Item>首页</Breadcrumb.Item>
         <Breadcrumb.Item>系统管理</Breadcrumb.Item>
-        <Breadcrumb.Item>账户管理</Breadcrumb.Item>
+        <Breadcrumb.Item>登录日志</Breadcrumb.Item>
       </Breadcrumb>
       <SearchForm>
         <SearchForm.Item span={8} title="账户名称">
