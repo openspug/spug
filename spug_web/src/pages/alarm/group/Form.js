@@ -40,7 +40,7 @@ export default observer(function () {
           <Input placeholder="请输入联系组名称"/>
         </Form.Item>
         <Form.Item name="desc" label="备注信息">
-          <Input.TextArea placeholder="请输入模板备注信息"/>
+          <Input.TextArea placeholder="请输入备注信息"/>
         </Form.Item>
         <Form.Item required name="contacts" valuePropName="targetKeys" label="选择联系人">
           <Transfer
