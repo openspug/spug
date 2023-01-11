@@ -70,7 +70,7 @@ function ComTable() {
       )}/>
       <Table.Column title="环境名称" dataIndex="name"/>
       <Table.Column title="标识符" dataIndex="key"/>
-      <Table.Column ellipsis title="描述信息" dataIndex="desc"/>
+      <Table.Column ellipsis title="备注信息" dataIndex="desc"/>
       {hasPermission('config.env.edit|config.env.del') && (
         <Table.Column title="操作" render={info => (
           <Action>

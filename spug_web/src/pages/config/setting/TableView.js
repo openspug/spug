@@ -30,11 +30,11 @@ class TableView extends React.Component {
     dataIndex: 'value',
     className: styles.value
   }, {
-    title: '修改人',
+    title: '操作人',
     width: 120,
     dataIndex: 'update_user'
   }, {
-    title: '修改时间',
+    title: '操作时间',
     width: 180,
     dataIndex: 'updated_at'
   }, {

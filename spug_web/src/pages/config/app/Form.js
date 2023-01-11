@@ -40,7 +40,7 @@ export default observer(function () {
         <Form.Item
           required
           name="key"
-          label="唯一标识符"
+          label="标识符"
           tooltip="应用的唯一标识符，会作为生成配置的前缀。"
           extra="可以由字母、数字和下划线组成。">
           <Input placeholder="请输入唯一标识符，例如：api_order"/>

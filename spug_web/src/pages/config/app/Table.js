@@ -64,7 +64,7 @@ class ComTable extends React.Component {
         }}>
         <Table.Column title="应用名称" dataIndex="name"/>
         <Table.Column title="标识符" dataIndex="key"/>
-        <Table.Column ellipsis title="描述信息" dataIndex="desc"/>
+        <Table.Column ellipsis title="备注信息" dataIndex="desc"/>
         {hasPermission('config.app.edit|config.app.del|config.app.view_config') && (
           <Table.Column width={210} title="操作" render={info => (
             <Action>

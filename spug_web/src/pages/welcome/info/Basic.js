@@ -42,7 +42,7 @@ export default observer(function Basic(props) {
     <Spin spinning={fetching}>
       <div className={styles.title}>基本设置</div>
       <Form form={form} layout="vertical" style={{maxWidth: 320}} initialValues={store.user}>
-        <Form.Item required name="nickname" label="昵称">
+        <Form.Item required name="nickname" label="姓名">
           <Input placeholder="请输入"/>
         </Form.Item>
         <Form.Item name="wx_token" label="微信Token" extra={<a target="_blank" rel="noopener noreferrer" href="https://spug.cc/docs/wx-token/">什么是微信Token？</a>}>

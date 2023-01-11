@@ -30,7 +30,7 @@ export default observer(function () {
           <Input
             value={store.settings.api_key}
             onChange={e => store.settings.api_key = e.target.value}
-            placeholder="请输入自定义Token"/>
+            placeholder="请输入自定义凭证"/>
         </Form.Item>
         <Form.Item style={{marginTop: 24}}>
           <Button type="primary" loading={store.loading} onClick={handleSubmit}>保存设置</Button>

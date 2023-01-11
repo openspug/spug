@@ -41,7 +41,7 @@ export default observer(function () {
     Modal.confirm({
       title: 'LDAP用户测试登录',
       content: <Form layout="vertical" style={{marginTop: 24}}>
-        <Form.Item required label="LDAP用户名">
+        <Form.Item required label="LDAP登录名">
           <Input onChange={val => ldadUser = val.target.value }/>
         </Form.Item>
         <Form.Item required label="LDAP用户密码" >
@@ -87,10 +87,10 @@ export default observer(function () {
           <Input.TextArea row={4} placeholder="例如：" />
         </Form.Item> */}
 
-        <Form.Item required name="map_username" label="登录名映射" extra="登录名映射代表将LDAP用户的某个属性映射到Spug的登录名中，例如cn对应登录名">
+        <Form.Item required name="map_username" label="登录名映射" extra="登录名映射代表将LDAP用户的某个属性映射到Spug账户的登录名中，例如cn对应登录名">
           <Input placeholder="例如：cn" />
         </Form.Item>
-        <Form.Item required name="map_nickname" label="姓名映射" extra="姓名映射代表将LDAP用户的某个属性映射到Spug的姓名中，例如sn对应姓名">
+        <Form.Item required name="map_nickname" label="姓名映射" extra="姓名映射代表将LDAP用户的某个属性映射到Spug账户的姓名中，例如sn对应姓名">
           <Input placeholder="例如：sn" />
         </Form.Item>
         <Space>

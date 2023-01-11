@@ -34,7 +34,7 @@ class ComTable extends React.Component {
       </Popover>
     ) : <Button type="link" disabled>{info.used}</Button>
   }, {
-    title: '描述信息',
+    title: '备注信息',
     dataIndex: 'desc',
     ellipsis: true
   }, {
