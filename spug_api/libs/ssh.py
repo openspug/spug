@@ -1,6 +1,9 @@
+#coding:utf-8
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
+from paramiko.config import SSHConfig
+from paramiko.proxy  import ProxyCommand
 from paramiko.client import SSHClient, AutoAddPolicy
 from paramiko.rsakey import RSAKey
 from paramiko.auth_handler import AuthHandler
@@ -10,7 +13,8 @@ from io import StringIO
 from uuid import uuid4
 import time
 import re
-
+import os
+import io
 
 def _finalize_pubkey_algorithm(self, key_type):
     if "rsa" not in key_type:
@@ -61,6 +65,15 @@ class SSH:
         self.eof = 'Spug EOF 2108111926'
         self.default_env = default_env
         self.regex = re.compile(r'Spug EOF 2108111926 (-?\d+)[\r\n]?')
+        sock = None
+        ssh_config_file = os.path.expanduser("~/.ssh/config")
+        if os.path.exists(ssh_config_file):
+            ssh_config = SSHConfig()
+            with io.open(ssh_config_file, 'rt', encoding='utf-8') as f:
+                ssh_config.parse(f)
+            host_config = ssh_config.lookup(hostname)
+            if 'proxycommand' in host_config:
+                sock = ProxyCommand(host_config['proxycommand']) 
         self.arguments = {
             'hostname': hostname,
             'port': port,
@@ -70,7 +83,9 @@ class SSH:
             'timeout': connect_timeout,
             'allow_agent': False,
             'look_for_keys': False,
-            'banner_timeout': 30
+            'banner_timeout': 30,
+            'sock':sock
+            
         }
 
     @staticmethod
@@ -79,6 +94,7 @@ class SSH:
         key = RSAKey.generate(2048)
         key.write_private_key(key_obj)
         return key_obj.getvalue(), 'ssh-rsa ' + key.get_base64()
+
 
     def get_client(self):
         if self.client is not None:
