@@ -59,29 +59,26 @@ class SSHConsumer(BaseConsumer):
         self.ssh = None
 
     def loop_read(self):
-        is_ready, data = False, b''
+        is_ready, buf_size = False, 4096
         while True:
-            out = self.chan.recv(32 * 1024)
-            if not out:
+            data = self.chan.recv(buf_size)
+            if not data:
                 self.close(3333)
                 break
-            data += out
+            while self.chan.recv_ready():
+                data += self.chan.recv(buf_size)
             try:
                 text = data.decode()
             except UnicodeDecodeError:
                 try:
                     text = data.decode(encoding='GBK')
                 except UnicodeDecodeError:
-                    time.sleep(0.01)
-                    if self.chan.recv_ready():
-                        continue
                     text = data.decode(errors='ignore')
 
             if not is_ready:
                 self.send(text_data='\033[2J\033[3J\033[1;1H')
                 is_ready = True
             self.send(text_data=text)
-            data = b''
 
     def receive(self, text_data=None, bytes_data=None):
         data = text_data or bytes_data

@@ -1,9 +1,52 @@
 .container {
   position: relative;
+  display: flex;
+  flex-direction: column;
   border-radius: 4px;
-  min-height: calc(100vh - 127px);
-  margin: -12px -12px 0 -12px;
-  padding: 12px 0 0 12px;
+  margin: -24px -24px 0;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: #ffffff;
+  height: 56px;
+  padding-left: 24px;
+  padding-right: 12px;
+
+  .title {
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .back {
+    color: #999999;
+
+    &:hover {
+      color: #2563fc;
+    }
+  }
+
+  .edit {
+    margin-left: 12px;
+    cursor: pointer;
+    font-size: 14px;
+
+    &:hover {
+      color: #2563fc;
+    }
+  }
+}
+
+.body {
+  position: relative;
+
+  .nodes {
+    height: calc(100vh - 48px - 56px);
+    padding: 24px;
+    overflow: auto;
+  }
 }
 
 .triangle {
@@ -16,42 +59,4 @@
 .row {
   display: flex;
   flex-direction: row;
-}
-
-.item {
-  width: 240px;
-  height: 80px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  box-shadow: 0 0 15px #9999994c;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  padding: 0 12px;
-  background: #ffffff;
-  cursor: pointer;
-
-  .title {
-    width: 164px;
-    margin-left: 12px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-
-  .add {
-    width: 40px;
-    height: 40px;
-    border-radius: 20px;
-    border: 2px dashed #dddddd;
-    background: #f5f5f5;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    .icon {
-      font-size: 18px;
-      color: #999999;
-    }
-  }
 }

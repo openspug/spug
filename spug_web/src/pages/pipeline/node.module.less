@@ -1,8 +1,14 @@
 .box {
   position: relative;
   width: 240px;
-  height: 80px;
+  height: 70px;
   margin-right: 24px;
+  flex-shrink: 0;
+}
+
+.blank {
+  width: 24px;
+  flex-shrink: 0;
 }
 
 .triangle {
@@ -24,6 +30,7 @@
   align-items: center;
   cursor: pointer;
   padding: 0 24px;
+  margin: 0;
 
   &:hover {
     box-shadow: 0 0 6px #2563fcbb;
@@ -34,7 +41,7 @@
 
   .title {
     flex: 1;
-    font-size: 20px;
+    font-size: 14px;
     margin-left: 12px;
     white-space: nowrap;
     overflow: hidden;
@@ -61,7 +68,7 @@
     height: 2px;
     background: #999999;
     position: absolute;
-    top: 39px;
+    top: 34px;
     left: -24px;
     right: 0;
   }
@@ -78,8 +85,8 @@
     content: ' ';
     position: absolute;
     background: #999999;
-    top: 39px;
-    bottom: 39px;
+    top: 34px;
+    bottom: 34px;
     left: -24px;
     right: 119px;
   }
@@ -88,7 +95,7 @@
     content: ' ';
     position: absolute;
     background: #999999;
-    top: 40px;
+    top: 34px;
     left: 119px;
     right: 119px;
     bottom: 0;

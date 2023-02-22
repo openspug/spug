@@ -42,7 +42,11 @@ function HostSelector(props) {
   }, [store.treeData])
 
   useEffect(() => {
-    setSelectedRowKeys([...props.value])
+    if (Array.isArray(props.value)) {
+      setSelectedRowKeys([...props.value])
+    } else {
+      setSelectedRowKeys([props.value])
+    }
   }, [props.value])
 
   useEffect(() => {
@@ -114,6 +118,20 @@ function HostSelector(props) {
     }
   }
 
+  function ButtonAction() {
+    if (!props.value || props.value.length === 0) {
+      return <Button icon={<PlusOutlined/>} onClick={() => setVisible(true)}>添加目标主机</Button>
+    }
+    const number = props.value.length || 1
+    return (
+      <Alert
+        type="info"
+        className={styles.area}
+        message={<div>已选择 <b style={{fontSize: 18, color: '#1890ff'}}>{number}</b> 台主机</div>}
+        onClick={() => setVisible(true)}/>
+    )
+  }
+
   return (
     <div className={styles.selector}>
       {props.mode !== 'group' && (
@@ -121,17 +139,8 @@ function HostSelector(props) {
           <div onClick={() => setVisible(true)}>{props.children}</div>
         ) : (
           props.type === 'button' ? (
-            props.value.length > 0 ? (
-              <Alert
-                type="info"
-                className={styles.area}
-                message={<div>已选择 <b style={{fontSize: 18, color: '#1890ff'}}>{props.value.length}</b> 台主机</div>}
-                onClick={() => setVisible(true)}/>
-            ) : (
-              <Button icon={<PlusOutlined/>} onClick={() => setVisible(true)}>
-                添加目标主机
-              </Button>
-            )) : (
+            <ButtonAction/>
+          ) : (
             <div style={{display: 'flex', alignItems: 'center'}}>
               {props.value.length > 0 && <span style={{marginRight: 16}}>已选择 {props.value.length} 台</span>}
               <Button type="link" style={{padding: 0}} onClick={() => setVisible(true)}>选择主机</Button>
@@ -209,6 +218,7 @@ HostSelector.defaultProps = {
   value: [],
   type: 'text',
   mode: 'ids',
+  onlyOne: false,
   onChange: () => null
 }
 

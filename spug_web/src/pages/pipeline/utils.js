@@ -1,3 +1,5 @@
+import lds from 'lodash'
+
 let response = []
 let nodes = {}
 let layer = 0
@@ -9,7 +11,7 @@ function loop(keys) {
     const node = nodes[key]
     tmp.push(node.id)
     for (let item of node.downstream || []) {
-      downKeys.push(item.id)
+      downKeys.push(item)
     }
   }
   response[layer] = tmp
@@ -37,8 +39,7 @@ export function transfer(data) {
       const node = nodes[currentRow[cIdx]]
       if (node.downstream) {
         const downRow = response[idx + 1]
-        for (let item of node.downstream) {
-          const sKey = item.id
+        for (let sKey of node.downstream) {
           let dIdx = downRow.indexOf(sKey)
           while (dIdx < cIdx) { // 下级在左侧，则在下级前补空
             let tIdx = idx + 1
@@ -88,5 +89,5 @@ export function transfer(data) {
     idx += 2
   }
 
-  return response
+  return lds.cloneDeep(response)
 }

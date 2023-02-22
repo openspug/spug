@@ -9,7 +9,6 @@ import { Layout, message } from 'antd';
 import { NotFound } from 'components';
 import Sider from './Sider';
 import Header from './Header';
-import Footer from './Footer'
 import routes from '../routes';
 import { hasPermission, isMobile } from 'libs';
 import styles from './layout.module.less';
@@ -50,7 +49,6 @@ export default function () {
             {Routes}
             <Route component={NotFound}/>
           </Switch>
-          <Footer/>
         </Layout.Content>
       </Layout>
     </Layout>

@@ -39,8 +39,11 @@ import SystemAccount from './pages/system/account';
 import SystemRole from './pages/system/role';
 import SystemSetting from './pages/system/setting';
 import SystemLogin from './pages/system/login';
+import SystemCredential from './pages/system/credential';
 import WelcomeIndex from './pages/welcome/index';
 import WelcomeInfo from './pages/welcome/info';
+import PipelineIndex from './pages/pipeline';
+import PipelineEditor from './pages/pipeline';
 
 export default [
   {icon: <DesktopOutlined/>, title: '工作台', path: '/home', component: HomeIndex},
@@ -66,6 +69,8 @@ export default [
       {title: '发布申请', auth: 'deploy.request.view', path: '/deploy/request', component: DeployRequest},
     ]
   },
+  {icon: <FlagOutlined/>, title: '流水线', path: '/pipeline', component: PipelineIndex},
+  {path: '/pipeline/:id', component: PipelineEditor},
   {
     icon: <ScheduleOutlined/>,
     title: '任务计划',
@@ -92,6 +97,7 @@ export default [
   {
     icon: <SettingOutlined/>, title: '系统管理', auth: "system.account.view|system.role.view|system.setting.view", child: [
       {title: '登录日志', auth: 'system.login.view', path: '/system/login', component: SystemLogin},
+      {title: '凭据管理', auth: 'system.credential.view', path: '/system/credential', component: SystemCredential},
       {title: '账户管理', auth: 'system.account.view', path: '/system/account', component: SystemAccount},
       {title: '角色管理', auth: 'system.role.view', path: '/system/role', component: SystemRole},
       {title: '系统设置', auth: 'system.setting.view', path: '/system/setting', component: SystemSetting},

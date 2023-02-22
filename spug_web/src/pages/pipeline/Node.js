@@ -1,7 +1,7 @@
 import React from 'react'
 import { observer } from 'mobx-react';
 import { Dropdown } from 'antd';
-import { MoreOutlined } from '@ant-design/icons';
+import { MoreOutlined, DeleteOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import Icon from './Icon';
 import { clsNames } from 'libs';
 import css from './node.module.less';
@@ -22,17 +22,20 @@ function Node(props) {
     {
       key: 'upstream',
       label: '添加上游节点',
+      icon: <ArrowUpOutlined/>,
       onClick: props.onAction
     },
     {
       key: 'downstream',
       label: '添加下游节点',
+      icon: <ArrowDownOutlined/>,
       onClick: props.onAction
     },
     {
       key: 'delete',
       danger: true,
       label: '删除此节点',
+      icon: <DeleteOutlined/>,
       onClick: props.onAction
     }
   ]
@@ -57,18 +60,21 @@ function Node(props) {
       )
     default:
       return (
-        <div className={clsNames(css.box, css.node, S.node.id === node.id && css.active)}
-             onClick={handleNodeClick}>
-          <Icon module={node.module}/>
-          {node.name ? (
-            <div className={css.title}>{node.name}</div>
-          ) : (
-            <div className={css.title} style={{color: '#595959'}}>请选择节点</div>
-          )}
-          <Dropdown className={css.action} trigger="click" menu={{items: menus}} onClick={handleActionClick}>
-            <MoreOutlined/>
-          </Dropdown>
-        </div>
+        <React.Fragment>
+          <div className={clsNames(css.box, css.node, S.node.id === node.id && css.active)}
+               onMouseDown={handleNodeClick}>
+            <Icon size={36} module={node.module}/>
+            {node.name ? (
+              <div className={css.title}>{node.name}</div>
+            ) : (
+              <div className={css.title} style={{color: '#595959'}}>请选择节点</div>
+            )}
+            <Dropdown className={css.action} trigger="click" menu={{items: menus}} onMouseDown={handleActionClick}>
+              <MoreOutlined/>
+            </Dropdown>
+          </div>
+          <div className={css.blank}/>
+        </React.Fragment>
       )
   }
 }

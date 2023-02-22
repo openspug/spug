@@ -4,10 +4,12 @@
  * Released under the AGPL-3.0 License.
  */
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { observer } from 'mobx-react';
-import { PlusOutlined } from '@ant-design/icons';
-import { message } from 'antd';
+import { Button, message } from 'antd';
+import { RollbackOutlined, EditOutlined } from '@ant-design/icons';
 import NodeConfig from './NodeConfig';
+import PipeForm from './Form';
 import Node from './Node';
 import { transfer } from './utils';
 import S from './store';
@@ -15,13 +17,27 @@ import lds from 'lodash';
 import css from './editor.module.less';
 
 function Editor(props) {
-  const [record, setRecord] = useState({})
+  const params = useParams()
   const [nodes, setNodes] = useState([])
+  const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    const data = transfer(record.pipeline || [])
-    setNodes(data)
-  }, [record])
+    if (params.id === 'new') {
+      S.record = {name: '新建流水线', nodes: []}
+      handleAddDownstream()
+    } else {
+      S.fetchRecord(params.id)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (S.record.nodes.length) {
+      const data = transfer(S.record.nodes)
+      setNodes(data)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [S.record])
 
   function handleAction({key, domEvent}) {
     domEvent.stopPropagation()
@@ -41,15 +57,17 @@ function Editor(props) {
     let index
     let [upNode, streamIdx] = [null, null]
     const id = S.actionNode.id
-    for (let idx in record.pipeline) {
-      const node = record.pipeline[idx]
+    for (let idx in S.record.nodes) {
+      const node = S.record.nodes[idx]
       if (node.id === id) {
         index = Number(idx)
       }
-      idx = lds.findIndex(node.downstream, {id})
-      if (idx >= 0) {
-        upNode = node
-        streamIdx = idx
+      if (node.downstream) {
+        idx = node.downstream.indexOf(id)
+        if (idx >= 0) {
+          upNode = node
+          streamIdx = idx
+        }
       }
     }
     return [index, upNode, streamIdx]
@@ -58,28 +76,30 @@ function Editor(props) {
   function handleAddUpstream() {
     const oldID = S.actionNode.id
     const newID = new Date().getTime()
+    const newNode = {id: newID, downstream: [oldID]}
     const [index, upNode, streamIdx] = _findIndexAndUpNode()
-    if (upNode) upNode.downstream.splice(streamIdx, 1, {id: newID})
-    record.pipeline.splice(index, 0, {id: newID, downstream: [{id: oldID}]})
-    setRecord(Object.assign({}, record))
+    if (upNode) upNode.downstream.splice(streamIdx, 1, newID)
+    S.record.nodes.splice(index, 0, newNode)
+    S.record = {...S.record}
+    S.node = newNode
   }
 
-  function handleAddDownstream(e) {
-    if (e) e.stopPropagation()
+  function handleAddDownstream() {
     const oldID = S.actionNode.id
+    const newID = new Date().getTime()
     const newNode = {id: new Date().getTime()}
-    if (record.pipeline) {
-      const idx = lds.findIndex(record.pipeline, {id: oldID})
-      if (record.pipeline[idx].downstream) {
-        record.pipeline[idx].downstream.push(newNode)
+    if (S.record.nodes.length) {
+      const idx = lds.findIndex(S.record.nodes, {id: oldID})
+      if (S.record.nodes[idx].downstream) {
+        S.record.nodes[idx].downstream.push(newID)
       } else {
-        record.pipeline[idx].downstream = [newNode]
+        S.record.nodes[idx].downstream = [newID]
       }
-      record.pipeline.splice(idx + 1, 0, newNode)
+      S.record.nodes.splice(idx + 1, 0, newNode)
     } else {
-      record.pipeline = [newNode]
+      S.record.nodes = [newNode]
     }
-    setRecord(Object.assign({}, record))
+    S.record = {...S.record}
     S.node = newNode
   }
 
@@ -97,34 +117,37 @@ function Editor(props) {
         }
       }
     }
-    record.pipeline.splice(index, 1)
-    setRecord(Object.assign({}, record))
+    S.record.nodes.splice(index, 1)
+    S.record = {...S.record}
   }
 
   function handleRefresh(node) {
-    const index = lds.findIndex(record.pipeline, {id: node.id})
-    record.pipeline.splice(index, 1, node)
-    setRecord(Object.assign({}, record))
+    const index = lds.findIndex(S.record.nodes, {id: node.id})
+    S.record.nodes.splice(index, 1, node)
+    return S.updateRecord()
   }
 
   return (
-    <div className={css.container} onClick={() => S.node = {}}>
-      {nodes.map((row, idx) => (
-        <div key={idx} className={css.row}>
-          {row.map((item, idx) => (
-            <Node key={idx} node={item} onAction={handleAction}/>
+    <div className={css.container} onMouseDown={() => S.node = {}}>
+      <div className={css.header}>
+        <div className={css.title}>{S.record.name}</div>
+        <EditOutlined className={css.edit} onClick={() => setVisible(true)}/>
+        <div style={{flex: 1}}/>
+        <Button className={css.back} type="link" icon={<RollbackOutlined/>}>返回列表</Button>
+      </div>
+      <div className={css.body}>
+        <div className={css.nodes}>
+          {nodes.map((row, idx) => (
+            <div key={idx} className={css.row}>
+              {row.map((item, idx) => (
+                <Node key={idx} node={item} onAction={handleAction}/>
+              ))}
+            </div>
           ))}
         </div>
-      ))}
-      {nodes.length === 0 && (
-        <div className={css.item} onClick={handleAddDownstream}>
-          <div className={css.add}>
-            <PlusOutlined className={css.icon}/>
-          </div>
-          <div className={css.title} style={{color: '#999999'}}>点击添加节点</div>
-        </div>
-      )}
-      <NodeConfig doRefresh={handleRefresh}/>
+        <NodeConfig doRefresh={handleRefresh}/>
+      </div>
+      {visible && <PipeForm onCancel={() => setVisible(false)}/>}
     </div>
   )
 }

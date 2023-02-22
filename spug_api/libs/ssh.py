@@ -3,50 +3,11 @@
 # Released under the AGPL-3.0 License.
 from paramiko.client import SSHClient, AutoAddPolicy
 from paramiko.rsakey import RSAKey
-from paramiko.auth_handler import AuthHandler
 from paramiko.ssh_exception import AuthenticationException, SSHException
-from paramiko.py3compat import b, u
 from io import StringIO
 from uuid import uuid4
 import time
 import re
-
-
-def _finalize_pubkey_algorithm(self, key_type):
-    if "rsa" not in key_type:
-        return key_type
-    if re.search(r"-OpenSSH_(?:[1-6]|7\.[0-7])", self.transport.remote_version):
-        pubkey_algo = "ssh-rsa"
-        if key_type.endswith("-cert-v01@openssh.com"):
-            pubkey_algo += "-cert-v01@openssh.com"
-
-        self.transport._agreed_pubkey_algorithm = pubkey_algo
-        return pubkey_algo
-    my_algos = [x for x in self.transport.preferred_pubkeys if "rsa" in x]
-    if not my_algos:
-        raise SSHException(
-            "An RSA key was specified, but no RSA pubkey algorithms are configured!"  # noqa
-        )
-    server_algo_str = u(
-        self.transport.server_extensions.get("server-sig-algs", b(""))
-    )
-    if server_algo_str:
-        server_algos = server_algo_str.split(",")
-        agreement = list(filter(server_algos.__contains__, my_algos))
-        if agreement:
-            pubkey_algo = agreement[0]
-        else:
-            err = "Unable to agree on a pubkey algorithm for signing a {!r} key!"  # noqa
-            raise AuthenticationException(err.format(key_type))
-    else:
-        pubkey_algo = "ssh-rsa"
-    if key_type.endswith("-cert-v01@openssh.com"):
-        pubkey_algo += "-cert-v01@openssh.com"
-    self.transport._agreed_pubkey_algorithm = pubkey_algo
-    return pubkey_algo
-
-
-AuthHandler._finalize_pubkey_algorithm = _finalize_pubkey_algorithm
 
 
 class SSH:
@@ -56,7 +17,7 @@ class SSH:
         self.client = None
         self.channel = None
         self.sftp = None
-        self.exec_file = None
+        self.exec_file = f'/tmp/spug.{uuid4().hex}'
         self.term = term or {}
         self.pid = None
         self.eof = 'Spug EOF 2108111926'
@@ -124,29 +85,18 @@ class SSH:
             out += line
         return exit_code, out
 
-    def _win_exec_command_with_stream(self, command, environment=None):
-        channel = self.client.get_transport().open_session()
-        if environment:
-            channel.update_environment(environment)
-        channel.set_combine_stderr(True)
-        channel.get_pty(width=102)
-        channel.exec_command(command)
-        stdout = channel.makefile("rb", -1)
-        out = stdout.readline()
-        while out:
-            yield channel.exit_status, self._decode(out)
-            out = stdout.readline()
-        yield channel.recv_exit_status(), self._decode(out)
-
     def exec_command_with_stream(self, command, environment=None):
         channel = self._get_channel()
         command = self._handle_command(command, environment)
         channel.sendall(command)
-        exit_code, line = -1, ''
+        buf_size, exit_code, line = 4096, -1, ''
         while True:
-            line = self._decode(channel.recv(8196))
-            if not line:
+            out = channel.recv(buf_size)
+            if not out:
                 break
+            while channel.recv_ready():
+                out += channel.recv(buf_size)
+            line = self._decode(out)
             match = self.regex.search(line)
             if match:
                 exit_code = int(match.group(1))
@@ -185,18 +135,23 @@ class SSH:
         if self.channel:
             return self.channel
 
-        counter = 0
-        self.channel = self.client.invoke_shell(**self.term)
+        self.channel = self.client.invoke_shell(term='xterm', **self.term)
+        self.channel.settimeout(3600)
         command = '[ -n "$BASH_VERSION" ] && set +o history\n'
-        command += '[ -n "$ZSH_VERSION" ] && set +o zle && set -o no_nomatch\n'
+        command += '[ -n "$ZSH_VERSION" ] && set +o zle && set -o no_nomatch && HISTFILE=""\n'
         command += 'export PS1= && stty -echo\n'
+        command += f'trap \'rm -f {self.exec_file}*\' EXIT\n'
         command += self._make_env_command(self.default_env)
         command += f'echo {self.eof} $$\n'
+        time.sleep(0.2)  # compatibility
         self.channel.sendall(command)
-        out = ''
+        counter, buf_size = 0, 4096
         while True:
             if self.channel.recv_ready():
-                out += self._decode(self.channel.recv(8196))
+                out = self.channel.recv(buf_size)
+                if self.channel.recv_ready():
+                    out += self.channel.recv(buf_size)
+                out = self._decode(out)
                 match = self.regex.search(out)
                 if match:
                     self.pid = int(match.group(1))
@@ -232,17 +187,11 @@ class SSH:
         return f'export {str_envs}\n'
 
     def _handle_command(self, command, environment):
-        new_command = commands = ''
-        if not self.exec_file:
-            self.exec_file = f'/tmp/spug.{uuid4().hex}'
-            commands += f'trap \'rm -f {self.exec_file}\' EXIT\n'
-
-        new_command += self._make_env_command(environment)
+        new_command = self._make_env_command(environment)
         new_command += command
         new_command += f'\necho {self.eof} $?\n'
         self.put_file_by_fl(StringIO(new_command), self.exec_file)
-        commands += f'. {self.exec_file}\n'
-        return commands
+        return f'. {self.exec_file}\n'
 
     def _decode(self, content):
         try:
@@ -253,12 +202,8 @@ class SSH:
 
     def __enter__(self):
         self.get_client()
-        transport = self.client.get_transport()
-        if 'windows' in transport.remote_version.lower():
-            self.exec_command = self.exec_command_raw
-            self.exec_command_with_stream = self._win_exec_command_with_stream
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, *args, **kwargs):
         self.client.close()
         self.client = None

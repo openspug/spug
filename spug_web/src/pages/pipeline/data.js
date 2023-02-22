@@ -15,13 +15,12 @@ export const DATAS = {
       'module': 'build',
       'name': '构建',
       'id': 0,
+      'condition': 'success',
       'repository': 1,
       'target': 2,
       'workspace': '/data/spug',
       'command': 'mvn build',
-      'downstream': [
-        {'id': 1, 'state': 'success'}
-      ]
+      'downstream': [1, 2, 3]
     },
     {
       'module': 'remote_exec',
@@ -30,9 +29,6 @@ export const DATAS = {
       'targets': [2, 3],
       'interpreter': 'sh',
       'command': 'date && sleep 3',
-      'downstream': [
-        {'id': 2, 'state': 'success'}
-      ]
     },
     {
       'module': 'data_transfer',
@@ -42,10 +38,34 @@ export const DATAS = {
         'target': 1,
         'path': '/data/spug'
       },
-      'dest': {
+      'destination': {
         'targets': [2, 3],
         'path': '/data/dist'
       }
-    }
+    },
+    {
+      'module': 'remote_exec',
+      'name': '执行命令',
+      'id': 3,
+      'targets': [2, 3],
+      'interpreter': 'sh',
+      'command': 'date && sleep 3',
+    },
+    {
+      'module': 'remote_exec',
+      'name': '执行命令',
+      'id': 4,
+      'targets': [2, 3],
+      'interpreter': 'sh',
+      'command': 'date && sleep 3',
+    },
+    {
+      'module': 'remote_exec',
+      'name': '执行命令',
+      'id': 5,
+      'targets': [2, 3],
+      'interpreter': 'sh',
+      'command': 'date && sleep 3',
+    },
   ]
 }

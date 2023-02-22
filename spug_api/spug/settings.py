@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'apps.notify',
     'apps.repository',
     'apps.home',
+    'apps.credential',
+    'apps.pipeline',
     'channels',
 ]
 
