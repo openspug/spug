@@ -22,6 +22,8 @@ class ComConsumer(BaseConsumer):
             self.key = f'{settings.BUILD_KEY}:{token}'
         elif module == 'request':
             self.key = f'{settings.REQUEST_KEY}:{token}'
+        elif module == 'pipeline':
+            self.key = f'{settings.PIPELINE_KEY}:{token}'
         elif module == 'host':
             self.key = token
         else:

@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) OpenSpug Organization. https://github.com/openspug/spug
+ * Copyright (c) <spug.dev@gmail.com>
+ * Released under the AGPL-3.0 License.
+ */
 import React, { useEffect } from 'react';
 import { Form, Input, message, Card, Radio } from 'antd';
 import HostSelector from 'pages/host/Selector';
@@ -29,7 +34,7 @@ function DataTransfer(props) {
       <Form.Item required name="condition" label="执行条件" tooltip="当该节点为流程的起始节点时（无上游节点），该条件将会被忽略。">
         <Radio.Group>
           <Radio.Button value="success">上游执行成功时</Radio.Button>
-          <Radio.Button value="failure">上游执行失败时</Radio.Button>
+          <Radio.Button value="error">上游执行失败时</Radio.Button>
           <Radio.Button value="always">总是执行</Radio.Button>
         </Radio.Group>
       </Form.Item>

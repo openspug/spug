@@ -2,8 +2,14 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
+from django_redis import get_redis_connection
 from libs import JsonParser, Argument, json_response, auth
-from apps.pipeline.models import Pipeline
+from libs.utils import AttrDict
+from apps.pipeline.models import Pipeline, PipeHistory
+from apps.pipeline.utils import NodeExecutor
+from apps.host.models import Host
+from threading import Thread
+from uuid import uuid4
 import json
 
 
@@ -56,4 +62,59 @@ class PipeView(View):
         ).parse(request.GET)
         if error is None:
             Pipeline.objects.filter(pk=form.id).delete()
+        return json_response(error=error)
+
+
+class DoView(View):
+    @auth('exec.task.do')
+    def get(self, request):
+        pass
+
+    @auth('exec.task.do')
+    def post(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='参数错误'),
+        ).parse(request.body)
+        if error is None:
+            pipe = Pipeline.objects.get(pk=form.id)
+            latest_history = pipe.pipehistory_set.first()
+            ordinal = latest_history.ordinal + 1 if latest_history else 1
+            history = PipeHistory.objects.create(pipeline=pipe, ordinal=ordinal, created_by=request.user)
+            nodes, ids = json.loads(pipe.nodes), set()
+            for item in filter(lambda x: x['module'] == 'ssh_exec', nodes):
+                ids.update(item['targets'])
+
+            host_map = {x.id: f'{x.name}({x.hostname})' for x in Host.objects.filter(id__in=ids)}
+            for item in filter(lambda x: x['module'] == 'ssh_exec', nodes):
+                item['targets'] = [{'id': x, 'name': host_map[x]} for x in item['targets']]
+
+            rds = get_redis_connection()
+            executor = NodeExecutor(rds, history.deploy_key, json.loads(pipe.nodes))
+            Thread(target=executor.run).start()
+
+            response = AttrDict(token=history.id, nodes=nodes)
+            return json_response(response)
+        return json_response(error=error)
+
+    @auth('exec.task.do')
+    def patch(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='参数错误'),
+            Argument('cols', type=int, required=False),
+            Argument('rows', type=int, required=False)
+        ).parse(request.body)
+        if error is None:
+            term = None
+            if form.cols and form.rows:
+                term = {'width': form.cols, 'height': form.rows}
+            pipe = Pipeline.objects.get(pk=form.id)
+            latest_history = pipe.pipehistory_set.first()
+            ordinal = latest_history.ordinal + 1 if latest_history else 1
+            history = PipeHistory.objects.create(pipeline=pipe, ordinal=ordinal, created_by=request.user)
+            rds = get_redis_connection()
+            nodes = json.loads(pipe.nodes)
+            executor = NodeExecutor(rds, history.deploy_key, nodes)
+            Thread(target=executor.run).start()
+            response = AttrDict(token=history.id, nodes=nodes)
+            return json_response(response)
         return json_response(error=error)

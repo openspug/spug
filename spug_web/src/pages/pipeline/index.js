@@ -6,12 +6,16 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { AuthDiv } from 'components';
-import Editor from './Editor';
+import Table from './Table';
+import Console from './console';
 
-export default observer(function () {
+function Index() {
   return (
-    <AuthDiv auth="system.account.view">
-      <Editor/>
+    <AuthDiv auth="pipeline.pipeline.view">
+      <Table/>
+      <Console/>
     </AuthDiv>
   )
-})
+}
+
+export default observer(Index)

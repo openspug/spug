@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) OpenSpug Organization. https://github.com/openspug/spug
+ * Copyright (c) <spug.dev@gmail.com>
+ * Released under the AGPL-3.0 License.
+ */
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Form, Input, Select, Radio, message } from 'antd';
@@ -47,7 +52,7 @@ function Build(props) {
       <Form.Item required name="condition" label="执行条件" tooltip="当该节点为流程的起始节点时（无上游节点），该条件将会被忽略。">
         <Radio.Group>
           <Radio.Button value="success">上游执行成功时</Radio.Button>
-          <Radio.Button value="failure">上游执行失败时</Radio.Button>
+          <Radio.Button value="error">上游执行失败时</Radio.Button>
           <Radio.Button value="always">总是执行</Radio.Button>
         </Radio.Group>
       </Form.Item>

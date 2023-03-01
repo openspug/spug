@@ -12,7 +12,8 @@ import Icon from './Icon';
 import { clsNames } from 'libs';
 import S from './store';
 import css from './nodeConfig.module.less';
-import { NODES } from './data'
+import { NODES } from './data';
+import lds from 'lodash';
 
 function NodeConfig(props) {
   const [tab, setTab] = useState('node')
@@ -35,7 +36,8 @@ function NodeConfig(props) {
     const data = handler()
     if (typeof data === 'object') {
       setLoading(true)
-      Object.assign(S.node, data)
+      const basic = lds.pick(S.node, ['id', 'module', 'downstream'])
+      S.node = Object.assign(data, basic)
       props.doRefresh(S.node)
         .finally(() => setLoading(false))
     }

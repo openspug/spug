@@ -1,5 +1,5 @@
 export const NODES = [
-  {module: 'remote_exec', name: '执行命令'},
+  {module: 'ssh_exec', name: '执行命令'},
   {module: 'build', name: '构建'},
   {module: 'parameter', name: '参数化'},
   {module: 'data_transfer', name: '数据传输'},
@@ -60,7 +60,7 @@ export const DATAS = {
       'command': 'date && sleep 3',
     },
     {
-      'module': 'remote_exec',
+      'module': 'ssh_exec',
       'name': '执行命令',
       'id': 5,
       'targets': [2, 3],

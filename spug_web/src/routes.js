@@ -43,7 +43,7 @@ import SystemCredential from './pages/system/credential';
 import WelcomeIndex from './pages/welcome/index';
 import WelcomeInfo from './pages/welcome/info';
 import PipelineIndex from './pages/pipeline';
-import PipelineEditor from './pages/pipeline';
+import PipelineEditor from './pages/pipeline/Editor';
 
 export default [
   {icon: <DesktopOutlined/>, title: '工作台', path: '/home', component: HomeIndex},
@@ -69,8 +69,8 @@ export default [
       {title: '发布申请', auth: 'deploy.request.view', path: '/deploy/request', component: DeployRequest},
     ]
   },
-  {icon: <FlagOutlined/>, title: '流水线', path: '/pipeline', component: PipelineIndex},
   {path: '/pipeline/:id', component: PipelineEditor},
+  {icon: <FlagOutlined/>, title: '流水线', path: '/pipeline', component: PipelineIndex},
   {
     icon: <ScheduleOutlined/>,
     title: '任务计划',

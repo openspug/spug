@@ -1,6 +1,11 @@
+/**
+ * Copyright (c) OpenSpug Organization. https://github.com/openspug/spug
+ * Copyright (c) <spug.dev@gmail.com>
+ * Released under the AGPL-3.0 License.
+ */
 import React from 'react';
 import { Avatar } from 'antd';
-import iconRemoteExec from './assets/icon_remote_exec.png';
+import iconSSHExec from './assets/icon_ssh_exec.png';
 import iconBuild from './assets/icon_build.png';
 import iconParameter from './assets/icon_parameter.png';
 import iconDataTransfer from './assets/icon_data_transfer.png';
@@ -11,8 +16,8 @@ import iconSelect from './assets/icon_select.png';
 
 function Icon(props) {
   switch (props.module) {
-    case 'remote_exec':
-      return <Avatar size={props.size || 42} src={iconRemoteExec}/>
+    case 'ssh_exec':
+      return <Avatar size={props.size || 42} src={iconSSHExec}/>
     case 'build':
       return <Avatar size={props.size || 42} src={iconBuild}/>
     case 'parameter':

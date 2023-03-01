@@ -1,0 +1,108 @@
+.box {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  margin-right: 16px;
+  flex-shrink: 0;
+
+  &:last-child {
+    margin: 0;
+  }
+}
+
+.triangle {
+  position: absolute;
+  bottom: -2px;
+  left: 15px;
+  width: 0;
+  height: 0;
+  border: 4px solid transparent;
+  border-top-color: #999999;
+}
+
+.node {
+  position: relative;
+  box-shadow: 0 0 6px #9999994c;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: 0 0 6px #2563fcbb;
+    .action {
+      display: block;
+    }
+  }
+}
+
+.loading {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  color: #ffffff;
+  font-size: 28px;
+  z-index: 999;
+}
+
+.active {
+  box-shadow: 0 0 6px #2563fc;
+}
+
+.line {
+  &:after {
+    content: ' ';
+    height: 2px;
+    background: #999999;
+    position: absolute;
+    top: 18px;
+    left: -14px;
+    right: -4px;
+  }
+}
+
+.line2 {
+  &:after {
+    left: -34px;
+  }
+}
+
+.angle {
+  &:before {
+    content: ' ';
+    position: absolute;
+    background: #999999;
+    top: 18px;
+    bottom: 18px;
+    left: -14px;
+    right: 18px;
+  }
+
+  &:after {
+    content: ' ';
+    position: absolute;
+    background: #999999;
+    top: 18px;
+    left: 18px;
+    right: 18px;
+    bottom: -4px;
+  }
+}
+
+.angle2 {
+  &:before {
+    left: -34px;
+  }
+}
+
+.arrow {
+  &:after {
+    content: ' ';
+    background: #999999;
+    position: absolute;
+    top: 2px;
+    left: 18px;
+    right: 18px;
+    bottom: 4px;
+  }
+}
+

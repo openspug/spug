@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) OpenSpug Organization. https://github.com/openspug/spug
+ * Copyright (c) <spug.dev@gmail.com>
+ * Released under the AGPL-3.0 License.
+ */
 import React from 'react'
 import { observer } from 'mobx-react';
 import { Dropdown } from 'antd';
@@ -40,6 +45,14 @@ function Node(props) {
     }
   ]
 
+  function dropdownRender(menus) {
+    return (
+      <div onMouseDown={e => e.stopPropagation()}>
+        {menus}
+      </div>
+    )
+  }
+
   const node = props.node
   switch (node) {
     case '  ':
@@ -69,7 +82,8 @@ function Node(props) {
             ) : (
               <div className={css.title} style={{color: '#595959'}}>请选择节点</div>
             )}
-            <Dropdown className={css.action} trigger="click" menu={{items: menus}} onMouseDown={handleActionClick}>
+            <Dropdown dropdownRender={dropdownRender} className={css.action}
+                      trigger="click" menu={{items: menus}} onMouseDown={handleActionClick}>
               <MoreOutlined/>
             </Dropdown>
           </div>

@@ -5,6 +5,7 @@ from git import Repo, RemoteReference, TagReference, InvalidGitRepositoryError, 
 from tempfile import NamedTemporaryFile
 from datetime import datetime
 from io import StringIO
+from functools import partial
 import subprocess
 import shutil
 import os
@@ -114,6 +115,7 @@ class RemoteGit:
         self.url = url
         self.path = path
         self.credential = credential
+        self.remote_exec = self.ssh.exec_command
         self._ask_env = None
 
     def _make_ask_env(self):
@@ -123,7 +125,7 @@ class RemoteGit:
             return self._ask_env
         ask_file = f'{self.ssh.exec_file}.1'
         if self.credential.type == 'pw':
-            env = dict(GIT_ASKPASS=ask_file)
+            self._ask_env = dict(GIT_ASKPASS=ask_file)
             body = '#!/bin/bash\n'
             body += 'case "$1" in\n'
             body += '  Username*)\n'
@@ -134,19 +136,27 @@ class RemoteGit:
             body = body.format(self.credential)
             self.ssh.put_file_by_fl(StringIO(body), ask_file)
         else:
-            env = dict(GIT_SSH=ask_file)
+            self._ask_env = dict(GIT_SSH=ask_file)
             key_file = f'{self.ssh.exec_file}.2'
             self.ssh.put_file_by_fl(StringIO(self.credential.secret), key_file)
             self.ssh.sftp.chmod(key_file, 0o600)
             body = f'ssh -o StrictHostKeyChecking=no -i {key_file} $@'
             self.ssh.put_file_by_fl(StringIO(body), ask_file)
         self.ssh.sftp.chmod(ask_file, 0o755)
-        return env
+        return self._ask_env
 
     def _check_path(self):
         body = f'git rev-parse --resolve-git-dir {self.path}/.git'
         code, _ = self.ssh.exec_command(body)
         return code == 0
+
+    def _clone(self):
+        env = self._make_ask_env()
+        print(env)
+        return self.remote_exec(f'git clone {self.url} {self.path}', env)
+
+    def set_remote_exec(self, remote_exec):
+        self.remote_exec = partial(remote_exec, self.ssh)
 
     @classmethod
     def check_auth(cls, url, credential=None):
@@ -185,16 +195,12 @@ class RemoteGit:
         res = subprocess.run(command, shell=True, capture_output=True, env=env)
         return res.returncode == 0, res.stderr.decode()
 
-    def clone(self):
-        env = self._make_ask_env()
-        code, out = self.ssh.exec_command(f'git clone {self.url} {self.path}', env)
-        if code != 0:
-            raise Exception(out)
-
     def fetch_branches_tags(self):
         body = f'set -e\ncd {self.path}\n'
         if not self._check_path():
-            self.clone()
+            code, out = self._clone()
+            if code != 0:
+                raise Exception(out)
         else:
             body += 'git fetch -q --tags --force\n'
 
@@ -224,15 +230,15 @@ class RemoteGit:
     def checkout(self, marker):
         body = f'set -e\ncd {self.path}\n'
         if not self._check_path():
-            self.clone()
+            is_success = self._clone()
+            if not is_success:
+                return False
         else:
             body += 'git fetch -q --tags --force\n'
 
         body += f'git checkout -f {marker}'
         env = self._make_ask_env()
-        code, out = self.ssh.exec_command(body, env)
-        if code != 0:
-            raise Exception(out)
+        return self.remote_exec(body, env)
 
     def __enter__(self):
         self.ssh.get_client()

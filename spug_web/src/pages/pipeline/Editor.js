@@ -12,6 +12,7 @@ import NodeConfig from './NodeConfig';
 import PipeForm from './Form';
 import Node from './Node';
 import { transfer } from './utils';
+import { history } from 'libs';
 import S from './store';
 import lds from 'lodash';
 import css from './editor.module.less';
@@ -32,7 +33,7 @@ function Editor(props) {
   }, [])
 
   useEffect(() => {
-    if (S.record.nodes.length) {
+    if ((S.record?.nodes ?? []).length) {
       const data = transfer(S.record.nodes)
       setNodes(data)
     }
@@ -119,6 +120,7 @@ function Editor(props) {
     }
     S.record.nodes.splice(index, 1)
     S.record = {...S.record}
+    S.updateRecord()
   }
 
   function handleRefresh(node) {
@@ -133,7 +135,8 @@ function Editor(props) {
         <div className={css.title}>{S.record.name}</div>
         <EditOutlined className={css.edit} onClick={() => setVisible(true)}/>
         <div style={{flex: 1}}/>
-        <Button className={css.back} type="link" icon={<RollbackOutlined/>}>返回列表</Button>
+        <Button className={css.back} type="link" icon={<RollbackOutlined/>}
+                onClick={() => history.goBack()}>返回列表</Button>
       </div>
       <div className={css.body}>
         <div className={css.nodes}>
