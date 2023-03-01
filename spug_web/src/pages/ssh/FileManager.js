@@ -18,6 +18,7 @@ import { AuthButton, Action } from 'components';
 import { http, uniqueId, X_TOKEN } from 'libs';
 import lds from 'lodash';
 import styles from './index.module.less'
+import moment from 'moment';
 
 
 class FileManager extends React.Component {
@@ -72,6 +73,7 @@ class FileManager extends React.Component {
   }, {
     title: '修改时间',
     dataIndex: 'date',
+    sorter: (a, b) => { return moment(a.date).unix() - moment(b.date).unix()},
     width: 190
   }, {
     title: '属性',
@@ -223,7 +225,7 @@ class FileManager extends React.Component {
             <Input ref={ref => this.input2 = ref} size="small" className={styles.input}
                    suffix={<div style={{color: '#999', fontSize: 12}}>回车确认</div>}
                    value={this.state.inputPath} onChange={e => this.setState({inputPath: e.target.value})}
-                   onBlur={this.handleInputEnter}
+              onBlur={this.handleInputEnter}
                    onPressEnter={this.handleInputEnter}/>
           ) : (
             <Breadcrumb className={styles.bread}>
