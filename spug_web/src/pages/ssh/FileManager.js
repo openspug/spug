@@ -18,6 +18,7 @@ import { AuthButton, Action } from 'components';
 import { http, uniqueId, X_TOKEN } from 'libs';
 import lds from 'lodash';
 import styles from './index.module.less'
+import moment from 'moment';
 
 
 class FileManager extends React.Component {
@@ -44,7 +45,7 @@ class FileManager extends React.Component {
   componentDidUpdate(prevProps) {
     if (this.props.id !== prevProps.id) {
       this.fetchFiles()
-      this.setState({objects: []})
+      this.setState({ objects: [] })
     }
   }
 
@@ -52,14 +53,14 @@ class FileManager extends React.Component {
     title: '名称',
     key: 'name',
     render: info => info.kind === 'd' ? (
-      <div onClick={() => this.handleChdir(info.name, '1')} style={{cursor: 'pointer'}}>
-        <FolderOutlined style={{color: info.is_link ? '#008b8b' : '#2563fc'}}/>
-        <span style={{color: info.is_link ? '#008b8b' : '#2563fc', paddingLeft: 5}}>{info.name}</span>
+      <div onClick={() => this.handleChdir(info.name, '1')} style={{ cursor: 'pointer' }}>
+        <FolderOutlined style={{ color: info.is_link ? '#008b8b' : '#2563fc' }} />
+        <span style={{ color: info.is_link ? '#008b8b' : '#2563fc', paddingLeft: 5 }}>{info.name}</span>
       </div>
     ) : (
       <React.Fragment>
-        <FileOutlined/>
-        <span style={{paddingLeft: 5}}>{info.name}</span>
+        <FileOutlined />
+        <span style={{ paddingLeft: 5 }}>{info.name}</span>
       </React.Fragment>
     ),
     ellipsis: true
@@ -72,6 +73,7 @@ class FileManager extends React.Component {
   }, {
     title: '修改时间',
     dataIndex: 'date',
+    sorter: (a, b) => moment(a.date).unix() - moment(b.date).unix(),
     width: 190
   }, {
     title: '属性',
@@ -84,10 +86,10 @@ class FileManager extends React.Component {
     key: 'action',
     render: info => info.kind === '-' ? (
       <Action>
-        <Action.Button className={styles.drawerBtn} icon={<DownloadOutlined/>}
-                       onClick={() => this.handleDownload(info.name)}/>
-        <Action.Button danger auth="host.console.del" className={styles.drawerBtn} icon={<DeleteOutlined/>}
-                       onClick={() => this.handleDelete(info.name)}/>
+        <Action.Button className={styles.drawerBtn} icon={<DownloadOutlined />}
+          onClick={() => this.handleDownload(info.name)} />
+        <Action.Button danger auth="host.console.del" className={styles.drawerBtn} icon={<DeleteOutlined />}
+          onClick={() => this.handleDelete(info.name)} />
       </Action>
     ) : null
   }];
@@ -97,23 +99,23 @@ class FileManager extends React.Component {
   };
 
   fetchFiles = (pwd) => {
-    this.setState({fetching: true});
+    this.setState({ fetching: true });
     pwd = pwd || this.state.pwd;
     const path = '/' + pwd.join('/');
-    return http.get('/api/file/', {params: {id: this.props.id, path}})
+    return http.get('/api/file/', { params: { id: this.props.id, path } })
       .then(res => {
         const objects = lds.orderBy(res, [this._kindSort, 'name'], ['desc', 'asc']);
-        this.setState({objects, pwd})
-        this.state.inputPath !== null && this.setState({inputPath: path})
+        this.setState({ objects, pwd })
+        this.state.inputPath !== null && this.setState({ inputPath: path })
       })
-      .finally(() => this.setState({fetching: false}))
+      .finally(() => this.setState({ fetching: false }))
   };
 
   handleChdir = (name, action) => {
     let pwd = this.state.pwd.map(x => x);
     if (action === '1') {
       pwd.push(name)
-      this.setState({inputPath: null})
+      this.setState({ inputPath: null })
     } else if (action === '2') {
       const index = pwd.indexOf(name);
       pwd = pwd.splice(0, index + 1)
@@ -126,23 +128,23 @@ class FileManager extends React.Component {
   handleInputEnter = () => {
     if (this.state.inputPath === null) {
       if (this.state.pwd.length > 0) {
-        this.setState({inputPath: `/${this.state.pwd.join('/')}/`})
+        this.setState({ inputPath: `/${this.state.pwd.join('/')}/` })
       } else {
-        this.setState({inputPath: '/'})
+        this.setState({ inputPath: '/' })
       }
       setTimeout(() => this.input2.focus(), 100)
     } else {
       let pwdStr = this.state.inputPath.replace(/^\/+/, '')
       pwdStr = pwdStr.replace(/\/+$/, '')
       this.fetchFiles(pwdStr.split('/'))
-        .then(() => this.setState({inputPath: null}))
+        .then(() => this.setState({ inputPath: null }))
     }
   }
 
   handleUpload = () => {
     this.input.click();
     this.input.onchange = e => {
-      this.setState({uploading: true, uploadStatus: 'active', percent: 0});
+      this.setState({ uploading: true, uploadStatus: 'active', percent: 0 });
       const file = e.target['files'][0];
       const formData = new FormData();
       const token = uniqueId();
@@ -152,18 +154,18 @@ class FileManager extends React.Component {
       formData.append('token', token);
       formData.append('path', '/' + this.state.pwd.join('/'));
       this.input.value = '';
-      http.post('/api/file/object/', formData, {timeout: 600000, onUploadProgress: this._updateLocal})
+      http.post('/api/file/object/', formData, { timeout: 600000, onUploadProgress: this._updateLocal })
         .then(() => {
-          this.setState({uploadStatus: 'success'});
+          this.setState({ uploadStatus: 'success' });
           this.fetchFiles()
-        }, () => this.setState({uploadStatus: 'exception'}))
-        .finally(() => setTimeout(() => this.setState({uploading: false}), 2000))
+        }, () => this.setState({ uploadStatus: 'exception' }))
+        .finally(() => setTimeout(() => this.setState({ uploading: false }), 2000))
     }
   };
 
   _updateLocal = (e) => {
     const percent = e.loaded / e.total * 100 / 2
-    this.setState({percent: Number(percent.toFixed(1))})
+    this.setState({ percent: Number(percent.toFixed(1)) })
   }
 
   _updatePercent = token => {
@@ -175,7 +177,7 @@ class FileManager extends React.Component {
         this.socket.send('ping')
       } else {
         const percent = this.state.percent + Number(e.data) / 2;
-        if (percent > this.state.percent) this.setState({percent: Number(percent.toFixed(1))});
+        if (percent > this.state.percent) this.setState({ percent: Number(percent.toFixed(1)) });
         if (percent === 100) {
           this.socket.close()
         }
@@ -200,7 +202,7 @@ class FileManager extends React.Component {
       title: '删除文件确认',
       content: `确认删除文件：${file} ?`,
       onOk: () => {
-        return http.delete('/api/file/object/', {params: {id: this.props.id, file}})
+        return http.delete('/api/file/object/', { params: { id: this.props.id, file } })
           .then(() => {
             message.success('删除成功');
             this.fetchFiles()
@@ -217,18 +219,18 @@ class FileManager extends React.Component {
     const scrollY = document.body.clientHeight - 168;
     return (
       <React.Fragment>
-        <input style={{display: 'none'}} type="file" ref={ref => this.input = ref}/>
+        <input style={{ display: 'none' }} type="file" ref={ref => this.input = ref} />
         <div className={styles.drawerHeader}>
           {this.state.inputPath !== null ? (
             <Input ref={ref => this.input2 = ref} size="small" className={styles.input}
-                   suffix={<div style={{color: '#999', fontSize: 12}}>回车确认</div>}
-                   value={this.state.inputPath} onChange={e => this.setState({inputPath: e.target.value})}
-                   onBlur={this.handleInputEnter}
-                   onPressEnter={this.handleInputEnter}/>
+              suffix={<div style={{ color: '#999', fontSize: 12 }}>回车确认</div>}
+              value={this.state.inputPath} onChange={e => this.setState({ inputPath: e.target.value })}
+              onBlur={this.handleInputEnter}
+              onPressEnter={this.handleInputEnter} />
           ) : (
             <Breadcrumb className={styles.bread}>
               <Breadcrumb.Item href="#" onClick={() => this.handleChdir('', '0')}>
-                <HomeOutlined style={{fontSize: 16}}/>
+                <HomeOutlined style={{ fontSize: 16 }} />
               </Breadcrumb.Item>
               {this.state.pwd.map(item => (
                 <Breadcrumb.Item key={item} href="#" onClick={() => this.handleChdir(item, '2')}>
@@ -236,7 +238,7 @@ class FileManager extends React.Component {
                 </Breadcrumb.Item>
               ))}
               <Breadcrumb.Item onClick={this.handleInputEnter}>
-                <EditOutlined className={styles.edit}/>
+                <EditOutlined className={styles.edit} />
               </Breadcrumb.Item>
             </Breadcrumb>
           )}
@@ -247,17 +249,17 @@ class FileManager extends React.Component {
               checked={this.state.showDot}
               checkedChildren="开启"
               unCheckedChildren="关闭"
-              onChange={v => this.setState({showDot: v})}/>
+              onChange={v => this.setState({ showDot: v })} />
             {this.state.uploading ? (
               <Progress className={styles.progress} strokeWidth={14} status={this.state.uploadStatus}
-                        percent={this.state.percent}/>
+                percent={this.state.percent} />
             ) : (
               <AuthButton
                 auth="host.console.upload"
-                style={{marginLeft: 12}}
+                style={{ marginLeft: 12 }}
                 size="small"
                 type="primary"
-                icon={<UploadOutlined/>}
+                icon={<UploadOutlined />}
                 onClick={this.handleUpload}>上传文件</AuthButton>
             )}
           </div>
@@ -268,9 +270,9 @@ class FileManager extends React.Component {
           loading={this.state.fetching}
           pagination={false}
           columns={this.columns}
-          scroll={{y: scrollY}}
-          style={{fontFamily: 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei'}}
-          dataSource={objects}/>
+          scroll={{ y: scrollY }}
+          style={{ fontFamily: 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei' }}
+          dataSource={objects} />
       </React.Fragment>
     )
   }
