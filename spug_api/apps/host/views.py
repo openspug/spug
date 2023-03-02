@@ -12,6 +12,7 @@ from apps.host.utils import batch_sync_host, _sync_host_extend
 from apps.app.models import Deploy
 from apps.schedule.models import Task
 from apps.monitor.models import Detection
+from apps.exec.models import ExecTemplate
 from libs.ssh import SSH, AuthenticationException
 from paramiko.ssh_exception import BadAuthenticationType
 from openpyxl import load_workbook, Workbook
@@ -121,6 +122,9 @@ class HostView(View):
                 if detection:
                     return json_response(
                         error=f'监控中心的任务【{detection.name}】关联了该主机，请解除关联后再尝试删除该主机')
+                tpl = ExecTemplate.objects.filter(host_ids__regex=regex).first()
+                if tpl:
+                    return json_response(error=f'执行模板【{tpl.name}】关联了该主机，请解除关联后再尝试删除该主机')
             Host.objects.filter(id__in=host_ids).delete()
         return json_response(error=error)
 
@@ -172,8 +176,9 @@ def post_export(request):
         hosts = hosts.filter(id__in=get_host_perms(request.user))
     wb = Workbook()
     ws = wb.active
-    ws.append(('主机名称', 'SSH地址', 'SSH端口', 'SSH用户', 'SSH密码', '备注信息', '实例ID', '操作系统', 'CPU核心数', '内存GB', '磁盘GB', '内网IP'
-               '公网IP', '实例计费方式', '网络计费方式', '创建时间', '到期时间'))
+    ws.append(('主机名称', 'SSH地址', 'SSH端口', 'SSH用户', 'SSH密码', '备注信息', '实例ID', '操作系统', 'CPU核心数',
+               '内存GB', '磁盘GB', '内网IP'
+                                   '公网IP', '实例计费方式', '网络计费方式', '创建时间', '到期时间'))
     for item in hosts:
         data = [item.name, item.hostname, item.port, item.username, '', item.desc]
         if hasattr(item, 'hostextend'):
