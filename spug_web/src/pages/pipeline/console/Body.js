@@ -129,8 +129,8 @@ function Body() {
           <CodeOutlined className={css.icon} onClick={() => openTerminal()}/>
         </Tooltip>
       </div>
-      {S.node?.module === 'ssh_exec' && (
-        <Tabs items={(S.node?.targets ?? []).map(x => ({label: x.name, key: `${S.node.id}.${x.id}`}))}
+      {['ssh_exec', 'data_transfer'].includes(S.node?.module) && (
+        <Tabs items={(S.node?._targets ?? []).map(x => ({label: x.name, key: `${S.node.id}.${x.id}`}))}
               tabBarStyle={{fontSize: 13}} onChange={v => S.node = Object.assign({}, S.node, {_id: v})}/>
       )}
       <div className={css.termContainer}>

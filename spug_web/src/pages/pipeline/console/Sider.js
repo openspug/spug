@@ -12,8 +12,8 @@ import css from './sider.module.less';
 
 function Sider() {
   function handleClick(node) {
-    if (node.module === 'ssh_exec') {
-      node._id = `${node.id}.${node.targets[0].id}`
+    if (['ssh_exec', 'data_transfer'].includes(node.module)) {
+      node._id = `${node.id}.${node._targets[0].id}`
     }
     S.node = node
   }

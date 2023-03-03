@@ -83,11 +83,14 @@ class DoView(View):
             nodes, ids = json.loads(pipe.nodes), set()
             for item in filter(lambda x: x['module'] == 'ssh_exec', nodes):
                 ids.update(item['targets'])
+            for item in filter(lambda x: x['module'] == 'data_transfer', nodes):
+                ids.update(item['destination']['targets'])
 
             host_map = {x.id: f'{x.name}({x.hostname})' for x in Host.objects.filter(id__in=ids)}
             for item in filter(lambda x: x['module'] == 'ssh_exec', nodes):
-                item['targets'] = [{'id': x, 'name': host_map[x]} for x in item['targets']]
-
+                item['_targets'] = [{'id': x, 'name': host_map[x]} for x in item['targets']]
+            for item in filter(lambda x: x['module'] == 'data_transfer', nodes):
+                item['_targets'] = [{'id': x, 'name': host_map[x]} for x in item['destination']['targets']]
             rds = get_redis_connection()
             executor = NodeExecutor(rds, history.deploy_key, json.loads(pipe.nodes))
             Thread(target=executor.run).start()
