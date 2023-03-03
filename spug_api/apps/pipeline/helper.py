@@ -172,9 +172,7 @@ class Helper(KitMixin):
         self.send(key, message, status='success')
 
     def send_error(self, key, message, with_break=False):
-        message = self.term_message(message, 'error')
-        if not message.endswith('\r\n'):
-            message += '\r\n'
+        message = self.term_message(f'\r\n{message}', 'error')
         self.send(key, message, status='error')
         if with_break:
             raise SpugError
