@@ -121,17 +121,17 @@ function Body() {
         ) : wsState === '1' ? (
           <Badge status="success" text="Websocket 已连接"/>
         ) : (
-          <Badge status="processing" text="Websocket 连接已关闭"/>
+          <Badge status="error" text="Websocket 连接已关闭"/>
         )}
 
-        {['build', 'ssh_exec', 'data_transfer'].includes(S.node.module) && S.outputs[S.nodeID]?.status === 'processing' ? (
+        {['build', 'ssh_exec', 'data_transfer', 'data_upload'].includes(S.node.module) && S.outputs[S.nodeID]?.status === 'processing' ? (
           <Popconfirm title="确定要终止执行？" onConfirm={handleTerminate}>
             <StopOutlined className={css.icon} style={{color: '#faad14'}}/>
           </Popconfirm>
         ) : (
           <StopOutlined className={css.icon} style={{color: '#dfdfdf'}}/>
         )}
-        {['build', 'ssh_exec', 'data_transfer'].includes(S.node.module) ? (
+        {['build', 'ssh_exec', 'data_transfer', 'data_upload'].includes(S.node.module) ? (
           <Tooltip title="打开web终端">
             <CodeOutlined className={css.icon} onClick={() => openTerminal()}/>
           </Tooltip>
@@ -139,7 +139,7 @@ function Body() {
           <CodeOutlined className={css.icon} style={{color: '#dfdfdf'}}/>
         )}
       </div>
-      {['ssh_exec', 'data_transfer'].includes(S.node?.module) && (
+      {['ssh_exec', 'data_transfer', 'data_upload'].includes(S.node?.module) && (
         <Tabs items={(S.node?._targets ?? []).map(x => ({label: x.name, key: x.id}))}
               className={css.tabs} activeKey={S.node._host_id} onChange={handleTabChange}/>
       )}

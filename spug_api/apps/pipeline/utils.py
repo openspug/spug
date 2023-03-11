@@ -12,9 +12,11 @@ from apps.setting.utils import AppSetting
 from functools import partial
 from threading import Thread
 from concurrent import futures
+from pathlib import Path
 from uuid import uuid4
 import subprocess
 import tempfile
+import shutil
 import time
 import os
 
@@ -50,6 +52,8 @@ class NodeExecutor:
             self._do_ssh_exec(node)
         elif node.module == 'data_transfer':
             self._do_data_transfer(node)
+        elif node.module == 'data_upload':
+            self._do_data_upload(node)
         elif node.module == 'parameter':
             self._do_parameter(node)
 
@@ -149,7 +153,7 @@ class NodeExecutor:
         threads = []
         with futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             for host in Host.objects.filter(id__in=destination.targets):
-                t = executor.submit(self._data_transfer, node, host, local_path)
+                t = executor.submit(self._data_transfer, node, host, local_path, destination.path)
                 threads.append(t)
             results = [x.result() for x in futures.as_completed(threads)]
         os.system(f'umount -f {local_dir} &> /dev/null ; rm -rf {local_dir}')
@@ -157,10 +161,10 @@ class NodeExecutor:
         self.helper.send_status(node.id, state)
         self.run(node, state)
 
-    def _data_transfer(self, node, host, local_path):
+    def _data_transfer(self, node, host, local_path, remote_path):
+        # TODO：支持--delete参数，页面上添加是否删除选项
         timestamp = time.time()
         key = f'{node.id}.{host.id}'
-        remote_path = node.destination.path
         self.helper.send_info(key, '开始传输数据\r\n', 'processing')
         with tempfile.NamedTemporaryFile(mode='w') as fp:
             fp.write(host.pkey or AppSetting.get('private_key'))
@@ -178,3 +182,17 @@ class NodeExecutor:
             if is_success:
                 self.helper.send_success(key, '传输完成', start_time=timestamp)
             return is_success
+
+    def _do_data_upload(self, node):
+        self.helper.send_info(node.id, '开始执行\r\n', 'processing')
+        local_path = Path(settings.TRANSFER_DIR) / self.token / str(node.id)
+        threads = []
+        with futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            for host in Host.objects.filter(id__in=node.targets):
+                t = executor.submit(self._data_transfer, node, host, f'{local_path}{os.sep}', node.path)
+                threads.append(t)
+            results = [x.result() for x in futures.as_completed(threads)]
+        shutil.rmtree(local_path)
+        state = 'success' if all(results) else 'error'
+        self.helper.send_status(node.id, state)
+        self.run(node, state)

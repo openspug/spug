@@ -49,12 +49,11 @@ class Store {
     return http.post('/api/pipeline/do/', {id: 1})
       .then(res => {
         S.open = true
+        S.token = res.token
         S.nodes = res.nodes
         S.node = res.nodes[0]
         if (res.dynamic_params) {
           S.dynamicParams = res.dynamic_params
-        } else {
-          S.token = res.token
         }
       })
   }

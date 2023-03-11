@@ -5,20 +5,8 @@
  */
 import React, { useEffect, useState } from 'react';
 import { observer, useLocalStore } from 'mobx-react';
-import {
-  Form,
-  Input,
-  Button,
-  Modal,
-  Switch,
-  Select,
-  Popconfirm,
-  Tooltip,
-  DatePicker,
-  Upload,
-  message
-} from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined, QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Modal, Switch, Select, Popconfirm, Tooltip, DatePicker, message } from 'antd';
+import { EditOutlined, DeleteOutlined, PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { clsNames } from 'libs';
 import css from './index.module.less';
 import lds from "lodash";
@@ -279,10 +267,6 @@ Parameter.Component = function (props) {
             <Select.Option key={idx} value={item.value}>{item.label}</Select.Option>
           ))}
         </Select>
-      )
-    case 'upload':
-      return (
-        <Upload><Button icon={<UploadOutlined/>}>点击上传</Button></Upload>
       )
     default:
       return <Input defaultValue={data.default} placeholder="请输入" {...props}/>

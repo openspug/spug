@@ -15,27 +15,28 @@ import css from './index.module.less';
 function Index() {
   function handleClose() {
     S.open = false
-    S.token = false
+    S.dynamicParams = null
   }
 
   return (
     <Modal
       open={S.open}
-      width={S.token ? '80%' : '540px'}
-      title={S.token ? '执行控制台' : '执行参数设置'}
+      width={S.dynamicParams ? '540px' : '80%'}
+      title={S.dynamicParams ? '执行参数设置' : '执行控制台'}
       footer={null}
       destroyOnClose
       maskClosable={false}
       wrapClassName={css.fade}
       afterClose={S.initial}
       onCancel={handleClose}>
-      <Ask/>
-      {S.token ? (
+      {S.dynamicParams ? (
+        <Ask/>
+      ) : (
         <Row>
           <Sider/>
           <Body/>
         </Row>
-      ) : null}
+      )}
     </Modal>
   )
 }

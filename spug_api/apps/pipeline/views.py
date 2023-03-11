@@ -2,6 +2,8 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
+from django.conf import settings
+from django.http.response import HttpResponseBadRequest
 from django_redis import get_redis_connection
 from libs import JsonParser, Argument, json_response, auth
 from libs.utils import AttrDict
@@ -9,6 +11,7 @@ from apps.pipeline.models import Pipeline, PipeHistory
 from apps.pipeline.utils import NodeExecutor
 from apps.host.models import Host
 from threading import Thread
+from pathlib import Path
 from uuid import uuid4
 import json
 
@@ -83,17 +86,23 @@ class DoView(View):
             for item in filter(lambda x: x['module'] == 'data_transfer', nodes):
                 ids.update(item['destination']['targets'])
 
-            dynamic_params = None
+            dynamic_params = []
             host_map = {x.id: f'{x.name}({x.hostname})' for x in Host.objects.filter(id__in=ids)}
             for item in nodes:
-                if item['module'] == 'ssh_exec':
+                if item['module'] in ('ssh_exec', 'data_upload'):
                     item['_targets'] = [{'id': x, 'name': host_map[x]} for x in item['targets']]
                 elif item['module'] == 'data_transfer':
                     item['_targets'] = [{'id': x, 'name': host_map[x]} for x in item['destination']['targets']]
-                elif item['module'] == 'parameter':
-                    dynamic_params = item.get('dynamic_params')
 
-            if not dynamic_params:
+                if item['module'] == 'parameter':
+                    dynamic_params = item.get('dynamic_params')
+                elif item['module'] == 'data_upload':
+                    dynamic_params.append({'id': item['id'], 'name': item['name'], 'type': 'upload'})
+
+            token = uuid4().hex
+            if dynamic_params:
+                response = AttrDict(token=token, nodes=nodes, dynamic_params=dynamic_params)
+            else:
                 latest_history = pipe.pipehistory_set.first()
                 ordinal = latest_history.ordinal + 1 if latest_history else 1
                 history = PipeHistory.objects.create(pipeline=pipe, ordinal=ordinal, created_by=request.user)
@@ -101,9 +110,7 @@ class DoView(View):
                 rds = get_redis_connection()
                 executor = NodeExecutor(rds, history.deploy_key, json.loads(pipe.nodes))
                 Thread(target=executor.run).start()
-                response = AttrDict(token=history.id, nodes=nodes)
-            else:
-                response = AttrDict(nodes=nodes, dynamic_params=dynamic_params)
+                response = AttrDict(token=token, nodes=nodes)
             return json_response(response)
         return json_response(error=error)
 
@@ -111,6 +118,7 @@ class DoView(View):
     def patch(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='参数错误'),
+            Argument('token', help='参数错误'),
             Argument('params', type=dict, help='参数错误'),
             Argument('cols', type=int, required=False),
             Argument('rows', type=int, required=False)
@@ -131,9 +139,22 @@ class DoView(View):
             PipeHistory.objects.create(pipeline=pipe, ordinal=ordinal, created_by=request.user)
             rds = get_redis_connection()
 
-            token = uuid4().hex
-            executor = NodeExecutor(rds, token, nodes)
+            executor = NodeExecutor(rds, form.token, nodes)
             Thread(target=executor.run).start()
-            response = AttrDict(token=token)
-            return json_response(response)
+            return json_response()
         return json_response(error=error)
+
+
+def handle_data_upload(request):
+    token = request.POST.get('token')
+    node_id = request.POST.get('id')
+    file = request.FILES.get('file')
+    if not all([token, node_id, file]):
+        return HttpResponseBadRequest('参数错误')
+
+    file_path = Path(settings.TRANSFER_DIR) / token / node_id / file.name
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(file_path, 'wb') as f:
+        for chunk in file.chunks():
+            f.write(chunk)
+    return json_response('ok')
