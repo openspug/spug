@@ -8,3 +8,85 @@
     color: #ff4d4f;
   }
 }
+
+.parameter {
+  display: flex;
+  flex-direction: column;
+
+  .item {
+    margin-bottom: 24px;
+  }
+
+  .title {
+    font-size: 14px;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    :global(.anticon) {
+      margin-left: 4px;
+      color: #999999;
+      cursor: help;
+    }
+  }
+
+  .required:before {
+    display: inline-block;
+    margin-right: 4px;
+    color: #ff4d4f;
+    font-size: 14px;
+    font-family: SimSun, sans-serif;
+    line-height: 1;
+    content: '*';
+  }
+
+  .body {
+    background: #f9f9f9;
+    border-radius: 4px;
+    padding: 24px;
+    margin-bottom: 24px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      margin-bottom: 16px;
+
+      .label {
+        width: 122px;
+        font-size: 14px;
+        text-align: right;
+        flex-shrink: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        &:after {
+          position: relative;
+          top: -0.5px;
+          margin: 0 8px 0 2px;
+          content: ':';
+        }
+      }
+
+      :global(.anticon-edit) {
+        font-size: 18px;
+        color: #2563fc;
+        margin-left: 12px;
+        cursor: pointer;
+      }
+
+      :global(.anticon-delete) {
+        font-size: 18px;
+        color: #ff4d4f;
+        margin-left: 12px;
+        cursor: pointer;
+      }
+    }
+  }
+}

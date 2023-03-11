@@ -42,12 +42,14 @@ function HostSelector(props) {
   }, [store.treeData])
 
   useEffect(() => {
-    if (Array.isArray(props.value)) {
-      setSelectedRowKeys([...props.value])
-    } else {
-      setSelectedRowKeys([props.value])
+    if (!visible) {
+      if (Array.isArray(props.value)) {
+        setSelectedRowKeys([...props.value])
+      } else {
+        setSelectedRowKeys([props.value])
+      }
     }
-  }, [props.value])
+  }, [props.value, visible])
 
   useEffect(() => {
     if (props.onlySelf) {
@@ -121,15 +123,25 @@ function HostSelector(props) {
   function ButtonAction() {
     if (!props.value || props.value.length === 0) {
       return <Button icon={<PlusOutlined/>} onClick={() => setVisible(true)}>添加目标主机</Button>
+    } else if (props.onlyOne || props.value.length === 1) {
+      const id = props.onlyOne ? props.value : props.value[0]
+      const host = hStore.idMap[id]
+      return (
+        <Alert
+          type="info"
+          className={styles.area2}
+          onClick={() => setVisible(true)}
+          message={`${host?.hostname}(${host?.name})`}/>
+      )
+    } else {
+      return (
+        <Alert
+          type="info"
+          className={styles.area}
+          message={<div>已选择 <b style={{fontSize: 18, color: '#1890ff'}}>{props.value.length}</b> 台主机</div>}
+          onClick={() => setVisible(true)}/>
+      )
     }
-    const number = props.value.length || 1
-    return (
-      <Alert
-        type="info"
-        className={styles.area}
-        message={<div>已选择 <b style={{fontSize: 18, color: '#1890ff'}}>{number}</b> 台主机</div>}
-        onClick={() => setVisible(true)}/>
-    )
   }
 
   return (

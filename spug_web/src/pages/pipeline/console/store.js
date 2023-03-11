@@ -7,9 +7,13 @@ import { observable, computed } from 'mobx';
 import { transfer } from '../utils';
 
 class Store {
+  host_id = null;
+  @observable token = null;
+  @observable open = false;
   @observable node = {};
   @observable nodes = [];
   @observable outputs = {};
+  @observable dynamicParams = null;
 
   @computed get nodeID() {
     return this.node._id ?? this.node.id

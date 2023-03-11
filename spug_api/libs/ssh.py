@@ -74,15 +74,19 @@ class SSH:
         channel = self._get_channel()
         command = self._handle_command(command, environment)
         channel.sendall(command)
-        out, exit_code = '', -1
-        for line in self.stdout:
-            match = self.regex.search(line)
+        buf_size, exit_code, out = 4096, -1, ''
+        while True:
+            data = channel.recv(buf_size)
+            if not data:
+                break
+            while channel.recv_ready():
+                data += channel.recv(buf_size)
+            out += self._decode(data)
+            match = self.regex.search(out)
             if match:
                 exit_code = int(match.group(1))
-                line = line[:match.start()]
-                out += line
+                out = out[:match.start()]
                 break
-            out += line
         return exit_code, out
 
     def exec_command_with_stream(self, command, environment=None):

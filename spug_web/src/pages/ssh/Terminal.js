@@ -18,9 +18,9 @@ function WebSSH(props) {
 
   useEffect(() => {
     term.loadAddon(fitPlugin);
-    term.setOption('fontSize', gStore.terminal.fontSize)
-    term.setOption('fontFamily', gStore.terminal.fontFamily)
-    term.setOption('theme', gStore.terminal.styles)
+    term.options.fontSize = gStore.terminal.fontSize;
+    term.options.fontFamily = gStore.terminal.fontFamily;
+    term.options.theme = gStore.terminal.styles;
     term.attachCustomKeyEventHandler((arg) => {
       if (arg.code === 'PageUp' && arg.type === 'keydown') {
         term.scrollPages(-1)
@@ -60,9 +60,9 @@ function WebSSH(props) {
   }, [])
 
   useEffect(() => {
-    term.setOption('fontSize', gStore.terminal.fontSize)
-    term.setOption('fontFamily', gStore.terminal.fontFamily)
-    term.setOption('theme', gStore.terminal.styles)
+    term.options.fontSize = gStore.terminal.fontSize;
+    term.options.fontFamily = gStore.terminal.fontFamily;
+    term.options.theme = gStore.terminal.styles;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gStore.terminal])
 

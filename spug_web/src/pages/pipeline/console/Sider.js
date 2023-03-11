@@ -7,13 +7,18 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import Node from './Node';
 import S from './store';
+import lds from 'lodash';
 import css from './sider.module.less';
 
 
 function Sider() {
   function handleClick(node) {
+    node = lds.cloneDeep(node)
     if (['ssh_exec', 'data_transfer'].includes(node.module)) {
-      node._id = `${node.id}.${node._targets[0].id}`
+      node._host_id = node._targets[0].id
+      node._id = `${node.id}.${node._host_id}`
+    } else if (node.module === 'build') {
+      node._host_id = node.target
     }
     S.node = node
   }

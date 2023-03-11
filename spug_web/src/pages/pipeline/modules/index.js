@@ -6,6 +6,7 @@
 import React from 'react';
 import SSHExec from './SSHExec';
 import Build from './Build';
+import Parameter from './Parameter';
 import DataTransfer from './DataTransfer';
 
 function ModuleConfig(props) {
@@ -16,6 +17,8 @@ function ModuleConfig(props) {
       return <Build {...props}/>
     case 'data_transfer':
       return <DataTransfer {...props}/>
+    case 'parameter':
+      return <Parameter {...props}/>
     default:
       return <div>hello</div>
   }

@@ -13,8 +13,8 @@
   align-items: center;
   margin-bottom: 8px;
 
-  .tips {
-    color: #ff4d4f;
+  :global(.ant-badge-status-text) {
+    font-size: 12px;
   }
 
   .icon {
@@ -30,6 +30,12 @@
   }
 }
 
+.tabs {
+  :global(.ant-tabs-tab) {
+    padding-top: 0;
+    font-size: 13px;
+  }
+}
 
 .termContainer {
   flex: 1;
@@ -66,8 +72,4 @@
   .item {
 
   }
-}
-
-:global(.ant-tabs-tab) {
-  font-size: 13px;
 }

@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Drawer, Button } from 'antd';
-import { AppstoreOutlined, SettingOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, SettingOutlined, SaveOutlined } from '@ant-design/icons';
 import ModuleConfig from './modules/index';
 import Icon from './Icon';
 import { clsNames } from 'libs';
@@ -83,7 +83,7 @@ function NodeConfig(props) {
         </div>
 
         <div className={css.footer} style={{display: tab === 'conf' ? 'block' : 'none'}}>
-          <Button type="primary" loading={loading} onClick={handleSave}>保存</Button>
+          <Button icon={<SaveOutlined/>} size="large" type="primary" loading={loading} onClick={handleSave}>保存</Button>
         </div>
       </div>
     </Drawer>

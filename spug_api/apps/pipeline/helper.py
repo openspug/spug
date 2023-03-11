@@ -132,7 +132,6 @@ class Helper(KitMixin):
         message = {'key': key, 'data': data}
         if status:
             message['status'] = status
-        print(self.rds_key, message)
         self.rds.rpush(self.rds_key, json.dumps(message))
 
         file = self.get_file(key)
@@ -208,3 +207,25 @@ class Helper(KitMixin):
         if code != 0:
             self.send_error(key, f'exit code: {code}')
         return code == 0
+
+    def local_exec(self, key, et, command):
+        code = -1
+        for code, out in et.exec_command_with_stream(command):
+            self.send(key, out)
+        if code != 0:
+            self.send_error(key, f'exit code: {code}')
+        return code == 0
+
+    def get_dynamic_envs(self, key, ssh):
+        code, out = ssh.exec_command('env')
+        if code == 0:
+            envs = {}
+            for line in out.splitlines():
+                if not line.startswith('SPUG_SET_'):
+                    continue
+                k, v = line.split('=', 1)
+                envs[k.replace('SPUG_SET_', '', 1)] = v
+                envs[k] = v
+            return True, envs
+        self.send_error(key, f'获取动态环境变量失败: {out}')
+        return False, None

@@ -77,25 +77,33 @@ class DoView(View):
         ).parse(request.body)
         if error is None:
             pipe = Pipeline.objects.get(pk=form.id)
-            latest_history = pipe.pipehistory_set.first()
-            ordinal = latest_history.ordinal + 1 if latest_history else 1
-            history = PipeHistory.objects.create(pipeline=pipe, ordinal=ordinal, created_by=request.user)
             nodes, ids = json.loads(pipe.nodes), set()
             for item in filter(lambda x: x['module'] == 'ssh_exec', nodes):
                 ids.update(item['targets'])
             for item in filter(lambda x: x['module'] == 'data_transfer', nodes):
                 ids.update(item['destination']['targets'])
 
+            dynamic_params = None
             host_map = {x.id: f'{x.name}({x.hostname})' for x in Host.objects.filter(id__in=ids)}
-            for item in filter(lambda x: x['module'] == 'ssh_exec', nodes):
-                item['_targets'] = [{'id': x, 'name': host_map[x]} for x in item['targets']]
-            for item in filter(lambda x: x['module'] == 'data_transfer', nodes):
-                item['_targets'] = [{'id': x, 'name': host_map[x]} for x in item['destination']['targets']]
-            rds = get_redis_connection()
-            executor = NodeExecutor(rds, history.deploy_key, json.loads(pipe.nodes))
-            Thread(target=executor.run).start()
+            for item in nodes:
+                if item['module'] == 'ssh_exec':
+                    item['_targets'] = [{'id': x, 'name': host_map[x]} for x in item['targets']]
+                elif item['module'] == 'data_transfer':
+                    item['_targets'] = [{'id': x, 'name': host_map[x]} for x in item['destination']['targets']]
+                elif item['module'] == 'parameter':
+                    dynamic_params = item.get('dynamic_params')
 
-            response = AttrDict(token=history.id, nodes=nodes)
+            if not dynamic_params:
+                latest_history = pipe.pipehistory_set.first()
+                ordinal = latest_history.ordinal + 1 if latest_history else 1
+                history = PipeHistory.objects.create(pipeline=pipe, ordinal=ordinal, created_by=request.user)
+
+                rds = get_redis_connection()
+                executor = NodeExecutor(rds, history.deploy_key, json.loads(pipe.nodes))
+                Thread(target=executor.run).start()
+                response = AttrDict(token=history.id, nodes=nodes)
+            else:
+                response = AttrDict(nodes=nodes, dynamic_params=dynamic_params)
             return json_response(response)
         return json_response(error=error)
 
@@ -103,6 +111,7 @@ class DoView(View):
     def patch(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='参数错误'),
+            Argument('params', type=dict, help='参数错误'),
             Argument('cols', type=int, required=False),
             Argument('rows', type=int, required=False)
         ).parse(request.body)
@@ -111,13 +120,20 @@ class DoView(View):
             if form.cols and form.rows:
                 term = {'width': form.cols, 'height': form.rows}
             pipe = Pipeline.objects.get(pk=form.id)
+            nodes = json.loads(pipe.nodes)
+            for item in nodes:
+                if item['module'] == 'parameter':
+                    item['dynamic_params'] = form.params
+                    break
+
             latest_history = pipe.pipehistory_set.first()
             ordinal = latest_history.ordinal + 1 if latest_history else 1
-            history = PipeHistory.objects.create(pipeline=pipe, ordinal=ordinal, created_by=request.user)
+            PipeHistory.objects.create(pipeline=pipe, ordinal=ordinal, created_by=request.user)
             rds = get_redis_connection()
-            nodes = json.loads(pipe.nodes)
-            executor = NodeExecutor(rds, history.deploy_key, nodes)
+
+            token = uuid4().hex
+            executor = NodeExecutor(rds, token, nodes)
             Thread(target=executor.run).start()
-            response = AttrDict(token=history.id, nodes=nodes)
+            response = AttrDict(token=token)
             return json_response(response)
         return json_response(error=error)

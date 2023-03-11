@@ -5,7 +5,7 @@
  */
 import React from 'react'
 import { observer } from 'mobx-react';
-import { LoadingOutlined } from '@ant-design/icons';
+import { LoadingOutlined, CheckCircleFilled, ExclamationCircleFilled } from '@ant-design/icons';
 import Icon from '../Icon';
 import { clsNames } from 'libs';
 import S from './store';
@@ -31,9 +31,16 @@ function Node(props) {
         </div>
       )
     default:
+      const status = S.outputs[node.id]?.status
       return (
         <div className={clsNames(css.box, css.node, S.node?.id === node.id && css.active)} onClick={props.onClick}>
-          {S.outputs[node.id]?.status === 'processing' ? <LoadingOutlined className={css.loading}/> : null}
+          {status === 'processing' ? (
+            <LoadingOutlined className={css.loading}/>
+          ) : status === 'success' ? (
+            <CheckCircleFilled className={css.success}/>
+          ) : status === 'error' ? (
+            <ExclamationCircleFilled className={css.error}/>
+          ): null}
           <Icon size={36} module={node.module}/>
         </div>
       )

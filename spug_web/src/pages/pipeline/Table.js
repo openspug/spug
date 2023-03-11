@@ -5,7 +5,7 @@
  */
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Table, Modal, message } from 'antd';
+import { Table, Modal, Popconfirm, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { Action, TableCard, AuthButton } from 'components';
 import { http, hasPermission, history } from 'libs';
@@ -61,7 +61,9 @@ function ComTable() {
         <Table.Column width={210} title="操作" render={info => (
           <Action>
             <Action.Button auth="config.app.edit" onClick={() => toDetail(info)}>编辑</Action.Button>
-            <Action.Button auth="config.app.edit" onClick={() => S.showConsole(info)}>执行</Action.Button>
+            <Popconfirm title="确定要执行吗？" onConfirm={() => S.showConsole(info)}>
+              <Action.Button auth="config.app.edit">执行</Action.Button>
+            </Popconfirm>
             <Action.Button danger auth="config.app.del" onClick={() => handleDelete(info)}>删除</Action.Button>
           </Action>
         )}/>

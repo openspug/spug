@@ -8,23 +8,34 @@ import { observer } from 'mobx-react';
 import { Modal, Row } from 'antd';
 import Sider from './Sider';
 import Body from './Body';
-import pS from '../store';
+import Ask from './Ask';
 import S from './store';
+import css from './index.module.less';
 
 function Index() {
+  function handleClose() {
+    S.open = false
+    S.token = false
+  }
+
   return (
     <Modal
-      open={pS.consoleVisible}
-      width="80%"
-      title="运行控制台"
+      open={S.open}
+      width={S.token ? '80%' : '540px'}
+      title={S.token ? '执行控制台' : '执行参数设置'}
       footer={null}
       destroyOnClose
+      maskClosable={false}
+      wrapClassName={css.fade}
       afterClose={S.initial}
-      onCancel={() => pS.consoleVisible = false}>
-      <Row>
-        <Sider/>
-        <Body/>
-      </Row>
+      onCancel={handleClose}>
+      <Ask/>
+      {S.token ? (
+        <Row>
+          <Sider/>
+          <Body/>
+        </Row>
+      ) : null}
     </Modal>
   )
 }

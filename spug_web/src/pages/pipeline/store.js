@@ -6,6 +6,7 @@
 import { computed, observable } from 'mobx';
 import { http, includes } from 'libs';
 import { message } from 'antd';
+import S from './console/store';
 
 class Store {
   @observable records = [];
@@ -14,7 +15,6 @@ class Store {
   @observable node = {};
   @observable actionNode = {};
   @observable isFetching = true;
-  @observable consoleVisible = false;
 
   @computed get dataSource() {
     let records = this.records;
@@ -46,7 +46,17 @@ class Store {
 
   showConsole = (record) => {
     this.record = record
-    this.consoleVisible = true
+    return http.post('/api/pipeline/do/', {id: 1})
+      .then(res => {
+        S.open = true
+        S.nodes = res.nodes
+        S.node = res.nodes[0]
+        if (res.dynamic_params) {
+          S.dynamicParams = res.dynamic_params
+        } else {
+          S.token = res.token
+        }
+      })
   }
 }
 
