@@ -9,7 +9,7 @@ import { transfer } from '../utils';
 class Store {
   host_id = null;
   @observable token = null;
-  @observable open = false;
+  @observable record = null;
   @observable node = {};
   @observable nodes = [];
   @observable outputs = {};
@@ -21,12 +21,6 @@ class Store {
 
   @computed get matrixNodes() {
     return transfer(this.nodes)
-  }
-
-  initial = () => {
-    this.node = {}
-    this.nodes = []
-    this.outputs = {}
   }
 }
 

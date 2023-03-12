@@ -14,20 +14,18 @@ import css from './index.module.less';
 
 function Index() {
   function handleClose() {
-    S.open = false
-    S.dynamicParams = null
+    S.record = null
   }
 
   return (
     <Modal
-      open={S.open}
+      open={S.record}
       width={S.dynamicParams ? '540px' : '80%'}
       title={S.dynamicParams ? '执行参数设置' : '执行控制台'}
       footer={null}
       destroyOnClose
       maskClosable={false}
       wrapClassName={css.fade}
-      afterClose={S.initial}
       onCancel={handleClose}>
       {S.dynamicParams ? (
         <Ask/>

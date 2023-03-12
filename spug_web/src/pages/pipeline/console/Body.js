@@ -78,7 +78,6 @@ function Body() {
       }
     }
     socket.onerror = () => setWSState('2')
-    socket.onclose = () => setWSState('2')
     return () => socket && socket.close()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
