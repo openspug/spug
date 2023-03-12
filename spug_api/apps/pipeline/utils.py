@@ -147,8 +147,11 @@ class NodeExecutor:
             command = f'sshfs -o ro -o ssh_command="ssh -p {host.port} -i {fp.name}" {remote_dir} {local_dir}'
             task = subprocess.run(command, shell=True, capture_output=True)
             if task.returncode != 0:
+                error_msg = task.stderr.decode()
                 os.system(f'umount -f {local_dir} &> /dev/null ; rm -rf {local_dir}')
-                return self.helper.send_error(node.id, task.stderr.decode())
+                for host_id in destination.targets:
+                    self.helper.send_error(f'{node.id}.{host_id}', error_msg)
+                return self.helper.send_error(node.id, error_msg)
 
         threads = []
         with futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:

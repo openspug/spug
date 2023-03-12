@@ -97,7 +97,12 @@ class DoView(View):
                 if item['module'] == 'parameter':
                     dynamic_params = item.get('dynamic_params')
                 elif item['module'] == 'data_upload':
-                    dynamic_params.append({'id': item['id'], 'name': item['name'], 'type': 'upload'})
+                    tmp = {'variable': item['id'], 'name': item['name'], 'type': 'upload', 'required': True}
+                    if 'accept' in item:
+                        tmp['accept'] = item['accept']
+                    if 'size' in item:
+                        tmp['size'] = item['size']
+                    dynamic_params.append(tmp)
 
             token = uuid4().hex
             if dynamic_params:
@@ -120,13 +125,11 @@ class DoView(View):
             Argument('id', type=int, help='参数错误'),
             Argument('token', help='参数错误'),
             Argument('params', type=dict, help='参数错误'),
-            Argument('cols', type=int, required=False),
-            Argument('rows', type=int, required=False)
         ).parse(request.body)
         if error is None:
-            term = None
-            if form.cols and form.rows:
-                term = {'width': form.cols, 'height': form.rows}
+            for k, v in form.params.items():
+                if isinstance(v, list):
+                    form.params[k] = ','.join(v)
             pipe = Pipeline.objects.get(pk=form.id)
             nodes = json.loads(pipe.nodes)
             for item in nodes:

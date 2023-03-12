@@ -152,8 +152,7 @@ class RemoteGit:
 
     def _clone(self):
         env = self._make_ask_env()
-        print(env)
-        return self.remote_exec(f'git clone {self.url} {self.path}', env)
+        return self.remote_exec(f'git clone  {self.url} {self.path}', env)
 
     def set_remote_exec(self, remote_exec):
         self.remote_exec = partial(remote_exec, self.ssh)
@@ -176,7 +175,6 @@ class RemoteGit:
                 ask_file.flush()
                 os.chmod(ask_file.name, 0o755)
                 env.update(GIT_ASKPASS=ask_file.name)
-                print(ask_file.name)
             else:
                 key_file = NamedTemporaryFile()
                 key_file.write(credential.secret.encode())
@@ -188,8 +186,6 @@ class RemoteGit:
                 ask_file.flush()
                 os.chmod(ask_file.name, 0o755)
                 env.update(GIT_SSH=ask_file.name)
-                print(ask_file.name)
-                print(key_file.name)
 
         command = f'git ls-remote -h {url} HEAD'
         res = subprocess.run(command, shell=True, capture_output=True, env=env)

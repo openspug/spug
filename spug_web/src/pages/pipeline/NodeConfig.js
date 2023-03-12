@@ -57,16 +57,16 @@ function NodeConfig(props) {
         <div className={css.header}>
           <div className={clsNames(css.item, tab === 'node' && css.active)} onClick={() => setTab('node')}>
             <AppstoreOutlined/>
-            <span>选择节点</span>
+            <span>选择模块</span>
           </div>
           <div className={clsNames(css.item, tab === 'conf' && css.active)} onClick={() => setTab('conf')}>
             <SettingOutlined/>
-            <span>节点配置</span>
+            <span>模块配置</span>
           </div>
         </div>
 
         <div style={{marginTop: 72, display: tab === 'node' ? 'block' : 'none'}}>
-          <div className={css.category}>内置节点</div>
+          <div className={css.category}>内置模块</div>
           <div className={css.items}>
             {NODES.map(item => (
               <div key={item.module} className={clsNames(css.item, S.node?.module === item.module && css.active)}

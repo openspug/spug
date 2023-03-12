@@ -46,15 +46,14 @@ class Store {
 
   showConsole = (record) => {
     this.record = record
-    return http.post('/api/pipeline/do/', {id: 1})
+    return http.post('/api/pipeline/do/', {id: record.id})
       .then(res => {
-        S.open = true
+        S.record = record
         S.token = res.token
         S.nodes = res.nodes
         S.node = res.nodes[0]
-        if (res.dynamic_params) {
-          S.dynamicParams = res.dynamic_params
-        }
+        S.outputs = {}
+        S.dynamicParams = res.dynamic_params ? res.dynamic_params : null
       })
   }
 }
