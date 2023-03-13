@@ -135,7 +135,7 @@ export default observer(function () {
           <Button type="link" style={{padding: 0}} onClick={() => setParameter({})}>添加参数</Button>
         </Form.Item>
         <Form.Item label="目标主机">
-          <HostSelector value={info.host_ids} onChange={ids => info.host_ids = ids}/>
+          <HostSelector nullable value={info.host_ids} onChange={ids => info.host_ids = ids}/>
         </Form.Item>
         <Form.Item name="desc" label="备注信息">
           <Input.TextArea placeholder="请输入模板备注信息"/>
