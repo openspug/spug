@@ -96,7 +96,6 @@ function Body() {
   }, [S.node])
 
   function handleTabChange(v) {
-    S.node._id = `${S.node.id}.${v}`
     S.node._host_id = v
     S.node = Object.assign({}, S.node)
   }

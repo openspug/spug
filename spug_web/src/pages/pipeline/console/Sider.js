@@ -14,12 +14,6 @@ import css from './sider.module.less';
 function Sider() {
   function handleClick(node) {
     node = lds.cloneDeep(node)
-    if (['ssh_exec', 'data_transfer', 'data_upload'].includes(node.module)) {
-      node._host_id = node._targets[0].id
-      node._id = `${node.id}.${node._host_id}`
-    } else if (node.module === 'build') {
-      node._host_id = node.target
-    }
     S.node = node
   }
 

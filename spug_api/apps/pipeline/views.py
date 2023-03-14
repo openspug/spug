@@ -110,10 +110,10 @@ class DoView(View):
             else:
                 latest_history = pipe.pipehistory_set.first()
                 ordinal = latest_history.ordinal + 1 if latest_history else 1
-                history = PipeHistory.objects.create(pipeline=pipe, ordinal=ordinal, created_by=request.user)
+                PipeHistory.objects.create(pipeline=pipe, ordinal=ordinal, created_by=request.user)
 
                 rds = get_redis_connection()
-                executor = NodeExecutor(rds, history.deploy_key, json.loads(pipe.nodes))
+                executor = NodeExecutor(rds, token, json.loads(pipe.nodes))
                 Thread(target=executor.run).start()
                 response = AttrDict(token=token, nodes=nodes)
             return json_response(response)

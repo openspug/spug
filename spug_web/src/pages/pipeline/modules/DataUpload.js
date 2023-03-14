@@ -41,10 +41,10 @@ function DataUpload(props) {
           <Radio.Button value="always">总是执行</Radio.Button>
         </Radio.Group>
       </Form.Item>
-      <Form.Item required name="targets" label="选择主机" tooltip="数据将会上传到选择的主机上">
+      <Form.Item required name="targets" label="选择上传目标主机" tooltip="数据将会上传到选择的主机上">
         <HostSelector type="button"/>
       </Form.Item>
-      <Form.Item required name="path" label="上传路径(目录)" tooltip="文件将会上传到该目录下，同名文件将会被覆盖">
+      <Form.Item required name="path" label="上传路径(目录)" tooltip="文件将会上传到所选择主机的该目录下，同名文件将会被覆盖">
         <Input placeholder="请输入上传路径"/>
       </Form.Item>
       <Form.Item name="accept" label="文件类型限制" tooltip="限制上传的文件类型，">

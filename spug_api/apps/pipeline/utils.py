@@ -131,7 +131,7 @@ class NodeExecutor:
         node.source = source = AttrDict(node.source)
         node.destination = destination = AttrDict(node.destination)
         host = Host.objects.get(pk=source.target)
-        local_dir = local_path = os.path.join(settings.TRANSFER_DIR, uuid4().hex)
+        local_dir = os.path.join(settings.TRANSFER_DIR, uuid4().hex)
         os.makedirs(local_dir)
         remote_dir = f'{host.username}@{host.hostname}:{source.path}'
         with host.get_ssh() as ssh:
@@ -139,6 +139,8 @@ class NodeExecutor:
         if code == 0:
             remote_dir = f'{host.username}@{host.hostname}:{os.path.dirname(source.path)}'
             local_path = os.path.join(local_dir, os.path.basename(source.path))
+        else:
+            local_path = local_dir + '/'
 
         with tempfile.NamedTemporaryFile(mode='w') as fp:
             fp.write(host.pkey or AppSetting.get('private_key'))
@@ -192,7 +194,7 @@ class NodeExecutor:
         threads = []
         with futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             for host in Host.objects.filter(id__in=node.targets):
-                t = executor.submit(self._data_transfer, node, host, f'{local_path}{os.sep}', node.path)
+                t = executor.submit(self._data_transfer, node, host, f'{local_path}/', node.path)
                 threads.append(t)
             results = [x.result() for x in futures.as_completed(threads)]
         shutil.rmtree(local_path)

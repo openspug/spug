@@ -7,6 +7,7 @@ import { computed, observable } from 'mobx';
 import { http, includes } from 'libs';
 import { message } from 'antd';
 import S from './console/store';
+import lds from 'lodash';
 
 class Store {
   @observable records = [];
@@ -51,7 +52,7 @@ class Store {
         S.record = record
         S.token = res.token
         S.nodes = res.nodes
-        S.node = res.nodes[0]
+        S.node = lds.cloneDeep(res.nodes[0])
         S.outputs = {}
         S.dynamicParams = res.dynamic_params ? res.dynamic_params : null
       })

@@ -31,7 +31,8 @@ function DataTransfer(props) {
       <Form.Item required name="name" label="节点名称">
         <Input placeholder="请输入节点名称"/>
       </Form.Item>
-      <Form.Item required name="condition" label="执行条件" tooltip="当该节点为流程的起始节点时（无上游节点），该条件将会被忽略。">
+      <Form.Item required name="condition" label="执行条件"
+                 tooltip="当该节点为流程的起始节点时（无上游节点），该条件将会被忽略。">
         <Radio.Group>
           <Radio.Button value="success">上游执行成功时</Radio.Button>
           <Radio.Button value="error">上游执行失败时</Radio.Button>
@@ -39,7 +40,8 @@ function DataTransfer(props) {
         </Radio.Group>
       </Form.Item>
       <Card type="inner" title="数据源" style={{margin: '24px 0'}} bodyStyle={{paddingBottom: 0}}>
-        <Form.Item required name={['source', 'path']} label="数据源路径">
+        <Form.Item required name={['source', 'path']} label="数据源路径"
+                   tooltip="当数据源是目录时，则同步目录下的所有文件至目标路径">
           <Input placeholder="请输入数据源路径"/>
         </Form.Item>
         <Form.Item required name={['source', 'target']} label="数据源主机">
@@ -47,7 +49,8 @@ function DataTransfer(props) {
         </Form.Item>
       </Card>
       <Card type="inner" title="传输目标" style={{margin: '24px 0'}} bodyStyle={{paddingBottom: 0}}>
-        <Form.Item required name={['destination', 'path']} label="目标路径">
+        <Form.Item required name={['destination', 'path']} label="目标路径"
+                   tooltip="当数据源是文件时，此路径以 / 结尾则同步文件至该路径下（新建或覆盖路径下的同名文件），否则该路径即为同步之后的文件路径（可理解为把源文件同步后重命名）">
           <Input placeholder="请输入目标路径"/>
         </Form.Item>
         <Form.Item required name={['destination', 'targets']} label="目标主机">
