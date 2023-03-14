@@ -5,9 +5,10 @@
  */
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Form, Input, Select, Radio, message } from 'antd';
+import { Form, Input, Select, Radio, Divider, Button, message } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import { ACEditor } from 'components';
-import { http } from 'libs';
+import { http, history, hasPermission } from 'libs';
 import HostSelector from 'pages/host/Selector';
 import credStore from 'pages/system/credential/store';
 import css from './index.module.less';
@@ -49,7 +50,8 @@ function Build(props) {
       <Form.Item required name="name" label="节点名称">
         <Input placeholder="请输入节点名称"/>
       </Form.Item>
-      <Form.Item required name="condition" label="执行条件" tooltip="当该节点为流程的起始节点时（无上游节点），该条件将会被忽略。">
+      <Form.Item required name="condition" label="执行条件"
+                 tooltip="当该节点为流程的起始节点时（无上游节点），该条件将会被忽略。">
         <Radio.Group>
           <Radio.Button value="success">上游执行成功时</Radio.Button>
           <Radio.Button value="error">上游执行失败时</Radio.Button>
@@ -61,12 +63,24 @@ function Build(props) {
           <Input placeholder="请输入Git仓库地址" style={{width: 300}} onBlur={checkGit}/>
         </Form.Item>
         <Form.Item name="credential_id" label="访问凭据" style={{marginBottom: 0}}>
-          <Select allowClear placeholder="请选择访问凭据" style={{width: 140}} onChange={checkGit}>
-            <Select.Option value="">无</Select.Option>
-            {credStore.records.map(item => (
-              <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
-            ))}
-          </Select>
+          <Select
+            allowClear
+            placeholder="可选访问凭据"
+            style={{width: 140}}
+            onChange={checkGit} options={credStore.records.map(x => ({label: `${x.username}(${x.name})`, value: x.id}))}
+            dropdownRender={menu => (
+              <>
+                {menu}
+                {hasPermission('system.credential.add') && (
+                  <>
+                    <Divider style={{margin: '8px 0'}}/>
+                    <Button block type="link" icon={<PlusOutlined/>} style={{padding: 0}}
+                            onClick={() => history.push('/system/credential')}>添加凭据</Button>
+                  </>
+                )}
+              </>
+            )}
+          />
         </Form.Item>
       </div>
       <div className={css.formTips}>

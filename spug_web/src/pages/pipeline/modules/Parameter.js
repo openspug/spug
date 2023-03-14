@@ -87,7 +87,7 @@ function Editor(props) {
             <Select.Option value="date">日期选择框</Select.Option>
             <Select.Option value="select">下拉单选</Select.Option>
             <Select.Option value="select2">下拉多选</Select.Option>
-            <Select.Option value="upload" disabled>上传文件（请使用数据上传控件）</Select.Option>
+            <Select.Option value="upload" disabled>上传文件（请使用数据上传模块）</Select.Option>
           </Select>
         </Form.Item>
         <Form.Item noStyle shouldUpdate>
