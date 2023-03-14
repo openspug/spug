@@ -360,6 +360,80 @@ const en_US = {
 
 
 
+    // 流水线
+    '流水线': 'Pipeline',
+    '流水线列表': 'Pipeline List',
+    '新建流水线': 'New Pipeline',
+    '请选择节点模块': 'Please select the node module',
+    '选择模块': 'Select Module',
+    '模块配置': 'Module Configuration',
+    '内置模块': 'Built-in Module',
+    '节点名称': 'Node Name',
+    '请输入节点名称': 'Please enter the node name',
+    '执行条件': 'Execution Condition',
+    '当该节点为流程的起始节点时（无上游节点），该条件将会被忽略。': 'When this node is the starting node of the process (no upstream node), this condition will be ignored.',
+    '上游执行成功时': 'When the upstream is executed successfully',
+    '上游执行失败时': 'When the upstream is executed failed',
+    '总是执行': 'Always Execute',
+    'Git仓库': 'Git Repository',
+    '请输入Git仓库地址': 'Please enter the Git repository address',
+    '访问凭据': 'Access Credentials',
+    '请选择访问凭据': 'Please select the access credentials',
+    '工作目录': 'Working Directory',
+    '请输入工作目录': 'Please enter the working directory',
+    
+    '动态参数': 'Dynamic Parameters',
+    '添加参数': 'Add Parameter',
+    '动态参数会在执行时弹窗提示用户输入，最终生成全局变量': 'Dynamic parameters will pop up a window to prompt the user to enter when executing, and finally generate global variables',
+    '编辑参数': 'Edit Parameters',
+    '参数名': 'Parameter Name',
+    '请输入参数名称': 'Please enter the parameter name',
+    '变量名': 'Variable Name',
+    '请输入变量名称': 'Please enter the variable name',
+    '在脚本使用的变量名称，固定前缀_SPUG_ + 输入的变量名，例如变量名name，则最终生成环境变量为 _SPUG_name': 'The variable name used in the script, fixed prefix _SPUG_ + the variable name entered, for example, the variable name name, then the final generated environment variable is _SPUG_name',
+    '参数类型': 'Parameter Type',
+    '请选择参数类型': 'Please select the parameter type',
+    '单行文本': 'Single Line Text',
+    '多行文本': 'Multi-line Text',
+    '密码输入框': 'Password Input Box',
+    '日期选择框': 'Date Selection Box',
+    '下拉单选': 'Drop-down Single Selection',
+    '可选项': 'Optional Items',
+    '每行一个可选项, 例如': 'One optional item per line, for example',
+    '张三': 'ZhangSan',
+    'lisi:李四': 'lisi:LiSi',
+    '下拉多选': 'Drop-down Multiple Selection',
+    '上传文件（请使用数据上传控件）': 'Upload File (please use the data upload control)',
+    '必填': 'Required',
+    '该参数是否为必填项': 'Whether this parameter is required',
+    '请输入该参数的帮助提示信息': 'Please enter the help prompt information for this parameter',
+
+    '静态参数': 'Static Parameters',
+    '静态参数生成固定的全局变量': 'Static parameters generate fixed global variables',
+    '输入变量名': 'Input Variable Name',
+    '输入变量值': 'Input Variable Value',
+
+    '数据源路径': 'Data Source Path',
+    '请输入数据源路径': 'Please enter the data source path',
+    '数据源主机': 'Data Source Host',
+
+    '上传路径(目录)': 'Upload Path (Directory)',
+    '文件将会上传到该目录下，同名文件将会被覆盖': 'The file will be uploaded to this directory, and the same name file will be overwritten',
+    '请输入上传路径': 'Please enter the upload path',
+    '文件类型限制': 'File Type Limit',
+    '限制上传的文件类型': 'Limit the file type to be uploaded',
+    '请输入接受上传的文件类型': 'Please enter the file type accepted for upload',
+    '文件大小限制': 'File Size Limit',
+    '请输入文件大小限制': 'Please enter the file size limit',
+
+
+    '数据上传': 'Data Upload',
+    '钉钉推送': 'DingTalk Push',
+    '推送助手': 'Push Assistant',
+
+
+
+
     // 任务计划
     '任务计划': 'Task Schedule',
     '类型': 'Type',
@@ -616,6 +690,21 @@ const en_US = {
     '失败': 'Failure',
 
 
+    // 凭据管理
+    '凭证管理': 'Credential Management',
+    '凭据列表': 'Credential List',
+    '凭据名称': 'Credential Name',
+    '可共享': 'Shareable',
+    '凭据类型': 'Credential Type',
+    '用户名': 'Username',
+    '新建凭证': 'New Credential',
+    '密码': 'Password',
+    '请输入凭证名称': 'Please enter the credential name',
+    '私钥密码': 'Private Key Password',
+    '请输入私钥密码': 'Please enter the private key password',
+    '共享凭据': 'Share Credential',
+
+
     // 账户管理
     '账户管理': 'Account management',
     '正常': 'Normal',
@@ -714,7 +803,7 @@ const en_US = {
     '请输入公钥': 'Please enter the public key',
     '一般位于': 'Usually located at',
     '私钥': 'Private key',
-    '请输入私钥': 'Please enter the private key',
+    '请输入私钥内容': 'Please enter the private key content',
     '报警服务设置': 'Alarm Service Settings',
     '邮件服务': 'Mail Service',
     '用于通过邮件方式发送报警信息': 'Used to send alarm information by email',

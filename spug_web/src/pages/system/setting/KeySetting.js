@@ -67,7 +67,7 @@ export default observer(function () {
             className={styles.keyText}
             value={store.settings.private_key}
             onChange={e => store.settings.private_key = e.target.value}
-            placeholder="请输入私钥"/>
+            placeholder="请输入私钥内容"/>
         </Form.Item>
         <Form.Item style={{marginTop: 24}}>
           <Button type="primary" loading={store.loading} onClick={handleSubmit}>保存设置</Button>
