@@ -18,6 +18,7 @@ import { AuthButton, Action } from 'components';
 import { http, uniqueId, X_TOKEN } from 'libs';
 import lds from 'lodash';
 import styles from './index.module.less'
+import moment from 'moment';
 
 
 class FileManager extends React.Component {
@@ -25,6 +26,7 @@ class FileManager extends React.Component {
     super(props);
     this.input = null;
     this.input2 = null
+    this.pwdHistoryCaches = new Map()
     this.state = {
       fetching: false,
       showDot: false,
@@ -72,6 +74,7 @@ class FileManager extends React.Component {
   }, {
     title: '修改时间',
     dataIndex: 'date',
+    sorter: (a, b) => moment(a.date).unix() - moment(b.date).unix(),
     width: 190
   }, {
     title: '属性',
@@ -97,13 +100,19 @@ class FileManager extends React.Component {
   };
 
   fetchFiles = (pwd) => {
-    this.setState({fetching: true});
-    pwd = pwd || this.state.pwd;
+    this.setState({ fetching: true });
+    pwd = pwd || (this.pwdHistoryCaches.get(this.props.id) || []);
+    if (this.pwdHistoryCaches.has(this.props.id)) {
+      let pwdCache = this.pwdHistoryCaches.get(this.props.id)
+      pwdCache.push(pwd.length > 0 ? pwd.splice(-1) : null)
+      pwd = pwdCache.filter(x => !!x)
+    }
     const path = '/' + pwd.join('/');
     return http.get('/api/file/', {params: {id: this.props.id, path}})
       .then(res => {
         const objects = lds.orderBy(res, [this._kindSort, 'name'], ['desc', 'asc']);
         this.setState({objects, pwd})
+        this.pwdHistoryCaches.set(this.props.id, pwd)
         this.state.inputPath !== null && this.setState({inputPath: path})
       })
       .finally(() => this.setState({fetching: false}))
