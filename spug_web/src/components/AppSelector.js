@@ -42,7 +42,7 @@ export default observer(function AppSelector(props) {
   if (props.filter) records = records.filter(x => props.filter(x));
   return (
     <Modal
-      visible={props.visible}
+      open={props.visible}
       width={800}
       maskClosable={false}
       title="选择应用"
@@ -56,9 +56,8 @@ export default observer(function AppSelector(props) {
               mode="inline"
               selectedKeys={[String(env_id)]}
               style={{border: 'none'}}
-              onSelect={({selectedKeys}) => setEnvId(selectedKeys[0])}>
-              {envStore.records.map(item => <Menu.Item key={item.id}>{item.name}</Menu.Item>)}
-            </Menu>
+              items={envStore.records.map(x => ({key: x.id, label: x.name, title: x.name}))}
+              onSelect={({selectedKeys}) => setEnvId(selectedKeys[0])}/>
           </Spin>
         </div>
 
