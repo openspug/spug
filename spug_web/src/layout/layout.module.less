@@ -12,7 +12,20 @@
     flex: 1;
   }
 
-  .right {
+  .terminal {
+    padding: 0 12px;
+    cursor: pointer;
+    line-height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.025);
+    }
+  }
+
+  .user {
     .action {
       cursor: pointer;
       padding: 0 12px;
@@ -27,12 +40,9 @@
   }
 
   .trigger {
-    font-size: 20px;
-    line-height: 48px;
     cursor: pointer;
     transition: all 0.3s, padding 0s;
-    padding: 0 24px;
-    float: left;
+    padding: 0 12px;
   }
 
   .trigger:hover {

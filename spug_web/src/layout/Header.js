@@ -6,7 +6,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Layout, Dropdown, Menu, Avatar } from 'antd';
-import { MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
+import { MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined, LogoutOutlined, CodeOutlined } from '@ant-design/icons';
+import { AuthDiv } from 'components';
 import Notification from './Notification';
 import styles from './layout.module.less';
 import http from '../libs/http';
@@ -18,6 +19,10 @@ export default function (props) {
   function handleLogout() {
     history.push('/');
     http.get('/api/account/logout/')
+  }
+
+  function openTerminal() {
+    window.open('/ssh')
   }
 
   const UserMenu = (
@@ -42,7 +47,10 @@ export default function (props) {
         </div>
       </div>
       <Notification/>
-      <div className={styles.right}>
+      <AuthDiv className={styles.terminal} auth="host.console.view|host.console.list" onClick={openTerminal}>
+        <CodeOutlined style={{fontSize: 16}}/>
+      </AuthDiv>
+      <div className={styles.user}>
         <Dropdown overlay={UserMenu} style={{background: '#000'}}>
           <span className={styles.action}>
             <Avatar size="small" src={avatar} style={{marginRight: 8}}/>
