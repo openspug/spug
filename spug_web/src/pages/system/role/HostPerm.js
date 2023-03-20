@@ -59,6 +59,7 @@ export default observer(function () {
             <div className={styles.groupItem} key={index}>
               <TreeSelect
                 value={id}
+                allowClear
                 showSearch={false}
                 treeNodeLabelProp="name"
                 treeData={hostStore.rawTreeData}
