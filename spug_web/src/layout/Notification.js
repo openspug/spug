@@ -106,7 +106,7 @@ export default function () {
 
   const count = notifies.length - reads.length;
   return (
-    <div className={styles.right}>
+    <div className={styles.notification}>
       <Dropdown trigger={['click']} onVisibleChange={handleVisible} overlay={(
         <Menu className={styles.notify}>
           <Menu.Item style={{padding: 0, whiteSpace: 'unset'}}>
@@ -133,11 +133,11 @@ export default function () {
           </Menu.Item>
         </Menu>
       )}>
-        <span className={styles.trigger}>
+        <div className={styles.trigger}>
           <Badge count={count > 0 ? count : 0}>
             <NotificationOutlined style={{fontSize: 16}}/>
           </Badge>
-        </span>
+        </div>
       </Dropdown>
     </div>
   )
