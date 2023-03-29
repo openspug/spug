@@ -83,7 +83,7 @@ export default observer(function () {
   }
 
   function getStyle(t) {
-    return t.includes(store.record.type) ? {display: 'flex'} : {display: 'none'}
+    return t.includes(store.record.type) ? {} : {display: 'none'}
   }
 
   const {name, desc, type, targets, extra, group} = store.record;
@@ -117,6 +117,7 @@ export default observer(function () {
         <Select
           mode="tags"
           value={targets}
+          tokenSeparators={[',', ' ']}
           onChange={v => store.record.targets = v}
           placeholder="http(s)://开头，支持多个地址，每输入完成一个后按回车确认"
           notFoundContent={null}/>
@@ -125,6 +126,7 @@ export default observer(function () {
         <Select
           mode="tags"
           value={targets}
+          tokenSeparators={[',', ' ']}
           onChange={v => store.record.targets = v}
           placeholder="IP或域名，支持多个地址，每输入完成一个后按回车确认"
           notFoundContent={null}/>
