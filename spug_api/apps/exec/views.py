@@ -121,25 +121,42 @@ class TaskView(View):
         return json_response(error=error)
 
 
+KILLER = '''
+function kill_tree {
+  local pid=$1
+  local and_self=${2:-0}
+  local children=$(pgrep -P $pid)
+  for child in $children; do
+    kill_tree $child 1
+  done
+  if [ $and_self -eq 1 ]; then
+    kill $pid
+  fi
+}
+
+kill_tree %s
+'''
+
+
 @auth('exec.task.do|deploy.request.do')
 def handle_terminate(request):
     form, error = JsonParser(
-        Argument('token', help='参数错误'),
-        Argument('target', help='参数错误')
+        Argument('token', help='参数错误')
     ).parse(request.body)
     if error is None:
         rds = get_redis_connection()
-        rds_key = f'PID:{form.token}:{form.target}'
-        pid = rds.get(rds_key)
-        if not pid:
+        pid_str = rds.get(form.token)
+        if not pid_str:
             return json_response(error='未找到关联进程')
-        if form.target.isdigit():
-            host = Host.objects.get(pk=form.target)
+        target, pid = pid_str.decode().split('.')
+        if target.isdigit():
+            host = Host.objects.get(pk=target)
             with host.get_ssh() as ssh:
-                ssh.exec_command_raw(f'kill -9 {pid.decode()}')
-        elif form.target == 'local':
+                command = KILLER % pid
+                ssh.exec_command_raw(command)
+        elif target == 'local':
             gid = os.getpgid(int(pid))
             if gid:
                 os.killpg(gid, 9)
-        rds.delete(rds_key)
+        rds.delete(form.token)
     return json_response(error=error)
