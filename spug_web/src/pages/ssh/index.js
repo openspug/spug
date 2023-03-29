@@ -221,9 +221,9 @@ function WebSSH(props) {
   return hasPermission('host.console.view|host.console.list') ? (
     <div className={styles.container} onMouseUp={() => posX = 0} onMouseMove={handleMouseMove}>
       <div className={styles.sider} style={{width}}>
-        <div className={styles.logo}>
+        <a className={styles.logo} href="/host" target="_blank">
           <img src={LogoSpugText} alt="logo"/>
-        </div>
+        </a>
         <div className={styles.hosts}>
           <Spin spinning={fetching}>
             <Input allowClear className={styles.search} prefix={<SearchOutlined style={{color: '#999'}}/>}
