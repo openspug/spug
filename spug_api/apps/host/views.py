@@ -9,6 +9,7 @@ from apps.setting.utils import AppSetting
 from apps.account.utils import get_host_perms
 from apps.host.models import Host, Group
 from apps.host.utils import batch_sync_host, _sync_host_extend
+from apps.exec.models import ExecTemplate
 from apps.app.models import Deploy
 from apps.schedule.models import Task
 from apps.monitor.models import Detection
@@ -117,6 +118,9 @@ class HostView(View):
                 detection = Detection.objects.filter(type__in=('3', '4'), targets__regex=regex).first()
                 if detection:
                     return json_response(error=f'监控中心的任务【{detection.name}】关联了该主机，请解除关联后再尝试删除该主机')
+                tpl = ExecTemplate.objects.filter(host_ids__regex=regex).first()
+                if tpl:
+                    return json_response(error=f'执行模板【{tpl.name}】关联了该主机，请解除关联后再尝试删除该主机')
             Host.objects.filter(id__in=host_ids).delete()
         return json_response(error=error)
 
