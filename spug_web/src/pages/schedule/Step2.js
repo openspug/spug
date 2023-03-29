@@ -13,7 +13,7 @@ import hostStore from 'pages/host/store';
 import styles from './index.module.css';
 
 export default observer(function () {
-  function handleChange(_, ids) {
+  function handleChange(ids) {
     if (store.targets.includes('local')) {
       ids.unshift('local')
     }

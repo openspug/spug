@@ -87,7 +87,7 @@ function TaskIndex() {
       <div className={style.index} hidden={store.showConsole}>
         <Form layout="vertical" className={style.left}>
           <Form.Item required label="目标主机">
-            <HostSelector type="button" value={store.host_ids} onChange={(_, ids) => store.host_ids = ids}/>
+            <HostSelector type="button" value={store.host_ids} onChange={ids => store.host_ids = ids}/>
           </Form.Item>
 
           <Form.Item required label="执行命令" style={{position: 'relative'}}>

@@ -51,9 +51,10 @@ export default observer(function () {
       {store.syncVisible && <BatchSync/>}
       {store.selectorVisible &&
         <Selector
+          mode="group"
           onlySelf={!store.addByCopy}
           onCancel={() => store.selectorVisible = false}
-          onOk={store.updateGroup}
+          onChange={store.updateGroup}
         />}
     </AuthDiv>
   );

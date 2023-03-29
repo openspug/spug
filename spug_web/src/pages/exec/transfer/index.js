@@ -120,7 +120,7 @@ function TransferIndex() {
         <Card type="inner" title={`数据源${files.length ? `（${files.length}）` : ''}`} extra={(<Space size={24}>
           <Upload multiple beforeUpload={handleUpload}><Space
             className="btn"><UploadOutlined/>上传本地文件</Space></Upload>
-          <HostSelector onlyOne onChange={(_, __, row) => makeFile(row)}>
+          <HostSelector onlyOne mode="rows" onChange={row => makeFile(row)}>
             <Space className="btn"><CloudServerOutlined/>添加主机文件</Space>
           </HostSelector>
         </Space>)}>
@@ -144,7 +144,7 @@ function TransferIndex() {
               <Input value={dir} onChange={e => setDir(e.target.value)} placeholder="请输入目标路径"/>
             </Form.Item>
             <Form.Item required label="目标主机">
-              <HostSelector type="button" value={hosts.map(x => x.id)} onChange={(_, __, rows) => setHosts(rows)}/>
+              <HostSelector type="button" mode="rows" value={hosts.map(x => x.id)} onChange={rows => setHosts(rows)}/>
             </Form.Item>
           </Form>
         </Card>

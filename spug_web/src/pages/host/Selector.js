@@ -62,20 +62,17 @@ function HostSelector(props) {
   }
 
   function handleSubmit() {
-    if (props.onChange) {
-      setLoading(true);
-      let res
-      const selectedRows = store.rawRecords.filter(x => selectedRowKeys.includes(x.id))
-      if (props.onlyOne) {
-        res = props.onChange(store.group, selectedRowKeys[0], selectedRows[0])
-      } else {
-        res = props.onChange(store.group, selectedRowKeys, selectedRows);
-      }
-      if (res && res.then) {
-        res.then(handleClose, () => setLoading(false))
-      } else {
-        handleClose()
-      }
+    if (props.mode === 'ids') {
+      props.onChange(props.onlyOne ? selectedRowKeys[0] : selectedRowKeys)
+      handleClose()
+    } else if (props.mode === 'rows') {
+      const value = store.rawRecords.filter(x => selectedRowKeys.includes(x.id))
+      props.onChange(props.onlyOne ? value[0] : value)
+      handleClose()
+    } else if (props.mode === 'group') {
+      setLoading(true)
+      props.onChange(store.group, selectedRowKeys)
+        .then(handleClose, () => setLoading(false))
     }
   }
 
@@ -112,34 +109,39 @@ function HostSelector(props) {
     setSelectedRowKeys([])
     setLoading(false)
     setVisible(false)
+    if (props.onCancel) {
+      props.onCancel()
+    }
   }
 
   return (
     <div className={styles.selector}>
-      {props.children ? (
-        <div onClick={() => setVisible(true)}>{props.children}</div>
-      ) : (
-        props.type === 'button' ? (
-          props.value.length > 0 ? (
-            <Alert
-              type="info"
-              className={styles.area}
-              message={<div>已选择 <b style={{fontSize: 18, color: '#1890ff'}}>{props.value.length}</b> 台主机</div>}
-              onClick={() => setVisible(true)}/>
-          ) : (
-            <Button icon={<PlusOutlined/>} onClick={() => setVisible(true)}>
-              添加目标主机
-            </Button>
-          )) : (
-          <div style={{display: 'flex', alignItems: 'center'}}>
-            {props.value.length > 0 && <span style={{marginRight: 16}}>已选择 {props.value.length} 台</span>}
-            <Button type="link" style={{padding: 0}} onClick={() => setVisible(true)}>选择主机</Button>
-          </div>
+      {props.mode !== 'group' && (
+        props.children ? (
+          <div onClick={() => setVisible(true)}>{props.children}</div>
+        ) : (
+          props.type === 'button' ? (
+            props.value.length > 0 ? (
+              <Alert
+                type="info"
+                className={styles.area}
+                message={<div>已选择 <b style={{fontSize: 18, color: '#1890ff'}}>{props.value.length}</b> 台主机</div>}
+                onClick={() => setVisible(true)}/>
+            ) : (
+              <Button icon={<PlusOutlined/>} onClick={() => setVisible(true)}>
+                添加目标主机
+              </Button>
+            )) : (
+            <div style={{display: 'flex', alignItems: 'center'}}>
+              {props.value.length > 0 && <span style={{marginRight: 16}}>已选择 {props.value.length} 台</span>}
+              <Button type="link" style={{padding: 0}} onClick={() => setVisible(true)}>选择主机</Button>
+            </div>
+          )
         )
       )}
 
       <Modal
-        visible={visible}
+        visible={props.mode === 'group' || visible}
         width={1000}
         className={styles.modal}
         title={props.title || '主机列表'}
@@ -205,7 +207,9 @@ function HostSelector(props) {
 
 HostSelector.defaultProps = {
   value: [],
-  type: 'text'
+  type: 'text',
+  mode: 'ids',
+  onChange: () => null
 }
 
 export default observer(HostSelector)
