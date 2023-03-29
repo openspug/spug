@@ -146,7 +146,7 @@ function HostSelector(props) {
         className={styles.modal}
         title={props.title || '主机列表'}
         onOk={handleSubmit}
-        okButtonProps={{disabled: selectedRowKeys.length === 0}}
+        okButtonProps={{disabled: selectedRowKeys.length === 0 && !props.nullable}}
         confirmLoading={loading}
         onCancel={handleClose}>
         <Row>
@@ -209,6 +209,7 @@ HostSelector.defaultProps = {
   value: [],
   type: 'text',
   mode: 'ids',
+  nullable: false,
   onChange: () => null
 }
 
