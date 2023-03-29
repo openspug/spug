@@ -24,7 +24,7 @@ function HostSelector(props) {
     hStore.initial().then(() => {
       store.rawRecords = hStore.rawRecords;
       store.rawTreeData = hStore.rawTreeData;
-      store.group = store.treeData[0]
+      store.group = store.treeData[0] || {}
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -166,7 +166,7 @@ function HostSelector(props) {
           </Col>
           <Col span={18} style={{paddingLeft: 12}}>
             <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: 12}}>
-              <Input allowClear style={{width: 260}} placeholder="输入名称/IP检索"
+              <Input allowClear style={{width: 260}} placeholder="输入名称/IP检索" value={store.f_word}
                      onChange={e => store.f_word = e.target.value}/>
               <Space hidden={selectedRowKeys.length === 0}>
                 <div>已选择 {selectedRowKeys.length} 台主机</div>
@@ -209,6 +209,7 @@ HostSelector.defaultProps = {
   value: [],
   type: 'text',
   mode: 'ids',
+  onlyOne: false,
   nullable: false,
   onChange: () => null
 }
