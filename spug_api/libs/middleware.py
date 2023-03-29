@@ -37,7 +37,7 @@ class AuthenticationMiddleware(MiddlewareMixin):
             if user and user.token_expired >= time.time() and user.is_active:
                 if x_real_ip == user.last_ip or AppSetting.get_default('bind_ip') is False:
                     request.user = user
-                    user.token_expired = time.time() + 8 * 60 * 60
+                    user.token_expired = time.time() + settings.TOKEN_TTL
                     user.save()
                     return None
         response = json_response(error="验证失败，请重新登录")
