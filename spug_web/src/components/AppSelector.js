@@ -56,9 +56,8 @@ export default observer(function AppSelector(props) {
               mode="inline"
               selectedKeys={[String(env_id)]}
               style={{border: 'none'}}
-              onSelect={({selectedKeys}) => setEnvId(selectedKeys[0])}>
-              {envStore.records.map(item => <Menu.Item key={item.id}>{item.name}</Menu.Item>)}
-            </Menu>
+              items={envStore.records.map(x => ({key: x.id, label: x.name, title: x.name}))}
+              onSelect={({selectedKeys}) => setEnvId(selectedKeys[0])}/>
           </Spin>
         </div>
 
