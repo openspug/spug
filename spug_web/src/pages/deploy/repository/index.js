@@ -57,11 +57,14 @@ export default observer(function () {
         </SearchForm.Item>
       </SearchForm>
       <ComTable/>
-      <AppSelector
-        visible={store.addVisible}
+      {store.addVisible && (
+        <AppSelector
+        visible
         filter={item => item.extend === '1'}
         onCancel={() => store.addVisible = false}
         onSelect={store.confirmAdd}/>
+      )}
+
       <Detail visible={store.detailVisible}/>
       {store.formVisible && <ComForm/>}
       {store.logVisible && <Console/>}

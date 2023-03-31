@@ -19,10 +19,10 @@ class RepositoryView(View):
     def get(self, request):
         apps = request.user.deploy_perms['apps']
         deploy_id = request.GET.get('deploy_id')
-        data = Repository.objects.annotate(
+        data = Repository.objects.filter(app_id__in=apps).annotate(
             app_name=F('app__name'),
             env_name=F('env__name'),
-            created_by_user=F('created_by__nickname')).filter(deploy_id__in=apps)
+            created_by_user=F('created_by__nickname'))
         if deploy_id:
             data = data.filter(deploy_id=deploy_id, status='5')
             return json_response([x.to_view() for x in data])
