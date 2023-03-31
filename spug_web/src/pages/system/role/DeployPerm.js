@@ -48,13 +48,14 @@ class DeployPerm extends React.Component {
   };
 
   handleSubmit = () => {
-    if (lds.get(store.deployRel, 'envs', []).length === 0) {
-      return message.error('请至少设置一个环境权限')
-    } else if (lds.get(store.deployRel, 'apps', []).length === 0) {
-      return message.error('请至少设置一个应用权限')
+    const envs = lds.get(store.deployRel, 'envs', [])
+    const apps = lds.get(store.deployRel, 'apps', [])
+    if (!(envs.length === 0 && apps.length === 0)) {
+      if (envs.length === 0) return message.error('请至少设置一个环境权限')
+      if (apps.length === 0) return message.error('请至少设置一个应用权限')
     }
     this.setState({loading: true});
-    http.patch('/api/account/role/', {id: store.record.id, deploy_perms: store.deployRel})
+    http.patch('/api/account/role/', {id: store.record.id, deploy_perms: {envs, apps}})
       .then(res => {
         message.success('操作成功');
         store.deployPermVisible = false;
