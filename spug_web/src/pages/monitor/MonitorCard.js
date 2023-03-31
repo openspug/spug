@@ -6,16 +6,16 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Card, Input, Select, Space, Tooltip, Spin, message } from 'antd';
-import { FrownOutlined, RedoOutlined, SyncOutlined } from '@ant-design/icons';
+import { FrownOutlined, ReloadOutlined, SyncOutlined } from '@ant-design/icons';
 import styles from './index.module.less';
 import store from './store';
 
 const StyleMap = {
-  '0': {background: '#99999933', border: '2px solid #999', color: '#999999'},
-  '1': {background: '#16a98733', border: '2px solid #16a987', color: '#16a987'},
-  '2': {background: '#ffba0033', border: '2px solid #ffba00', color: '#ffba00'},
-  '3': {background: '#f2655d33', border: '2px solid #f2655d', color: '#f2655d'},
-  '10': {background: '#99999919', border: '2px dashed #999999', color: '#999999'}
+  '0': {background: '#99999933', border: '1px solid #999', color: '#999999'},
+  '1': {background: '#16a98733', border: '1px solid #16a987', color: '#16a987'},
+  '2': {background: '#ffba0033', border: '1px solid #ffba00', color: '#ffba00'},
+  '3': {background: '#f2655d33', border: '1px solid #f2655d', color: '#f2655d'},
+  '10': {background: '#99999919', border: '1px dashed #999999', color: '#999999'}
 }
 
 const StatusMap = {
@@ -27,9 +27,10 @@ const StatusMap = {
 }
 
 function CardItem(props) {
-  const {status, type, desc, name, target, latest_run_time} = props.data
+  const {status, type, group, desc, name, target, latest_run_time} = props.data
   const title = (
     <div>
+      <div>分组: {group}</div>
       <div>类型: {type}</div>
       <div>名称: {name}</div>
       <div>目标: {target}</div>
@@ -65,7 +66,7 @@ function MonitorCard() {
 
   const filteredRecords = store.ovDataSource.filter(x => !status || x.status === status)
   return (
-    <Card title="总览" style={{marginBottom: 24}} extra={(
+    <Card title="总览" style={{marginBottom: 24}} bodyStyle={{padding: '12px 24px'}} extra={(
       <Space size="middle">
         <Space>
           <div>分组：</div>
@@ -94,21 +95,21 @@ function MonitorCard() {
           {Object.entries(StyleMap).map(([s, style]) => {
             const count = store.ovDataSource.filter(x => x.status === s).length;
             return count ? (
-              <div
-                key={s}
-                className={styles.item}
-                style={s === status ? style : {...style, background: '#fff'}}
-                onClick={() => setStatus(s === status ? '' : s)}>
-                {store.ovDataSource.filter(x => x.status === s).length}
-              </div>
+              <Tooltip key={s} title={StatusMap[s]}>
+                <div
+                  className={styles.item}
+                  style={s === status ? style : {...style, background: '#fff'}}
+                  onClick={() => setStatus(s === status ? '' : s)}>
+                  {store.ovDataSource.filter(x => x.status === s).length}
+                </div>
+              </Tooltip>
             ) : null
           })}
-          <div
-            className={styles.authLoad}
-            style={autoReload ? {backgroundColor: '#1890ff'} : {color: '#1890ff', border: '2px solid #1890ff'}}
-            onClick={handleAutoReload}>
-            {autoReload ? <SyncOutlined/> : <RedoOutlined/>}
-          </div>
+          <Tooltip title="自动刷新">
+            <div className={styles.autoLoad} onClick={handleAutoReload}>
+              {autoReload ? <SyncOutlined spin style={{color: '#2563fc'}}/> : <ReloadOutlined/>}
+            </div>
+          </Tooltip>
         </div>
         {filteredRecords.length > 0 ? (
           <Space wrap size={4}>
