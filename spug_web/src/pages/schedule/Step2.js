@@ -22,7 +22,7 @@ export default observer(function () {
 
   return (
     <React.Fragment>
-      <Form labelCol={{span: 6}} wrapperCol={{span: 14}} style={{minHeight: 350}}>
+      <Form labelCol={{span: 7}} wrapperCol={{span: 14}} style={{minHeight: 350}}>
         <Form.Item required label="执行对象">
           {store.targets.map((id, index) => (
             <React.Fragment key={index}>
