@@ -25,7 +25,6 @@ class FileManager extends React.Component {
   constructor(props) {
     super(props);
     this.input = null;
-    this.input2 = null
     this.pwdHistoryCaches = new Map()
     this.state = {
       fetching: false,
@@ -45,8 +44,9 @@ class FileManager extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.id !== prevProps.id) {
-      this.fetchFiles()
-      this.setState({objects: []})
+      let pwd = this.pwdHistoryCaches.get(this.props.id) || []
+      this.setState({objects: [], pwd})
+      this.fetchFiles(pwd)
     }
   }
 
@@ -101,12 +101,7 @@ class FileManager extends React.Component {
 
   fetchFiles = (pwd) => {
     this.setState({ fetching: true });
-    pwd = pwd || (this.pwdHistoryCaches.get(this.props.id) || []);
-    if (this.pwdHistoryCaches.has(this.props.id)) {
-      let pwdCache = this.pwdHistoryCaches.get(this.props.id)
-      pwdCache.push(pwd.length > 0 ? pwd.splice(-1) : null)
-      pwd = pwdCache.filter(x => !!x)
-    }
+    pwd = pwd || this.state.pwd;
     const path = '/' + pwd.join('/');
     return http.get('/api/file/', {params: {id: this.props.id, path}})
       .then(res => {
@@ -132,19 +127,19 @@ class FileManager extends React.Component {
     this.fetchFiles(pwd)
   };
 
+  handleInputEdit = () => {
+    let inputPath = '/' + this.state.pwd.join('/')
+    this.setState({inputPath})
+  }
+
   handleInputEnter = () => {
-    if (this.state.inputPath === null) {
-      if (this.state.pwd.length > 0) {
-        this.setState({inputPath: `/${this.state.pwd.join('/')}/`})
-      } else {
-        this.setState({inputPath: '/'})
-      }
-      setTimeout(() => this.input2.focus(), 100)
-    } else {
+    if (this.state.inputPath) {
       let pwdStr = this.state.inputPath.replace(/^\/+/, '')
       pwdStr = pwdStr.replace(/\/+$/, '')
       this.fetchFiles(pwdStr.split('/'))
         .then(() => this.setState({inputPath: null}))
+    } else {
+      this.setState({inputPath: null})
     }
   }
 
@@ -229,7 +224,7 @@ class FileManager extends React.Component {
         <input style={{display: 'none'}} type="file" ref={ref => this.input = ref}/>
         <div className={styles.drawerHeader}>
           {this.state.inputPath !== null ? (
-            <Input ref={ref => this.input2 = ref} size="small" className={styles.input}
+            <Input size="small" className={styles.input}
                    suffix={<div style={{color: '#999', fontSize: 12}}>回车确认</div>}
                    value={this.state.inputPath} onChange={e => this.setState({inputPath: e.target.value})}
                    onBlur={this.handleInputEnter}
@@ -244,7 +239,7 @@ class FileManager extends React.Component {
                   <span>{item}</span>
                 </Breadcrumb.Item>
               ))}
-              <Breadcrumb.Item onClick={this.handleInputEnter}>
+              <Breadcrumb.Item onClick={this.handleInputEdit}>
                 <EditOutlined className={styles.edit}/>
               </Breadcrumb.Item>
             </Breadcrumb>
