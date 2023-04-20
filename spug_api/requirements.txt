@@ -6,7 +6,7 @@ channels_redis==2.4.1
 paramiko==2.11.0
 django-redis==4.10.0
 requests==2.22.0
-GitPython==3.0.8
+GitPython==3.1.30
 python-ldap==3.4.0
 openpyxl==3.0.3
 user_agents==2.2.0
