@@ -19,7 +19,8 @@ class RepositoryView(View):
     @auth('deploy.repository.view|deploy.request.add|deploy.request.edit')
     def get(self, request):
         app_id = request.GET.get('app_id')
-        data = Repository.objects.annotate(
+        apps = request.user.deploy_perms['apps']
+        data = Repository.objects.filter(app_id__in=apps).annotate(
             app_name=F('app__name'),
             env_name=F('env__name'),
             created_by_user=F('created_by__nickname'))
