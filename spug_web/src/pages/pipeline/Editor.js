@@ -6,9 +6,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { observer } from 'mobx-react';
-import { Button, message } from 'antd';
-import { RollbackOutlined, EditOutlined } from '@ant-design/icons';
+import { Button, Popconfirm, message } from 'antd';
+import { RollbackOutlined, EditOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import NodeConfig from './NodeConfig';
+import Console from './console';
 import PipeForm from './Form';
 import Node from './Node';
 import { transfer } from './utils';
@@ -135,6 +136,9 @@ function Editor(props) {
         <div className={css.title}>{S.record.name}</div>
         <EditOutlined className={css.edit} onClick={() => setVisible(true)}/>
         <div style={{flex: 1}}/>
+        <Popconfirm title="确定要执行吗？" onConfirm={() => S.showConsole(S.record)}>
+          <Button  className={css.back} type="link" icon={<ThunderboltOutlined/>}/>
+        </Popconfirm>
         <Button className={css.back} type="link" icon={<RollbackOutlined/>}
                 onClick={() => history.goBack()}>返回列表</Button>
       </div>
@@ -151,6 +155,7 @@ function Editor(props) {
         <NodeConfig doRefresh={handleRefresh}/>
       </div>
       {visible && <PipeForm onCancel={() => setVisible(false)}/>}
+      <Console/>
     </div>
   )
 }
