@@ -95,12 +95,18 @@ class DoView(View):
                     item['_targets'] = [{'id': x, 'name': host_map[x]} for x in item['destination']['targets']]
 
                 if item['module'] == 'parameter':
-                    dynamic_params = item.get('dynamic_params')
+                    if item.get('dynamic_params'):
+                        dynamic_params.extend(item['dynamic_params'])
+                elif item['module'] == 'build':
+                    if item.get('git_commit') == 'selective':
+                        dynamic_params.append({'variable': 'git_commit', 'name': 'Git提交', 'type': 'select', 'options': [{'value': 1, 'label': 1}], 'required': True})
+                    elif item.get('git_tag') == 'selective':
+                        dynamic_params.append({'variable': 'tag_', 'name': 'Git标签', 'type': 'text', 'required': True})
                 elif item['module'] == 'data_upload':
                     tmp = {'variable': item['id'], 'name': item['name'], 'type': 'upload', 'required': True}
-                    if 'accept' in item:
+                    if item.get('accept'):
                         tmp['accept'] = item['accept']
-                    if 'size' in item:
+                    if item.get('size'):
                         tmp['size'] = item['size']
                     dynamic_params.append(tmp)
 

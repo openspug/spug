@@ -187,9 +187,13 @@ class RemoteGit:
                 os.chmod(ask_file.name, 0o755)
                 env.update(GIT_SSH=ask_file.name)
 
-        command = f'git ls-remote -h {url} HEAD'
+        command = f'git ls-remote -h {url}'
         res = subprocess.run(command, shell=True, capture_output=True, env=env)
-        return res.returncode == 0, res.stderr.decode()
+        if res.returncode == 0:
+            lines = res.stdout.decode().strip().split('\n')
+            branches = [x.split('/')[-1] for x in lines]
+            return True, branches
+        return False, res.stderr.decode()
 
     def fetch_branches_tags(self):
         body = f'set -e\ncd {self.path}\n'
