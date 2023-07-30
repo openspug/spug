@@ -16,7 +16,7 @@ Demo：https://demo.spug.cc
 
 
 
-## Push Assistant 
+## 🔥Push Assistant 
 
 Push Assistant is a message push platform that integrates multiple channels such as telephone, SMS, email, Feishu, DingTalk, WeChat, and WeChat Work. It can realize telephone and SMS alarms of Zabbix, Prometheus, Nightingale and other monitoring systems in 3 minutes. Click to experience: [https://push.spug.cc](https://push.spug.cc)
 
