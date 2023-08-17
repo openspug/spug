@@ -5,9 +5,11 @@ from django.views.generic import View
 from django.db.models import F
 from libs import JsonParser, Argument, json_response, auth
 from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
+from apps.host.models import Host
 from apps.config.models import Config, ConfigHistory, Service
 from apps.app.utils import fetch_versions, remove_repo
 from apps.setting.utils import AppSetting
+from apps.account.utils import get_host_perms
 import json
 import re
 
@@ -117,6 +119,20 @@ class DeployView(View):
         deploys = Deploy.objects.filter(**form) \
             .annotate(app_name=F('app__name'), app_key=F('app__key')) \
             .order_by('-app__sort_id')
+        # 获取用户有权访问的主机列表
+        hosts = Host.objects.select_related('hostextend')
+        if not request.user.is_supper:
+            hosts = hosts.filter(id__in=get_host_perms(request.user))
+        # 提取出所有的 host id 到列表中
+        allowed_host_ids = list(map(lambda x: x.id, hosts))
+        # 遍历每一个发布配置，并修改其中的 host_ids 字段
+        for deploy_item in deploys:
+            # 解析 host_ids 字符串
+            all_host_ids = json.loads(deploy_item.host_ids)
+            # 获取所有用户有权访问的主机
+            available_host_ids = list(filter(lambda x: x in allowed_host_ids, all_host_ids))
+            # 将该列表重新赋值给发布配置的 host_ids 字段
+            deploy_item.host_ids = json.dumps(available_host_ids)
         return json_response(deploys)
 
     @auth('deploy.app.edit')
