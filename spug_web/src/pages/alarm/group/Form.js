@@ -3,16 +3,24 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React, { useState } from 'react';
-import { observer } from 'mobx-react';
-import { Modal, Form, Input, Transfer, message } from 'antd';
+import React, {useEffect, useState} from 'react';
+import {observer} from 'mobx-react';
+import {Modal, Form, Input, Transfer, Spin, message} from 'antd';
 import http from 'libs/http';
 import store from './store';
-import contactStore from '../contact/store';
 
 export default observer(function () {
   const [form] = Form.useForm();
+  const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(false);
+
+  useEffect(() => {
+    setFetching(true)
+    http.get('/api/alarm/contact/?with_push=1')
+      .then(res => setContacts(res))
+      .finally(() => setFetching(false))
+  }, []);
 
   function handleSubmit() {
     setLoading(true);
@@ -42,14 +50,16 @@ export default observer(function () {
         <Form.Item name="desc" label="备注信息">
           <Input.TextArea placeholder="请输入备注信息"/>
         </Form.Item>
-        <Form.Item required name="contacts" valuePropName="targetKeys" label="选择联系人">
-          <Transfer
-            rowKey={item => item.id}
-            titles={['已有联系人', '已选联系人']}
-            listStyle={{width: 199}}
-            dataSource={contactStore.records}
-            render={item => item.name}/>
-        </Form.Item>
+        <Spin spinning={fetching}>
+          <Form.Item required name="contacts" valuePropName="targetKeys" label="选择联系人">
+            <Transfer
+              rowKey={item => item.id}
+              titles={['已有联系人', '已选联系人']}
+              listStyle={{width: 199}}
+              dataSource={contacts}
+              render={item => item.name}/>
+          </Form.Item>
+        </Spin>
       </Form>
     </Modal>
   )

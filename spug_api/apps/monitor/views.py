@@ -37,8 +37,8 @@ class DetectionView(View):
         ).parse(request.body)
         if error is None:
             if set(form.notify_mode).intersection(['1', '2', '4']):
-                if not AppSetting.get_default('spug_key'):
-                    return json_response(error='报警方式 微信、短信、邮件需要配置调用凭据（系统设置/基本设置），请配置后再启用该报警方式。')
+                if not AppSetting.get_default('spug_key') and not AppSetting.get_default('spug_push_key'):
+                    return json_response(error='报警方式 微信、短信、邮件需要配置调用凭据（系统设置/基本设置）或推送服务（系统设置/推送服务设置），请配置后再启用该报警方式。')
 
             form.targets = json.dumps(form.targets)
             form.notify_grp = json.dumps(form.notify_grp)

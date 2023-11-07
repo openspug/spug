@@ -8,6 +8,7 @@ from libs import JsonParser, Argument, json_response, auth
 from libs.utils import generate_random_str
 from libs.mail import Mail
 from libs.spug import send_login_wx_code
+from libs.push import get_balance
 from libs.mixins import AdminView
 from apps.setting.utils import AppSetting
 from apps.setting.models import Setting, KEYS_DEFAULT
@@ -36,7 +37,8 @@ class SettingView(AdminView):
 class MFAView(AdminView):
     def get(self, request):
         if not request.user.wx_token:
-            return json_response(error='检测到当前账户未配置微信Token，请配置后再尝试启用MFA认证，否则可能造成系统无法正常登录。')
+            return json_response(
+                error='检测到当前账户未配置微信Token，请配置后再尝试启用MFA认证，否则可能造成系统无法正常登录。')
         code = generate_random_str(6)
         send_login_wx_code(request.user.wx_token, code)
         cache.set(f'{request.user.username}:code', code, 300)
@@ -105,7 +107,8 @@ def email_test(request):
 @auth('admin')
 def mfa_test(request):
     if not request.user.wx_token:
-        return json_response(error='检测到当前账户未配置微信Token，请配置后再尝试启用MFA认证，否则可能造成系统无法正常登录。')
+        return json_response(
+            error='检测到当前账户未配置微信Token，请配置后再尝试启用MFA认证，否则可能造成系统无法正常登录。')
     code = generate_random_str(6)
     send_login_wx_code(request.user.wx_token, code)
     cache.set(f'{request.user.username}:code', code, 300)
@@ -120,3 +123,12 @@ def get_about(request):
         'spug_version': settings.SPUG_VERSION,
         'django_version': django.get_version()
     })
+
+
+@auth('admin')
+def get_push_balance(request):
+    token = AppSetting.get_default('spug_push_key')
+    if not token:
+        return json_response(error='请先配置推送服务绑定账户')
+    res = get_balance(token)
+    return json_response(res)

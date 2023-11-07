@@ -16,6 +16,7 @@ KEYS_DEFAULT = {
     'mail_service': {},
     'private_key': None,
     'public_key': None,
+    'spug_push_key': None,
 }
 
 

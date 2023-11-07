@@ -11,7 +11,6 @@ import { Action, TableCard, AuthButton } from 'components';
 import { http, hasPermission } from 'libs';
 import store from './store';
 import contactStore from '../contact/store';
-import lds from 'lodash';
 
 @observer
 class ComTable extends React.Component {
@@ -76,8 +75,7 @@ class ComTable extends React.Component {
           pageSizeOptions: ['10', '20', '50', '100']
         }}>
         <Table.Column title="组名称" dataIndex="name"/>
-        <Table.Column ellipsis title="成员" dataIndex="contacts"
-                      render={value => value.map(x => lds.get(this.state.contactMap, `${x}.name`)).join(',')}/>
+        <Table.Column ellipsis title="成员" dataIndex="contacts" render={value => `${value.length}个`}/>
         <Table.Column ellipsis title="描述信息" dataIndex="desc"/>
         {hasPermission('alarm.group.edit|alarm.group.del') && (
           <Table.Column title="操作" render={info => (

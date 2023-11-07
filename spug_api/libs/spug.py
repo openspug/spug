@@ -6,11 +6,23 @@ from apps.setting.utils import AppSetting
 from apps.notify.models import Notify
 from libs.mail import Mail
 from libs.utils import human_datetime
+from libs.push import push_server
+from functools import partial
 import requests
 import json
 
 spug_server = 'https://api.spug.cc'
 notify_source = 'monitor'
+make_no_spug_key_notify = partial(
+    Notify.make_monitor_notify,
+    '发送报警信息失败',
+    '未配置报警服务调用凭据，请在系统管理/系统设置/基本设置/调用凭据中配置。'
+)
+make_no_push_key_notify = partial(
+    Notify.make_monitor_notify,
+    '发送报警信息失败',
+    '未绑定推送服务，请在系统管理/系统设置/推送服务设置中绑定推送助手账户。'
+)
 
 
 def send_login_wx_code(wx_token, code):
@@ -33,7 +45,7 @@ class Notification:
         self.message = message
         self.duration = duration
         self.spug_key = AppSetting.get_default('spug_key')
-        self.u_ids = []
+        self.spug_push_key = AppSetting.get_default('spug_push_key')
 
     @staticmethod
     def handle_request(url, data, mode=None):
@@ -62,7 +74,7 @@ class Notification:
 
     def monitor_by_wx(self, users):
         if not self.spug_key:
-            Notify.make_monitor_notify('发送报警信息失败', '未配置报警服务调用凭据，请在系统管理/系统设置/基本设置/调用凭据中配置。')
+            make_no_spug_key_notify()
             return
         data = {
             'token': self.spug_key,
@@ -99,7 +111,7 @@ class Notification:
             }
             self.handle_request(f'{spug_server}/apis/notify/mail/', data, 'spug')
         else:
-            Notify.make_monitor_notify('发送报警信息失败', '未配置报警服务调用凭据，请在系统管理/系统设置/报警服务设置中配置。')
+            make_no_spug_key_notify()
 
     def monitor_by_dd(self, users):
         texts = [
@@ -144,30 +156,82 @@ class Notification:
         for url in users:
             self.handle_request(url, data, 'wx')
 
+    def monitor_by_spug_push(self, targets):
+        if not self.spug_push_key:
+            make_no_push_key_notify()
+            return
+        data = {
+            'token': self.spug_push_key,
+            'targets': list(targets),
+            'dataset': {
+                'title': self.title,
+                'target': self.target,
+                'message': self.message,
+                'duration': self.duration,
+                'event': self.event
+            }
+        }
+        self.handle_request(f'{push_server}/spug/message/', data, 'spug')
+
     def dispatch_monitor(self, modes):
-        self.u_ids = sum([json.loads(x.contacts) for x in Group.objects.filter(id__in=self.grp)], [])
+        u_ids, push_ids = [], []
+        for item in Group.objects.filter(id__in=self.grp):
+            for x in json.loads(item.contacts):
+                if isinstance(x, str) and '_' in x:
+                    push_ids.append(x)
+                else:
+                    u_ids.append(x)
+
+        targets = set()
         for mode in modes:
             if mode == '1':
-                users = set(x.wx_token for x in Contact.objects.filter(id__in=self.u_ids, wx_token__isnull=False))
+                wx_mp_ids = set(x for x in push_ids if x.startswith('wx_mp_'))
+                targets.update(wx_mp_ids)
+                users = set(x.wx_token for x in Contact.objects.filter(id__in=u_ids, wx_token__isnull=False))
                 if not users:
-                    Notify.make_monitor_notify('发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的微信Token。')
+                    if not wx_mp_ids:
+                        Notify.make_monitor_notify(
+                            '发送报警信息失败',
+                            '未找到可用的通知对象，请确保设置了相关报警联系人的微信Token。'
+                        )
                     continue
                 self.monitor_by_wx(users)
+            elif mode == '2':
+                sms_ids = set(x for x in push_ids if x.startswith('sms_'))
+                targets.update(sms_ids)
             elif mode == '3':
-                users = set(x.ding for x in Contact.objects.filter(id__in=self.u_ids, ding__isnull=False))
+                users = set(x.ding for x in Contact.objects.filter(id__in=u_ids, ding__isnull=False))
                 if not users:
-                    Notify.make_monitor_notify('发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的钉钉。')
+                    Notify.make_monitor_notify(
+                        '发送报警信息失败',
+                        '未找到可用的通知对象，请确保设置了相关报警联系人的钉钉。'
+                    )
                     continue
                 self.monitor_by_dd(users)
             elif mode == '4':
-                users = set(x.email for x in Contact.objects.filter(id__in=self.u_ids, email__isnull=False))
+                mail_ids = set(x for x in push_ids if x.startswith('mail_'))
+                targets.update(mail_ids)
+                users = set(x.email for x in Contact.objects.filter(id__in=u_ids, email__isnull=False))
                 if not users:
-                    Notify.make_monitor_notify('发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的邮件地址。')
+                    if not mail_ids:
+                        Notify.make_monitor_notify(
+                            '发送报警信息失败',
+                            '未找到可用的通知对象，请确保设置了相关报警联系人的邮件地址。'
+                        )
                     continue
                 self.monitor_by_email(users)
             elif mode == '5':
-                users = set(x.qy_wx for x in Contact.objects.filter(id__in=self.u_ids, qy_wx__isnull=False))
+                users = set(x.qy_wx for x in Contact.objects.filter(id__in=u_ids, qy_wx__isnull=False))
                 if not users:
-                    Notify.make_monitor_notify('发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的企业微信。')
+                    Notify.make_monitor_notify(
+                        '发送报警信息失败',
+                        '未找到可用的通知对象，请确保设置了相关报警联系人的企业微信。'
+                    )
                     continue
                 self.monitor_by_qy_wx(users)
+            elif mode == '6':
+                voice_ids = set(x for x in push_ids if x.startswith('voice_'))
+                targets.update(voice_ids)
+
+        if targets:
+            self.monitor_by_spug_push(targets)

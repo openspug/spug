@@ -1,31 +1,117 @@
 .container {
-    display: flex;
-    background-color: #fff;
-    padding: 16px 0;
+  display: flex;
+  background-color: #fff;
+  padding: 16px 0;
 }
 
 .left {
-    flex: 2;
-    border-right: 1px solid #e8e8e8;
+  flex: 2;
+  border-right: 1px solid #e8e8e8;
 }
 
 .right {
-    flex: 7;
-    padding: 8px 40px;
+  flex: 7;
+  padding: 8px 40px;
 }
 
 .title {
-    margin-bottom: 24px;
-    color: rgba(0, 0, 0, .85);
-    font-weight: 500;
-    font-size: 20px;
-    line-height: 28px;
+  margin-bottom: 24px;
+  color: rgba(0, 0, 0, .85);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 28px;
 }
 
 .form {
-    max-width: 320px;
+  max-width: 320px;
 }
 
 .keyText {
-    font-family: "Bitstream Vera Sans Mono", Monaco, "Courier New", Courier, monospace;
+  font-family: "Bitstream Vera Sans Mono", Monaco, "Courier New", Courier, monospace;
 }
+
+.statistic {
+  background: #fafafa;
+  border-radius: 4px;
+
+  .body {
+    display: flex;
+    flex-direction: row;
+
+    .item {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 180px;
+      height: 150px;
+
+      &:nth-child(n+2) {
+        &:before {
+          content: ' ';
+          position: absolute;
+          top: 52px;
+          left: 0;
+          width: 1px;
+          height: 56px;
+          background: #CCCCCC;
+          opacity: 0.5;
+        }
+      }
+
+      .title {
+        font-size: 14px;
+        color: #666666;
+        margin-bottom: 6px;
+      }
+
+      .value {
+        font-size: 40px;
+        line-height: 46px;
+        color: #333333;
+        position: relative;
+      }
+
+      .tips {
+        position: absolute;
+        bottom: 16px;
+        font-size: 11px;
+        color: rgba(0, 0, 0, 0.35);
+        background: rgba(0, 0, 0, 0.04);
+        border-radius: 10px;
+        line-height: 20px;
+        text-align: center;
+        padding: 0 8px;
+        cursor: pointer;
+      }
+
+      .active {
+        cursor: initial;
+        background: #f7af40;
+        color: #ffffff;
+      }
+    }
+
+    .buy {
+      position: absolute;
+      right: 51px;
+      top: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 32px;
+      width: 96px;
+      padding: 0 16px 0 20px;
+      border-radius: 16px;
+      color: #2563fc;
+      font-size: 14px;
+      cursor: pointer;
+
+      :global(.iconfont) {
+        font-size: 14px;
+      }
+    }
+  }
+}
+

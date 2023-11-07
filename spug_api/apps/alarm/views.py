@@ -4,8 +4,10 @@
 from django.views.generic import View
 from libs import json_response, JsonParser, Argument, auth
 from libs.spug import Notification
+from libs.push import get_contacts
 from apps.alarm.models import Alarm, Group, Contact
 from apps.monitor.models import Detection
+from apps.setting.utils import AppSetting
 import json
 
 
@@ -55,8 +57,20 @@ class GroupView(View):
 class ContactView(View):
     @auth('alarm.contact.view|alarm.group.view')
     def get(self, request):
-        contacts = Contact.objects.all()
-        return json_response(contacts)
+        form, error = JsonParser(
+            Argument('with_push', required=False),
+        ).parse(request.GET)
+        if error is None:
+            response = []
+            if form.with_push:
+                push_key = AppSetting.get('spug_push_key')
+                if push_key:
+                    response = get_contacts(push_key)
+
+            for item in Contact.objects.all():
+                response.append(item.to_dict())
+            return json_response(response)
+        return json_response(error=error)
 
     @auth('alarm.contact.add|alarm.contact.edit')
     def post(self, request):

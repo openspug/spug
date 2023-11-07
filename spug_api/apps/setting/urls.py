@@ -12,5 +12,6 @@ urlpatterns = [
     url(r'^ldap_test/$', ldap_test),
     url(r'^email_test/$', email_test),
     url(r'^mfa/$', MFAView.as_view()),
-    url(r'^about/$', get_about)
+    url(r'^about/$', get_about),
+    url(r'^balance/$', get_push_balance),
 ]
