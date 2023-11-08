@@ -161,6 +161,7 @@ class Notification:
             make_no_push_key_notify()
             return
         data = {
+            'source': 'monitor',
             'token': self.spug_push_key,
             'targets': list(targets),
             'dataset': {

@@ -55,17 +55,20 @@ class GroupView(View):
 
 
 class ContactView(View):
-    @auth('alarm.contact.view|alarm.group.view')
+    @auth('alarm.contact.view|alarm.group.view|schedule.schedule.add|schedule.schedule.edit')
     def get(self, request):
         form, error = JsonParser(
             Argument('with_push', required=False),
+            Argument('only_push', required=False),
         ).parse(request.GET)
         if error is None:
             response = []
-            if form.with_push:
+            if form.with_push or form.only_push:
                 push_key = AppSetting.get('spug_push_key')
                 if push_key:
                     response = get_contacts(push_key)
+                if form.only_push:
+                    return json_response(response)
 
             for item in Contact.objects.all():
                 response.append(item.to_dict())

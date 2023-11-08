@@ -1,16 +1,25 @@
-import React, { useState } from 'react';
-import { observer } from 'mobx-react';
-import { Form, Input, Select, Modal, Button, Radio } from 'antd';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { LinkButton, ACEditor } from 'components';
+import React, {useState, useEffect} from 'react';
+import {observer} from 'mobx-react';
+import {Form, Input, Select, Modal, Button, Radio} from 'antd';
+import {ExclamationCircleOutlined} from '@ant-design/icons';
+import {LinkButton, ACEditor} from 'components';
 import TemplateSelector from '../exec/task/TemplateSelector';
-import { cleanCommand } from 'libs';
+import {cleanCommand, http} from 'libs';
 import store from './store';
 
 export default observer(function () {
   const [form] = Form.useForm();
   const [showTmp, setShowTmp] = useState(false);
   const [command, setCommand] = useState(store.record.command || '');
+  const [rstValue, setRstValue] = useState({});
+  const [contacts, setContacts] = useState([]);
+
+  useEffect(() => {
+    const {mode, value} = store.record.rst_notify
+    setRstValue({[mode]: value})
+    http.get('/api/alarm/contact/?only_push=1')
+      .then(res => setContacts(res))
+  }, []);
 
   function handleAddZone() {
     let type;
@@ -39,8 +48,10 @@ export default observer(function () {
   }
 
   function handleNext() {
-    store.page += 1;
+    const notifyMode = store.record.rst_notify.mode
+    store.record.rst_notify.value = rstValue[notifyMode]
     Object.assign(store.record, form.getFieldsValue(), {command: cleanCommand(command)})
+    store.page += 1;
   }
 
   function handleSelect(tpl) {
@@ -67,6 +78,7 @@ export default observer(function () {
       modePlaceholder = '请输入'
   }
 
+  const notifyMode = store.record.rst_notify.mode
   return (
     <Form form={form} initialValues={store.record} labelCol={{span: 6}} wrapperCol={{span: 14}}>
       <Form.Item required label="任务类型" style={{marginBottom: 0}}>
@@ -104,21 +116,31 @@ export default observer(function () {
             <a target="_blank" rel="noopener noreferrer"
                href="https://spug.cc/docs/use-problem#use-dd">钉钉收不到通知？</a>
           </span>)}>
-        <Input
-          value={store.record.rst_notify.value}
-          onChange={e => store.record.rst_notify.value = e.target.value}
-          addonBefore={(
-            <Select style={{width: 100}} value={store.record.rst_notify.mode}
-                    onChange={v => store.record.rst_notify.mode = v}>
-              <Select.Option value="0">关闭</Select.Option>
-              <Select.Option value="1">钉钉</Select.Option>
-              <Select.Option value="4">飞书</Select.Option>
-              <Select.Option value="3">企业微信</Select.Option>
-              <Select.Option value="2">Webhook</Select.Option>
-            </Select>
-          )}
-          disabled={store.record.rst_notify.mode === '0'}
-          placeholder={modePlaceholder}/>
+        <Input.Group compact>
+          <Select style={{width: '25%'}} value={notifyMode}
+                  onChange={v => store.record.rst_notify.mode = v}>
+            <Select.Option value="0">关闭</Select.Option>
+            <Select.Option value="1">钉钉</Select.Option>
+            <Select.Option value="4">飞书</Select.Option>
+            <Select.Option value="3">企业微信</Select.Option>
+            <Select.Option value="2">Webhook</Select.Option>
+            <Select.Option value="5">推送助手</Select.Option>
+          </Select>
+          <Select hidden={notifyMode !== '5'} mode="multiple" style={{width: '75%'}} value={rstValue[notifyMode]}
+                  onChange={v => setRstValue(Object.assign({}, rstValue, {[notifyMode]: v}))}
+                  placeholder="请选择推送对象">
+            {contacts.map(item => (
+              <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+            ))}
+          </Select>
+          <Input
+            hidden={notifyMode === '5'}
+            style={{width: '75%'}}
+            value={rstValue[notifyMode]}
+            onChange={e => setRstValue(Object.assign({}, rstValue, {[notifyMode]: e.target.value}))}
+            disabled={notifyMode === '0'}
+            placeholder={modePlaceholder}/>
+        </Input.Group>
       </Form.Item>
       <Form.Item name="desc" label="备注信息">
         <Input.TextArea placeholder="请输入模板备注信息"/>
