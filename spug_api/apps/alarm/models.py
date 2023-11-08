@@ -14,6 +14,7 @@ class Alarm(models.Model, ModelMixin):
         ('3', '钉钉'),
         ('4', '邮件'),
         ('5', '企业微信'),
+        ('6', '电话'),
     )
     STATUS = (
         ('1', '报警发生'),
