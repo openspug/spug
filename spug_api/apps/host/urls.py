@@ -17,4 +17,6 @@ urlpatterns = [
     path('import/region/', get_regions),
     path('parse/', post_parse),
     path('valid/', batch_valid),
+    path('processes/', get_processes),
+    path('ports/', get_ports),
 ]

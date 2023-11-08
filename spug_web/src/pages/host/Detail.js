@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react';
-import { Drawer, Descriptions, List, Button, Input, Select, DatePicker, Tag, message } from 'antd';
+import {Drawer, Descriptions, List, Button, Input, Select, DatePicker, Tag, message, Tabs} from 'antd';
 import { EditOutlined, SaveOutlined, PlusOutlined, SyncOutlined } from '@ant-design/icons';
 import { AuthButton } from 'components';
 import { http } from 'libs';
@@ -13,7 +13,8 @@ import store from './store';
 import lds from 'lodash';
 import moment from 'moment';
 import styles from './index.module.less';
-
+import ProcessesTable from "./Processes";
+import PortsTable from "./Ports";
 export default observer(function () {
   const [edit, setEdit] = useState(false);
   const [host, setHost] = useState(store.record);
@@ -110,7 +111,7 @@ export default observer(function () {
 
   return (
     <Drawer
-      width={550}
+      width={1500}
       title={host.name}
       placement="right"
       onClose={handleClose}
@@ -118,9 +119,10 @@ export default observer(function () {
       <Descriptions
         bordered
         size="small"
-        labelStyle={{width: 150}}
+        // labelStyle={{width: 150}}
         title={<span style={{fontWeight: 500}}>基本信息</span>}
-        column={1}>
+        // column={1}
+      >
         <Descriptions.Item label="主机名称">{host.name}</Descriptions.Item>
         <Descriptions.Item label="连接地址">{host.username}@{host.hostname}</Descriptions.Item>
         <Descriptions.Item label="连接端口">{host.port}</Descriptions.Item>
@@ -137,9 +139,9 @@ export default observer(function () {
       <Descriptions
         bordered
         size="small"
-        column={1}
+        // column={1}
         className={edit ? styles.hostExtendEdit : null}
-        labelStyle={{width: 150}}
+        // labelStyle={{width: 150}}
         style={{marginTop: 24}}
         extra={edit ? ([
           <Button key="1" type="link" loading={fetching} icon={<SyncOutlined/>} onClick={handleFetch}>同步</Button>,
@@ -270,6 +272,16 @@ export default observer(function () {
         </Descriptions.Item>
         <Descriptions.Item label="更新时间">{host.updated_at}</Descriptions.Item>
       </Descriptions>
+      {host.id !== undefined && store.detailVisible ? (
+          <Tabs>
+            <Tabs.TabPane tab="进程清单" key="item-1">
+              <ProcessesTable host_id={store.record.id}/>
+            </Tabs.TabPane>
+            <Tabs.TabPane tab="网络端口" key="item-2">
+              <PortsTable host_id={store.record.id}/>
+            </Tabs.TabPane>
+          </Tabs>
+      ) : null}
     </Drawer>
   )
 })
