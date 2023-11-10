@@ -5,7 +5,7 @@
  */
 import React, { useState } from 'react';
 import { observer } from 'mobx-react';
-import { Button, Form, Input, Radio, Space, message } from 'antd';
+import { Button, Form, Input, Space, message } from 'antd';
 import styles from './index.module.css';
 import { http } from 'libs';
 import store from './store';
@@ -13,7 +13,6 @@ import store from './store';
 export default observer(function () {
   const [form] = Form.useForm();
   const setting = store.settings.mail_service || {};
-  const [mode, setMode] = useState(setting.server === undefined ? '1' : '2');
   const [loading, setLoading] = useState(false);
 
   function handleEmailTest() {
@@ -37,9 +36,7 @@ export default observer(function () {
 
   function handleSubmit() {
     let formData = form.getFieldsValue();
-    if (mode === '1') {
-      formData = {}
-    } else if (!formData.server || !formData.port || !formData.username || !formData.password) {
+    if (!formData.server || !formData.port || !formData.username || !formData.password) {
       return message.error('请完成邮件服务配置');
     }
     _doSubmit([{key: 'mail_service', value: formData}])
@@ -50,15 +47,7 @@ export default observer(function () {
       <div className={styles.title}>报警服务设置</div>
       <div style={{maxWidth: 340}}>
         <Form.Item label="邮件服务" labelCol={{span: 24}} style={{marginTop: 12}} extra="用于通过邮件方式发送报警信息">
-          <Radio.Group
-            value={mode}
-            style={{marginBottom: 8}}
-            buttonStyle="solid"
-            onChange={e => setMode(e.target.value)}>
-            <Radio.Button value="1">内置</Radio.Button>
-            <Radio.Button value="2">自定义</Radio.Button>
-          </Radio.Group>
-          <div style={{marginTop: 12, display: mode === '1' ? 'none' : 'block'}}>
+          <div style={{marginTop: 12}}>
             <Form form={form} initialValues={setting} labelCol={{span: 7}} wrapperCol={{span: 17}}>
               <Form.Item required name="server" label="邮件服务器">
                 <Input placeholder="例如：smtp.exmail.qq.com"/>
@@ -79,7 +68,7 @@ export default observer(function () {
           </div>
         </Form.Item>
         <Space style={{marginTop: 24}}>
-          {mode !== '1' && <Button type="danger" loading={loading} onClick={handleEmailTest}>测试邮件服务</Button>}
+          <Button type="danger" loading={loading} onClick={handleEmailTest}>测试邮件服务</Button>
           <Button type="primary" loading={store.loading} onClick={handleSubmit}>保存设置</Button>
         </Space>
       </div>
