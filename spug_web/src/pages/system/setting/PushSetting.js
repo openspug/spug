@@ -14,17 +14,18 @@ import store from './store';
 export default observer(function () {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
-  const [balance, setBalance] = useState({})
+  const [balance, setBalance] = useState({});
+  const [pushKey, setPushKey] = useState(store.settings.spug_push_key);
 
   useEffect(() => {
-    if (store.settings.spug_push_key) {
+    if (pushKey) {
       fetchBalance()
     }
   }, []);
 
   function fetchBalance() {
     setFetching(true)
-    http.get('/api/setting/balance/')
+    http.get('/api/setting/push/balance/')
       .then(res => setBalance(res))
       .finally(() => {
         setLoading(false)
@@ -33,19 +34,31 @@ export default observer(function () {
   }
 
   function handleBind() {
-    const spug_push_key = store.settings.spug_push_key
-    if (!spug_push_key) return message.error('请输入要绑定的推送助手用户ID')
+    if (!pushKey) return message.error('请输入要绑定的推送助手用户ID')
     setLoading(true);
-    http.post('/api/setting/', {data: [{key: 'spug_push_key', value: spug_push_key}]})
-      .then(() => {
-        message.success('保存成功');
+    http.post('/api/setting/push/bind/', {spug_push_key: pushKey})
+      .then(res => {
+        message.success('绑定成功');
         store.fetchSettings();
-        fetchBalance()
+        setBalance(res)
       })
-      .finally(() => store.loading = false)
+      .finally(() => setLoading(false))
   }
 
-  const isVip = true
+  function handleUnbind() {
+    setLoading(true);
+    http.post('/api/setting/push/bind/', {spug_push_key: ''})
+      .then(() => {
+        message.success('解绑成功');
+        store.fetchSettings();
+        setBalance({})
+        setPushKey('')
+      })
+      .finally(() => setLoading(false))
+  }
+
+  const isVip = balance.is_vip
+  const spugPushKey = store.settings.spug_push_key
   return (
     <React.Fragment>
       <div className={css.title}>推送服务设置</div>
@@ -54,61 +67,73 @@ export default observer(function () {
                    extra={<div>请登录 <Link href="https://push.spug.cc/login" title="推送助手"/>，至个人中心 /
                      个人设置查看用户ID，注意保密该ID请勿泄漏给第三方。</div>}>
 
-          <Input.Group compact>
-            <Input
-              value={store.settings.spug_push_key}
-              onChange={e => store.settings.spug_push_key = e.target.value}
-              style={{width: 'calc(100% - 100px)'}}
-              placeholder="请输入要绑定的推送助手用户ID"/>
-            <Button
-              type="primary"
-              style={{width: 80, marginLeft: 20}}
-              onClick={handleBind}
-              loading={loading}>确定</Button>
-          </Input.Group>
-          {/*<Input.Group compact>*/}
-          {/*  <Input bordered={false} style={{width: 'calc(100% - 100px)', paddingLeft: 0}} value="32uu73******64823d"/>*/}
-          {/*  <Button style={{width: 80, marginLeft: 20}}>解绑</Button>*/}
-          {/*</Input.Group>*/}
+          {spugPushKey ? (
+            <Input.Group compact>
+              <div className={css.keyText}
+                   style={{width: 'calc(100% - 100px)', lineHeight: '32px', fontWeight: 'bold'}}>{spugPushKey}</div>
+              <Button
+                ghost
+                type="danger"
+                style={{width: 80, marginLeft: 20}}
+                onClick={handleUnbind}
+                loading={loading}>解绑</Button>
+            </Input.Group>
+          ) : (
+            <Input.Group compact>
+              <Input
+                value={pushKey}
+                onChange={e => setPushKey(e.target.value)}
+                style={{width: 'calc(100% - 100px)'}}
+                placeholder="请输入要绑定的推送助手用户ID"/>
+              <Button
+                type="primary"
+                style={{width: 80, marginLeft: 20}}
+                onClick={handleBind}
+                loading={loading}>确定</Button>
+            </Input.Group>
+
+          )}
         </Form.Item>
       </div>
 
-      <Form.Item style={{marginTop: 24}}
-                 extra={<div> 如需充值请至 <Link href="https://push.spug.cc/buy/sms" title="推送助手"/>，具体计费规则及说明请查看推送助手官网。
-                 </div>}>
-        <div className={css.statistic}>
-          <Spin spinning={fetching}>
-            <div className={css.body}>
-              <div className={css.item}>
-                <div className={css.title}>短信余额</div>
-                <div className={css.value}>{balance.sms_balance}</div>
+      {spugPushKey ? (
+        <Form.Item style={{marginTop: 24}}
+                   extra={<div> 如需充值请至 <Link href="https://push.spug.cc/buy/sms" title="推送助手"/>，具体计费规则及说明请查看推送助手官网。
+                   </div>}>
+          <div className={css.statistic}>
+            <Spin spinning={fetching}>
+              <div className={css.body}>
+                <div className={css.item}>
+                  <div className={css.title}>短信余额</div>
+                  <div className={css.value}>{balance.sms_balance}</div>
+                </div>
+                <div className={css.item}>
+                  <div className={css.title}>语音余额</div>
+                  <div className={css.value}>{balance.voice_balance}</div>
+                </div>
+                <div className={css.item}>
+                  <div className={css.title}>邮件余额</div>
+                  <div className={css.value}>{balance.mail_balance}</div>
+                  {isVip ? (
+                    <div className={clsNames(css.tips, css.active)}>+ 会员免费20封 / 天</div>
+                  ) : (
+                    <div className={css.tips}>会员免费20封 / 天</div>
+                  )}
+                </div>
+                <div className={css.item}>
+                  <div className={css.title}>微信公众号余额</div>
+                  <div className={css.value}>{balance.wx_mp_balance}</div>
+                  {isVip ? (
+                    <div className={clsNames(css.tips, css.active)}>+ 会员免费100条 / 天</div>
+                  ) : (
+                    <div className={css.tips}>会员免费20封 / 天</div>
+                  )}
+                </div>
               </div>
-              <div className={css.item}>
-                <div className={css.title}>语音余额</div>
-                <div className={css.value}>{balance.voice_balance}</div>
-              </div>
-              <div className={css.item}>
-                <div className={css.title}>邮件余额</div>
-                <div className={css.value}>{balance.mail_balance}</div>
-                {isVip ? (
-                  <div className={clsNames(css.tips, css.active)}>+ 会员免费20封 / 天</div>
-                ) : (
-                  <div className={css.tips}>会员免费20封 / 天</div>
-                )}
-              </div>
-              <div className={css.item}>
-                <div className={css.title}>微信公众号余额</div>
-                <div className={css.value}>{balance.wx_mp_balance}</div>
-                {isVip ? (
-                  <div className={clsNames(css.tips, css.active)}>+ 会员免费100条 / 天</div>
-                ) : (
-                  <div className={css.tips}>会员免费20封 / 天</div>
-                )}
-              </div>
-            </div>
-          </Spin>
-        </div>
-      </Form.Item>
+            </Spin>
+          </div>
+        </Form.Item>
+      ) : null}
     </React.Fragment>
   )
 })
