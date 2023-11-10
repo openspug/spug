@@ -5,7 +5,7 @@
  */
 import React, {useEffect, useState} from 'react';
 import {observer} from 'mobx-react';
-import {Form, Input, Button, Spin, message} from 'antd';
+import {Form, Input, Button, Spin, Popconfirm, message} from 'antd';
 import {Link} from 'components';
 import css from './index.module.css';
 import {http, clsNames} from 'libs';
@@ -71,12 +71,9 @@ export default observer(function () {
             <Input.Group compact>
               <div className={css.keyText}
                    style={{width: 'calc(100% - 100px)', lineHeight: '32px', fontWeight: 'bold'}}>{spugPushKey}</div>
-              <Button
-                ghost
-                type="danger"
-                style={{width: 80, marginLeft: 20}}
-                onClick={handleUnbind}
-                loading={loading}>解绑</Button>
+              <Popconfirm title="确定要解除绑定？" onConfirm={handleUnbind}>
+                <Button ghost type="danger" style={{width: 80, marginLeft: 20}} loading={loading}>解绑</Button>
+              </Popconfirm>
             </Input.Group>
           ) : (
             <Input.Group compact>
