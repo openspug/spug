@@ -115,19 +115,10 @@ def handle_test(request):
     ).parse(request.body)
     if error is None:
         notify = Notification(None, '1', 'https://spug.cc', 'Spug官网（测试）', '这是一条测试告警信息', None)
-        if form.mode in ('1', '2', '4') and not notify.spug_key:
-            return json_response(error='未配置调用凭据（系统设置/基本设置），请配置后再尝试。')
-
-        if form.mode == '1':
-            notify.monitor_by_wx([form.value])
-        elif form.mode == '2':
-            return json_response(error='目前暂不支持短信告警，请关注后续更新。')
-        elif form.mode == '3':
+        if form.mode == '3':
             notify.monitor_by_dd([form.value])
         elif form.mode == '4':
             notify.monitor_by_email([form.value])
         elif form.mode == '5':
             notify.monitor_by_qy_wx([form.value])
-        else:
-            return json_response(error='不支持的报警方式')
     return json_response(error=error)
