@@ -6,7 +6,7 @@ from django.conf import settings
 from libs.mixins import AdminView, View
 from libs import JsonParser, Argument, human_datetime, json_response
 from libs.utils import get_request_real_ip, generate_random_str
-from libs.spug import send_login_wx_code
+from libs.push import send_login_code
 from apps.account.models import User, Role, History
 from apps.setting.utils import AppSetting
 from apps.account.utils import verify_password
@@ -255,9 +255,12 @@ def handle_user_info(handle_response, request, user, captcha):
         mfa = AppSetting.get_default('MFA', {'enable': False})
         if mfa['enable']:
             if not user.wx_token:
-                return handle_response(error='已启用登录双重认证，但您的账户未配置微信Token，请联系管理员')
+                return handle_response(error='已启用登录双重认证，但您的账户未配置推送标识，请联系管理员')
+            spug_push_key = AppSetting.get_default('spug_push_key')
+            if not spug_push_key:
+                return handle_response(error='已启用登录双重认证，但系统未配置推送服务，请联系管理员')
             code = generate_random_str(6)
-            send_login_wx_code(user.wx_token, code)
+            send_login_code(spug_push_key, user.wx_token, code)
             cache.set(key, code, 300)
             return json_response({'required_mfa': True})
 

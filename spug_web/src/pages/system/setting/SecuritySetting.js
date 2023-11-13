@@ -3,17 +3,14 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import React, { useState, useEffect } from 'react';
-import { observer } from 'mobx-react';
-import { Form, Switch, Input, Space, message, Button } from 'antd';
+import React, {useState, useEffect} from 'react';
+import {observer} from 'mobx-react';
+import {Form, Switch, Input, Space, Spin, message, Button} from 'antd';
 import styles from './index.module.css';
 import http from 'libs/http';
 import store from './store';
 
 export default observer(function () {
-  const [verify_ip, setVerifyIP] = useState(store.settings.verify_ip);
-  const [bind_ip, setBindIP] = useState(store.settings.bind_ip);
-  const [mfa, setMFA] = useState(store.settings.MFA || {});
   const [code, setCode] = useState();
   const [visible, setVisible] = useState(false);
   const [counter, setCounter] = useState(0);
@@ -29,25 +26,25 @@ export default observer(function () {
   }, [counter])
 
   function handleChangeVerifyIP(v) {
-    setVerifyIP(v);
+    store.isFetching = true;
     http.post('/api/setting/', {data: [{key: 'verify_ip', value: v}]})
       .then(() => {
         message.success('设置成功');
         store.fetchSettings()
-      })
+      }, () => store.isFetching = false)
   }
 
   function handleChangeBindIP(v) {
-    setBindIP(v);
+    store.isFetching = true;
     http.post('/api/setting/', {data: [{key: 'bind_ip', value: v}]})
       .then(() => {
         message.success('设置成功');
         store.fetchSettings()
-      })
+      }, () => store.isFetching = false)
   }
 
   function handleChangeMFA(v) {
-    if (v && !store.settings.spug_key) return message.error('开启MFA认证需要先在基本设置中配置调用凭据');
+    if (v && !store.settings.spug_push_key) return message.error('开启MFA认证需要先在推送服务设置中绑定推送助手账户');
     v ? setVisible(true) : handleMFAModify(false)
   }
 
@@ -62,7 +59,6 @@ export default observer(function () {
     setLoading2(true)
     http.post('/api/setting/mfa/', {enable: v, code})
       .then(() => {
-        setMFA({enable: v});
         setVisible(false);
         message.success('设置成功');
         store.fetchSettings()
@@ -70,8 +66,9 @@ export default observer(function () {
       .finally(() => setLoading2(false))
   }
 
+  const {verify_ip, bind_ip, MFA} = store.settings;
   return (
-    <React.Fragment>
+    <Spin spinning={store.isFetching}>
       <div className={styles.title}>安全设置</div>
       <Form layout="vertical" style={{maxWidth: 500}}>
         <Form.Item
@@ -98,8 +95,9 @@ export default observer(function () {
           label="登录MFA（两步）认证"
           style={{marginTop: 24}}
           extra={visible ? '输入验证码，通过验证后开启。' :
-            <span>建议开启，登录时额外使用验证码进行身份验证。开启前至少要确保管理员账户配置了微信Token（账户管理/编辑），开启后未配置微信Token的账户将无法登录，<a
-              target="_blank" rel="noopener noreferrer" href="https://spug.cc/docs/wx-token/">什么是微信Token？</a></span>}>
+            <span>建议开启，登录时额外使用验证码进行身份验证。开启前至少要确保管理员账户配置了推送标识（账户管理/编辑），开启后未配置的账户将无法登录，<a
+              target="_blank" rel="noopener noreferrer"
+              href="https://spug.cc/docs/wx-token/">什么是微信Token？</a></span>}>
           {visible ? (
             <div style={{display: 'flex', width: 490}}>
               <Form.Item noStyle extra="验证通过后开启MFA（两步验证）。">
@@ -120,10 +118,10 @@ export default observer(function () {
               checkedChildren="开启"
               unCheckedChildren="关闭"
               onChange={handleChangeMFA}
-              checked={mfa.enable}/>
+              checked={MFA?.enable}/>
           )}
         </Form.Item>
       </Form>
-    </React.Fragment>
+    </Spin>
   )
 })

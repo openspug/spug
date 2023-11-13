@@ -7,33 +7,8 @@ from apps.notify.models import Notify
 from libs.mail import Mail
 from libs.utils import human_datetime
 from libs.push import push_server
-from functools import partial
 import requests
 import json
-
-spug_server = 'https://api.spug.cc'
-notify_source = 'monitor'
-make_no_spug_key_notify = partial(
-    Notify.make_monitor_notify,
-    '发送报警信息失败',
-    '未配置报警服务调用凭据，请在系统管理/系统设置/基本设置/调用凭据中配置。'
-)
-make_no_push_key_notify = partial(
-    Notify.make_monitor_notify,
-    '发送报警信息失败',
-    '未绑定推送服务，请在系统管理/系统设置/推送服务设置中绑定推送助手账户。'
-)
-
-
-def send_login_wx_code(wx_token, code):
-    url = f'{spug_server}/apis/login/wx/'
-    spug_key = AppSetting.get_default('spug_key')
-    res = requests.post(url, json={'token': spug_key, 'user': wx_token, 'code': code}, timeout=30)
-    if res.status_code != 200:
-        raise Exception(f'status code: {res.status_code}')
-    res = res.json()
-    if res.get('error'):
-        raise Exception(res['error'])
 
 
 class Notification:
@@ -44,7 +19,6 @@ class Notification:
         self.target = target
         self.message = message
         self.duration = duration
-        self.spug_key = AppSetting.get_default('spug_key')
         self.spug_push_key = AppSetting.get_default('spug_push_key')
 
     @staticmethod
@@ -72,20 +46,6 @@ class Notification:
             raise NotImplementedError
         Notify.make_system_notify('通知发送失败', f'返回数据：{res}')
 
-    def monitor_by_wx(self, users):
-        if not self.spug_key:
-            make_no_spug_key_notify()
-            return
-        data = {
-            'token': self.spug_key,
-            'event': self.event,
-            'subject': f'{self.title} >> {self.target}',
-            'desc': self.message,
-            'remark': f'故障持续{self.duration}' if self.event == '2' else None,
-            'users': list(users)
-        }
-        self.handle_request(f'{spug_server}/apis/notify/wx/', data, 'spug')
-
     def monitor_by_email(self, users):
         mail_service = AppSetting.get_default('mail_service', {})
         body = [
@@ -101,17 +61,11 @@ class Notification:
             subject = f'{event_map[self.event]}-{self.title}'
             mail = Mail(**mail_service)
             mail.send_text_mail(users, subject, '\r\n'.join(body) + '\r\n\r\n自动发送，请勿回复。')
-        elif self.spug_key:
-            data = {
-                'token': self.spug_key,
-                'event': self.event,
-                'subject': self.title,
-                'body': '\r\n'.join(body),
-                'users': list(users)
-            }
-            self.handle_request(f'{spug_server}/apis/notify/mail/', data, 'spug')
         else:
-            make_no_spug_key_notify()
+            Notify.make_monitor_notify(
+                '发送报警信息失败',
+                '未配置报警服务，请在系统管理/系统设置/报警服务设置中配置邮件服务。'
+            )
 
     def monitor_by_dd(self, users):
         texts = [
@@ -158,7 +112,10 @@ class Notification:
 
     def monitor_by_spug_push(self, targets):
         if not self.spug_push_key:
-            make_no_push_key_notify()
+            Notify.make_monitor_notify(
+                '发送报警信息失败',
+                '未绑定推送服务，请在系统管理/系统设置/推送服务设置中绑定推送助手账户。'
+            )
             return
         data = {
             'source': 'monitor',
@@ -188,15 +145,6 @@ class Notification:
             if mode == '1':
                 wx_mp_ids = set(x for x in push_ids if x.startswith('wx_mp_'))
                 targets.update(wx_mp_ids)
-                users = set(x.wx_token for x in Contact.objects.filter(id__in=u_ids, wx_token__isnull=False))
-                if not users:
-                    if not wx_mp_ids:
-                        Notify.make_monitor_notify(
-                            '发送报警信息失败',
-                            '未找到可用的通知对象，请确保设置了相关报警联系人的微信Token。'
-                        )
-                    continue
-                self.monitor_by_wx(users)
             elif mode == '2':
                 sms_ids = set(x for x in push_ids if x.startswith('sms_'))
                 targets.update(sms_ids)
