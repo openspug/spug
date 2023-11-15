@@ -37,6 +37,21 @@
   .body {
     display: flex;
     flex-direction: row;
+    position: relative;
+
+    .badge {
+      border-radius: 4px;
+      line-height: 20px;
+      height: 20px;
+      font-size: 12px;
+      padding: 0 8px;
+      background: #2563fc;
+      font-weight: bold;
+      color: #ffffff;
+      cursor: pointer;
+      position: absolute;
+      right: 0;
+    }
 
     .item {
       position: relative;
@@ -83,13 +98,11 @@
         line-height: 20px;
         text-align: center;
         padding: 0 8px;
-        cursor: pointer;
       }
 
       .active {
-        cursor: initial;
-        background: #f7af40;
-        color: #ffffff;
+        color: #2563fc;
+        background: #ffffff;
       }
     }
 

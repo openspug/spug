@@ -95,9 +95,9 @@ export default observer(function () {
           label="登录MFA（两步）认证"
           style={{marginTop: 24}}
           extra={visible ? '输入验证码，通过验证后开启。' :
-            <span>建议开启，登录时额外使用验证码进行身份验证。开启前至少要确保管理员账户配置了推送标识（账户管理/编辑），开启后未配置的账户将无法登录，<a
+            <span>建议开启，登录时额外使用验证码进行身份验证。开启前至少要确保管理员账户配置了MFA标识（账户管理/编辑），开启后未配置的账户将无法登录。<a
               target="_blank" rel="noopener noreferrer"
-              href="https://spug.cc/docs/wx-token/">什么是微信Token？</a></span>}>
+              href="https://push.spug.cc/guide/spug">配置手册</a></span>}>
           {visible ? (
             <div style={{display: 'flex', width: 490}}>
               <Form.Item noStyle extra="验证通过后开启MFA（两步验证）。">

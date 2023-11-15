@@ -64,7 +64,7 @@ class ContactView(View):
         if error is None:
             response = []
             if form.with_push or form.only_push:
-                push_key = AppSetting.get('spug_push_key')
+                push_key = AppSetting.get_default('spug_push_key')
                 if push_key:
                     response = get_contacts(push_key)
                 if form.only_push:

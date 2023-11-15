@@ -60,11 +60,11 @@ export default observer(function () {
   const isVip = balance.is_vip
   const spugPushKey = store.settings.spug_push_key
   return (
-    <React.Fragment>
+    <Spin spinning={fetching}>
       <div className={css.title}>推送服务设置</div>
       <div style={{maxWidth: 340}}>
         <Form.Item label="推送助手账户绑定" labelCol={{span: 24}} style={{marginTop: 12}}
-                   extra={<div>请登录 <Link href="https://push.spug.cc/login" title="推送助手"/>，至个人中心 /
+                   extra={<div>请登录 <Link href="https://push.spug.cc/user/info" title="推送助手"/>，至个人中心 /
                      个人设置查看用户ID，注意保密该ID请勿泄漏给第三方。</div>}>
 
           {spugPushKey ? (
@@ -93,44 +93,45 @@ export default observer(function () {
         </Form.Item>
       </div>
 
-      {spugPushKey ? (
+      {balance.vip_desc ? (
         <Form.Item style={{marginTop: 24}}
                    extra={<div> 如需充值请至 <Link href="https://push.spug.cc/buy/sms" title="推送助手"/>，具体计费规则及说明请查看推送助手官网。
                    </div>}>
           <div className={css.statistic}>
-            <Spin spinning={fetching}>
-              <div className={css.body}>
-                <div className={css.item}>
-                  <div className={css.title}>短信余额</div>
-                  <div className={css.value}>{balance.sms_balance}</div>
-                </div>
-                <div className={css.item}>
-                  <div className={css.title}>语音余额</div>
-                  <div className={css.value}>{balance.voice_balance}</div>
-                </div>
-                <div className={css.item}>
-                  <div className={css.title}>邮件余额</div>
-                  <div className={css.value}>{balance.mail_balance}</div>
-                  {isVip ? (
-                    <div className={clsNames(css.tips, css.active)}>+ 会员免费20封 / 天</div>
-                  ) : (
-                    <div className={css.tips}>会员免费20封 / 天</div>
-                  )}
-                </div>
-                <div className={css.item}>
-                  <div className={css.title}>微信公众号余额</div>
-                  <div className={css.value}>{balance.wx_mp_balance}</div>
-                  {isVip ? (
-                    <div className={clsNames(css.tips, css.active)}>+ 会员免费100条 / 天</div>
-                  ) : (
-                    <div className={css.tips}>会员免费20封 / 天</div>
-                  )}
-                </div>
+            <div className={css.body}>
+              <div className={css.item}>
+                <div className={css.title}>短信余额</div>
+                <div className={css.value}>{balance.sms_balance}</div>
               </div>
-            </Spin>
+              <div className={css.item}>
+                <div className={css.title}>语音余额</div>
+                <div className={css.value}>{balance.voice_balance}</div>
+              </div>
+              <div className={css.item}>
+                <div className={css.title}>邮件余额</div>
+                <div className={css.value}>{balance.mail_balance}</div>
+                {isVip ? (
+                  <div className={clsNames(css.tips, css.active)}>+ 会员赠送{balance.mail_free}封 / 天</div>
+                ) : (
+                  <Link href="https://push.spug.cc/buy/vip" title={`订阅会员每天赠送${balance.mail_free}封`}
+                        className={css.tips}/>
+                )}
+              </div>
+              <div className={css.item}>
+                <div className={css.title}>微信公众号余额</div>
+                <div className={css.value}>{balance.wx_mp_balance}</div>
+                {isVip ? (
+                  <div className={clsNames(css.tips, css.active)}>+ 会员赠送{balance.wx_mp_free}条 / 天</div>
+                ) : (
+                  <Link href="https://push.spug.cc/buy/vip" title={`订阅会员每天赠送${balance.wx_mp_free}条`}
+                        className={css.tips}/>
+                )}
+              </div>
+              <Link href="https://push.spug.cc/buy/vip" className={css.badge} title={balance.vip_desc}/>
+            </div>
           </div>
         </Form.Item>
       ) : null}
-    </React.Fragment>
+    </Spin>
   )
 })

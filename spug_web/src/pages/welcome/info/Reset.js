@@ -42,10 +42,10 @@ export default function Reset(props) {
           <Input.Password value={old_password} placeholder="请输入" onChange={e => setOldPassword(e.target.value)}/>
         </Form.Item>
         <Form.Item required label="新密码" extra="至少8位包含数字、小写和大写字母。">
-          <Input.Password value={new_password} placeholder="请输入" onChange={e => setNewPassword(e.target.value)}/>
+          <Input.Password value={new_password} placeholder="请输入新密码" onChange={e => setNewPassword(e.target.value)}/>
         </Form.Item>
         <Form.Item required label="再次确认">
-          <Input.Password value={new2_password} placeholder="请输入" onChange={e => setNew2Password(e.target.value)}/>
+          <Input.Password value={new2_password} placeholder="请再次输入新密码" onChange={e => setNew2Password(e.target.value)}/>
         </Form.Item>
         <Form.Item>
           <Button type="primary" loading={loading} onClick={handleSubmit}>保存设置</Button>
