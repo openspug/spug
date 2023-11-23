@@ -21,6 +21,7 @@ export default observer(function () {
     if (pushKey) {
       fetchBalance()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function fetchBalance() {
@@ -46,6 +47,10 @@ export default observer(function () {
   }
 
   function handleUnbind() {
+    if (store.settings.MFA?.enable) {
+      message.error('请先关闭登录MFA认证，否则将造成无法登录');
+      return
+    }
     setLoading(true);
     http.post('/api/setting/push/bind/', {spug_push_key: ''})
       .then(() => {
@@ -64,8 +69,8 @@ export default observer(function () {
       <div className={css.title}>推送服务设置</div>
       <div style={{maxWidth: 340}}>
         <Form.Item label="推送助手账户绑定" labelCol={{span: 24}} style={{marginTop: 12}}
-                   extra={<div>请登录 <Link href="https://push.spug.cc/user/info" title="推送助手"/>，至个人中心 /
-                     个人设置查看用户ID，注意保密该ID请勿泄漏给第三方。</div>}>
+                   extra={<div>请登录推送助手，至个人中心 / 个人设置查看用户ID，注意保密该ID请勿泄漏给第三方。<Link
+                     href="https://push.spug.cc/guide/spug" title="配置手册"/></div>}>
 
           {spugPushKey ? (
             <Input.Group compact>
