@@ -14,14 +14,14 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
-import os
+from pathlib import Path
 import re
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
+# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'vk0do47)egwzz!uk49%(y3s(fpx4+ha@ugt-hcv&%&d@hwr&p7'
@@ -43,9 +43,7 @@ INSTALLED_APPS = [
     'apps.alarm',
     'apps.config',
     'apps.app',
-    'apps.deploy',
     'apps.notify',
-    'apps.repository',
     'apps.home',
     'apps.credential',
     'apps.pipeline',
@@ -57,31 +55,30 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'libs.middleware.AuthenticationMiddleware',
     'libs.middleware.HandleExceptionMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'spug.urls'
 
 WSGI_APPLICATION = 'spug.wsgi.application'
 ASGI_APPLICATION = 'spug.routing.application'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Database
-# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
+# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ATOMIC_REQUESTS': True,
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
 CACHES = {
     "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/1",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
+        "KEY_PREFIX": "spug",
     }
 }
 
@@ -90,19 +87,12 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [("127.0.0.1", 6379)],
+            "prefix": "spug:channel",
             "capacity": 1000,
             "expiry": 120,
         },
     },
 }
-
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': False,
-    },
-]
 
 TOKEN_TTL = 8 * 3600
 SCHEDULE_KEY = 'spug:schedule'
@@ -113,10 +103,8 @@ EXEC_WORKER_KEY = 'spug:exec:worker'
 REQUEST_KEY = 'spug:request'
 BUILD_KEY = 'spug:build'
 PIPELINE_KEY = 'spug:pipeline'
-REPOS_DIR = os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'repos')
-BUILD_DIR = os.path.join(REPOS_DIR, 'build')
-TRANSFER_DIR = os.path.join(BASE_DIR, 'storage', 'transfer')
-DEPLOY_DIR = os.path.join(BASE_DIR, 'storage', 'deploy')
+TRANSFER_DIR = BASE_DIR / 'storage' / 'transfer'
+DEPLOY_DIR = BASE_DIR / 'storage' / 'deploy'
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
@@ -137,7 +125,7 @@ AUTHENTICATION_EXCLUDES = (
     re.compile('/apis/.*'),
 )
 
-SPUG_VERSION = 'v3.2.4'
+SPUG_VERSION = 'v4.0.0'
 
 # override default config
 try:

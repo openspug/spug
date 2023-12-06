@@ -37,7 +37,7 @@ class Command(BaseCommand):
             if not all((options['u'], options['p'], options['n'])):
                 self.echo_error('缺少参数')
                 self.print_help()
-            elif User.objects.filter(username=options['u'], deleted_by_id__isnull=True).exists():
+            elif User.objects.filter(username=options['u'], is_deleted=False).exists():
                 self.echo_error(f'已存在登录名为【{options["u"]}】的用户')
             else:
                 User.objects.create(

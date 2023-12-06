@@ -10,7 +10,7 @@ from django_redis import get_redis_connection
 from django.db import connections
 from django.db.utils import DatabaseError
 from apps.schedule.models import Task, History
-from apps.schedule.builtin import auto_run_by_day, auto_run_by_minute
+from apps.schedule.builtin import auto_run_by_day
 from django.conf import settings
 from libs import AttrDict, human_datetime
 import logging
@@ -75,7 +75,6 @@ class Scheduler:
 
     def _init_builtin_jobs(self):
         self.scheduler.add_job(auto_run_by_day, 'cron', hour=1, minute=20)
-        self.scheduler.add_job(auto_run_by_minute, 'interval', minutes=1)
 
     def _init(self):
         self.scheduler.start()

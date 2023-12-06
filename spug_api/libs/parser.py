@@ -1,9 +1,8 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
+from libs.utils import AttrDict
 import json
-
-from .utils import AttrDict
 
 
 # 自定义的解析异常
@@ -13,14 +12,8 @@ class ParseError(BaseException):
 
 
 # 需要校验的参数对象
-class Argument(object):
-    """
-    :param name: name of option
-    :param default: default value if the argument if absent
-    :param bool required: is required
-    """
-
-    def __init__(self, name, default=None, handler=None, required=True, type=str, filter=None, help=None):
+class Argument:
+    def __init__(self, name, default=None, handler=None, required=True, type=None, filter=None, help=None):
         self.name = name
         self.default = default
         self.type = type
@@ -69,6 +62,8 @@ class Argument(object):
                     self.help or 'Value Error: %s filter check failed' % self.name)
         if self.handler:
             value = self.handler(value)
+        if isinstance(value, str):
+            value = value.strip()
         return value
 
 
