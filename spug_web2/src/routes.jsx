@@ -11,7 +11,6 @@ let routes = [
     path: '/',
     element: <Layout/>,
     errorElement: <ErrorPage/>,
-    title: t('首页'),
     children: [
       {
         path: 'home',
@@ -71,18 +70,6 @@ function routes2menu(routes, parentPath = '') {
   }
   return menu
 }
-
-function handle(routes) {
-  for (const route of routes) {
-    if (route.children) {
-      route.children = handle(route.children)
-    }
-    route.handle = {crumb: route.title}
-  }
-  return routes
-}
-
-routes = handle(routes)
 
 export const menus = routes2menu(routes[0].children)
 export default routes

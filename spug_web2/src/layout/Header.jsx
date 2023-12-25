@@ -1,10 +1,22 @@
-import {Layout, Flex, Dropdown, theme} from 'antd'
+import {useContext} from 'react'
+import {Layout, Flex, Dropdown} from 'antd'
 import {AiOutlineTranslation} from 'react-icons/ai'
-import css from './header.module.scss'
+import {IoSunny, IoMoon} from 'react-icons/io5'
+import {SContext} from '@/libs'
+import css from './index.module.scss'
 import i18n from '@/i18n.js'
+import logo from "@/assets/spug-default.png";
 
 function Header() {
-  const {token: {colorBgContainer}} = theme.useToken()
+  const {S: {theme}, updateS} = useContext(SContext)
+
+  function handleThemeChange() {
+    const newTheme = theme === 'light' ? 'dark' : 'light'
+    localStorage.setItem('theme', newTheme)
+    updateS(draft => {
+      draft.theme = newTheme
+    })
+  }
 
   function handleLangChange({key}) {
     localStorage.setItem('lang', key)
@@ -19,9 +31,9 @@ function Header() {
     key: 'en',
   }]
 
-  console.log('lang', i18n.language)
   return (
-    <Layout.Header className={css.header} style={{background: colorBgContainer}}>
+    <Layout.Header theme="light" className={css.header}>
+      <img src={logo} alt="logo" className={css.logo}/>
       <Flex justify="flex-end" align="center" gap="small" style={{height: 48}}>
         <div className={css.item}>admin</div>
         <Dropdown menu={{items: locales, selectable: true, onClick: handleLangChange, selectedKeys: [i18n.language]}}>
@@ -29,6 +41,9 @@ function Header() {
             <AiOutlineTranslation size={18}/>
           </div>
         </Dropdown>
+        <div className={css.item} onClick={handleThemeChange}>
+          {theme === 'light' ? <IoMoon size={16}/> : <IoSunny size={18}/>}
+        </div>
       </Flex>
     </Layout.Header>
   )

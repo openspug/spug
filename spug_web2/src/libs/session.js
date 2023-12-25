@@ -3,6 +3,8 @@ import {isSubArray} from "@/libs/utils.js";
 class Session {
   constructor() {
     this._session = {};
+    this.lang = localStorage.getItem('lang') || 'zh';
+    this.theme = localStorage.getItem('theme') || 'light';
     const tmp = localStorage.getItem('session');
     if (tmp) {
       try {
