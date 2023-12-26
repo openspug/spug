@@ -240,9 +240,9 @@ def fetch_host_extend(ssh):
             else:
                 response['memory'] = round(int(size) / 1024, 0)
     if 'memory' not in response:
-        code, out = ssh.exec_command_raw("free -m | awk 'NR==2{print $2}'")
+        code, out = ssh.exec_command_raw("cat /proc/meminfo | grep 'MemTotal' | awk '{print $2}'")
         if code == 0:
-            response['memory'] = math.ceil(int(out) / 1024)
+            response['memory'] = math.ceil(int(out) / 1024 / 1024)
 
     response['public_ip_address'] = list(public_ip_address)
     response['private_ip_address'] = list(private_ip_address)
