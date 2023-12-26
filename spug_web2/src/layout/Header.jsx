@@ -1,7 +1,7 @@
-import {useContext} from 'react'
-import {Layout, Flex, Dropdown} from 'antd'
+import {useContext, useEffect} from 'react'
+import {Dropdown, Flex, Layout, theme as antdTheme} from 'antd'
 import {AiOutlineTranslation} from 'react-icons/ai'
-import {IoSunny, IoMoon} from 'react-icons/io5'
+import {IoMoon, IoSunny} from 'react-icons/io5'
 import {SContext} from '@/libs'
 import css from './index.module.scss'
 import i18n from '@/i18n.js'
@@ -9,6 +9,12 @@ import logo from "@/assets/spug-default.png";
 
 function Header() {
   const {S: {theme}, updateS} = useContext(SContext)
+  const {token} = antdTheme.useToken()
+
+  useEffect(() => {
+    document.body.style.backgroundColor = token.colorBgLayout
+  }, [theme])
+
 
   function handleThemeChange() {
     const newTheme = theme === 'light' ? 'dark' : 'light'
