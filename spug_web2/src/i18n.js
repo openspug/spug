@@ -1,9 +1,9 @@
 import i18n from 'i18next'
 import {initReactI18next} from 'react-i18next'
-import {session} from '@/libs'
+import {app} from '@/libs'
 
 i18n.use(initReactI18next).init({
-  lng: session.lang,
+  lng: app.lang,
   resources: {
     en: {
       translation: {
@@ -16,6 +16,8 @@ i18n.use(initReactI18next).init({
         '重置': 'Reset',
         '展示字段': 'Columns Display',
         '年龄': 'Age',
+        // buttons
+        '新建': 'Add',
         'page': 'Total {{total}} items',
       }
     },

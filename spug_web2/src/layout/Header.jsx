@@ -1,7 +1,6 @@
 import {useContext, useEffect} from 'react'
 import {Dropdown, Flex, Layout, theme as antdTheme} from 'antd'
-import {AiOutlineTranslation} from 'react-icons/ai'
-import {IoMoon, IoSunny} from 'react-icons/io5'
+import {IoMoon, IoSunny, IoLanguage} from 'react-icons/io5'
 import {SContext} from '@/libs'
 import css from './index.module.scss'
 import i18n from '@/i18n.js'
@@ -44,7 +43,7 @@ function Header() {
         <div className={css.item}>admin</div>
         <Dropdown menu={{items: locales, selectable: true, onClick: handleLangChange, selectedKeys: [i18n.language]}}>
           <div className={css.item}>
-            <AiOutlineTranslation size={18}/>
+            <IoLanguage size={16}/>
           </div>
         </Dropdown>
         <div className={css.item} onClick={handleThemeChange}>

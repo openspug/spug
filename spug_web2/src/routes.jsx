@@ -1,4 +1,4 @@
-import {AiOutlineDesktop, AiOutlineCloudServer, AiOutlineCluster} from 'react-icons/ai'
+import {FaDesktop, FaServer, FaSitemap} from 'react-icons/fa6'
 import Layout from './layout/index.jsx'
 import ErrorPage from './error-page.jsx'
 import LoginIndex from './pages/login/index.jsx'
@@ -16,18 +16,18 @@ let routes = [
         path: 'home',
         element: <HomeIndex/>,
         title: t('工作台'),
-        icon: <AiOutlineDesktop/>,
+        icon: <FaDesktop/>,
       },
       {
         path: 'host',
         element: <HostIndex/>,
         title: t('主机管理'),
-        icon: <AiOutlineCloudServer/>
+        icon: <FaServer/>
       },
       {
         path: 'exec',
         title: t('批量执行'),
-        icon: <AiOutlineCluster/>,
+        icon: <FaSitemap/>,
         children: [
           {
             path: 'task',

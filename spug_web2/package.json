@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ant-design/icons": "^5.2.6",
     "antd": "^5.12.4",
     "dayjs": "^1.11.10",
     "i18next": "^23.7.7",

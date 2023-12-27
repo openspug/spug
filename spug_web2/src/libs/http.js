@@ -1,6 +1,6 @@
 import useSWR from 'swr'
 import {message} from 'antd'
-import session from '@/libs/session'
+import app from '@/libs/app.js'
 import {redirect} from 'react-router-dom'
 
 function fetcher(resource, init) {
@@ -33,7 +33,7 @@ function SWRGet(url, params) {
 }
 
 function request(method, url, params) {
-  const init = {method, headers: {'X-Token': session.access_token}}
+  const init = {method, headers: {'X-Token': app.accessToken}}
   if (['GET', 'DELETE'].includes(method)) {
     if (params) url = `${url}?${new URLSearchParams(params).toString()}`
     return fetcher(url, init)

@@ -1,0 +1,15 @@
+.stable {
+  :global(.ant-pagination) {
+    margin: 16px 0 0 !important;
+  }
+}
+
+.toolbar {
+  margin-bottom: 12px;
+
+  .icon {
+    font-size: 18px;
+    cursor: pointer;
+  }
+}
+

@@ -43,3 +43,15 @@ export function includes(s, keys) {
     return isInclude(s, keys)
   }
 }
+
+export function loadJSONStorage(key, defaultValue = null) {
+  const tmp = localStorage.getItem(key)
+  if (tmp) {
+    try {
+      return JSON.parse(tmp)
+    } catch (e) {
+      localStorage.removeItem(key)
+    }
+  }
+  return defaultValue
+}
