@@ -1,4 +1,4 @@
-import {isSubArray, loadJSONStorage} from "@/libs/utils.js";
+import { isSubArray, loadJSONStorage } from "@/libs/utils.js";
 
 class App {
   constructor() {
@@ -17,7 +17,7 @@ class App {
   }
 
   hasPermission(code) {
-    const {isSuper, permissions} = this.session;
+    const { isSuper, permissions } = this.session;
     if (!code || isSuper) return true;
     for (let item of code.split('|')) {
       if (isSubArray(permissions, item.split('&'))) {
@@ -38,6 +38,7 @@ class App {
 
   updateStable(key, data) {
     this.stable[key] = data;
+    if (data === null) delete this.stable[key];
     localStorage.setItem('stable', JSON.stringify(this.stable));
   }
 }

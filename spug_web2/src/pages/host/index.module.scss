@@ -1,0 +1,14 @@
+.group {
+  flex: 1;
+  min-width: 200px;
+  max-width: 300px;
+  margin-right: -1px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.table {
+  flex: 3;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}

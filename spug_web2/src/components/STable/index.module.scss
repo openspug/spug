@@ -4,8 +4,18 @@
   }
 }
 
+.search {
+  height: 28px;
+  line-height: 28px;
+}
+
 .toolbar {
   margin-bottom: 12px;
+
+  .title {
+    font-size: 16px;
+    font-weight: bold;
+  }
 
   .icon {
     font-size: 18px;
@@ -13,3 +23,16 @@
   }
 }
 
+.filterItems {
+  min-width: 150px;
+
+  :global(.ant-checkbox-group) {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 16px;
+  }
+
+  .action {
+    padding: 8px 16px 8px 8px;
+  }
+}
