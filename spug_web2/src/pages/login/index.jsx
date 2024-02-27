@@ -8,8 +8,8 @@ import {useNavigate} from 'react-router-dom'
 import {Form, Input, Button, Tabs, Modal, message} from 'antd';
 import {AiOutlineUser, AiOutlineLock, AiOutlineCopyright, AiOutlineGithub, AiOutlineMail} from 'react-icons/ai'
 import styles from './login.module.css';
-import {http, session} from '@/libs';
-import logo from '@/assets/logo-spug-txt.png';
+import {http, app} from '@/libs';
+import logo from '@/assets/spug-default.png';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -59,7 +59,7 @@ export default function Login() {
 
   function doLogin(data) {
     localStorage.setItem('login_type', loginType);
-    session.update(data)
+    app.updateSession(data)
     navigate('/home', {replace: true})
   }
 

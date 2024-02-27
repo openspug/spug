@@ -1,7 +1,7 @@
 import useSWR from 'swr'
-import {message} from 'antd'
+import { message } from 'antd'
 import app from '@/libs/app.js'
-import {redirect} from 'react-router-dom'
+import { redirect } from 'react-router-dom'
 
 function fetcher(resource, init) {
   return fetch(resource, init)
@@ -33,7 +33,7 @@ function SWRGet(url, params) {
 }
 
 function request(method, url, params) {
-  const init = {method, headers: {'X-Token': app.accessToken}}
+  const init = { method, headers: { 'X-Token': app.access_token } }
   if (['GET', 'DELETE'].includes(method)) {
     if (params) url = `${url}?${new URLSearchParams(params).toString()}`
     return fetcher(url, init)

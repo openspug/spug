@@ -55,3 +55,14 @@ export function loadJSONStorage(key, defaultValue = null) {
   }
   return defaultValue
 }
+
+// 递归查找树节点
+export function findNodeByKey(array, key) {
+  for (let item of array) {
+    if (item.key === key) return item
+    if (item.children) {
+      let tmp = findNodeByKey(item.children, key)
+      if (tmp) return tmp
+    }
+  }
+}

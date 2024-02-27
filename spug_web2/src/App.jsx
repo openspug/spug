@@ -35,6 +35,9 @@ function App() {
               headerHeight: 48,
               footerPadding: 16
             },
+            Tree: {
+              titleHeight: 30
+            }
           },
         }}>
         <IconContext.Provider value={{ className: 'anticon' }}>

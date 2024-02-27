@@ -5,6 +5,26 @@
   margin-right: -1px;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
+
+  .treeTitle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .title {
+      flex: 1;
+      margin-left: 6px;
+    }
+
+    .more {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: -4px;
+    }
+  }
 }
 
 .table {
