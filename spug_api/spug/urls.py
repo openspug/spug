@@ -28,8 +28,6 @@ urlpatterns = [
     path('setting/', include('apps.setting.urls')),
     path('config/', include('apps.config.urls')),
     path('app/', include('apps.app.urls')),
-    path('deploy/', include('apps.deploy.urls')),
-    path('repository/', include('apps.repository.urls')),
     path('home/', include('apps.home.urls')),
     path('notify/', include('apps.notify.urls')),
     path('file/', include('apps.file.urls')),

@@ -3,9 +3,6 @@
 # Released under the AGPL-3.0 License.
 from django.http.response import HttpResponseBadRequest, HttpResponseForbidden, HttpResponse
 from apps.setting.utils import AppSetting
-from apps.deploy.models import Deploy, DeployRequest
-from apps.repository.models import Repository
-from apps.deploy.utils import dispatch as deploy_dispatch
 from libs.utils import human_datetime
 from threading import Thread
 import hashlib

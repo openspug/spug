@@ -1,0 +1,53 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  padding: 0 8px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--ant-color-border);
+  background: var(--ant-color-bg-container);
+
+  .logo {
+    margin-left: 16px;
+    height: 30px;
+  }
+
+  .item {
+    height: 47px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.1s ease-in-out;
+
+    &:hover {
+      background: var(--ant-color-fill-secondary);
+    }
+  }
+}
+
+.sider {
+  position: fixed !important;
+  top: 48px;
+  left: 0;
+  bottom: 0;
+
+  :global(.ant-menu) {
+    height: 100%;
+  }
+
+  :global(.ant-layout-sider-trigger) {
+    border-inline-end: 1px solid var(--ant-color-split);
+  }
+}
+
+.menu {
+  border-inline-end: none;
+}

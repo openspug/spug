@@ -3,7 +3,7 @@
 # Released under the AGPL-3.0 License.
 from django.db import models
 from django.core.cache import cache
-from libs import ModelMixin, human_datetime
+from libs import ModelMixin
 from django.contrib.auth.hashers import make_password, check_password
 import json
 
@@ -15,24 +15,21 @@ class User(models.Model, ModelMixin):
     type = models.CharField(max_length=20, default='default')
     is_supper = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False)
     access_token = models.CharField(max_length=32)
     token_expired = models.IntegerField(null=True)
     last_login = models.CharField(max_length=20)
     last_ip = models.CharField(max_length=50)
     wx_token = models.CharField(max_length=50, null=True)
     roles = models.ManyToManyField('Role', db_table='user_role_rel')
-
-    created_at = models.CharField(max_length=20, default=human_datetime)
-    created_by = models.ForeignKey('User', models.PROTECT, related_name='+', null=True)
-    deleted_at = models.CharField(max_length=20, null=True)
-    deleted_by = models.ForeignKey('User', models.PROTECT, related_name='+', null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     @staticmethod
-    def make_password(plain_password: str) -> str:
-        return make_password(plain_password, hasher='pbkdf2_sha256')
+    def make_password(password):
+        return make_password(password, hasher='pbkdf2_sha256')
 
-    def verify_password(self, plain_password: str) -> bool:
-        return check_password(plain_password, self.password_hash)
+    def verify_password(self, password):
+        return check_password(password, self.password_hash)
 
     def get_perms_cache(self):
         return cache.get(f'perms_{self.id}', set())
@@ -89,26 +86,22 @@ class User(models.Model, ModelMixin):
 class Role(models.Model, ModelMixin):
     name = models.CharField(max_length=50)
     desc = models.CharField(max_length=255, null=True)
-    page_perms = models.TextField(null=True)
-    deploy_perms = models.TextField(null=True)
-    group_perms = models.TextField(null=True)
-    created_at = models.CharField(max_length=20, default=human_datetime)
-    created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='+')
+    page_perms = models.JSONField(default=dict)
+    deploy_perms = models.JSONField(default=dict)
+    group_perms = models.JSONField(default=list)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
-        tmp['page_perms'] = json.loads(self.page_perms) if self.page_perms else {}
-        tmp['deploy_perms'] = json.loads(self.deploy_perms) if self.deploy_perms else {}
-        tmp['group_perms'] = json.loads(self.group_perms) if self.group_perms else []
         tmp['used'] = self.user_set.filter(deleted_by_id__isnull=True).count()
         return tmp
 
     def add_deploy_perm(self, target, value):
         perms = {'apps': [], 'envs': []}
         if self.deploy_perms:
-            perms.update(json.loads(self.deploy_perms))
+            perms.update(self.deploy_perms)
         perms[target].append(value)
-        self.deploy_perms = json.dumps(perms)
+        self.deploy_perms = perms
         self.save()
 
     def clear_perms_cache(self):
@@ -130,7 +123,7 @@ class History(models.Model, ModelMixin):
     agent = models.CharField(max_length=255, null=True)
     message = models.CharField(max_length=255, null=True)
     is_success = models.BooleanField(default=True)
-    created_at = models.CharField(max_length=20, default=human_datetime)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'login_histories'

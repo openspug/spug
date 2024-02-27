@@ -6,7 +6,6 @@ from apps.host.models import Host
 from apps.schedule.models import Task
 from apps.monitor.models import Detection
 from apps.alarm.models import Alarm
-from apps.deploy.models import Deploy, DeployRequest
 from apps.account.utils import get_host_perms
 from libs.utils import json_response, human_date, parse_time
 from libs.parser import JsonParser, Argument

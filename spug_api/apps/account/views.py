@@ -3,6 +3,7 @@
 # Released under the AGPL-3.0 License.
 from django.core.cache import cache
 from django.conf import settings
+from django.http.response import HttpResponse
 from libs.mixins import AdminView, View
 from libs import JsonParser, Argument, human_datetime, json_response
 from libs.utils import get_request_real_ip, generate_random_str
@@ -39,7 +40,7 @@ class UserView(AdminView):
             Argument('wx_token', required=False),
         ).parse(request.body)
         if error is None:
-            user = User.objects.filter(username=form.username, deleted_by_id__isnull=True).first()
+            user = User.objects.filter(username=form.username, is_deleted=False).first()
             if user and (not form.id or form.id != user.id):
                 return json_response(error=f'已存在登录名为【{form.username}】的用户')
 
@@ -50,11 +51,8 @@ class UserView(AdminView):
             else:
                 if not verify_password(password):
                     return json_response(error='请设置至少8位包含数字、小写和大写字母的新密码')
-                user = User.objects.create(
-                    password_hash=User.make_password(password),
-                    created_by=request.user,
-                    **form
-                )
+                form.password_hash = User.make_password(password)
+                user = User.objects.create(**form)
             user.roles.set(role_ids)
             user.set_perms_cache()
         return json_response(error=error)
@@ -71,7 +69,7 @@ class UserView(AdminView):
                 if not verify_password(form.password):
                     return json_response(error='请设置至少8位包含数字、小写和大写字母的新密码')
                 user.token_expired = 0
-                user.password_hash = User.make_password(form.pop('password'))
+                user.password_hash = User.make_password(form.password)
             if form.is_active is not None:
                 user.is_active = form.is_active
                 cache.delete(user.username)
@@ -90,8 +88,7 @@ class UserView(AdminView):
                 if user.id == request.user.id:
                     return json_response(error='无法删除当前登录账户')
                 user.is_active = True
-                user.deleted_at = human_datetime()
-                user.deleted_by = request.user
+                user.is_deleted = True
                 user.roles.clear()
                 user.save()
         return json_response(error=error)
@@ -127,12 +124,12 @@ class RoleView(AdminView):
             if not role:
                 return json_response(error='未找到指定角色')
             if form.page_perms is not None:
-                role.page_perms = json.dumps(form.page_perms)
+                role.page_perms = form.page_perms
                 role.clear_perms_cache()
             if form.deploy_perms is not None:
-                role.deploy_perms = json.dumps(form.deploy_perms)
+                role.deploy_perms = form.deploy_perms
             if form.group_perms is not None:
-                role.group_perms = json.dumps(form.group_perms)
+                role.group_perms = form.group_perms
             role.user_set.update(token_expired=0)
             role.save()
         return json_response(error=error)
@@ -193,7 +190,7 @@ def login(request):
     ).parse(request.body)
     if error is None:
         handle_response = partial(handle_login_record, request, form.username, form.type)
-        user = User.objects.filter(username=form.username, type=form.type).first()
+        user = User.objects.filter(username=form.username, type=form.type, is_deleted=False).first()
         if user and not user.is_active:
             return handle_response(error="账户已被系统禁用")
         if form.type == 'ldap':
@@ -209,9 +206,8 @@ def login(request):
             elif message:
                 return handle_response(error=message)
         else:
-            if user and user.deleted_by is None:
-                if user.verify_password(form.password):
-                    return handle_user_info(handle_response, request, user, form.captcha)
+            if user and user.verify_password(form.password):
+                return handle_user_info(handle_response, request, user, form.captcha)
 
         value = cache.get_or_set(form.username, 0, 86400)
         if value >= 3:

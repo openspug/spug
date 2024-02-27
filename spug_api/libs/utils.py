@@ -94,7 +94,7 @@ def json_response(data='', error=''):
         content.data = data.to_dict()
     elif isinstance(data, (list, QuerySet)) and all([hasattr(item, 'to_dict') for item in data]):
         content.data = [item.to_dict() for item in data]
-    return HttpResponse(json.dumps(content, cls=DateTimeEncoder), content_type='application/json')
+    return HttpResponse(json.dumps(content, cls=SpugEncoder, ensure_ascii=False), content_type='application/json')
 
 
 # 继承自dict，实现可以通过.来操作元素
@@ -112,8 +112,7 @@ class AttrDict(dict):
         self.__delitem__(item)
 
 
-# 日期json序列化
-class DateTimeEncoder(json.JSONEncoder):
+class SpugEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, datetime):
             return o.strftime('%Y-%m-%d %H:%M:%S')
@@ -121,6 +120,8 @@ class DateTimeEncoder(json.JSONEncoder):
             return o.strftime('%Y-%m-%d')
         elif isinstance(o, Decimal):
             return float(o)
+        elif isinstance(o, set):
+            return list(o)
 
         return json.JSONEncoder.default(self, o)
 

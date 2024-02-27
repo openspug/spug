@@ -1,0 +1,42 @@
+.group {
+  flex: 1;
+  min-width: 200px;
+  max-width: 300px;
+  margin-right: -1px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+
+  :global(.ant-card-head) {
+    height: 58px;
+  }
+
+  .tree {
+    min-height: 200px;
+  }
+
+  .treeTitle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .title {
+      flex: 1;
+      margin-left: 6px;
+    }
+
+    .more {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: -4px;
+    }
+  }
+}
+
+.table {
+  flex: 3;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
