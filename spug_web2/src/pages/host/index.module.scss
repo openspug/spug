@@ -6,6 +6,14 @@
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 
+  :global(.ant-card-head) {
+    height: 58px;
+  }
+
+  .tree {
+    min-height: 200px;
+  }
+
   .treeTitle {
     display: flex;
     flex-direction: row;

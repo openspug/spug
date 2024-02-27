@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react'
-import { Card, Tree, Dropdown, Input } from 'antd'
+import { Card, Tree, Dropdown, Input, Spin } from 'antd'
 import { FaServer } from 'react-icons/fa6'
 import { IoMdMore } from 'react-icons/io'
 import { AiOutlineFolder, AiOutlineFolderAdd, AiOutlineEdit, AiOutlineFileAdd, AiOutlineScissor, AiOutlineClose, AiOutlineDelete } from 'react-icons/ai'
@@ -8,11 +8,13 @@ import { http, findNodeByKey } from '@/libs'
 import css from './index.module.scss'
 
 let clickNode = null
+let rawTreeData = []
 
 function Group() {
   const inputRef = useRef(null)
   const [expandedKeys, setExpandedKeys] = useState([])
   const [treeData, updateTreeData] = useImmer([])
+  const [loading, setLoading] = useState(false)
 
   const menuItems = [
     { label: '新建根分组', key: 'newRoot', icon: <AiOutlineFolder size={18} /> },
@@ -32,10 +34,13 @@ function Group() {
   }, [])
 
   function fetchData() {
+    setLoading(true)
     http.get('/api/host/group/')
       .then(res => {
+        rawTreeData = res.treeData
         updateTreeData(res.treeData)
       })
+      .finally(() => setLoading(false))
   }
 
   function handleNodeClick(e, node) {
@@ -45,7 +50,6 @@ function Group() {
 
   function handleMenuClick({ key, domEvent }) {
     domEvent.stopPropagation()
-    console.log(key, clickNode.key)
     switch (key) {
       case 'newRoot':
         updateTreeData(draft => {
@@ -81,7 +85,9 @@ function Group() {
         console.log('删除主机')
         break
       case 'deleteGroup':
-        console.log('删除此分组')
+        setLoading(true)
+        http.delete('/api/host/group/', { id: clickNode.key })
+          .then(() => fetchData(), () => setLoading(false))
         break
       default:
         break
@@ -93,13 +99,31 @@ function Group() {
     }
   }
 
-  function handleInputSubmit(e) {
-    console.log('提交: ', e.target.value)
+  function handleInputSubmit(e, node) {
+    const value = e.target.value.trim()
+    if (value) {
+      let form = { name: value }
+      if (node.action === 'newChild') {
+        form.parent_id = clickNode.key
+      } else if (node.action === 'rename') {
+        form.id = node.key
+      }
+      setLoading(true)
+      http.post('/api/host/group/', form)
+        .then(() => fetchData(), () => setLoading(false))
+    } else {
+      updateTreeData(rawTreeData)
+    }
   }
 
   function titleRender(node) {
     return ['newRoot', 'newChild', 'rename'].includes(node.action) ? (
-      <Input ref={inputRef} defaultValue={node.title} onPressEnter={handleInputSubmit} onBlur={handleInputSubmit} />
+      <Input
+        ref={inputRef}
+        defaultValue={node.title}
+        onPressEnter={e => handleInputSubmit(e, node)}
+        onBlur={e => handleInputSubmit(e, node)}
+        placeholder="请输入" />
     ) : (
       <div className={css.treeTitle}>
         <FaServer />
@@ -117,15 +141,18 @@ function Group() {
 
   return (
     <Card title="分组列表" className={css.group}>
-      <Tree.DirectoryTree
-        defaultExpandParent
-        showIcon={false}
-        treeData={treeData}
-        expandedKeys={expandedKeys}
-        expandAction="doubleClick"
-        titleRender={titleRender}
-        onExpand={keys => setExpandedKeys(keys)}
-      />
+      <Spin spinning={loading}>
+        <Tree.DirectoryTree
+          className={css.tree}
+          defaultExpandParent
+          showIcon={false}
+          treeData={treeData}
+          expandedKeys={expandedKeys}
+          expandAction="doubleClick"
+          titleRender={titleRender}
+          onExpand={keys => setExpandedKeys(keys)}
+        />
+      </Spin>
     </Card>
   )
 }
