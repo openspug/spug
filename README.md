@@ -16,6 +16,10 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
 
 演示地址：https://demo.spug.cc
 
+## 🔐免费通配符SSL证书
+免费通配符，付费证书价格亲民，性价比超高，低于市场其他平台价格，免费专家一对一配置服务，购买流程简单快速，且支持7天无理由退款和开具发票。提供一键下载和SSL过期通知配置，免费申请：[https://push.spug.cc/toolkit/ssl/intro](https://push.spug.cc/toolkit/ssl/intro)
+
+
 ## 🔥推送助手
 
 推送助手是一个集成了电话、短信、邮件、飞书、钉钉、微信、企业微信等多通道的消息推送平台，可以3分钟实现Zabbix、Prometheus、夜莺等监控系统的电话短信报警，点击体验：[https://push.spug.cc](https://push.spug.cc)
