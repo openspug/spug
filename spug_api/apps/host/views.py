@@ -6,7 +6,7 @@ from django.db.models import F
 from django.http.response import HttpResponseBadRequest
 from libs import json_response, JsonParser, Argument, AttrDict, auth
 from apps.setting.utils import AppSetting
-from apps.account.utils import get_host_perms
+from apps.account.utils import get_host_perms, has_host_perm
 from apps.host.models import Host, Group
 from apps.host.utils import batch_sync_host, _sync_host_extend
 from apps.exec.models import ExecTemplate
@@ -230,3 +230,45 @@ def _do_host_verify(form):
     except socket.timeout:
         raise Exception('连接主机超时，请检查网络')
     return True
+
+@auth('host.host.view')
+def get_processes(request):
+    form, error = JsonParser(
+        Argument('host_id', type=int, help='参数错误'),
+    ).parse(request.body)
+    if error is None:
+        if not has_host_perm(request.user, form.host_id):
+            return json_response(error='无权访问主机，请联系管理员')
+        private_key, public_key = AppSetting.get_ssh_key()
+        host = Host.objects.filter(id=form.host_id).first()
+        if host.is_verified:
+            try:
+                result = _sync_host_process(host=host, private_key=private_key)
+            except socket.timeout:
+                return json_response(error='连接主机超时，请检查网络')
+            return json_response(result)
+        else:
+            return json_response(error='该主机未验证，请先验证')
+    return json_response(error=error)
+
+
+@auth('host.host.view')
+def get_ports(request):
+    form, error = JsonParser(
+        Argument('host_id', type=int, help='参数错误'),
+    ).parse(request.body)
+    if error is None:
+        if not has_host_perm(request.user, form.host_id):
+            return json_response(error='无权访问主机，请联系管理员')
+        private_key, public_key = AppSetting.get_ssh_key()
+        host = Host.objects.filter(id=form.host_id).first()
+        if host.is_verified:
+            try:
+                result = _sync_host_ports(host=host, private_key=private_key)
+            except socket.timeout:
+                return json_response(error='连接主机超时，请检查网络')
+            return json_response(result)
+        else:
+            return json_response(error='该主机未验证，请先验证')
+    return json_response(error=error)
+

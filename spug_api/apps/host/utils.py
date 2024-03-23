@@ -1,20 +1,22 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
-from django_redis import get_redis_connection
-from libs.helper import make_ali_request, make_tencent_request
-from libs.ssh import SSH, AuthenticationException
-from libs.utils import AttrDict, human_datetime
-from libs.validators import ip_validator
-from apps.host.models import HostExtend
-from apps.setting.utils import AppSetting
-from collections import defaultdict
-from datetime import datetime, timezone
-from concurrent import futures
 import ipaddress
 import json
 import math
 import os
+from collections import defaultdict
+from concurrent import futures
+from datetime import datetime, timezone
+
+from django_redis import get_redis_connection
+
+from apps.host.models import HostExtend
+from apps.setting.utils import AppSetting
+from libs.helper import make_ali_request, make_tencent_request
+from libs.ssh import SSH, AuthenticationException
+from libs.utils import AttrDict, human_datetime
+from libs.validators import ip_validator
 
 
 def check_os_type(os_name):
@@ -201,7 +203,7 @@ def fetch_host_extend(ssh):
     code, out = ssh.exec_command_raw('hostname -I')
     if code == 0:
         for ip in out.strip().split():
-            if len(ip) > 15:   # ignore ipv6
+            if len(ip) > 15:  # ignore ipv6
                 continue
             if ipaddress.ip_address(ip).is_global:
                 if len(public_ip_address) < 10:
@@ -301,3 +303,51 @@ def _get_ssh(kwargs, pkey=None, private_key=None, public_key=None, password=None
                 ssh.add_public_key(public_key)
             return _get_ssh(kwargs, private_key)
         raise e
+
+
+def _sync_host_process(host, private_key=None, public_key=None, password=None, ssh=None):
+    if not ssh:
+        kwargs = host.to_dict(selects=('hostname', 'port', 'username'))
+        with _get_ssh(kwargs, host.pkey, private_key, public_key, password) as ssh:
+            return _sync_host_process(host, ssh=ssh)
+    process_list = fetch_host_processes(ssh)
+    return process_list
+
+
+def fetch_host_processes(ssh):
+    command = '''ps_info=$(ps -e -o pid=,comm=,ppid=,user=,%cpu=,%mem=,rss,uid= --no-headers); echo -n '['; while read -r line; do read pid name ppid username cpu_usage memory_usage memory uid <<<$(echo $line); if [ -e \"/proc/${pid}/cmdline\" ]; then command=$(tr '\\0' ' ' <\"/proc/${pid}/cmdline\" | awk '{$1=$1};1'| sed 's/\\\\/\\\\\\\\/g' | sed 's/\"/\\\\\"/g' 2>/dev/null); start_time=$(stat -c %Y \"/proc/${pid}\" 2>/dev/null); echo \"{\\\"name\\\":\\\"${name}\\\",\\\"pid\\\":${pid},\\\"ppid\\\":${ppid},\\\"username\\\":\\\"${username}\\\",\\\"uid\\\":${uid},\\\"start_time\\\":${start_time},\\\"cpu_usage\\\":\\\"${cpu_usage}\\\",\\\"memory_usage\\\":\\\"${memory_usage}\\\",\\\"memory\\\":\\\"${memory}\\\",\\\"command\\\":\\\"${command}\\\"},\"; fi; done <<<\"$ps_info\" | sed '$s/,$/]/';'''
+    code, out = ssh.exec_command(command)
+    if code == 0:
+        try:
+            _j = json.loads(out.strip())
+            return _j
+        except Exception as e:
+            print(e)
+            print(out)
+    elif code != 0:
+        print(code, out)
+        return []
+
+
+def _sync_host_ports(host, private_key=None, public_key=None, password=None, ssh=None):
+    if not ssh:
+        kwargs = host.to_dict(selects=('hostname', 'port', 'username'))
+        with _get_ssh(kwargs, host.pkey, private_key, public_key, password) as ssh:
+            return _sync_host_ports(host, ssh=ssh)
+    ports_list = fetch_host_ports(ssh)
+    return ports_list
+
+
+def fetch_host_ports(ssh):
+    command = '''netstat -nltp | awk 'NR>2 {cmd=\"netstat -n | grep -c \\\"\"$4\"\\\"\"; cmd | getline conn_count; close(cmd); printf \"{\\\"protocol\\\":\\\"%s\\\",\\\"listen\\\":\\\"%s\\\",\\\"pid\\\":\\\"%s\\\",\\\"connections\\\":\\\"%s\\\"},\", $1, $4, $7, conn_count}' | sed 's/,$/]/' | awk 'BEGIN {printf\"[\"} {print}' '''
+    code, out = ssh.exec_command(command)
+    if code == 0:
+        try:
+            _j = json.loads(out.strip())
+            return _j
+        except Exception as e:
+            print(e)
+            print(out)
+    elif code != 0:
+        print(code, out)
+        return []
