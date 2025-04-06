@@ -6,20 +6,36 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { ExclamationCircleOutlined, UploadOutlined } from '@ant-design/icons';
-import { Modal, Form, Input, TreeSelect, Button, Upload, Alert, message } from 'antd';
+import { Modal, Form, Input, TreeSelect, Button, Upload, Alert, message, Select } from 'antd';
 import { http, X_TOKEN } from 'libs';
 import store from './store';
 import styles from './index.module.less';
+
+const { Option } = Select;
 
 export default observer(function () {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [fileList, setFileList] = useState([]);
+  const [connectType, setConnectType] = useState('ssh');
+  const [showPasswordField, setShowPasswordField] = useState(false);
+  
+  function handleConnectTypeChange(value) {
+    setConnectType(value);
+    setShowPasswordField(value === 'telnet');
+    if (value === 'telnet') {
+      setFileList([]);
+    }
+  }
 
   useEffect(() => {
     if (store.record.pkey) {
       setFileList([{uid: '0', name: '独立密钥', data: store.record.pkey}])
+    }
+    if (store.record.connect_type) {
+      setConnectType(store.record.connect_type);
+      setShowPasswordField(store.record.connect_type === 'telnet');
     }
   }, [])
 
@@ -27,30 +43,38 @@ export default observer(function () {
     setLoading(true);
     const formData = form.getFieldsValue();
     formData['id'] = store.record.id;
+    formData['connect_type'] = connectType;
     const file = fileList[0];
     if (file && file.data) formData['pkey'] = file.data;
+    
+    if (connectType === 'telnet' && !formData.password && !showPasswordField) {
+      setShowPasswordField(true);
+      setLoading(false);
+      return;
+    }
+    
     http.post('/api/host/', formData)
       .then(res => {
         if (res === 'auth fail') {
-          setLoading(false)
+          setLoading(false);
           if (formData.pkey) {
-            message.error('独立密钥认证失败')
+            message.error(connectType === 'ssh' ? '独立密钥认证失败' : 'Telnet认证失败');
           } else {
             const onChange = v => formData.password = v;
             Modal.confirm({
               icon: <ExclamationCircleOutlined/>,
-              title: '首次验证请输入密码',
+              title: connectType === 'ssh' ? '首次验证请输入密码' : 'Telnet认证',
               content: <ConfirmForm username={formData.username} onChange={onChange}/>,
               onOk: () => handleConfirm(formData),
-            })
+            });
           }
         } else {
           message.success('验证成功');
           store.formVisible = false;
           store.fetchRecords();
-          store.fetchExtend(res.id)
+          store.fetchExtend(res.id);
         }
-      }, () => setLoading(false))
+      }, () => setLoading(false));
   }
 
   function handleConfirm(formData) {
@@ -117,27 +141,42 @@ export default observer(function () {
           <Input placeholder="请输入主机名称"/>
         </Form.Item>
         <Form.Item required label="连接地址" style={{marginBottom: 0}}>
-          <Form.Item name="username" className={styles.formAddress1} style={{width: 'calc(30%)'}}>
-            <Input addonBefore="ssh" placeholder="用户名"/>
+          <Form.Item name="connect_type" className={styles.formAddress1} style={{width: 'calc(30%)'}}>
+            <Select defaultValue="ssh" onChange={handleConnectTypeChange}>
+              <Option value="ssh">SSH</Option>
+              <Option value="telnet">Telnet</Option>
+            </Select>
           </Form.Item>
-          <Form.Item name="hostname" className={styles.formAddress2} style={{width: 'calc(40%)'}}>
+          <Form.Item name="username" className={styles.formAddress2} style={{width: 'calc(30%)'}}>
+            <Input addonBefore={connectType === 'ssh' ? 'ssh' : 'telnet'} placeholder="用户名"/>
+          </Form.Item>
+          <Form.Item name="hostname" className={styles.formAddress3} style={{width: 'calc(40%)'}}>
             <Input addonBefore="@" placeholder="主机名/IP"/>
           </Form.Item>
-          <Form.Item name="port" className={styles.formAddress3} style={{width: 'calc(30%)'}}>
-            <Input addonBefore="-p" placeholder="端口"/>
+        </Form.Item>
+        <Form.Item label="端口号" name="port">
+          <Input placeholder={connectType === 'ssh' ? '默认22' : '默认23'} style={{width: 200}} />
+        </Form.Item>
+        {connectType === 'ssh' && (
+          <Form.Item label="独立密钥" extra="默认使用全局密钥，如果上传了独立密钥（私钥）则优先使用该密钥。">
+            <Upload name="file" fileList={fileList} headers={{'X-Token': X_TOKEN}} beforeUpload={handleUpload}
+                    onChange={handleUploadChange}>
+              {fileList.length === 0 ? <Button loading={uploading} icon={<UploadOutlined/>}>点击上传</Button> : null}
+            </Upload>
           </Form.Item>
-        </Form.Item>
-        <Form.Item label="独立密钥" extra="默认使用全局密钥，如果上传了独立密钥（私钥）则优先使用该密钥。">
-          <Upload name="file" fileList={fileList} headers={{'X-Token': X_TOKEN}} beforeUpload={handleUpload}
-                  onChange={handleUploadChange}>
-            {fileList.length === 0 ? <Button loading={uploading} icon={<UploadOutlined/>}>点击上传</Button> : null}
-          </Upload>
-        </Form.Item>
+        )}
+        {connectType === 'telnet' && (
+          <Form.Item name="password" label="密码" rules={[{required: true, message: '请输入Telnet密码'}]}>
+            <Input.Password placeholder="请输入Telnet密码" />
+          </Form.Item>
+        )}
         <Form.Item name="desc" label="备注信息">
           <Input.TextArea placeholder="请输入主机备注信息"/>
         </Form.Item>
         <Form.Item wrapperCol={{span: 17, offset: 5}}>
-          <Alert showIcon type="info" message="首次验证时需要输入登录用户名对应的密码，该密码会用于配置SSH密钥认证，不会存储该密码。"/>
+          <Alert showIcon type="info" message={connectType === 'ssh' ? 
+            '首次验证时需要输入登录用户名对应的密码，该密码会用于配置SSH密钥认证，不会存储该密码。' : 
+            'Telnet连接需要输入密码进行认证。'} />
         </Form.Item>
       </Form>
     </Modal>
