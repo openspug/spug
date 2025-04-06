@@ -10,3 +10,4 @@ GitPython==3.1.41
 python-ldap==3.4.0
 openpyxl==3.0.3
 user_agents==2.2.0
+telnetlib3==1.0.4
