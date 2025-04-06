@@ -19,6 +19,7 @@ class Host(models.Model, ModelMixin):
     is_verified = models.BooleanField(default=False)
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
+    connect_type = models.CharField(max_length=20, default='ssh')
 
     @property
     def private_key(self):
@@ -27,6 +28,12 @@ class Host(models.Model, ModelMixin):
     def get_ssh(self, pkey=None, default_env=None):
         pkey = pkey or self.private_key
         return SSH(self.hostname, self.port, self.username, pkey, default_env=default_env)
+        
+    def get_telnet(self, password=None):
+        """获取telnet连接实例"""
+        from libs.telnet import Telnet
+        port = self.port or 23  # telnet默认端口23
+        return Telnet(self.hostname, port, self.username, password)
 
     def to_view(self):
         tmp = self.to_dict()
