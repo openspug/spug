@@ -13,7 +13,8 @@ from apps.exec.models import ExecTemplate
 from apps.app.models import Deploy
 from apps.schedule.models import Task
 from apps.monitor.models import Detection
-from libs.ssh import SSH, AuthenticationException
+from libs.ssh import SSH
+from libs.telnet import Telnet, AuthenticationException
 from paramiko.ssh_exception import BadAuthenticationType
 from openpyxl import load_workbook
 from threading import Thread
@@ -193,7 +194,23 @@ def batch_valid(request):
 
 
 def _do_host_verify(form):
-    password = form.pop('password')
+    password = form.pop('password', None)
+    connect_type = form.pop('connect_type', 'ssh')
+    
+    if connect_type == 'telnet':
+        if not password:
+            return False
+        try:
+            with Telnet(form.hostname, form.port or 23, form.username, password) as tn:
+                return True
+        except AuthenticationException:
+            raise Exception('Telnet认证失败，请检查用户名和密码是否正确')
+        except socket.timeout:
+            raise Exception('连接主机超时，请检查网络')
+        except Exception as e:
+            raise Exception(f'Telnet连接失败: {str(e)}')
+    
+    # SSH验证逻辑
     if form.pkey:
         try:
             with SSH(form.hostname, form.port, form.username, form.pkey) as ssh:
