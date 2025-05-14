@@ -15,4 +15,5 @@ urlpatterns = [
     url(r'^about/$', get_about),
     url(r'^push/bind/$', handle_push_bind),
     url(r'^push/balance/$', handle_push_balance),
+    url(r'^ai_assistant/$', ai_assistant),  # 新增 AI 助理接口
 ]
