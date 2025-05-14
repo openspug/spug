@@ -14,6 +14,7 @@ import routes from '../routes';
 import { hasPermission, isMobile } from 'libs';
 import styles from './layout.module.less';
 import { RobotOutlined } from '@ant-design/icons'; // AI 助理图标
+import Markdown from 'markdown-to-jsx'; // 引入 markdown-to-jsx
 
 function initRoutes(Routes, routes) {
   for (let route of routes) {
@@ -149,7 +150,7 @@ export default function () {
                   }}
                 >
                   <p>{msg.role === 'user' ? '用户：' : 'AI 助理：'}</p>
-                 {msg.content}
+                  <Markdown>{msg.content}</Markdown> {/* 使用 Markdown 渲染内容 */}
                 </div>
               ))}
               {loading && (
