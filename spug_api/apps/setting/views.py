@@ -14,6 +14,9 @@ from apps.setting.models import Setting, KEYS_DEFAULT
 from copy import deepcopy
 import platform
 import ldap
+from django.http import StreamingHttpResponse
+from openai import OpenAI
+import json
 
 
 class SettingView(AdminView):
@@ -146,3 +149,66 @@ def handle_push_balance(request):
         return json_response(error='请先配置推送服务绑定账户')
     res = get_balance(token)
     return json_response(res)
+
+
+@auth('admin')
+def ai_assistant(request):
+    """
+    使用 DashScope 接入大模型，通过 openai 库流式返回生成结果，支持上下文对话
+    """
+    print(request.body)
+    try:
+        # 解析请求
+        form = json.loads(request.body)
+        question = form.get('question')
+        context = form.get('context', [])
+        if not question:
+            return JsonResponse({"error": "请输入问题"}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": f"请求解析失败：{e}"}, status=400)
+
+    api_key = "sk-d4f98b80a3064eed843aa670eee486b4"
+    if not api_key:
+        return JsonResponse({"error": "未配置 DashScope API Key，请在系统设置中配置。"}, status=400)
+
+    try:
+        # 初始化 OpenAI 客户端
+        client = OpenAI(
+            api_key=api_key,
+            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
+        )
+
+        # 构建消息列表
+        messages = context + [
+            {"role": "user", "content": question}
+        ]
+
+        # 调用 DashScope API
+        completion = client.chat.completions.create(
+            model="qwen-plus",
+            messages=messages,
+            stream=True,
+            stream_options={"include_usage": True}
+        )
+
+        # 流式返回
+        def stream_response():
+            try:
+                for chunk in completion:
+                    # 参考阿里云代码，跳过 usage chunk
+                    if chunk.choices:
+                        delta_content = chunk.choices[0].delta.content
+                        if delta_content:  # 确保内容非空
+                            yield delta_content
+                    # else: usage chunk，忽略
+            except Exception as e:
+                yield json.dumps({"error": f"流式响应错误：{str(e)}"})
+            finally:
+                completion.close()  # 释放资源
+
+        return StreamingHttpResponse(
+            stream_response(),
+            content_type="text/plain; charset=utf-8"
+        )
+    except Exception as e:
+        return JsonResponse({"error": f"调用 DashScope API 失败：{e}"}, status=500)
