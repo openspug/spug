@@ -53,6 +53,7 @@ export default function () {
     if (!value.trim()) return;
     const userMessage = { role: 'user', content: value };
     setMessages((prev) => [...prev, userMessage]); // 添加用户消息
+    setContext((prev) => [...prev, userMessage]); // 更新上下文
     setLoading(true);
 
     try {
