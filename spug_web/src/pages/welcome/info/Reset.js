@@ -1,8 +1,3 @@
-/**
- * Copyright (c) OpenSpug Organization. https://github.com/openspug/spug
- * Copyright (c) <spug.dev@gmail.com>
- * Released under the AGPL-3.0 License.
- */
 import React, { useState } from 'react';
 import { Button, Form, Input, message } from 'antd';
 import styles from './index.module.css';

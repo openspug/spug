@@ -1,8 +1,3 @@
-/**
- * Copyright (c) OpenSpug Organization. https://github.com/openspug/spug
- * Copyright (c) <spug.dev@gmail.com>
- * Released under the AGPL-3.0 License.
- */
 import React, { useState, useEffect, useRef } from 'react';
 import { Table, Space, Divider, Popover, Checkbox, Button, Input, Select } from 'antd';
 import { ReloadOutlined, SettingOutlined, FullscreenOutlined, SearchOutlined } from '@ant-design/icons';
