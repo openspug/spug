@@ -34,33 +34,12 @@ export default function (props) {
     </Menu>
   );
 
-  const ToolsMenu = (
-    <Menu>
-      <Menu.Item onClick={() => window.open('https://ssl.spug.cc')}>
-        免费证书
-      </Menu.Item>
-      <Menu.Item onClick={() => window.open('https://up.spug.cc')}>
-        免费监控
-      </Menu.Item>
-      <Menu.Item onClick={() => window.open('https://push.spug.cc')}>
-        推送助手
-      </Menu.Item>
-    </Menu>
-  );
-
   return (
     <Layout.Header className={styles.header}>
       <div className={styles.trigger} onClick={props.toggle}>
         {props.collapsed ? <MenuUnfoldOutlined/> : <MenuFoldOutlined/>}
       </div>
       <div className={styles.right}>
-        <div className={styles.link} onClick={() => window.open('https://spug.cc/')}>官网</div>
-        <div className={styles.link} onClick={() => window.open('https://ops.spug.cc/docs/about-spug/')}>文档</div>
-        <Dropdown overlay={ToolsMenu} placement="bottomCenter">
-          <span className={styles.link}>
-            工具服务 <DownOutlined style={{fontSize: 12}}/>
-          </span>
-        </Dropdown>
         <Divider type="vertical"/>
         <Notification/>
         <AuthDiv className={styles.terminal} auth="host.console.view|host.console.list" onClick={openTerminal}>
