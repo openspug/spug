@@ -186,63 +186,134 @@ def fetch_host_extend(ssh):
     public_ip_address = set()
     private_ip_address = set()
     response = {'disk': []}
-    code, out = ssh.exec_command_raw('nproc')
-    if code != 0:
-        code, out = ssh.exec_command_raw("grep -c '^processor' /proc/cpuinfo")
-    if code == 0:
-        response['cpu'] = int(out.strip())
+    
+    # 先检测操作系统类型
+    code, os_type = ssh.exec_command_raw('uname -s')
+    is_macos = code == 0 and 'Darwin' in os_type
+    
+    # 获取 CPU 核心数
+    if is_macos:
+        code, out = ssh.exec_command_raw('sysctl -n hw.ncpu')
+        if code == 0:
+            response['cpu'] = int(out.strip())
+    else:
+        code, out = ssh.exec_command_raw('nproc')
+        if code != 0:
+            code, out = ssh.exec_command_raw("grep -c '^processor' /proc/cpuinfo")
+        if code == 0:
+            response['cpu'] = int(out.strip())
 
-    code, out = ssh.exec_command_raw("cat /etc/os-release | grep PRETTY_NAME | awk -F \\\" '{print $2}'")
-    if '/etc/os-release' in out:
-        code, out = ssh.exec_command_raw("cat /etc/issue | head -1 | awk '{print $1,$2,$3}'")
-    if code == 0:
-        response['os_name'] = out.strip()[:50]
+    # 获取操作系统名称
+    if is_macos:
+        code, out = ssh.exec_command_raw('sw_vers -productName && sw_vers -productVersion')
+        if code == 0:
+            response['os_name'] = 'macOS ' + out.strip().replace('\n', ' ')
+    else:
+        code, out = ssh.exec_command_raw("cat /etc/os-release | grep PRETTY_NAME | awk -F \\\" '{print $2}'")
+        if '/etc/os-release' in out:
+            code, out = ssh.exec_command_raw("cat /etc/issue | head -1 | awk '{print $1,$2,$3}'")
+        if code == 0:
+            response['os_name'] = out.strip()[:50]
 
-    code, out = ssh.exec_command_raw('hostname -I')
+    # 获取 IP 地址
+    if is_macos:
+        code, out = ssh.exec_command_raw("ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}'")
+    else:
+        code, out = ssh.exec_command_raw('hostname -I')
+    
     if code == 0:
         for ip in out.strip().split():
-            if len(ip) > 15:   # ignore ipv6
+            # 过滤掉 IPv6 和空字符串
+            if not ip or ':' in ip or len(ip) > 15:
                 continue
-            if ipaddress.ip_address(ip).is_global:
-                if len(public_ip_address) < 10:
-                    public_ip_address.add(ip)
-            elif len(private_ip_address) < 10:
-                private_ip_address.add(ip)
+            try:
+                if ipaddress.ip_address(ip).is_global:
+                    if len(public_ip_address) < 10:
+                        public_ip_address.add(ip)
+                elif len(private_ip_address) < 10:
+                    private_ip_address.add(ip)
+            except:
+                continue
 
     ssh_hostname = ssh.arguments.get('hostname')
     if ip_validator(ssh_hostname):
-        if ipaddress.ip_address(ssh_hostname).is_global:
-            if ssh_hostname in public_ip_address:
-                public_ip_address.remove(ssh_hostname)
-            public_ip_address = [ssh_hostname] + list(public_ip_address)
-        else:
-            if ssh_hostname in private_ip_address:
-                private_ip_address.remove(ssh_hostname)
-            private_ip_address = [ssh_hostname] + list(private_ip_address)
-
-    code, out = ssh.exec_command_raw('lsblk -dbn -o SIZE -e 11 2> /dev/null')
-    if code == 0:
-        disks = []
-        for item in out.strip().splitlines():
-            item = item.strip()
-            size = math.ceil(int(item) / 1024 / 1024 / 1024)
-            if size > 10:
-                disks.append(size)
-        response['disk'] = disks[:10]
-
-    code, out = ssh.exec_command_raw("dmidecode -t 17 | grep -E 'Size: [0-9]+' | awk '{s+=$2} END {print s,$3}'")
-    if code == 0:
-        fields = out.strip().split()
-        if len(fields) == 2 and fields[1] in ('GB', 'MB'):
-            size, unit = out.strip().split()
-            if unit == 'GB':
-                response['memory'] = size
+        try:
+            if ipaddress.ip_address(ssh_hostname).is_global:
+                if ssh_hostname in public_ip_address:
+                    public_ip_address.remove(ssh_hostname)
+                public_ip_address = [ssh_hostname] + list(public_ip_address)
             else:
-                response['memory'] = round(int(size) / 1024, 0)
-    if 'memory' not in response:
-        code, out = ssh.exec_command_raw("cat /proc/meminfo | grep 'MemTotal' | awk '{print $2}'")
+                if ssh_hostname in private_ip_address:
+                    private_ip_address.remove(ssh_hostname)
+                private_ip_address = [ssh_hostname] + list(private_ip_address)
+        except:
+            pass
+
+    # 获取磁盘信息
+    if is_macos:
+        code, out = ssh.exec_command_raw("diskutil list | grep -E '^[[:space:]]+[0-9]+:' | grep -v 'Apple_APFS' | awk '{print $3}'")
         if code == 0:
-            response['memory'] = math.ceil(int(out) / 1024 / 1024)
+            disks = []
+            for size_str in out.strip().splitlines():
+                try:
+                    # macOS 的 diskutil 输出格式是 "10.5 GB" 这样的
+                    size_parts = size_str.strip().split()
+                    if len(size_parts) == 2:
+                        size_num = float(size_parts[0])
+                        size_unit = size_parts[1]
+                        if size_unit in ('GB', 'GiB'):
+                            size_gb = int(size_num)
+                        elif size_unit in ('MB', 'MiB'):
+                            size_gb = int(size_num / 1024)
+                        else:
+                            size_gb = int(size_num)
+                        
+                        if size_gb > 10:
+                            disks.append(size_gb)
+                except:
+                    continue
+            response['disk'] = disks[:10]
+        else:
+            # 如果 diskutil 失败，尝试用 df 粗略估计
+            code, out = ssh.exec_command_raw("df -k / | tail -1 | awk '{print $2}'")
+            if code == 0:
+                total_kb = int(out.strip())
+                response['disk'] = [math.ceil(total_kb / 1024 / 1024)]
+    else:
+        code, out = ssh.exec_command_raw('lsblk -dbn -o SIZE -e 11 2> /dev/null')
+        if code == 0:
+            disks = []
+            for item in out.strip().splitlines():
+                item = item.strip()
+                size = math.ceil(int(item) / 1024 / 1024 / 1024)
+                if size > 10:
+                    disks.append(size)
+            response['disk'] = disks[:10]
+
+    # 获取内存信息
+    if is_macos:
+        code, out = ssh.exec_command_raw('sysctl -n hw.memsize')
+        if code == 0:
+            memory_bytes = int(out.strip())
+            response['memory'] = math.ceil(memory_bytes / 1024 / 1024 / 1024)  # 转换为 GB
+    else:
+        code, out = ssh.exec_command_raw("dmidecode -t 17 | grep -E 'Size: [0-9]+' | awk '{s+=$2} END {print s,$3}'")
+        if code == 0:
+            fields = out.strip().split()
+            if len(fields) == 2 and fields[1] in ('GB', 'MB'):
+                size, unit = out.strip().split()
+                if unit == 'GB':
+                    response['memory'] = size
+                else:
+                    response['memory'] = round(int(size) / 1024, 0)
+        if 'memory' not in response:
+            code, out = ssh.exec_command_raw("cat /proc/meminfo | grep 'MemTotal' | awk '{print $2}'")
+            if code == 0:
+                response['memory'] = math.ceil(int(out) / 1024 / 1024)
+
+    # 如果还是没获取到内存，给个默认值
+    if 'memory' not in response:
+        response['memory'] = 4  # 默认 4GB
 
     response['public_ip_address'] = list(public_ip_address)
     response['private_ip_address'] = list(private_ip_address)
