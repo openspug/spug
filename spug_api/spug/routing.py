@@ -1,7 +1,8 @@
 # spug/routing.py
-from channels.routing import ProtocolTypeRouter
-from consumer import routing
+from channels.routing import ProtocolTypeRouter, URLRouter
+import consumer.routing
 
 application = ProtocolTypeRouter({
-    'websocket': routing.ws_router
+    # 暂时移除 AuthMiddlewareStack，直接使用 URLRouter 测试
+    'websocket': consumer.routing.ws_router
 })
