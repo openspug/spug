@@ -65,7 +65,7 @@ export default function () {
   function listen() {
     if (!X_TOKEN) return;
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    ws = new WebSocket(`${protocol}//${window.location.host}/ws/notify/?x-token=${X_TOKEN}`);
+    ws = new WebSocket(`${protocol}//${window.location.host}/api/ws/notify/?x-token=${X_TOKEN}`);
     ws.onopen = () => ws.send('ok');
     ws.onmessage = e => {
       if (e.data !== 'pong') {
