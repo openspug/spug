@@ -1,9 +1,13 @@
-# Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
-# Copyright: (c) <spug.dev@gmail.com>
-# Released under the AGPL-3.0 License.
-from channels.routing import ProtocolTypeRouter
-from consumer import routing
+# spug/routing.py
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+from consumer.routing import ws_router
 
 application = ProtocolTypeRouter({
-    'websocket': routing.ws_router
+    'http': get_asgi_application(),
+    'websocket': AuthMiddlewareStack(
+        URLRouter(
+            ws_router
+        )
+    ),
 })
