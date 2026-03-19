@@ -29,7 +29,7 @@ SECRET_KEY = 'vk0do47)egwzz!uk49%(y3s(fpx4+ha@ugt-hcv&%&d@hwr&p7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # Application definition
 
@@ -73,16 +73,25 @@ DATABASES = {
     }
 }
 
+# Redis 缓存配置 - 优化连接池
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "CONNECTION_POOL_KWARGS": {
+                "max_connections": 100,  # 增加最大连接数
+                "timeout": 60,  # 连接超时时间
+            },
+            "SOCKET_CONNECT_TIMEOUT": 10,  # Socket连接超时
+            "SOCKET_TIMEOUT": 30,  # Socket读写超时
+            "RETRY_ON_TIMEOUT": True,  # 超时重试
         }
     }
 }
 
+# Channel Layers 配置 - 优化 WebSocket
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -94,7 +103,9 @@ CHANNEL_LAYERS = {
             "channel_capacity": {
                 "http.request": 1000,
                 "websocket.send*": 1000,
+                "websocket.receive*": 1000,
             },
+            "symmetric_encryption_keys": [SECRET_KEY],  # 加密密钥
         },
     },
 }
@@ -118,6 +129,87 @@ BUILD_KEY = 'spug:build'
 REPOS_DIR = os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'repos')
 BUILD_DIR = os.path.join(REPOS_DIR, 'build')
 TRANSFER_DIR = os.path.join(BASE_DIR, 'storage', 'transfer')
+
+# ========== 新增超时配置 ==========
+
+# WebSocket 配置
+CHANNELS_WS_TIMEOUT = 300  # WebSocket 超时时间（秒）- 5分钟
+WEBSOCKET_TIMEOUT = 300     # WebSocket 连接超时
+ASGI_THREADS = 1000         # ASGI 线程池大小
+
+# 执行任务配置
+EXEC_TIMEOUT = 600          # 任务执行超时时间（秒）- 10分钟
+EXEC_OUTPUT_LIMIT = 10 * 1024 * 1024  # 输出限制 10MB
+EXEC_MAX_RETRIES = 3        # 任务执行最大重试次数
+EXEC_RETRY_DELAY = 5        # 重试延迟（秒）
+
+# SSH 连接配置
+SSH_TIMEOUT = 60            # SSH 连接超时（秒）
+SSH_AUTH_TIMEOUT = 30       # SSH 认证超时
+SSH_KEEPALIVE_INTERVAL = 30 # SSH 保活间隔（秒）
+
+# Redis PubSub 配置
+REDIS_PUBSUB_TIMEOUT = 60   # Redis PubSub 超时（秒）
+REDIS_CONNECTION_RETRIES = 3  # Redis 连接重试次数
+REDIS_RETRY_DELAY = 2       # Redis 重试延迟（秒）
+
+# 任务队列配置
+TASK_QUEUE_TIMEOUT = 300    # 任务队列等待超时
+TASK_RESULT_TTL = 3600      # 任务结果保留时间（秒）
+
+# 并发配置
+MAX_CONCURRENT_EXECUTIONS = 50  # 最大并发执行数
+MAX_CONCURRENT_WEBSOCKETS = 100 # 最大并发 WebSocket 连接数
+
+# 日志配置
+LOG_LEVEL = 'INFO'          # 日志级别
+LOG_MAX_BYTES = 10 * 1024 * 1024  # 日志文件最大 10MB
+LOG_BACKUP_COUNT = 10       # 日志备份数量
+
+# 安全配置
+ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+]
+
+# 会话配置
+SESSION_COOKIE_AGE = 8 * 3600  # 会话 Cookie 有效期 8小时
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# ========== 新增目录检查 ==========
+
+# 确保必要目录存在
+import os
+
+def ensure_directories():
+    """确保所有必要的目录存在"""
+    directories = [
+        TRANSFER_DIR,
+        REPOS_DIR,
+        BUILD_DIR,
+        os.path.join(BASE_DIR, 'logs'),
+        os.path.join(BASE_DIR, 'storage'),
+    ]
+    for directory in directories:
+        os.makedirs(directory, exist_ok=True)
+
+# 执行目录检查
+ensure_directories()
+
+# ========== 新增健康检查 ==========
+
+# 健康检查配置
+HEALTH_CHECK_ENABLED = True
+HEALTH_CHECK_INTERVAL = 60  # 健康检查间隔（秒）
+HEALTH_CHECK_TIMEOUT = 30   # 健康检查超时（秒）
+
+# ========== 新增监控配置 ==========
+
+# 监控配置
+MONITOR_CHECK_INTERVAL = 60  # 监控检查间隔（秒）
+MONITOR_CHECK_TIMEOUT = 30   # 监控检查超时
+MONITOR_ALARM_RETRIES = 3    # 告警重试次数
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
@@ -146,16 +238,15 @@ try:
 except ImportError:
     pass
 
-# WebSocket 配置
-WEBSOCKET_TIMEOUT = 120  # WebSocket 超时时间（秒）
-ASGI_THREADS = 1000      # ASGI 线程数
+# ========== 启动时打印配置信息 ==========
 
-# 执行任务配置
-EXEC_TIMEOUT = 300       # 任务执行超时时间（秒）
-EXEC_OUTPUT_LIMIT = 1024 * 1024  # 输出限制 1MB
-
-# 确保这些目录存在
-import os
-os.makedirs(TRANSFER_DIR, exist_ok=True)
-os.makedirs(REPOS_DIR, exist_ok=True)
-os.makedirs(BUILD_DIR, exist_ok=True)
+if DEBUG:
+    print("=" * 50)
+    print("Spug 配置信息:")
+    print(f"版本: {SPUG_VERSION}")
+    print(f"DEBUG模式: {DEBUG}")
+    print(f"WebSocket超时: {CHANNELS_WS_TIMEOUT}秒")
+    print(f"任务执行超时: {EXEC_TIMEOUT}秒")
+    print(f"ASGI线程数: {ASGI_THREADS}")
+    print(f"Redis连接池: 最大100连接")
+    print("=" * 50)
