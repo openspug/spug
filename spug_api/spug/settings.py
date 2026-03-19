@@ -88,8 +88,13 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [("127.0.0.1", 6379)],
-            "capacity": 1000,
-            "expiry": 120,
+            "capacity": 5000,  # 增加容量
+            "expiry": 600,      # 增加过期时间到10分钟
+            "group_expiry": 600, # 添加组过期时间
+            "channel_capacity": {
+                "http.request": 1000,
+                "websocket.send*": 1000,
+            },
         },
     },
 }
