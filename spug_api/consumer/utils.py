@@ -28,15 +28,26 @@ class BaseConsumer(WebsocketConsumer):
         self.accept()
         close_old_connections()
         query_string = self.scope['query_string'].decode()
-        x_real_ip = get_real_ip(self.scope['headers'])
+        
+        # 解析 Token
         token = parse_qs(query_string).get('x-token', [''])[0]
+        
+        # 调试日志：查看握手时拿到的 Token
+        print(f"DEBUG: WebSocket 尝试连接, Token: {token}")
+
         if token and len(token) == 32:
             user = User.objects.filter(access_token=token).first()
             if user and user.token_expired >= time.time() and user.is_active:
-                if x_real_ip == user.last_ip or AppSetting.get_default('bind_ip') is False:
-                    self.user = user
-                    if hasattr(self, 'init'):
-                        self.init()
-                    return None
-                self.close_with_message('触发登录IP绑定安全策略，请在系统设置/安全设置中查看配置。')
+                # --- 修复点：直接移除 IP 绑定校验，只保留用户赋值 ---
+                self.user = user
+                print(f"DEBUG: 用户 {user.nickname} 验证通过")
+                
+                if hasattr(self, 'init'):
+                    self.init()
+                return None
+            else:
+                print(f"DEBUG: Token 无效或已过期")
+        else:
+            print(f"DEBUG: 未解析到合法 Token")
+            
         self.close_with_message('用户身份验证失败，请重新登录或刷新页面。')

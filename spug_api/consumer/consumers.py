@@ -133,6 +133,8 @@ class NotifyConsumer(BaseConsumer):
         self.send(text_data=json.dumps(event))
 
 
+# consumer/consumers.py 中的 PubSubConsumer 类
+
 class PubSubConsumer(BaseConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -145,10 +147,17 @@ class PubSubConsumer(BaseConsumer):
         self.p.close()
         self.rds.close()
 
-    def receive(self, **kwargs):
-        response = self.p.get_message(timeout=10)
-        while response:
+    def receive(self, text_data=None, **kwargs):
+        # 如果前端发来 'ping'，我们回一个 'pong' 维持连接
+        if text_data == 'ping':
+            self.send(text_data='pong')
+            return
+
+        # 优化获取逻辑：设置较短的 timeout，避免长时间霸占线程
+        response = self.p.get_message(timeout=0.1) # 降低单次阻塞时间
+        count = 0
+        while response and count < 50: # 限制单次处理的消息数，给心跳留出间隙
             data = str_decode(response['data'])
             self.send(text_data=data)
-            response = self.p.get_message(timeout=10)
-        self.send(text_data='pong')
+            response = self.p.get_message(timeout=0.1)
+            count += 1
