@@ -145,3 +145,17 @@ try:
     from spug.overrides import *
 except ImportError:
     pass
+
+# WebSocket 配置
+WEBSOCKET_TIMEOUT = 120  # WebSocket 超时时间（秒）
+ASGI_THREADS = 1000      # ASGI 线程数
+
+# 执行任务配置
+EXEC_TIMEOUT = 300       # 任务执行超时时间（秒）
+EXEC_OUTPUT_LIMIT = 1024 * 1024  # 输出限制 1MB
+
+# 确保这些目录存在
+import os
+os.makedirs(TRANSFER_DIR, exist_ok=True)
+os.makedirs(REPOS_DIR, exist_ok=True)
+os.makedirs(BUILD_DIR, exist_ok=True)
