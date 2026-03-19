@@ -81,12 +81,11 @@ CACHES = {
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "CONNECTION_POOL_KWARGS": {
-                "max_connections": 100,  # 增加最大连接数
-                "timeout": 60,  # 连接超时时间
+                "max_connections": 100,  # 只保留这个
             },
-            "SOCKET_CONNECT_TIMEOUT": 10,  # Socket连接超时
-            "SOCKET_TIMEOUT": 30,  # Socket读写超时
-            "RETRY_ON_TIMEOUT": True,  # 超时重试
+            "SOCKET_CONNECT_TIMEOUT": 10,  # 这个可以保留
+            "SOCKET_TIMEOUT": 30,  # 这个可以保留
+            "RETRY_ON_TIMEOUT": True,  # 这个可以保留
         }
     }
 }
