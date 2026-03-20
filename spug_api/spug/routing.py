@@ -1,8 +1,9 @@
-# spug/routing.py
-from channels.routing import ProtocolTypeRouter, URLRouter
-import consumer.routing
+# Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
+# Copyright: (c) <spug.dev@gmail.com>
+# Released under the AGPL-3.0 License.
+from channels.routing import ProtocolTypeRouter
+from consumer import routing
 
 application = ProtocolTypeRouter({
-    # 暂时移除 AuthMiddlewareStack，直接使用 URLRouter 测试
-    'websocket': consumer.routing.ws_router
+    'websocket': routing.ws_router
 })
