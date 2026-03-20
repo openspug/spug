@@ -69,7 +69,7 @@ class Index extends React.Component {
     const isApp = store.type === 'app';
     return (
       <AuthDiv auth={`config.${store.type}.view_config`}>
-        <Breadcrumb extra={<Alert message="4.0将移除公共/私有配置概念，所有配置将被视为公共配置。" banner/>}>
+        <Breadcrumb extra={<Alert message="区分公共/私有配置" banner/>}>
           <Breadcrumb.Item>配置中心</Breadcrumb.Item>
           <Breadcrumb.Item onClick={() => history.goBack()}>{isApp ? '应用配置' : '服务配置'}</Breadcrumb.Item>
           <Breadcrumb.Item>{store.obj.name}</Breadcrumb.Item>
