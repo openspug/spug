@@ -6,8 +6,8 @@ module.exports = override(
     lessOptions: {
       javascriptEnabled: true,
       modifyVars: {
-        '@primary-color': '#2563fc'
-      }
+          '@primary-color': '#13c2c2'
+        }
     }
   }),
 );
