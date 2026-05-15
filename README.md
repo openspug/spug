@@ -34,10 +34,11 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
 * Django 2.2
 * Node 12.14
 * React 16.11
+* MariaDB 10.x（平台元数据库；官方 Docker 部署与 `docs/install.sh` 一键安装默认使用 MariaDB）
 
 ## 安装
 
-[官方文档](https://ops.spug.cc/docs/install-docker)
+[官方文档](https://ops.spug.cc/docs/install-docker)（仓库内 `docs/docker/docker-compose.yml` 使用 `mariadb:10.8` 镜像）
 
 更多使用帮助请参考： [使用文档](https://ops.spug.cc/docs/host-manage/)
 
