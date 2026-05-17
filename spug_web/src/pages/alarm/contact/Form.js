@@ -71,16 +71,6 @@ export default observer(function () {
           </Form.Item>
           <Test mode="4" name="email"/>
         </Form.Item>
-        <Form.Item label="钉钉" extra={<span>
-            钉钉收不到通知？请参考
-            <a target="_blank" rel="noopener noreferrer"
-               href="https://ops.spug.cc/docs/use-problem#use-dd">官方文档</a>
-          </span>}>
-          <Form.Item noStyle name="ding">
-            <Input placeholder="https://oapi.dingtalk.com/robot/send?access_token=xxx"/>
-          </Form.Item>
-          <Test mode="3" name="ding"/>
-        </Form.Item>
         <Form.Item label="企业微信">
           <Form.Item noStyle name="qy_wx">
             <Input placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx"/>

@@ -12,7 +12,6 @@ const modeOptions = [
   {label: '短信', 'value': '2'},
   {label: '电话', 'value': '6'},
   {label: '邮件', 'value': '4'},
-  {label: '钉钉', 'value': '3'},
   {label: '企业微信', 'value': '5'},
 ];
 
