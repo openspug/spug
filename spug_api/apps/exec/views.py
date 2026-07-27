@@ -7,6 +7,7 @@ from django.conf import settings
 from libs import json_response, JsonParser, Argument, human_datetime, auth
 from apps.exec.models import ExecTemplate, ExecHistory
 from apps.host.models import Host
+from apps.host.utils import parse_group_host_ids
 from apps.account.utils import has_host_perm
 import uuid
 import json
@@ -61,13 +62,18 @@ class TaskView(View):
     @auth('exec.task.do')
     def post(self, request):
         form, error = JsonParser(
-            Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择执行主机'),
+            Argument('host_ids', type=list, required=False, default=[]),
+            Argument('group_ids', type=list, required=False, default=[]),
             Argument('command', help='请输入执行命令内容'),
             Argument('interpreter', default='sh'),
             Argument('template_id', type=int, required=False),
             Argument('params', type=dict, handler=json.dumps, default={})
         ).parse(request.body)
         if error is None:
+            form.host_ids = sorted(set(form.host_ids).union(parse_group_host_ids(form.group_ids)))
+            if not form.host_ids:
+                return json_response(error='请选择执行主机')
+            form.pop('group_ids')
             if not has_host_perm(request.user, form.host_ids):
                 return json_response(error='无权访问主机，请联系管理员')
             token, rds = uuid.uuid4().hex, get_redis_connection()

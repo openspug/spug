@@ -20,6 +20,7 @@ class AddSelect extends React.Component {
       is_audit: false,
       rst_notify: {mode: '0'},
       host_ids: [],
+      group_ids: [],
       filter_rule: {type: 'exclude', data: ''}
     }
   };
@@ -31,6 +32,7 @@ class AddSelect extends React.Component {
       is_audit: false,
       rst_notify: {mode: '0'},
       host_ids: [],
+      group_ids: [],
       host_actions: [],
       server_actions: []
     }

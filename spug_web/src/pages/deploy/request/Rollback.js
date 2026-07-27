@@ -9,6 +9,7 @@ import { Modal, Form, Input, Select, Button, message } from 'antd';
 import HostSelector from './HostSelector';
 import { http, includes } from 'libs';
 import store from './store';
+import hostStore from 'pages/host/store';
 import lds from 'lodash';
 import moment from 'moment';
 
@@ -17,12 +18,30 @@ export default observer(function () {
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [host_ids, setHostIds] = useState([]);
+  const [group_ids, setGroupIds] = useState([]);
 
   useEffect(() => {
     const {app_host_ids, host_ids} = store.record;
     setHostIds(lds.clone(host_ids || app_host_ids));
+    hostStore.initial()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  function handleChangeGroups(ids) {
+    setGroupIds(ids)
+    const selected = new Set(host_ids);
+    for (let id of ids) {
+      const counter = hostStore.counter[id];
+      if (counter) {
+        counter.forEach(h_id => {
+          if (app_host_ids.includes(h_id)) {
+            selected.add(h_id)
+          }
+        })
+      }
+    }
+    setHostIds([...selected])
+  }
 
   function handleSubmit() {
     if (host_ids.length === 0) {
@@ -31,6 +50,7 @@ export default observer(function () {
     setLoading(true);
     const formData = form.getFieldsValue();
     formData['host_ids'] = host_ids;
+    formData['group_ids'] = group_ids;
     http.post('/api/deploy/request/ext1/rollback/', formData)
       .then(res => {
         message.success('操作成功');
@@ -73,6 +93,13 @@ export default observer(function () {
             <span style={{marginRight: 16}}>已选择 {host_ids.length} 台（可选{app_host_ids.length}）</span>
           )}
           <Button type="link" style={{padding: 0}} onClick={() => setVisible(true)}>选择主机</Button>
+        </Form.Item>
+        <Form.Item label="机器组选择" tooltip="可按机器组批量加入发布主机，之后仍可手动调整。">
+          <Select mode="multiple" allowClear value={group_ids} onChange={handleChangeGroups} placeholder="请选择机器组">
+            {Object.entries(hostStore.groups).map(([id, name]) => (
+              <Select.Option key={id} value={Number(id)}>{name}</Select.Option>
+            ))}
+          </Select>
         </Form.Item>
         <Form.Item name="desc" label="备注信息">
           <Input placeholder="请输入备注信息"/>

@@ -6,7 +6,7 @@ from libs.helper import make_ali_request, make_tencent_request
 from libs.ssh import SSH, AuthenticationException
 from libs.utils import AttrDict, human_datetime
 from libs.validators import ip_validator
-from apps.host.models import HostExtend
+from apps.host.models import HostExtend, Group
 from apps.setting.utils import AppSetting
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -301,3 +301,14 @@ def _get_ssh(kwargs, pkey=None, private_key=None, public_key=None, password=None
                 ssh.add_public_key(public_key)
             return _get_ssh(kwargs, private_key)
         raise e
+
+
+def parse_group_host_ids(group_ids):
+    group_ids = {int(x) for x in (group_ids or [])}
+    if not group_ids:
+        return set()
+    all_ids, sub_ids = set(group_ids), set(group_ids)
+    while sub_ids:
+        sub_ids = {x.id for x in Group.objects.filter(parent_id__in=sub_ids)}
+        all_ids.update(sub_ids)
+    return set(x.host_id for x in Group.hosts.through.objects.filter(group_id__in=all_ids))

@@ -10,6 +10,7 @@ import { LoadingOutlined, SyncOutlined } from '@ant-design/icons';
 import HostSelector from './HostSelector';
 import { http, history, includes } from 'libs';
 import store from './store';
+import hostStore from 'pages/host/store';
 import lds from 'lodash';
 import moment from 'moment';
 
@@ -32,6 +33,7 @@ export default observer(function () {
   const [loading, setLoading] = useState(false);
   const [repositories, setRepositories] = useState([]);
   const [host_ids, setHostIds] = useState([]);
+  const [group_ids, setGroupIds] = useState([]);
   const [plan, setPlan] = useState(store.record.plan);
   const [fetching, setFetching] = useState(false);
   const [git_type, setGitType] = useState();
@@ -43,9 +45,26 @@ export default observer(function () {
   useEffect(() => {
     const {app_host_ids, host_ids} = store.record;
     setHostIds(lds.clone(host_ids || app_host_ids));
+    hostStore.initial()
     fetchVersions()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  function handleChangeGroups(ids) {
+    setGroupIds(ids)
+    const selected = new Set(host_ids);
+    for (let id of ids) {
+      const counter = hostStore.counter[id];
+      if (counter) {
+        counter.forEach(h_id => {
+          if (app_host_ids.includes(h_id)) {
+            selected.add(h_id)
+          }
+        })
+      }
+    }
+    setHostIds([...selected])
+  }
 
   function fetchVersions() {
     setFetching(true);
@@ -70,6 +89,7 @@ export default observer(function () {
     formData['id'] = store.record.id;
     formData['deploy_id'] = store.record.deploy_id;
     formData['host_ids'] = host_ids;
+    formData['group_ids'] = group_ids;
     formData['type'] = store.record.type;
     formData['extra'] = [git_type, extra1, extra2];
     if (plan) formData.plan = plan.format('YYYY-MM-DD HH:mm:00');
@@ -231,6 +251,13 @@ export default observer(function () {
             <span style={{marginRight: 16}}>已选择 {host_ids.length} 台（可选{app_host_ids.length}）</span>
           )}
           <Button type="link" style={{padding: 0}} onClick={() => setVisible(true)}>选择主机</Button>
+        </Form.Item>
+        <Form.Item label="机器组选择" tooltip="可按机器组批量加入发布主机，之后仍可手动调整。">
+          <Select mode="multiple" allowClear value={group_ids} onChange={handleChangeGroups} placeholder="请选择机器组">
+            {Object.entries(hostStore.groups).map(([id, name]) => (
+              <Select.Option key={id} value={Number(id)}>{name}</Select.Option>
+            ))}
+          </Select>
         </Form.Item>
         <Form.Item name="desc" label="备注信息">
           <Input placeholder="请输入备注信息"/>

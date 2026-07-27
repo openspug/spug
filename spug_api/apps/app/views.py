@@ -7,6 +7,7 @@ from libs import JsonParser, Argument, json_response, auth
 from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
 from apps.config.models import Config, ConfigHistory, Service
 from apps.app.utils import fetch_versions, remove_repo
+from apps.host.utils import parse_group_host_ids
 from apps.setting.utils import AppSetting
 import json
 import re
@@ -125,17 +126,23 @@ class DeployView(View):
             Argument('id', type=int, required=False),
             Argument('app_id', type=int, help='请选择应用'),
             Argument('env_id', type=int, help='请选择环境'),
-            Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
+            Argument('host_ids', type=list, required=False, default=[]),
+            Argument('group_ids', type=list, required=False, default=[]),
             Argument('rst_notify', type=dict, help='请选择发布结果通知方式'),
             Argument('extend', filter=lambda x: x in dict(Deploy.EXTENDS), help='请选择发布类型'),
             Argument('is_parallel', type=bool, default=True),
             Argument('is_audit', type=bool, default=False)
         ).parse(request.body)
         if error is None:
+            host_ids = set(form.host_ids)
+            host_ids.update(parse_group_host_ids(form.group_ids))
+            if not host_ids:
+                return json_response(error='请选择要部署的主机')
             deploy = Deploy.objects.filter(app_id=form.app_id, env_id=form.env_id).first()
             if deploy and deploy.id != form.id:
                 return json_response(error='应用在该环境下已经存在发布配置')
-            form.host_ids = json.dumps(form.host_ids)
+            form.pop('group_ids')
+            form.host_ids = json.dumps(sorted(host_ids))
             form.rst_notify = json.dumps(form.rst_notify)
             if form.extend == '1':
                 extend_form, error = JsonParser(

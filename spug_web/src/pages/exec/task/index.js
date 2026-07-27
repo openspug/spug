@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { PlusOutlined, ThunderboltOutlined, BulbOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Form, Button, Radio, Tooltip } from 'antd';
+import { Form, Button, Radio, Tooltip, Select } from 'antd';
 import { ACEditor, AuthDiv, Breadcrumb } from 'components';
 import HostSelector from 'pages/host/Selector';
 import TemplateSelector from './TemplateSelector';
@@ -15,6 +15,7 @@ import Output from './Output';
 import { http, cleanCommand } from 'libs';
 import moment from 'moment';
 import store from './store';
+import hostStore from 'pages/host/store';
 import gStore from 'gStore';
 import style from './index.module.less';
 
@@ -25,6 +26,7 @@ function TaskIndex() {
   const [template_id, setTemplateId] = useState()
   const [histories, setHistories] = useState([])
   const [parameters, setParameters] = useState([])
+  const [group_ids, setGroupIds] = useState([])
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -41,6 +43,7 @@ function TaskIndex() {
   }, [command])
 
   useEffect(() => {
+    hostStore.initial()
     gStore.fetchUserSettings()
     return () => {
       store.host_ids = []
@@ -55,10 +58,29 @@ function TaskIndex() {
       return setVisible(true)
     }
     setLoading(true)
-    const formData = {interpreter, template_id, params, host_ids: store.host_ids, command: cleanCommand(command)}
+    const formData = {
+      interpreter,
+      template_id,
+      params,
+      host_ids: store.host_ids,
+      group_ids,
+      command: cleanCommand(command)
+    }
     http.post('/api/exec/do/', formData)
       .then(store.switchConsole)
       .finally(() => setLoading(false))
+  }
+
+  function handleChangeGroups(ids) {
+    setGroupIds(ids)
+    const selected = new Set(store.host_ids);
+    for (let id of ids) {
+      const counter = hostStore.counter[id];
+      if (counter) {
+        counter.forEach(h_id => selected.add(h_id))
+      }
+    }
+    store.host_ids = [...selected]
   }
 
   function handleTemplate(tpl) {
@@ -88,6 +110,13 @@ function TaskIndex() {
         <Form layout="vertical" className={style.left}>
           <Form.Item required label="目标主机">
             <HostSelector type="button" value={store.host_ids} onChange={ids => store.host_ids = ids}/>
+          </Form.Item>
+          <Form.Item label="机器组选择" tooltip="可按机器组批量加入主机，之后仍可手动调整。">
+            <Select mode="multiple" allowClear value={group_ids} onChange={handleChangeGroups} placeholder="请选择机器组">
+              {Object.entries(hostStore.groups).map(([id, name]) => (
+                <Select.Option key={id} value={Number(id)}>{name}</Select.Option>
+              ))}
+            </Select>
           </Form.Item>
 
           <Form.Item required label="执行命令" style={{position: 'relative'}}>

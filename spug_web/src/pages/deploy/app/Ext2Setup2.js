@@ -34,7 +34,26 @@ class Ext2Setup2 extends React.Component {
     info['app_id'] = store.app_id;
     info['extend'] = '2';
     info['host_actions'] = info['host_actions'].filter(x => (x.title && x.data) || (x.title && (x.src || x.src_mode === '1') && x.dst));
-    info['server_actions'] = info['server_actions'].filter(x => x.title && x.data);
+    const serverActions = [];
+    for (let item of info['server_actions']) {
+      if (item.type === 'jenkins') {
+        if (!item.title || !item.url) continue
+        let params = {};
+        if (item.params_text) {
+          try {
+            params = JSON.parse(item.params_text)
+          } catch (e) {
+            message.error(`Jenkins动作【${item.title || '未命名'}】参数必须是JSON对象`)
+            this.setState({loading: false});
+            return
+          }
+        }
+        serverActions.push({...item, params})
+      } else if (item.title && item.data) {
+        serverActions.push(item)
+      }
+    }
+    info['server_actions'] = serverActions;
     http.post('/api/app/deploy/', info)
       .then(res => {
         message.success('保存成功');
@@ -87,21 +106,73 @@ class Ext2Setup2 extends React.Component {
         {server_actions.map((item, index) => (
           <div key={index} style={{marginBottom: 30, position: 'relative'}}>
             <Form.Item required label={`本地动作${index + 1}`}>
-              <Input disabled={store.isReadOnly} value={item['title']} onChange={e => item['title'] = e.target.value}
-                     placeholder="请输入"/>
+              <Input
+                disabled={store.isReadOnly}
+                value={item['title']}
+                onChange={e => item['title'] = e.target.value}
+                placeholder="请输入"
+                addonAfter={(
+                  <Select
+                    disabled={store.isReadOnly}
+                    style={{width: 130}}
+                    value={item['type'] || 'shell'}
+                    onChange={v => item['type'] = v}>
+                    <Select.Option value="shell">脚本</Select.Option>
+                    <Select.Option value="jenkins">Jenkins</Select.Option>
+                  </Select>
+                )}/>
             </Form.Item>
-
-            <Form.Item required label="执行内容">
-              <ACEditor
-                readOnly={store.isReadOnly}
-                mode="sh"
-                theme="tomorrow"
-                width="100%"
-                height="100px"
-                value={item['data']}
-                onChange={v => item['data'] = cleanCommand(v)}
-                placeholder="请输入要执行的动作"/>
-            </Form.Item>
+            {item['type'] === 'jenkins' ? (
+              <React.Fragment>
+                <Form.Item required label="Jenkins Job URL">
+                  <Input
+                    disabled={store.isReadOnly}
+                    value={item['url']}
+                    onChange={e => item['url'] = e.target.value}
+                    placeholder="例如：https://jenkins.example.com/job/my-job"/>
+                </Form.Item>
+                <Form.Item label="认证用户名">
+                  <Input
+                    disabled={store.isReadOnly}
+                    value={item['user']}
+                    onChange={e => item['user'] = e.target.value}
+                    placeholder="可选"/>
+                </Form.Item>
+                <Form.Item label="API Token/Password">
+                  <Input.Password
+                    disabled={store.isReadOnly}
+                    value={item['token']}
+                    onChange={e => item['token'] = e.target.value}
+                    placeholder="可选"/>
+                </Form.Item>
+                <Form.Item label="触发超时(秒)">
+                  <Input
+                    disabled={store.isReadOnly}
+                    value={item['timeout'] || 20}
+                    onChange={e => item['timeout'] = Number(e.target.value || 20)}
+                    placeholder="20"/>
+                </Form.Item>
+                <Form.Item label="构建参数(JSON)">
+                  <Input.TextArea
+                    disabled={store.isReadOnly}
+                    value={item['params_text'] === undefined ? JSON.stringify(item['params'] || {}) : item['params_text']}
+                    onChange={e => item['params_text'] = e.target.value}
+                    placeholder='{"branch":"main","version":"$SPUG_RELEASE"}'/>
+                </Form.Item>
+              </React.Fragment>
+            ) : (
+              <Form.Item required label="执行内容">
+                <ACEditor
+                  readOnly={store.isReadOnly}
+                  mode="sh"
+                  theme="tomorrow"
+                  width="100%"
+                  height="100px"
+                  value={item['data']}
+                  onChange={v => item['data'] = cleanCommand(v)}
+                  placeholder="请输入要执行的动作"/>
+              </Form.Item>
+            )}
             {!store.isReadOnly && (
               <React.Fragment>
                 <Button type="dashed" icon={<UpOutlined/>} className={styles.upAction}
@@ -119,6 +190,13 @@ class Ext2Setup2 extends React.Component {
           <Form.Item wrapperCol={{span: 14, offset: 6}}>
             <Button type="dashed" block onClick={() => server_actions.push({})}>
               <PlusOutlined/>添加本地执行动作（在服务端本地执行）
+            </Button>
+            <Button
+              type="dashed"
+              block
+              style={{marginTop: 8}}
+              onClick={() => server_actions.push({type: 'jenkins', title: 'Jenkins发布', timeout: 20, params_text: '{}'})}>
+              <PlusOutlined/>添加 Jenkins 发布动作
             </Button>
           </Form.Item>
         )}
@@ -217,7 +295,10 @@ class Ext2Setup2 extends React.Component {
         <Form.Item wrapperCol={{span: 14, offset: 6}} style={{marginTop: 24}}>
           <Button
             type="primary"
-            disabled={store.isReadOnly || [...host_actions, ...server_actions].filter(x => x.title && x.data).length === 0}
+            disabled={store.isReadOnly || [...host_actions, ...server_actions].filter(x => {
+              if (x.type === 'jenkins') return x.title && x.url
+              return x.title && x.data
+            }).length === 0}
             loading={this.state.loading}
             onClick={this.handleSubmit}>提交</Button>
           <Button style={{marginLeft: 20}} onClick={() => store.page -= 1}>上一步</Button>
