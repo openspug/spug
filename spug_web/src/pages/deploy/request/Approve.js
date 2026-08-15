@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input, Switch, message } from 'antd';
 import http from 'libs/http';
+import { t } from 'libs';
 import store from './store';
 import styles from './index.module.less';
 
@@ -20,7 +21,7 @@ export default observer(function () {
     const formData = form.getFieldsValue();
     http.patch(`/api/deploy/request/${store.record.id}/`, formData)
       .then(res => {
-        message.success('操作成功');
+        message.success(t('操作成功'));
         store.approveVisible = false;
         store.fetchRecords()
       }, () => setLoading(false))
@@ -36,17 +37,17 @@ export default observer(function () {
       visible
       width={600}
       maskClosable={false}
-      title="审核发布申请"
+      title={t('审核发布申请')}
       onCancel={() => store.approveVisible = false}
       confirmLoading={loading}
       className={styles.approve}
       onOk={handleSubmit}>
       <Form form={form} labelCol={{span: 6}} wrapperCol={{span: 14}} onValuesChange={handleChange}>
-        <Form.Item required name="is_pass" initialValue={true} valuePropName="checked" label="审批结果">
-          <Switch checkedChildren="通过" unCheckedChildren="驳回"/>
+        <Form.Item required name="is_pass" initialValue={true} valuePropName="checked" label={t('审批结果')}>
+          <Switch checkedChildren={t('通过')} unCheckedChildren={t('驳回')}/>
         </Form.Item>
-        <Form.Item name="reason" required={isPass === false} label={isPass ? '审批意见' : '驳回原因'}>
-          <Input.TextArea placeholder={isPass ? '请输入审批意见' : '请输入驳回原因'}/>
+        <Form.Item name="reason" required={isPass === false} label={isPass ? t('审批意见') : t('驳回原因')}>
+          <Input.TextArea placeholder={isPass ? t('请输入审批意见') : t('请输入驳回原因')}/>
         </Form.Item>
       </Form>
     </Modal>

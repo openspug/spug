@@ -7,6 +7,7 @@ import React, { useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Input } from 'antd';
 import { SearchForm, AuthDiv, Breadcrumb } from 'components';
+import { t } from 'libs';
 import ComTable from './Table';
 import ComForm from './Form';
 import Ext1Form from './Ext1Form';
@@ -26,16 +27,16 @@ export default observer(function () {
   return (
     <AuthDiv auth="deploy.app.view">
       <Breadcrumb>
-        <Breadcrumb.Item>首页</Breadcrumb.Item>
-        <Breadcrumb.Item>应用发布</Breadcrumb.Item>
-        <Breadcrumb.Item>应用管理</Breadcrumb.Item>
+        <Breadcrumb.Item>{t('首页')}</Breadcrumb.Item>
+        <Breadcrumb.Item>{t('应用发布')}</Breadcrumb.Item>
+        <Breadcrumb.Item>{t('应用管理')}</Breadcrumb.Item>
       </Breadcrumb>
       <SearchForm>
-        <SearchForm.Item span={7} title="应用名称">
-          <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
+        <SearchForm.Item span={7} title={t('应用名称')}>
+          <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder={t('请输入')}/>
         </SearchForm.Item>
-        <SearchForm.Item span={7} title="描述信息">
-          <Input allowClear value={store.f_desc} onChange={e => store.f_desc = e.target.value} placeholder="请输入"/>
+        <SearchForm.Item span={7} title={t('描述信息')}>
+          <Input allowClear value={store.f_desc} onChange={e => store.f_desc = e.target.value} placeholder={t('请输入')}/>
         </SearchForm.Item>
       </SearchForm>
       <ComTable/>

@@ -8,7 +8,7 @@ import { observer } from 'mobx-react';
 import { message } from 'antd';
 import { ACEditor } from 'components';
 import store from './store';
-import { http } from 'libs';
+import { http, t } from 'libs';
 
 @observer
 class TextView extends React.Component {
@@ -35,7 +35,7 @@ class TextView extends React.Component {
     const formData = {type: store.type, o_id: store.id, env_id: store.env.id, data: this.state.body};
     return http.post('/api/config/parse/text/', formData)
       .then(res => {
-        message.success('保存成功');
+        message.success(t('保存成功'));
         store.fetchRecords().then(this.updateValue)
       })
   };

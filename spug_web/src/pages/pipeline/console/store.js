@@ -19,7 +19,7 @@ class Store {
       if (!this.node._host_id) this.node._host_id = this.node._targets[0].id
       return `${this.node.id}.${this.node._host_id}`
     } else if (this.node.module === 'build') {
-      this._host_id = this.node.target
+      this.node._host_id = this.node.target
     }
     return this.node.id
   }

@@ -8,6 +8,7 @@ import { observer } from 'mobx-react';
 import { Row, Col } from 'antd';
 import { CodeOutlined } from '@ant-design/icons';
 import { AuthDiv, Breadcrumb, AuthButton } from 'components';
+import { t } from 'libs';
 import Group from './Group';
 import ComTable from './Table';
 import ComForm from './Form';
@@ -30,9 +31,9 @@ export default observer(function () {
   return (
     <AuthDiv auth="host.host.view">
       <Breadcrumb extra={<AuthButton auth="host.console.view|host.console.list" type="primary" icon={<CodeOutlined/>}
-                                     onClick={openTerminal}>Web 终端</AuthButton>}>
-        <Breadcrumb.Item>首页</Breadcrumb.Item>
-        <Breadcrumb.Item>主机管理</Breadcrumb.Item>
+                                     onClick={openTerminal}>{t('Web 终端')}</AuthButton>}>
+        <Breadcrumb.Item>{t('首页')}</Breadcrumb.Item>
+        <Breadcrumb.Item>{t('主机管理')}</Breadcrumb.Item>
       </Breadcrumb>
 
       <Row gutter={12}>

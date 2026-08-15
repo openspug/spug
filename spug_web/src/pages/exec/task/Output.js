@@ -17,7 +17,7 @@ import {
 import { FitAddon } from 'xterm-addon-fit';
 import { Terminal } from 'xterm';
 import style from './index.module.less';
-import { http, X_TOKEN } from 'libs';
+import { http, X_TOKEN, t } from 'libs';
 import store from './store';
 import gStore from 'gStore';
 
@@ -124,7 +124,7 @@ function OutView(props) {
   return (
     <div className={style.output}>
       <div className={style.side}>
-        <PageHeader onBack={props.onBack} title="执行详情"/>
+        <PageHeader onBack={props.onBack} title={t('执行详情')}/>
         <div className={style.tags}>
           <div
             className={`${style.item} ${tag === '0' ? style.pendingOn : style.pending}`}
@@ -168,7 +168,7 @@ function OutView(props) {
           {loading ? (
             <LoadingOutlined className={style.icon} style={{color: '#faad14'}}/>
           ) : (
-            <Tooltip title="终止执行">
+            <Tooltip title={t('终止执行')}>
               {cItem.status === -2 ? (
                 <StopOutlined className={style.icon} style={{color: '#faad14'}} onClick={handleTerminate}/>
               ) : (
@@ -176,7 +176,7 @@ function OutView(props) {
               )}
             </Tooltip>
           )}
-          <Tooltip title="打开web终端">
+          <Tooltip title={t('打开web终端')}>
             <CodeOutlined className={style.icon} onClick={() => openTerminal(current)}/>
           </Tooltip>
         </div>

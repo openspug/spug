@@ -12,7 +12,7 @@ import HostSelector from 'pages/host/Selector';
 import hostStore from 'pages/host/store';
 import moment from 'moment';
 import lds from 'lodash';
-import { http } from 'libs';
+import { http, t } from 'libs';
 import S from './store';
 import styles from './index.module.less';
 
@@ -26,15 +26,15 @@ export default observer(function (props) {
     formData['trigger_args'] = _parse_args();
     if (S.trigger === 'monitor') {
       if (formData.targets.length > 1) {
-        return message.error('监控告警类触发器，只能选择一个执行对象')
+        return message.error(t('监控告警类触发器，只能选择一个执行对象'))
       }
     } else if (formData.targets.includes('monitor')) {
-      return message.error('执行对象选择有误，请重新选择')
+      return message.error(t('执行对象选择有误，请重新选择'))
     }
     setLoading(true)
     http.post('/api/schedule/', formData)
       .then(res => {
-        message.success('操作成功');
+        message.success(t('操作成功'));
         S.formVisible = false;
         S.fetchRecords()
       }, () => setLoading(false))
@@ -68,20 +68,20 @@ export default observer(function (props) {
   return (
     <Container visible={props.visible} style={{width: 420, margin: '0 auto'}}>
       <Form layout="vertical" style={{minHeight: 200}}>
-        <Form.Item required label="执行对象">
+        <Form.Item required label={t('执行对象')}>
           {S.targets.map((id, index) => (
             <React.Fragment key={index}>
               <Select
                 value={id}
                 showSearch
-                placeholder="请选择"
+                placeholder={t('请选择')}
                 optionFilterProp="children"
                 style={{width: 'calc(100% - 40px)', marginRight: 10, marginBottom: 12}}
                 filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                 onChange={v => S.editTarget(index, v)}>
-                <Select.Option value="local" disabled={S.targets.includes('local')}>本机</Select.Option>
+                <Select.Option value="local" disabled={S.targets.includes('local')}>{t('本机')}</Select.Option>
                 {S.trigger === 'monitor' &&
-                  <Select.Option value="monitor" disabled={S.targets.includes('monitor')}>告警关联主机</Select.Option>}
+                  <Select.Option value="monitor" disabled={S.targets.includes('monitor')}>{t('告警关联主机')}</Select.Option>}
                 {hostStore.rawRecords.map(item => (
                   <Select.Option key={item.id} value={item.id} disabled={S.targets.includes(item.id)}>
                     {`${item.name}(${item['hostname']}:${item['port']})`}
@@ -94,17 +94,17 @@ export default observer(function (props) {
             </React.Fragment>
           ))}
         </Form.Item>
-        <Form.Item extra="本机即Spug服务运行所在的容器或主机。">
+        <Form.Item extra={t('本机即Spug服务运行所在的容器或主机。')}>
           <HostSelector value={S.targets.filter(x => x !== 'local')} onChange={handleChange}>
             <Button type="dashed" style={{width: 'calc(100% - 40px)'}} disabled={S.trigger === 'monitor'}>
-              <PlusOutlined/>添加执行对象
+              <PlusOutlined/>{t('添加执行对象')}
             </Button>
           </HostSelector>
         </Form.Item>
         <Form.Item>
           <Button loading={loading} disabled={S.targets.filter(x => x).length === 0} type="primary"
-                  onClick={handleSubmit}>提交</Button>
-          <Button style={{marginLeft: 20}} onClick={() => S.page -= 1}>上一步</Button>
+                  onClick={handleSubmit}>{t('提交')}</Button>
+          <Button style={{marginLeft: 20}} onClick={() => S.page -= 1}>{t('上一步')}</Button>
         </Form.Item>
       </Form>
     </Container>

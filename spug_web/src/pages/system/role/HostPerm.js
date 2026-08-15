@@ -9,6 +9,7 @@ import { Modal, Form, Button, message, TreeSelect } from 'antd';
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import hostStore from 'pages/host/store';
 import http from 'libs/http';
+import { t } from 'libs';
 import store from './store';
 import styles from './index.module.css';
 
@@ -24,7 +25,7 @@ export default observer(function () {
     setLoading(true);
     http.patch('/api/account/role/', {id: store.record.id, group_perms: groups})
       .then(res => {
-        message.success('操作成功');
+        message.success(t('操作成功'));
         store.hostPermVisible = false;
         store.fetchRecords()
       }, () => setLoading(false))
@@ -49,12 +50,12 @@ export default observer(function () {
       visible
       width={400}
       maskClosable={false}
-      title="主机权限设置"
+      title={t('主机权限设置')}
       onCancel={() => store.hostPermVisible = false}
       confirmLoading={loading}
       onOk={handleSubmit}>
       <Form layout="vertical">
-        <Form.Item label="授权访问主机组" tooltip="主机权限将全局影响属于该角色的用户能够看到的主机。">
+        <Form.Item label={t('授权访问主机组')} tooltip={t('主机权限将全局影响属于该角色的用户能够看到的主机。')}>
           {groups.map((id, index) => (
             <div className={styles.groupItem} key={index}>
               <TreeSelect
@@ -64,7 +65,7 @@ export default observer(function () {
                 treeNodeLabelProp="name"
                 treeData={hostStore.rawTreeData}
                 onChange={value => handleChange(index, value)}
-                placeholder="请选择分组"/>
+                placeholder={t('请选择分组')}/>
               {groups.length > 1 && (
                 <MinusCircleOutlined className={styles.delIcon} onClick={() => handleChange(index)}/>
               )}
@@ -73,7 +74,7 @@ export default observer(function () {
         </Form.Item>
         <Form.Item>
           <Button type="dashed" style={{width: '100%'}} onClick={() => handleChange()}>
-            <PlusOutlined/>添加授权主机组
+            <PlusOutlined/>{t('添加授权主机组')}
           </Button>
         </Form.Item>
       </Form>

@@ -7,7 +7,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { message } from 'antd';
 import { ACEditor } from 'components';
-import { http } from 'libs';
+import { http, t } from 'libs';
 import store from './store';
 
 @observer
@@ -37,11 +37,11 @@ class JSONView extends React.Component {
       const formData = {type: store.type, o_id: store.id, env_id: store.env.id, data};
       return http.post('/api/config/parse/json/', formData)
         .then(res => {
-          message.success('保存成功');
+          message.success(t('保存成功'));
           store.fetchRecords().then(this.updateValue)
         })
     } catch (err) {
-      message.error('解析JSON失败，请检查输入内容')
+      message.error(t('解析JSON失败，请检查输入内容'))
     }
   };
 

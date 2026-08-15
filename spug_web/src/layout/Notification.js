@@ -7,7 +7,7 @@ import {
   ScheduleOutlined,
   AlertOutlined
 } from '@ant-design/icons';
-import { http, X_TOKEN } from 'libs';
+import { http, X_TOKEN, t } from 'libs';
 import moment from 'moment';
 import styles from './layout.module.less';
 
@@ -74,7 +74,7 @@ export default function () {
           const {title, content} = JSON.parse(e.data);
           const key = `open${Date.now()}`;
           const description = <div style={{whiteSpace: 'pre-wrap'}}>{content}</div>;
-          const btn = <Button type="primary" size="small" onClick={() => notification.close(key)}>知道了</Button>;
+          const btn = <Button type="primary" size="small" onClick={() => notification.close(key)}>{t('知道了')}</Button>;
           notification.warning({message: title, description, btn, key, top: 64, duration: null})
         } catch (e) {
 
@@ -128,7 +128,7 @@ export default function () {
                 </List.Item>
               )}/>
             {notifies.length !== 0 && (
-              <div className={styles.btn} onClick={handleReadAll}>全部 已读</div>
+              <div className={styles.btn} onClick={handleReadAll}>{t('全部 已读')}</div>
             )}
           </Menu.Item>
         </Menu>

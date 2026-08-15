@@ -8,7 +8,7 @@ import { observer } from 'mobx-react';
 import { UploadOutlined } from '@ant-design/icons';
 import { Modal, Form, Input, Upload, DatePicker, message, Button } from 'antd';
 import HostSelector from './HostSelector';
-import { http, clsNames, X_TOKEN } from 'libs';
+import { http, clsNames, X_TOKEN, t } from 'libs';
 import styles from './index.module.less';
 import store from './store';
 import lds from 'lodash';
@@ -30,7 +30,7 @@ export default observer(function () {
 
   function handleSubmit() {
     if (host_ids.length === 0) {
-      return message.error('请至少选择一个要发布的目标主机')
+      return message.error(t('请至少选择一个要发布的目标主机'))
     }
     setLoading(true);
     const formData = form.getFieldsValue();
@@ -42,7 +42,7 @@ export default observer(function () {
     if (fileList.length > 0) formData['extra'] = lds.pick(fileList[0], ['path', 'name']);
     http.post('/api/deploy/request/ext2/', formData)
       .then(res => {
-        message.success('操作成功');
+        message.success(t('操作成功'));
         store.ext2Visible = false;
         store.fetchRecords()
       }, () => setLoading(false))
@@ -74,53 +74,53 @@ export default observer(function () {
       visible
       width={700}
       maskClosable={false}
-      title={`${store.record.id ? '编辑' : '新建'}发布申请`}
+      title={store.record.id ? t('编辑发布申请') : t('新建发布申请')}
       onCancel={() => store.ext2Visible = false}
       confirmLoading={loading}
       onOk={handleSubmit}>
       <Form form={form} initialValues={store.record} labelCol={{span: 6}} wrapperCol={{span: 16}}>
-        <Form.Item required name="name" label="申请标题">
-          <Input placeholder="请输入申请标题"/>
+        <Form.Item required name="name" label={t('申请标题')}>
+          <Input placeholder={t('请输入申请标题')}/>
         </Form.Item>
         <Form.Item
           name="version"
           label="SPUG_RELEASE"
-          tooltip="可以在自定义脚本中引用该变量，用于设置本次发布相关的动态变量，在脚本中通过 $SPUG_RELEASE 来使用该值。">
-          <Input placeholder="请输入环境变量 SPUG_RELEASE 的值"/>
+          tooltip={t('可以在自定义脚本中引用该变量，用于设置本次发布相关的动态变量，在脚本中通过 $SPUG_RELEASE 来使用该值。')}>
+          <Input placeholder={t('请输入环境变量 SPUG_RELEASE 的值')}/>
         </Form.Item>
         {require_upload && (
-          <Form.Item required label="上传数据" tooltip="通过数据传输动作来使用上传的文件。"
+          <Form.Item required label={t('上传数据')} tooltip={t('通过数据传输动作来使用上传的文件。')}
                      className={clsNames(styles.upload, fileList.length ? styles.uploadHide : null)}>
             <Upload.Dragger name="file" fileList={fileList} headers={{'X-Token': X_TOKEN}} beforeUpload={handleUpload}
                             data={{deploy_id}} onChange={handleUploadChange}>
-              <Button type="link" loading={uploading} icon={<UploadOutlined/>}>点击或拖动文件至此区域上传</Button>
+              <Button type="link" loading={uploading} icon={<UploadOutlined/>}>{t('点击或拖动文件至此区域上传')}</Button>
             </Upload.Dragger>
           </Form.Item>
         )}
-        <Form.Item required label="目标主机" tooltip="可以通过创建多个发布申请单，选择主机分批发布。">
+        <Form.Item required label={t('目标主机')} tooltip={t('可以通过创建多个发布申请单，选择主机分批发布。')}>
           {host_ids.length > 0 && (
-            <span style={{marginRight: 16}}>已选择 {host_ids.length} 台（可选{app_host_ids.length}）</span>
+            <span style={{marginRight: 16}}>{t('已选择 {} 台（可选{}）', host_ids.length, app_host_ids.length)}</span>
           )}
-          <Button type="link" style={{padding: 0}} onClick={() => setVisible(true)}>选择主机</Button>
+          <Button type="link" style={{padding: 0}} onClick={() => setVisible(true)}>{t('选择主机')}</Button>
         </Form.Item>
-        <Form.Item name="desc" label="备注信息">
-          <Input placeholder="请输入备注信息"/>
+        <Form.Item name="desc" label={t('备注信息')}>
+          <Input placeholder={t('请输入备注信息')}/>
         </Form.Item>
         {type !== '2' && (
-          <Form.Item label="定时发布" tooltip="在到达指定时间后自动发布，会有最多1分钟的延迟。">
+          <Form.Item label={t('定时发布')} tooltip={t('在到达指定时间后自动发布，会有最多1分钟的延迟。')}>
             <DatePicker
               showTime
               value={plan}
               style={{width: 180}}
               format="YYYY-MM-DD HH:mm"
-              placeholder="请设置发布时间"
+              placeholder={t('请设置发布时间')}
               onChange={setPlan}/>
-            {plan ? <span style={{marginLeft: 24, fontSize: 12, color: '#888'}}>大约 {plan.fromNow()}</span> : null}
+            {plan ? <span style={{marginLeft: 24, fontSize: 12, color: '#888'}}>{t('大约 {}', plan.fromNow())}</span> : null}
           </Form.Item>
         )}
       </Form>
       {visible && <HostSelector
-        title="可选主机列表"
+        title={t('可选主机列表')}
         host_ids={host_ids}
         app_host_ids={app_host_ids}
         onCancel={() => setVisible(false)}

@@ -9,7 +9,7 @@ import { Tooltip, Tabs, Popconfirm, Badge } from 'antd';
 import { CodeOutlined, StopOutlined } from '@ant-design/icons';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
-import { http, X_TOKEN } from 'libs';
+import { http, X_TOKEN, t } from 'libs';
 import css from './body.module.less';
 import S from './store';
 import gStore from 'gStore';
@@ -115,22 +115,22 @@ function Body() {
       <div className={css.header}>
         <div className={css.title}>{S.node?.name}</div>
         {wsState === '0' ? (
-          <Badge status="processing" text="Websocket 正在连接中"/>
+          <Badge status="processing" text={t('Websocket 正在连接中')}/>
         ) : wsState === '1' ? (
-          <Badge status="success" text="Websocket 已连接"/>
+          <Badge status="success" text={t('Websocket 已连接')}/>
         ) : (
-          <Badge status="error" text="Websocket 连接已关闭"/>
+          <Badge status="error" text={t('Websocket 连接已关闭')}/>
         )}
 
         {['build', 'ssh_exec', 'data_transfer', 'data_upload'].includes(S.node.module) && S.outputs[S.nodeID]?.status === 'processing' ? (
-          <Popconfirm title="确定要终止执行？" onConfirm={handleTerminate}>
+          <Popconfirm title={t('确定要终止执行？')} onConfirm={handleTerminate}>
             <StopOutlined className={css.icon} style={{color: '#faad14'}}/>
           </Popconfirm>
         ) : (
           <StopOutlined className={css.icon} style={{color: '#dfdfdf'}}/>
         )}
         {['build', 'ssh_exec', 'data_transfer', 'data_upload'].includes(S.node.module) ? (
-          <Tooltip title="打开web终端">
+          <Tooltip title={t('打开web终端')}>
             <CodeOutlined className={css.icon} onClick={() => openTerminal()}/>
           </Tooltip>
         ) : (

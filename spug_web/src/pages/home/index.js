@@ -6,6 +6,7 @@
 import React from 'react';
 import { Row, Col } from 'antd';
 import { Breadcrumb } from 'components';
+import { t } from 'libs';
 import NoticeIndex from './Notice';
 import TodoIndex from './Todo';
 import NavIndex from './Nav';
@@ -14,8 +15,8 @@ function HomeIndex() {
   return (
     <div>
       <Breadcrumb>
-        <Breadcrumb.Item>首页</Breadcrumb.Item>
-        <Breadcrumb.Item>工作台</Breadcrumb.Item>
+        <Breadcrumb.Item>{t('首页')}</Breadcrumb.Item>
+        <Breadcrumb.Item>{t('工作台')}</Breadcrumb.Item>
       </Breadcrumb>
       <Row gutter={12}>
         <Col span={16}>

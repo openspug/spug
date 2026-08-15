@@ -113,7 +113,7 @@ class LDAPUserView(AdminView):
         status, ret = ldap.all_user()
         if status:
             cn_key, sn_key = ldap_config.get('map_username'), ldap_config.get('map_nickname')
-            system_users = [x.username for x in User.objects.filter(type='ldap', deleted_by_id__isnull=True)]
+            system_users = [x.username for x in User.objects.filter(type='ldap', is_deleted=False)]
             for index, u in enumerate(ret):
                 u['cn'] = u[cn_key]
                 u['sn'] = u[sn_key]

@@ -4,7 +4,7 @@
  * Released under the AGPL-3.0 License.
  */
 import { computed, observable } from 'mobx';
-import { http, includes } from 'libs';
+import { http, includes, t } from 'libs';
 import { message } from 'antd';
 import S from './console/store';
 import lds from 'lodash';
@@ -41,7 +41,7 @@ class Store {
     return http.post('/api/pipeline/', this.record)
       .then(res => {
         this.record = res
-        message.success('保存成功')
+        message.success(t('保存成功'))
       })
   }
 

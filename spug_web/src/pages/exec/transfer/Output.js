@@ -16,7 +16,7 @@ import {
 import { FitAddon } from 'xterm-addon-fit';
 import { Terminal } from 'xterm';
 import style from './index.module.less';
-import { X_TOKEN, http } from 'libs';
+import { X_TOKEN, http, t } from 'libs';
 import store from './store';
 import gStore from 'gStore';
 
@@ -113,7 +113,7 @@ function OutView(props) {
   return (
     <div className={style.output}>
       <div className={style.side}>
-        <PageHeader onBack={props.onBack} title="执行详情"/>
+        <PageHeader onBack={props.onBack} title={t('执行详情')}/>
         <div className={style.tags}>
           <div
             className={`${style.item} ${tag === '0' ? style.pendingOn : style.pending}`}

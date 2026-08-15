@@ -7,6 +7,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Transfer, message, Tabs, Alert } from 'antd';
 import http from 'libs/http';
+import { t } from 'libs';
 import envStore from 'pages/config/environment/store';
 import appStore from 'pages/config/app/store';
 import store from './store';
@@ -51,13 +52,13 @@ class DeployPerm extends React.Component {
     const envs = lds.get(store.deployRel, 'envs', [])
     const apps = lds.get(store.deployRel, 'apps', [])
     if (!(envs.length === 0 && apps.length === 0)) {
-      if (envs.length === 0) return message.error('请至少设置一个环境权限')
-      if (apps.length === 0) return message.error('请至少设置一个应用权限')
+      if (envs.length === 0) return message.error(t('请至少设置一个环境权限'))
+      if (apps.length === 0) return message.error(t('请至少设置一个应用权限'))
     }
     this.setState({loading: true});
     http.patch('/api/account/role/', {id: store.record.id, deploy_perms: {envs, apps}})
       .then(res => {
-        message.success('操作成功');
+        message.success(t('操作成功'));
         store.deployPermVisible = false;
         store.fetchRecords()
       }, () => this.setState({loading: false}))
@@ -74,7 +75,7 @@ class DeployPerm extends React.Component {
         visible
         width={800}
         maskClosable={false}
-        title="发布权限设置"
+        title={t('发布权限设置')}
         onCancel={() => store.deployPermVisible = false}
         confirmLoading={this.state.loading}
         onOk={this.handleSubmit}>
@@ -83,14 +84,14 @@ class DeployPerm extends React.Component {
           showIcon
           type="info"
           style={{margin: '0 24px 24px 24px'}}
-          message="环境权限和应用权限都需要设置，应用的创建者将默认拥有该应用的发布权限。"/>
+          message={t('环境权限和应用权限都需要设置，应用的创建者将默认拥有该应用的发布权限。')}/>
         <Tabs tabPosition="left">
-          <Tabs.TabPane tab="环境权限" key="env">
-            <Form.Item label="设置可发布至哪个环境">
+          <Tabs.TabPane tab={t('环境权限')} key="env">
+            <Form.Item label={t('设置可发布至哪个环境')}>
               <Transfer
                 showSearch
                 listStyle={{width: 280, minHeight: 300}}
-                titles={['所有环境', '已选环境']}
+                titles={[t('所有环境'), t('已选环境')]}
                 dataSource={this.state.envs}
                 targetKeys={store.deployRel.envs}
                 filterOption={this.handleFilter}
@@ -98,12 +99,12 @@ class DeployPerm extends React.Component {
                 render={item => `${item.name} - ${item._key}`}/>
             </Form.Item>
           </Tabs.TabPane>
-          <Tabs.TabPane tab="应用权限" key="app">
-            <Form.Item label="设置可发布的应用">
+          <Tabs.TabPane tab={t('应用权限')} key="app">
+            <Form.Item label={t('设置可发布的应用')}>
               <Transfer
                 showSearch
                 listStyle={{width: 280, minHeight: 300}}
-                titles={['所有应用', '已选应用']}
+                titles={[t('所有应用'), t('已选应用')]}
                 dataSource={this.state.apps}
                 targetKeys={store.deployRel.apps}
                 filterOption={this.handleFilter}

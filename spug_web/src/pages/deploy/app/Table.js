@@ -14,7 +14,7 @@ import {
   PlusOutlined
 } from '@ant-design/icons';
 import { Table, Modal, Tag, Divider, message } from 'antd';
-import { http, hasPermission } from 'libs';
+import { http, hasPermission, t } from 'libs';
 import { Action, TableCard, AuthButton } from "components";
 import CloneConfirm from './CloneConfirm';
 import store from './store';
@@ -27,11 +27,11 @@ function ComTable() {
     let deploy = null;
     Modal.confirm({
       icon: <ExclamationCircleOutlined/>,
-      title: '选择克隆对象',
+      title: t('选择克隆对象'),
       content: <CloneConfirm onChange={v => deploy = v}/>,
       onOk: () => {
         if (!deploy) {
-          message.error('请选择要克隆的应用及环境')
+          message.error(t('请选择要克隆的应用及环境'))
           return Promise.reject()
         }
         deploy.env_id = undefined;
@@ -43,12 +43,12 @@ function ComTable() {
   function handleDelete(e, text) {
     e.stopPropagation();
     Modal.confirm({
-      title: '删除确认',
-      content: `确定要删除应用【${text['name']}】?`,
+      title: t('删除确认'),
+      content: t('确定要删除应用【{}】?', text['name']),
       onOk: () => {
         return http.delete('/api/app/', {params: {id: text.id}})
           .then(() => {
-            message.success('删除成功');
+            message.success(t('删除成功'));
             store.fetchRecords()
           })
       }
@@ -57,12 +57,12 @@ function ComTable() {
 
   function handleDeployDelete(text) {
     Modal.confirm({
-      title: '删除确认',
-      content: `删除发布配置将会影响基于该配置所创建发布申请的发布和回滚功能，确定要删除【${lds.get(envStore.idMap, `${text.env_id}.name`)}】的发布配置?`,
+      title: t('删除确认'),
+      content: t('删除发布配置将会影响基于该配置所创建发布申请的发布和回滚功能，确定要删除【{}】的发布配置?', lds.get(envStore.idMap, `${text.env_id}.name`)),
       onOk: () => {
         return http.delete('/api/app/deploy/', {params: {id: text.id}})
           .then(() => {
-            message.success('删除成功');
+            message.success(t('删除成功'));
             store.loadDeploys(text.app_id)
           })
       }
@@ -89,25 +89,25 @@ function ComTable() {
         loading={record['deploys'] === undefined}
         dataSource={record['deploys']}
         pagination={false}>
-        <Table.Column width={80} title="模式" dataIndex="extend" render={value => value === '1' ?
+        <Table.Column width={80} title={t('模式')} dataIndex="extend" render={value => value === '1' ?
           <OrderedListOutlined style={{fontSize: 20, color: '#1890ff'}}/> :
           <BuildOutlined style={{fontSize: 20, color: '#1890ff'}}/>}/>
-        <Table.Column title="发布环境" dataIndex="env_id" render={value => lds.get(envStore.idMap, `${value}.name`)}/>
-        <Table.Column title="关联主机" dataIndex="host_ids" render={value => `${value.length} 台`}/>
-        <Table.Column title="发布审核" dataIndex="is_audit"
-                      render={value => value ? <Tag color="green">开启</Tag> : <Tag color="red">关闭</Tag>}/>
+        <Table.Column title={t('发布环境')} dataIndex="env_id" render={value => lds.get(envStore.idMap, `${value}.name`)}/>
+        <Table.Column title={t('关联主机')} dataIndex="host_ids" render={value => t('{} 台', value.length)}/>
+        <Table.Column title={t('发布审核')} dataIndex="is_audit"
+                      render={value => value ? <Tag color="green">{t('开启')}</Tag> : <Tag color="red">{t('关闭')}</Tag>}/>
         {hasPermission('deploy.app.config|deploy.app.edit') && (
-          <Table.Column title="操作" render={info => (
+          <Table.Column title={t('操作')} render={info => (
             <Action>
               <Action.Button
                 auth="deploy.app.config"
                 onClick={e => store.showAutoDeploy(info)}>Webhook</Action.Button>
               {hasPermission('deploy.app.edit') ? (
-                <Action.Button onClick={e => store.showExtForm(e, record.id, info)}>编辑</Action.Button>
+                <Action.Button onClick={e => store.showExtForm(e, record.id, info)}>{t('编辑')}</Action.Button>
               ) : hasPermission('deploy.app.config') ? (
-                <Action.Button onClick={e => store.showExtForm(e, record.id, info, false, true)}>查看</Action.Button>
+                <Action.Button onClick={e => store.showExtForm(e, record.id, info, false, true)}>{t('查看')}</Action.Button>
               ) : null}
-              <Action.Button danger auth="deploy.app.edit" onClick={() => handleDeployDelete(info)}>删除</Action.Button>
+              <Action.Button danger auth="deploy.app.edit" onClick={() => handleDeployDelete(info)}>{t('删除')}</Action.Button>
             </Action>
           )}/>
         )}
@@ -118,7 +118,7 @@ function ComTable() {
   return (
     <TableCard
       tKey="da"
-      title="应用列表"
+      title={t('应用列表')}
       rowKey="id"
       loading={store.isFetching}
       dataSource={store.dataSource}
@@ -129,15 +129,15 @@ function ComTable() {
           auth="deploy.app.add"
           type="primary"
           icon={<PlusOutlined/>}
-          onClick={() => store.showForm()}>新建</AuthButton>
+          onClick={() => store.showForm()}>{t('新建')}</AuthButton>
       ]}
       pagination={{
         showSizeChanger: true,
         showLessItems: true,
-        showTotal: total => `共 ${total} 条`,
+        showTotal: total => t('共 {} 条', total),
         pageSizeOptions: ['10', '20', '50', '100']
       }}>
-      <Table.Column width={80} title="排序" key="series" render={(info) => (
+      <Table.Column width={80} title={t('排序')} key="series" render={(info) => (
         <div>
           <UpSquareOutlined
             onClick={e => handleSort(e, info, 'up')}
@@ -148,16 +148,16 @@ function ComTable() {
             style={{cursor: 'pointer', color: '#1890ff'}}/>
         </div>
       )}/>
-      <Table.Column title="应用名称" dataIndex="name"/>
-      <Table.Column title="标识符" dataIndex="key"/>
-      <Table.Column ellipsis title="描述信息" dataIndex="desc"/>
+      <Table.Column title={t('应用名称')} dataIndex="name"/>
+      <Table.Column title={t('标识符')} dataIndex="key"/>
+      <Table.Column ellipsis title={t('描述信息')} dataIndex="desc"/>
       {hasPermission('deploy.app.edit|deploy.app.del') && (
-        <Table.Column width={260} title="操作" render={info => (
+        <Table.Column width={260} title={t('操作')} render={info => (
           <Action>
-            <Action.Button auth="deploy.app.edit" onClick={e => store.showExtForm(e, info.id)}>新建发布</Action.Button>
-            <Action.Button auth="deploy.app.edit" onClick={e => handleClone(e, info.id)}>克隆发布</Action.Button>
-            <Action.Button auth="deploy.app.edit" onClick={e => store.showForm(e, info)}>编辑</Action.Button>
-            <Action.Button danger auth="deploy.app.del" onClick={e => handleDelete(e, info)}>删除</Action.Button>
+            <Action.Button auth="deploy.app.edit" onClick={e => store.showExtForm(e, info.id)}>{t('新建发布')}</Action.Button>
+            <Action.Button auth="deploy.app.edit" onClick={e => handleClone(e, info.id)}>{t('克隆发布')}</Action.Button>
+            <Action.Button auth="deploy.app.edit" onClick={e => store.showForm(e, info)}>{t('编辑')}</Action.Button>
+            <Action.Button danger auth="deploy.app.del" onClick={e => handleDelete(e, info)}>{t('删除')}</Action.Button>
           </Action>
         )}/>
       )}

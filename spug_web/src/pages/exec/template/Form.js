@@ -10,7 +10,7 @@ import { Modal, Form, Input, Select, Button, Radio, Table, Tooltip, message } fr
 import { ACEditor } from 'components';
 import HostSelector from 'pages/host/Selector';
 import Parameter from './Parameter';
-import { http, cleanCommand } from 'libs';
+import { http, cleanCommand, t } from 'libs';
 import lds from 'lodash';
 import S from './store';
 
@@ -34,7 +34,7 @@ export default observer(function () {
     formData['parameters'] = parameters;
     http.post('/api/exec/template/', formData)
       .then(res => {
-        message.success('操作成功');
+        message.success(t('操作成功'));
         S.formVisible = false;
         S.fetchRecords()
       }, () => setLoading(false))
@@ -44,10 +44,10 @@ export default observer(function () {
     let type;
     Modal.confirm({
       icon: <ExclamationCircleOutlined/>,
-      title: '添加模板类型',
+      title: t('添加模板类型'),
       content: (
         <Form layout="vertical" style={{marginTop: 24}}>
-          <Form.Item required label="模板类型">
+          <Form.Item required label={t('模板类型')}>
             <Input onChange={e => type = e.target.value}/>
           </Form.Item>
         </Form>
@@ -84,33 +84,33 @@ export default observer(function () {
       visible
       width={800}
       maskClosable={false}
-      title={S.record.id ? '编辑模板' : '新建模板'}
+      title={S.record.id ? t('编辑模板') : t('新建模板')}
       onCancel={() => S.formVisible = false}
       confirmLoading={loading}
       onOk={handleSubmit}>
       <Form form={form} initialValues={info} labelCol={{span: 6}} wrapperCol={{span: 14}}>
-        <Form.Item required label="模板类型" style={{marginBottom: 0}}>
+        <Form.Item required label={t('模板类型')} style={{marginBottom: 0}}>
           <Form.Item name="type" style={{display: 'inline-block', width: 'calc(75%)', marginRight: 8}}>
-            <Select placeholder="请选择模板类型">
+            <Select placeholder={t('请选择模板类型')}>
               {S.types.map(item => (
                 <Select.Option value={item} key={item}>{item}</Select.Option>
               ))}
             </Select>
           </Form.Item>
           <Form.Item style={{display: 'inline-block', width: 'calc(25%-8px)'}}>
-            <Button type="link" onClick={handleAddZone}>添加类型</Button>
+            <Button type="link" onClick={handleAddZone}>{t('添加类型')}</Button>
           </Form.Item>
         </Form.Item>
-        <Form.Item required name="name" label="模板名称">
-          <Input placeholder="请输入模板名称"/>
+        <Form.Item required name="name" label={t('模板名称')}>
+          <Input placeholder={t('请输入模板名称')}/>
         </Form.Item>
-        <Form.Item required name="interpreter" label="脚本语言">
+        <Form.Item required name="interpreter" label={t('脚本语言')}>
           <Radio.Group>
             <Radio.Button value="sh">Shell</Radio.Button>
             <Radio.Button value="python">Python</Radio.Button>
           </Radio.Group>
         </Form.Item>
-        <Form.Item required label="模板内容" shouldUpdate={(p, c) => p.interpreter !== c.interpreter}>
+        <Form.Item required label={t('模板内容')} shouldUpdate={(p, c) => p.interpreter !== c.interpreter}>
           {({getFieldValue}) => (
             <ACEditor
               mode={getFieldValue('interpreter')}
@@ -119,26 +119,26 @@ export default observer(function () {
               height="250px"/>
           )}
         </Form.Item>
-        <Form.Item label="参数化">
+        <Form.Item label={t('参数化')}>
           {parameters.length > 0 && (
             <Table pagination={false} bordered rowKey="id" size="small" dataSource={parameters}>
-              <Table.Column title="参数名" dataIndex="name"
+              <Table.Column title={t('参数名')} dataIndex="name"
                             render={(_, row) => <Tooltip title={row.desc}>{row.name}</Tooltip>}/>
-              <Table.Column title="变量名" dataIndex="variable"/>
-              <Table.Column title="操作" width={90} render={(item, _, index) => [
+              <Table.Column title={t('变量名')} dataIndex="variable"/>
+              <Table.Column title={t('操作')} width={90} render={(item, _, index) => [
                 <Button key="1" type="link" icon={<EditOutlined/>} onClick={() => setParameter(item)}/>,
                 <Button danger key="2" type="link" icon={<DeleteOutlined/>} onClick={() => delParameter(index)}/>
               ]}>
               </Table.Column>
             </Table>
           )}
-          <Button type="link" style={{padding: 0}} onClick={() => setParameter({})}>添加参数</Button>
+          <Button type="link" style={{padding: 0}} onClick={() => setParameter({})}>{t('添加参数')}</Button>
         </Form.Item>
-        <Form.Item label="目标主机">
+        <Form.Item label={t('目标主机')}>
           <HostSelector nullable value={info.host_ids} onChange={ids => info.host_ids = ids}/>
         </Form.Item>
-        <Form.Item name="desc" label="备注信息">
-          <Input.TextArea placeholder="请输入模板备注信息"/>
+        <Form.Item name="desc" label={t('备注信息')}>
+          <Input.TextArea placeholder={t('请输入模板备注信息')}/>
         </Form.Item>
       </Form>
       {parameter ? (

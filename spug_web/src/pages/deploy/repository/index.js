@@ -7,7 +7,7 @@ import React, { useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Select } from 'antd';
 import { SearchForm, AuthDiv, Breadcrumb, AppSelector } from 'components';
-import { includes } from 'libs';
+import { includes, t } from 'libs';
 import ComTable from './Table';
 import ComForm from './Form';
 import Console from './Console';
@@ -24,32 +24,32 @@ export default observer(function () {
   return (
     <AuthDiv auth="deploy.repository.view">
       <Breadcrumb>
-        <Breadcrumb.Item>首页</Breadcrumb.Item>
-        <Breadcrumb.Item>应用发布</Breadcrumb.Item>
-        <Breadcrumb.Item>构建仓库</Breadcrumb.Item>
+        <Breadcrumb.Item>{t('首页')}</Breadcrumb.Item>
+        <Breadcrumb.Item>{t('应用发布')}</Breadcrumb.Item>
+        <Breadcrumb.Item>{t('构建仓库')}</Breadcrumb.Item>
       </Breadcrumb>
       <SearchForm>
-        <SearchForm.Item span={6} title="应用">
+        <SearchForm.Item span={6} title={t('应用')}>
           <Select
             allowClear
             showSearch
             value={store.f_app_id}
             onChange={v => store.f_app_id = v}
             filterOption={(i, o) => includes(o.children, i)}
-            placeholder="请选择">
+            placeholder={t('请选择')}>
             {appStore.records.map(item => (
               <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
             ))}
           </Select>
         </SearchForm.Item>
-        <SearchForm.Item span={6} title="环境">
+        <SearchForm.Item span={6} title={t('环境')}>
           <Select
             allowClear
             showSearch
             value={store.f_env_id}
             onChange={v => store.f_env_id = v}
             filterOption={(i, o) => includes(o.children, i)}
-            placeholder="请选择">
+            placeholder={t('请选择')}>
             {envStore.records.map(item => (
               <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
             ))}

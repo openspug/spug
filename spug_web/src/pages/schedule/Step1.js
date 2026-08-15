@@ -9,7 +9,7 @@ import { Form, Input, Select, Modal, Button, Radio } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { LinkButton, ACEditor, Container } from 'components';
 import TemplateSelector from '../exec/task/TemplateSelector';
-import { cleanCommand } from 'libs';
+import { cleanCommand, t } from 'libs';
 import store from './store';
 
 export default observer(function (props) {
@@ -21,10 +21,10 @@ export default observer(function (props) {
     let type;
     Modal.confirm({
       icon: <ExclamationCircleOutlined/>,
-      title: '添加任务类型',
+      title: t('添加任务类型'),
       content: (
         <Form layout="vertical" style={{marginTop: 24}}>
-          <Form.Item required label="任务类型">
+          <Form.Item required label={t('任务类型')}>
             <Input onChange={e => type = e.target.value}/>
           </Form.Item>
         </Form>
@@ -57,7 +57,7 @@ export default observer(function (props) {
   let modePlaceholder;
   switch (store.record.rst_notify.mode) {
     case '0':
-      modePlaceholder = '已关闭'
+      modePlaceholder = t('已关闭')
       break
     case '1':
       modePlaceholder = 'https://oapi.dingtalk.com/robot/send?access_token=xxx'
@@ -69,29 +69,29 @@ export default observer(function (props) {
       modePlaceholder = 'https://open.feishu.cn/open-apis/bot/v2/hook/xxx'
       break
     default:
-      modePlaceholder = '请输入'
+      modePlaceholder = t('请输入')
   }
 
   return (
     <Container visible={props.visible}>
       <Form form={form} initialValues={store.record} labelCol={{span: 6}} wrapperCol={{span: 14}}>
-        <Form.Item required label="任务类型" style={{marginBottom: 0}}>
+        <Form.Item required label={t('任务类型')} style={{marginBottom: 0}}>
           <Form.Item name="type" style={{display: 'inline-block', width: '80%'}}>
-            <Select placeholder="请选择任务类型">
+            <Select placeholder={t('请选择任务类型')}>
               {store.types.map(item => (
                 <Select.Option value={item} key={item}>{item}</Select.Option>
               ))}
             </Select>
           </Form.Item>
           <Form.Item style={{display: 'inline-block', width: '20%', textAlign: 'right'}}>
-            <Button type="link" onClick={handleAddZone}>添加类型</Button>
+            <Button type="link" onClick={handleAddZone}>{t('添加类型')}</Button>
           </Form.Item>
         </Form.Item>
-        <Form.Item required name="name" label="任务名称">
-          <Input placeholder="请输入任务名称"/>
+        <Form.Item required name="name" label={t('任务名称')}>
+          <Input placeholder={t('请输入任务名称')}/>
         </Form.Item>
-        <Form.Item required label="任务内容"
-                   extra={<LinkButton onClick={() => setShowTmp(true)}>从模板添加</LinkButton>}>
+        <Form.Item required label={t('任务内容')}
+                   extra={<LinkButton onClick={() => setShowTmp(true)}>{t('从模板添加')}</LinkButton>}>
           <Form.Item noStyle name="interpreter">
             <Radio.Group buttonStyle="solid" style={{marginBottom: 12}}>
               <Radio.Button value="sh" style={{width: 80, textAlign: 'center'}}>Shell</Radio.Button>
@@ -105,11 +105,11 @@ export default observer(function (props) {
             )}
           </Form.Item>
         </Form.Item>
-        <Form.Item label="失败通知" extra={(
+        <Form.Item label={t('失败通知')} extra={(
           <span>
-            任务执行失败告警通知，
+            {t('任务执行失败告警通知，')}
             <a target="_blank" rel="noopener noreferrer"
-               href="https://spug.cc/docs/use-problem#use-dd">钉钉收不到通知？</a>
+               href="https://spug.cc/docs/use-problem#use-dd">{t('钉钉收不到通知？')}</a>
           </span>)}>
           <Input
             value={store.record.rst_notify.value}
@@ -117,21 +117,21 @@ export default observer(function (props) {
             addonBefore={(
               <Select style={{width: 100}} value={store.record.rst_notify.mode}
                       onChange={v => store.record.rst_notify.mode = v}>
-                <Select.Option value="0">关闭</Select.Option>
-                <Select.Option value="1">钉钉</Select.Option>
-                <Select.Option value="4">飞书</Select.Option>
-                <Select.Option value="3">企业微信</Select.Option>
+                <Select.Option value="0">{t('关闭')}</Select.Option>
+                <Select.Option value="1">{t('钉钉')}</Select.Option>
+                <Select.Option value="4">{t('飞书')}</Select.Option>
+                <Select.Option value="3">{t('企业微信')}</Select.Option>
                 <Select.Option value="2">Webhook</Select.Option>
               </Select>
             )}
             disabled={store.record.rst_notify.mode === '0'}
             placeholder={modePlaceholder}/>
         </Form.Item>
-        <Form.Item name="desc" label="备注信息">
-          <Input.TextArea placeholder="请输入模板备注信息"/>
+        <Form.Item name="desc" label={t('备注信息')}>
+          <Input.TextArea placeholder={t('请输入模板备注信息')}/>
         </Form.Item>
         <Form.Item shouldUpdate wrapperCol={{span: 14, offset: 6}}>
-          {() => <Button disabled={canNext()} type="primary" onClick={handleNext}>下一步</Button>}
+          {() => <Button disabled={canNext()} type="primary" onClick={handleNext}>{t('下一步')}</Button>}
         </Form.Item>
         {showTmp && <TemplateSelector onOk={handleSelect} onCancel={() => setShowTmp(false)}/>}
       </Form>

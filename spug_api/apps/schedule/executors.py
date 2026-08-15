@@ -6,6 +6,7 @@ from django.db import close_old_connections, transaction
 from apps.host.models import Host
 from apps.schedule.models import History, Task
 from apps.schedule.utils import send_fail_notify
+from libs.utils import wrap_python_command
 import subprocess
 import socket
 import time
@@ -39,8 +40,7 @@ def host_executor(host, command):
 
 def dispatch_job(host_id, interpreter, command):
     if interpreter == 'python':
-        attach = 'INTERPRETER=python\ncommand -v python3 &> /dev/null && INTERPRETER=python3'
-        command = f'{attach}\n$INTERPRETER << EOF\n# -*- coding: UTF-8 -*-\n{command}\nEOF'
+        command = wrap_python_command(command)
     if host_id == 'local':
         code, duration, out = local_executor(command)
     else:

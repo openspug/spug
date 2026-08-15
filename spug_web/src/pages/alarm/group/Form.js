@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input, Transfer, message } from 'antd';
 import http from 'libs/http';
+import { t } from 'libs';
 import store from './store';
 import contactStore from '../contact/store';
 
@@ -20,7 +21,7 @@ export default observer(function () {
     formData['id'] = store.record.id;
     http.post('/api/alarm/group/', formData)
       .then(res => {
-        message.success('操作成功');
+        message.success(t('操作成功'));
         store.formVisible = false;
         store.fetchRecords()
       }, () => setLoading(true))
@@ -31,21 +32,21 @@ export default observer(function () {
       visible
       width={800}
       maskClosable={false}
-      title={store.record.id ? '编辑联系组' : '新建联系组'}
+      title={store.record.id ? t('编辑联系组') : t('新建联系组')}
       onCancel={() => store.formVisible = false}
       confirmLoading={loading}
       onOk={handleSubmit}>
       <Form form={form} initialValues={store.record} labelCol={{span: 6}} wrapperCol={{span: 14}}>
-        <Form.Item required name="name" label="组名称">
-          <Input placeholder="请输入联系组名称"/>
+        <Form.Item required name="name" label={t('组名称')}>
+          <Input placeholder={t('请输入联系组名称')}/>
         </Form.Item>
-        <Form.Item name="desc" label="备注信息">
-          <Input.TextArea placeholder="请输入备注信息"/>
+        <Form.Item name="desc" label={t('备注信息')}>
+          <Input.TextArea placeholder={t('请输入备注信息')}/>
         </Form.Item>
-        <Form.Item required name="contacts" valuePropName="targetKeys" label="选择联系人">
+        <Form.Item required name="contacts" valuePropName="targetKeys" label={t('选择联系人')}>
           <Transfer
             rowKey={item => item.id}
-            titles={['已有联系人', '已选联系人']}
+            titles={[t('已有联系人'), t('已选联系人')]}
             listStyle={{width: 199}}
             dataSource={contactStore.records}
             render={item => item.name}/>

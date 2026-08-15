@@ -6,12 +6,21 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Layout, Dropdown, Menu, Avatar } from 'antd';
-import { MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined, LogoutOutlined, CodeOutlined } from '@ant-design/icons';
+import {
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  UserOutlined,
+  LogoutOutlined,
+  CodeOutlined,
+  GlobalOutlined,
+  CheckOutlined
+} from '@ant-design/icons';
 import { AuthDiv } from 'components';
 import Notification from './Notification';
 import styles from './layout.module.less';
 import http from '../libs/http';
 import history from '../libs/history';
+import { t, langMode, setLanguage } from '../libs/i18n';
 import avatar from './avatar.png';
 
 export default function (props) {
@@ -29,12 +38,23 @@ export default function (props) {
     <Menu>
       <Menu.Item>
         <Link to="/welcome/info">
-          <UserOutlined style={{marginRight: 10}}/>个人中心
+          <UserOutlined style={{marginRight: 10}}/>{t('个人中心')}
         </Link>
       </Menu.Item>
       <Menu.Divider/>
       <Menu.Item onClick={handleLogout}>
-        <LogoutOutlined style={{marginRight: 10}}/>退出登录
+        <LogoutOutlined style={{marginRight: 10}}/>{t('退出登录')}
+      </Menu.Item>
+    </Menu>
+  );
+
+  const LanguageMenu = (
+    <Menu selectedKeys={[langMode]}>
+      <Menu.Item key="zh" onClick={() => setLanguage('zh')}>
+        {langMode === 'zh' ? <CheckOutlined style={{marginRight: 8}}/> : <span style={{marginRight: 22}}/>}简体中文
+      </Menu.Item>
+      <Menu.Item key="en" onClick={() => setLanguage('en')}>
+        {langMode === 'en' ? <CheckOutlined style={{marginRight: 8}}/> : <span style={{marginRight: 22}}/>}English
       </Menu.Item>
     </Menu>
   );
@@ -50,6 +70,11 @@ export default function (props) {
       <AuthDiv className={styles.terminal} auth="host.console.view|host.console.list" onClick={openTerminal}>
         <CodeOutlined style={{fontSize: 16}}/>
       </AuthDiv>
+      <div className={styles.terminal}>
+        <Dropdown overlay={LanguageMenu} placement="bottomRight">
+          <GlobalOutlined style={{fontSize: 16}}/>
+        </Dropdown>
+      </div>
       <div className={styles.user}>
         <Dropdown overlay={UserMenu} style={{background: '#000'}}>
           <span className={styles.action}>

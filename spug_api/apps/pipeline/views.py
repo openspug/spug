@@ -7,9 +7,11 @@ from django.http.response import HttpResponseBadRequest
 from django_redis import get_redis_connection
 from libs import JsonParser, Argument, json_response, auth
 from libs.utils import AttrDict
+from libs.gitlib import RemoteGit
 from apps.pipeline.models import Pipeline, PipeHistory
 from apps.pipeline.utils import NodeExecutor
 from apps.host.models import Host
+from apps.credential.models import Credential
 from threading import Thread
 from pathlib import Path
 from uuid import uuid4
@@ -17,6 +19,7 @@ import json
 
 
 class PipeView(View):
+    @auth('pipeline.pipeline.view|pipeline.pipeline.edit|pipeline.pipeline.do')
     def get(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False)
@@ -31,8 +34,9 @@ class PipeView(View):
                 pipes = Pipeline.objects.all()
                 response = [x.to_list() for x in pipes]
             return json_response(response)
+        return json_response(error=error)
 
-    @auth('deploy.app.add|deploy.app.edit|config.app.add|config.app.edit')
+    @auth('pipeline.pipeline.add|pipeline.pipeline.edit')
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
@@ -48,6 +52,7 @@ class PipeView(View):
             return json_response(pipe.to_view())
         return json_response(error=error)
 
+    @auth('pipeline.pipeline.edit')
     def patch(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='请指定操作对象'),
@@ -58,7 +63,7 @@ class PipeView(View):
             Pipeline.objects.filter(pk=form.id).update(**form)
         return json_response(error=error)
 
-    @auth('deploy.app.del|config.app.del')
+    @auth('pipeline.pipeline.del')
     def delete(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='请指定操作对象')
@@ -69,11 +74,7 @@ class PipeView(View):
 
 
 class DoView(View):
-    @auth('exec.task.do')
-    def get(self, request):
-        pass
-
-    @auth('exec.task.do')
+    @auth('pipeline.pipeline.do')
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='参数错误'),
@@ -98,10 +99,25 @@ class DoView(View):
                     if item.get('dynamic_params'):
                         dynamic_params.extend(item['dynamic_params'])
                 elif item['module'] == 'build':
-                    if item.get('git_commit') == 'selective':
-                        dynamic_params.append({'variable': 'git_commit', 'name': 'Git提交', 'type': 'select', 'options': [{'value': 1, 'label': 1}], 'required': True})
-                    elif item.get('git_tag') == 'selective':
-                        dynamic_params.append({'variable': 'tag_', 'name': 'Git标签', 'type': 'text', 'required': True})
+                    if item.get('git_mode') == 'tag':
+                        if item.get('git_tag') == 'selective':
+                            credential = None
+                            if item.get('credential_id'):
+                                credential = Credential.objects.filter(pk=item['credential_id']).first()
+                            is_pass, tags = RemoteGit.fetch_remote_tags(item.get('git_url'), credential)
+                            if is_pass and tags:
+                                options = [{'value': x, 'label': x} for x in tags]
+                                dynamic_params.append(
+                                    {'variable': '_spug_git_tag', 'name': 'Git标签', 'type': 'select',
+                                     'options': options, 'required': True})
+                            else:
+                                dynamic_params.append(
+                                    {'variable': '_spug_git_tag', 'name': 'Git标签', 'type': 'text',
+                                     'required': True, 'help': '请输入要构建的Git标签名称'})
+                    elif item.get('git_commit') == 'selective':
+                        dynamic_params.append(
+                            {'variable': '_spug_git_commit', 'name': 'Git Commit', 'type': 'text', 'required': False,
+                             'help': '要构建的Commit ID，留空则使用所选分支的最新提交'})
                 elif item['module'] == 'data_upload':
                     tmp = {'variable': item['id'], 'name': item['name'], 'type': 'upload', 'required': True}
                     if item.get('accept'):
@@ -125,7 +141,7 @@ class DoView(View):
             return json_response(response)
         return json_response(error=error)
 
-    @auth('exec.task.do')
+    @auth('pipeline.pipeline.do')
     def patch(self, request):
         form, error = JsonParser(
             Argument('id', type=int, help='参数错误'),
@@ -135,7 +151,7 @@ class DoView(View):
         if error is None:
             for k, v in form.params.items():
                 if isinstance(v, list):
-                    form.params[k] = ','.join(v)
+                    form.params[k] = ','.join(str(x) for x in v)
             pipe = Pipeline.objects.get(pk=form.id)
             nodes = json.loads(pipe.nodes)
             for item in nodes:
@@ -148,12 +164,13 @@ class DoView(View):
             PipeHistory.objects.create(pipeline=pipe, ordinal=ordinal, created_by=request.user)
             rds = get_redis_connection()
 
-            executor = NodeExecutor(rds, form.token, nodes)
+            executor = NodeExecutor(rds, form.token, nodes, form.params)
             Thread(target=executor.run).start()
             return json_response()
         return json_response(error=error)
 
 
+@auth('pipeline.pipeline.do')
 def handle_data_upload(request):
     token = request.POST.get('token')
     node_id = request.POST.get('id')

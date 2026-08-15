@@ -10,7 +10,7 @@ import { NotFound } from 'components';
 import Sider from './Sider';
 import Header from './Header';
 import routes from '../routes';
-import { hasPermission, isMobile } from 'libs';
+import { hasPermission, isMobile, t } from 'libs';
 import styles from './layout.module.less';
 
 function initRoutes(Routes, routes) {
@@ -32,7 +32,7 @@ export default function () {
   useEffect(() => {
      if (isMobile) {
       setCollapsed(true);
-      message.warn('检测到您在移动设备上访问，请使用横屏模式。', 5)
+      message.warn(t('检测到您在移动设备上访问，请使用横屏模式。'), 5)
     }
     const Routes = [];
     initRoutes(Routes, routes);

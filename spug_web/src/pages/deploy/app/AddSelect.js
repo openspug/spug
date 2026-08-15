@@ -7,6 +7,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { BuildOutlined, OrderedListOutlined } from '@ant-design/icons';
 import { Modal, Card } from 'antd';
+import { t } from 'libs';
 import store from './store';
 import styles from './index.module.css';
 
@@ -49,7 +50,7 @@ class AddSelect extends React.Component {
         visible
         width={800}
         maskClosable={false}
-        title="选择发布方式"
+        title={t('选择发布方式')}
         bodyStyle={modalStyle}
         onCancel={() => store.addVisible = false}
         footer={null}>
@@ -61,9 +62,9 @@ class AddSelect extends React.Component {
             <OrderedListOutlined style={{fontSize: 36, color: '#1890ff'}} />
           </div>
           <div>
-            <div className={styles.cardTitle}>常规发布</div>
+            <div className={styles.cardTitle}>{t('常规发布')}</div>
             <div className={styles.cardDesc}>
-              由 Spug 来控制发布的主流程，你可以通过添加钩子脚本来执行额外的自定义操作。
+              {t('由 Spug 来控制发布的主流程，你可以通过添加钩子脚本来执行额外的自定义操作。')}
             </div>
           </div>
         </Card>
@@ -75,9 +76,9 @@ class AddSelect extends React.Component {
             <BuildOutlined style={{fontSize: 36, color: '#1890ff'}} />
           </div>
           <div>
-            <div className={styles.cardTitle}>自定义发布</div>
+            <div className={styles.cardTitle}>{t('自定义发布')}</div>
             <div className={styles.cardDesc}>
-              你可以完全自己定义发布的所有流程和操作，Spug 负责按顺序依次执行你记录的动作。
+              {t('你可以完全自己定义发布的所有流程和操作，Spug 负责按顺序依次执行你记录的动作。')}
             </div>
           </div>
         </Card>

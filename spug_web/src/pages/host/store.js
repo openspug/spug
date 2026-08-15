@@ -5,7 +5,7 @@
  */
 import { observable, computed, toJS } from 'mobx';
 import { message } from 'antd';
-import { http, includes } from 'libs';
+import { http, includes, t } from 'libs';
 
 class Store {
   @observable rawTreeData = [];
@@ -123,7 +123,7 @@ class Store {
     const form = {host_ids, s_group_id: group.key, t_group_id: this.group.key, is_copy: this.addByCopy};
     return http.patch('/api/host/', form)
       .then(() => {
-        message.success('操作成功');
+        message.success(t('操作成功'));
         this.fetchRecords()
       })
   }

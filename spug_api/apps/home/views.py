@@ -1,7 +1,8 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
-from apps.app.models import App
+from apps.app.models import App, Deploy
+from apps.deploy.models import DeployRequest
 from apps.host.models import Host
 from apps.schedule.models import Task
 from apps.monitor.models import Detection
@@ -68,7 +69,7 @@ def get_request(request):
 
 @auth('dashboard.dashboard.view')
 def get_deploy(request):
-    host = Host.objects.filter(deleted_at__isnull=True).count()
+    host = Host.objects.count()
     data = {x.id: {'name': x.name, 'count': 0} for x in App.objects.all()}
     for dep in Deploy.objects.all():
         data[dep.app_id]['count'] += len(json.loads(dep.host_ids))

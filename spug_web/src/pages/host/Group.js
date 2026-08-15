@@ -19,7 +19,7 @@ import {
   QuestionCircleOutlined
 } from '@ant-design/icons';
 import { AuthFragment } from 'components';
-import { hasPermission, http } from 'libs';
+import { hasPermission, http, t } from 'libs';
 import styles from './index.module.less';
 import store from './store';
 import lds from 'lodash';
@@ -51,15 +51,15 @@ export default observer(function () {
 
   const menus = (
     <Menu onClick={() => setVisible(false)}>
-      <Menu.Item key="0" icon={<FolderOutlined/>} onClick={handleAddRoot}>新建根分组</Menu.Item>
-      <Menu.Item key="1" icon={<FolderAddOutlined/>} onClick={handleAdd}>新建子分组</Menu.Item>
-      <Menu.Item key="2" icon={<EditOutlined/>} onClick={() => setAction('edit')}>重命名</Menu.Item>
+      <Menu.Item key="0" icon={<FolderOutlined/>} onClick={handleAddRoot}>{t('新建根分组')}</Menu.Item>
+      <Menu.Item key="1" icon={<FolderAddOutlined/>} onClick={handleAdd}>{t('新建子分组')}</Menu.Item>
+      <Menu.Item key="2" icon={<EditOutlined/>} onClick={() => setAction('edit')}>{t('重命名')}</Menu.Item>
       <Menu.Divider/>
-      <Menu.Item key="3" icon={<CopyOutlined/>} onClick={() => store.showSelector(true)}>添加主机</Menu.Item>
-      <Menu.Item key="4" icon={<ScissorOutlined/>} onClick={() => store.showSelector(false)}>移动主机</Menu.Item>
-      <Menu.Item key="5" icon={<CloseOutlined/>} danger onClick={handleRemoveHosts}>删除主机</Menu.Item>
+      <Menu.Item key="3" icon={<CopyOutlined/>} onClick={() => store.showSelector(true)}>{t('添加主机')}</Menu.Item>
+      <Menu.Item key="4" icon={<ScissorOutlined/>} onClick={() => store.showSelector(false)}>{t('移动主机')}</Menu.Item>
+      <Menu.Item key="5" icon={<CloseOutlined/>} danger onClick={handleRemoveHosts}>{t('删除主机')}</Menu.Item>
       <Menu.Divider/>
-      <Menu.Item key="6" icon={<DeleteOutlined/>} danger onClick={handleRemove}>删除此分组</Menu.Item>
+      <Menu.Item key="6" icon={<DeleteOutlined/>} danger onClick={handleRemove}>{t('删除此分组')}</Menu.Item>
     </Menu>
   )
 
@@ -79,8 +79,8 @@ export default observer(function () {
   function handleRemoveHosts() {
     const group = store.group;
     Modal.confirm({
-      title: '操作确认',
-      content: `批量删除【${group.title}】分组内的 ${store.counter[group.key].size} 个主机？`,
+      title: t('操作确认'),
+      content: t('批量删除【{}】分组内的 {} 个主机？', group.title, store.counter[group.key].size),
       onOk: () => http.delete('/api/host/', {params: {group_id: group.key}})
         .then(store.fetchRecords)
     })
@@ -153,7 +153,7 @@ export default observer(function () {
         size="small"
         style={{width: 'calc(100% - 24px)'}}
         defaultValue={nodeData.title}
-        placeholder="请输入"
+        placeholder={t('请输入')}
         suffix={loading ? <LoadingOutlined/> : <span/>}
         onClick={e => e.stopPropagation()}
         onBlur={handleSubmit}
@@ -176,16 +176,16 @@ export default observer(function () {
   const treeData = store.treeData;
   return (
     <Card
-      title="分组列表"
+      title={t('分组列表')}
       className={styles.group}
       extra={(
         <AuthFragment auth="admin">
           <Switch
             checked={draggable}
             onChange={setDraggable}
-            checkedChildren="排版"
-            unCheckedChildren="浏览"/>
-          <Tooltip title="排版模式下，可通过拖拽分组实现快速排序，右键点击分组进行分组管理。">
+            checkedChildren={t('排版')}
+            unCheckedChildren={t('浏览')}/>
+          <Tooltip title={t('排版模式下，可通过拖拽分组实现快速排序，右键点击分组进行分组管理。')}>
             <QuestionCircleOutlined style={{marginLeft: 8, color: '#999'}}/>
           </Tooltip>
         </AuthFragment>)}>
@@ -212,10 +212,10 @@ export default observer(function () {
         </Dropdown>
       </Spin>
       {treeData.length === 1 && treeData[0].children.length === 0 && (
-        <div style={{color: '#999', marginTop: 20, textAlign: 'center'}}>右键点击分组进行分组管理哦~</div>
+        <div style={{color: '#999', marginTop: 20, textAlign: 'center'}}>{t('右键点击分组进行分组管理哦~')}</div>
       )}
       {store.records && treeData.length === 0 && (
-        <div style={{color: '#999'}}>你还没有可访问的主机分组，请联系管理员分配主机权限。</div>
+        <div style={{color: '#999'}}>{t('你还没有可访问的主机分组，请联系管理员分配主机权限。')}</div>
       )}
     </Card>
   )

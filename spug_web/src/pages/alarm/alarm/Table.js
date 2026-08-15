@@ -8,6 +8,7 @@ import { observer } from 'mobx-react';
 import { Radio, Tag, Tooltip } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { TableCard } from 'components';
+import { t } from 'libs';
 import store from './store';
 import groupStore from '../group/store';
 
@@ -38,30 +39,30 @@ class ComTable extends React.Component {
   };
 
   columns = [{
-    title: '任务名称',
+    title: t('任务名称'),
     dataIndex: 'name',
   }, {
-    title: '监控类型',
+    title: t('监控类型'),
     dataIndex: 'type',
   }, {
-    title: '监控对象',
+    title: t('监控对象'),
     dataIndex: 'target'
   }, {
-    title: '状态',
+    title: t('状态'),
     dataIndex: 'status',
-    render: value => value === '1' ? <Tag color="orange">报警发生</Tag> : <Tag color="green">故障恢复</Tag>
+    render: value => value === '1' ? <Tag color="orange">{t('报警发生')}</Tag> : <Tag color="green">{t('故障恢复')}</Tag>
   }, {
-    title: '持续时间',
+    title: t('持续时间'),
     dataIndex: 'duration',
   }, {
-    title: '通知方式',
+    title: t('通知方式'),
     dataIndex: 'notify_mode',
   }, {
-    title: '通知对象',
+    title: t('通知对象'),
     dataIndex: 'notify_grp',
     render: value => value.map(id => this.state.groupMap[id]).join(',')
   }, {
-    title: '发生时间',
+    title: t('发生时间'),
     dataIndex: 'created_at'
   }];
 
@@ -72,8 +73,8 @@ class ComTable extends React.Component {
         rowKey="id"
         title={(
           <div style={{display: 'flex', alignItems: 'center'}}>
-            <div>报警历史记录</div>
-            <Tooltip title="每天自动清理，仅保留最近30天的报警记录。">
+            <div>{t('报警历史记录')}</div>
+            <Tooltip title={t('每天自动清理，仅保留最近30天的报警记录。')}>
               <QuestionCircleOutlined style={{color: '#999', marginLeft: 8}}/>
             </Tooltip>
           </div>
@@ -83,15 +84,15 @@ class ComTable extends React.Component {
         onReload={store.fetchRecords}
         actions={[
           <Radio.Group value={store.f_status} onChange={e => store.f_status = e.target.value}>
-            <Radio.Button value="">全部</Radio.Button>
-            <Radio.Button value="1">报警发生</Radio.Button>
-            <Radio.Button value="2">报警恢复</Radio.Button>
+            <Radio.Button value="">{t('全部')}</Radio.Button>
+            <Radio.Button value="1">{t('报警发生')}</Radio.Button>
+            <Radio.Button value="2">{t('报警恢复')}</Radio.Button>
           </Radio.Group>
         ]}
         pagination={{
           showSizeChanger: true,
           showLessItems: true,
-          showTotal: total => `共 ${total} 条`,
+          showTotal: total => t('共 {} 条', total),
           pageSizeOptions: ['10', '20', '50', '100']
         }}
         columns={this.columns}/>

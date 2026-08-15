@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, List, Modal, Form, Input, Switch, Divider, Typography } from 'antd';
 import { DownSquareOutlined, PlusOutlined, UpSquareOutlined, SoundOutlined, DeleteOutlined } from '@ant-design/icons';
 import { AuthButton } from 'components';
-import { http } from 'libs';
+import { http, t } from 'libs';
 import styles from './index.module.less';
 
 function NoticeIndex(props) {
@@ -73,8 +73,8 @@ function NoticeIndex(props) {
 
   function handleDelete(item) {
     Modal.confirm({
-      title: '操作确认',
-      content: `确定要删除系统公告【${item.title}】？`,
+      title: t('操作确认'),
+      content: t('确定要删除系统公告【{}】？', item.title),
       onOk: () => http.delete('/api/home/notice/', {params: {id: item.id}})
         .then(fetchRecords)
     })
@@ -82,14 +82,14 @@ function NoticeIndex(props) {
 
   return (
     <Card
-      title="系统公告"
+      title={t('系统公告')}
       loading={fetching}
       className={styles.notice}
       extra={<AuthButton auth="admin" type="link"
-                         onClick={() => setIsEdit(!isEdit)}>{isEdit ? '完成' : '编辑'}</AuthButton>}>
+                         onClick={() => setIsEdit(!isEdit)}>{isEdit ? t('完成') : t('编辑')}</AuthButton>}>
       {isEdit ? (
         <List>
-          <div className={styles.add} onClick={() => showForm({})}><PlusOutlined/>新建公告</div>
+          <div className={styles.add} onClick={() => showForm({})}><PlusOutlined/>{t('新建公告')}</div>
           {records.map(item => (
             <List.Item key={item.id}>
               <div className={styles.item}>
@@ -112,25 +112,25 @@ function NoticeIndex(props) {
             </List.Item>
           ))}
           {records.length === 0 && (
-            <div style={{marginTop: 12, color: '#999'}}>暂无公告信息</div>
+            <div style={{marginTop: 12, color: '#999'}}>{t('暂无公告信息')}</div>
           )}
         </List>
       )}
       <Modal
-        title="编辑公告"
+        title={t('编辑公告')}
         visible={record}
         onCancel={() => setRecord(null)}
         confirmLoading={loading}
         onOk={handleSubmit}>
         <Form form={form} initialValues={record} labelCol={{span: 5}} wrapperCol={{span: 18}}>
-          <Form.Item name="is_stress" valuePropName="checked" tooltip="自动弹窗强提醒，仅能设置一条公告。" label="弹窗提醒">
-            <Switch checkedChildren="开启" unCheckedChildren="关闭"/>
+          <Form.Item name="is_stress" valuePropName="checked" tooltip={t('自动弹窗强提醒，仅能设置一条公告。')} label={t('弹窗提醒')}>
+            <Switch checkedChildren={t('开启')} unCheckedChildren={t('关闭')}/>
           </Form.Item>
-          <Form.Item required name="title" label="公告标题">
-            <Input placeholder="请输入"/>
+          <Form.Item required name="title" label={t('公告标题')}>
+            <Input placeholder={t('请输入')}/>
           </Form.Item>
-          <Form.Item required name="content" tooltip="" label="公告内容">
-            <Input.TextArea placeholder="请输入"/>
+          <Form.Item required name="content" tooltip="" label={t('公告内容')}>
+            <Input.TextArea placeholder={t('请输入')}/>
           </Form.Item>
         </Form>
       </Modal>

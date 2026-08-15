@@ -5,6 +5,7 @@
  */
 import { observable, computed } from "mobx";
 import http from 'libs/http';
+import { t } from 'libs';
 import moment from 'moment';
 import lds from 'lodash';
 
@@ -110,7 +111,7 @@ class Store {
   rollback = (info) => {
     this.record = lds.pick(info, ['app_id', 'deploy_id', 'host_ids', 'deploy_status']);
     this.record.app_host_ids = info.host_ids;
-    this.record.name = `${info.name} - 回滚`;
+    this.record.name = t('{} - 回滚', info.name);
     this.rollbackVisible = true
   }
 

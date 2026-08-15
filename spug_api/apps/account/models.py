@@ -93,7 +93,7 @@ class Role(models.Model, ModelMixin):
 
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
-        tmp['used'] = self.user_set.filter(deleted_by_id__isnull=True).count()
+        tmp['used'] = self.user_set.filter(is_deleted=False).count()
         return tmp
 
     def add_deploy_perm(self, target, value):

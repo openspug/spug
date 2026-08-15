@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { Drawer, Form, Button, Select, Space, message } from 'antd';
 import themes from './themes';
+import { t } from 'libs';
 import gStore from 'gStore';
 import css from './setting.module.less'
 
@@ -34,21 +35,21 @@ function Setting(props) {
     const data = {fontSize, fontFamily, theme}
     gStore.updateUserSettings('terminal', JSON.stringify(data))
       .then(() => {
-        message.success('已保存')
+        message.success(t('已保存'))
         props.onClose()
       })
       .finally(() => setLoading(false))
   }
 
   return (<Drawer
-      title="终端设置"
+      title={t('终端设置')}
       placement="right"
       width={300}
       visible={props.visible}
       onClose={props.onClose}>
       <Form layout="vertical">
-        <Form.Item label="字体大小">
-          <Select value={fontSize} placeholder="请选择字体大小" onChange={v => setFontSize(v)}>
+        <Form.Item label={t('字体大小')}>
+          <Select value={fontSize} placeholder={t('请选择字体大小')} onChange={v => setFontSize(v)}>
             <Select.Option value={12}>12</Select.Option>
             <Select.Option value={14}>14</Select.Option>
             <Select.Option value={16}>16</Select.Option>
@@ -56,8 +57,8 @@ function Setting(props) {
             <Select.Option value={20}>20</Select.Option>
           </Select>
         </Form.Item>
-        <Form.Item label="字体名称">
-          <Select value={fontFamily} placeholder="请选择字体" onChange={v => setFontFamily(v)}>
+        <Form.Item label={t('字体名称')}>
+          <Select value={fontFamily} placeholder={t('请选择字体')} onChange={v => setFontFamily(v)}>
             <Select.Option value="Courier">Courier</Select.Option>
             <Select.Option value="Consolas">Consolas</Select.Option>
             <Select.Option value="DejaVu Sans Mono">DejaVu Sans Mono</Select.Option>
@@ -68,14 +69,14 @@ function Setting(props) {
             <Select.Option value="Source Code Pro">Source Code Pro</Select.Option>
           </Select>
         </Form.Item>
-        <Form.Item label="主题配色">
+        <Form.Item label={t('主题配色')}>
           <Space wrap className={css.theme} size={12}>
             {Object.entries(themes).map(([key, item]) => (
               <pre key={key} style={{background: item.background, color: item.foreground}}
                    onClick={() => setTheme(key)}>spug</pre>))}
           </Space>
         </Form.Item>
-        <Form.Item label="预览">
+        <Form.Item label={t('预览')}>
           <div className={css.preview}
                style={{fontSize, fontFamily, background: styles.background, color: styles.foreground}}>
             <div>Welcome to Spug !</div>
@@ -92,7 +93,7 @@ function Setting(props) {
             <div>[root@iZ8vb48roZ ~]#</div>
           </div>
         </Form.Item>
-        <Button block type="primary" className={css.btn} loading={loading} onClick={handleSubmit}>保存</Button>
+        <Button block type="primary" className={css.btn} loading={loading} onClick={handleSubmit}>{t('保存')}</Button>
       </Form>
     </Drawer>)
 }

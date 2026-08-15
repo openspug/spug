@@ -8,6 +8,7 @@ import { observer } from 'mobx-react';
 import { Modal, Row, Col, Tree, Table, Button, Space, Input, Alert } from 'antd';
 import { FolderOpenOutlined, FolderOutlined, PlusOutlined } from '@ant-design/icons';
 import IPAddress from './IPAddress';
+import { t } from 'libs';
 import hStore from './store';
 import store from './store2';
 import styles from './selector.module.less';
@@ -122,7 +123,7 @@ function HostSelector(props) {
 
   function ButtonAction() {
     if (!props.value || props.value.length === 0) {
-      return <Button icon={<PlusOutlined/>} onClick={() => setVisible(true)}>添加目标主机</Button>
+      return <Button icon={<PlusOutlined/>} onClick={() => setVisible(true)}>{t('添加目标主机')}</Button>
     } else if (props.onlyOne || props.value.length === 1) {
       const id = props.onlyOne ? props.value : props.value[0]
       const host = hStore.idMap[id]
@@ -138,7 +139,7 @@ function HostSelector(props) {
         <Alert
           type="info"
           className={styles.area}
-          message={<div>已选择 <b style={{fontSize: 18, color: '#1890ff'}}>{props.value.length}</b> 台主机</div>}
+          message={<div>{t('已选择')} <b style={{fontSize: 18, color: '#1890ff'}}>{props.value.length}</b> {t('台主机')}</div>}
           onClick={() => setVisible(true)}/>
       )
     }
@@ -154,8 +155,8 @@ function HostSelector(props) {
             <ButtonAction/>
           ) : (
             <div style={{display: 'flex', alignItems: 'center'}}>
-              {props.value.length > 0 && <span style={{marginRight: 16}}>已选择 {props.value.length} 台</span>}
-              <Button type="link" style={{padding: 0}} onClick={() => setVisible(true)}>选择主机</Button>
+              {props.value.length > 0 && <span style={{marginRight: 16}}>{t('已选择 {} 台', props.value.length)}</span>}
+              <Button type="link" style={{padding: 0}} onClick={() => setVisible(true)}>{t('选择主机')}</Button>
             </div>
           )
         )
@@ -165,14 +166,14 @@ function HostSelector(props) {
         visible={props.mode === 'group' || visible}
         width={1000}
         className={styles.modal}
-        title={props.title || '主机列表'}
+        title={props.title || t('主机列表')}
         onOk={handleSubmit}
         okButtonProps={{disabled: selectedRowKeys.length === 0 && !props.nullable}}
         confirmLoading={loading}
         onCancel={handleClose}>
         <Row>
           <Col span={6} style={{borderRight: '8px solid #f0f0f0', paddingRight: 12}}>
-            <div className={styles.gTitle}>分组列表</div>
+            <div className={styles.gTitle}>{t('分组列表')}</div>
             <Tree.DirectoryTree
               showIcon={false}
               autoExpandParent
@@ -187,11 +188,11 @@ function HostSelector(props) {
           </Col>
           <Col span={18} style={{paddingLeft: 12}}>
             <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: 12}}>
-              <Input allowClear style={{width: 260}} placeholder="输入名称/IP检索" value={store.f_word}
+              <Input allowClear style={{width: 260}} placeholder={t('输入名称/IP检索')} value={store.f_word}
                      onChange={e => store.f_word = e.target.value}/>
               <Space hidden={selectedRowKeys.length === 0}>
-                <div>已选择 {selectedRowKeys.length} 台主机</div>
-                <Button type="link" style={{paddingRight: 0}} onClick={() => setSelectedRowKeys([])}>取消选择</Button>
+                <div>{t('已选择 {} 台主机', selectedRowKeys.length)}</div>
+                <Button type="link" style={{paddingRight: 0}} onClick={() => setSelectedRowKeys([])}>{t('取消选择')}</Button>
               </Space>
             </div>
             <Table
@@ -210,14 +211,14 @@ function HostSelector(props) {
                 onSelect: handleClickRow,
                 onSelectAll: handleSelectAll
               }}>
-              <Table.Column ellipsis width={170} title="主机名称" dataIndex="name"/>
-              <Table.Column width={320} title="IP地址" render={info => (
+              <Table.Column ellipsis width={170} title={t('主机名称')} dataIndex="name"/>
+              <Table.Column width={320} title={t('IP地址')} render={info => (
                 <Space>
                   <IPAddress ip={info.public_ip_address} isPublic/>
                   <IPAddress ip={info.private_ip_address}/>
                 </Space>
               )}/>
-              <Table.Column title="备注信息" dataIndex="desc"/>
+              <Table.Column title={t('备注信息')} dataIndex="desc"/>
             </Table>
           </Col>
         </Row>

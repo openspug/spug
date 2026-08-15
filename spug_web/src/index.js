@@ -8,19 +8,20 @@ import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import zhCN from 'antd/es/locale/zh_CN';
+import enUS from 'antd/es/locale/en_US';
 import './index.less';
 import App from './App';
 import moment from 'moment';
 import 'moment/locale/zh-cn';
 import * as serviceWorker from './serviceWorker';
-import { history, updatePermissions } from 'libs';
+import { history, updatePermissions, isEN } from 'libs';
 
-moment.locale('zh-cn');
+moment.locale(isEN ? 'en' : 'zh-cn');
 updatePermissions();
 
 ReactDOM.render(
   <Router history={history}>
-    <ConfigProvider locale={zhCN} getPopupContainer={() => document.fullscreenElement || document.body}>
+    <ConfigProvider locale={isEN ? enUS : zhCN} getPopupContainer={() => document.fullscreenElement || document.body}>
       <App/>
     </ConfigProvider>
   </Router>,

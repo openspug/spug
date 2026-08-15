@@ -51,7 +51,7 @@ class Command(BaseCommand):
             if not options['u']:
                 self.echo_error('缺少参数')
                 self.print_help()
-            user = User.objects.filter(username=options['u'], deleted_by_id__isnull=True).first()
+            user = User.objects.filter(username=options['u'], is_deleted=False).first()
             if user:
                 user.is_active = True
                 user.save()
@@ -61,7 +61,7 @@ class Command(BaseCommand):
             if not all((options['u'], options['p'])):
                 self.echo_error('缺少参数')
                 self.print_help()
-            user = User.objects.filter(username=options['u'], deleted_by_id__isnull=True).first()
+            user = User.objects.filter(username=options['u'], is_deleted=False).first()
             if not user:
                 return self.echo_error(f'未找到登录名为【{options["u"]}】的账户')
             user.password_hash = User.make_password(options['p'])

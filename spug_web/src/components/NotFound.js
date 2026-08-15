@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from 'libs';
 import styles from './index.module.less';
 
 export default function NotFound() {
@@ -9,7 +10,7 @@ export default function NotFound() {
       </div>
       <div>
         <h1 className={styles.title}>404</h1>
-        <div className={styles.desc}>抱歉，你访问的页面不存在</div>
+        <div className={styles.desc}>{t('抱歉，你访问的页面不存在')}</div>
       </div>
     </div>
   )

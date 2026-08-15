@@ -16,7 +16,7 @@ import {
 import { FitAddon } from 'xterm-addon-fit';
 import { Terminal } from 'xterm';
 import { Modal, Spin, Tooltip } from 'antd';
-import { X_TOKEN, http } from 'libs';
+import { X_TOKEN, http, t } from 'libs';
 import styles from './index.module.less';
 import gStore from 'gStore';
 import store from './store';
@@ -39,7 +39,7 @@ export default observer(function Console() {
         setStatus(res.output.status)
         term.write(res.output.data)
         if (res.status === '1') {
-          socket = _makeSocket(res.index)
+          socket = _makeSocket(res.index, res.token)
         }
       })
       .finally(() => setFetching(false))
@@ -71,10 +71,12 @@ export default observer(function Console() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function _makeSocket(index = 0) {
-    const token = store.record.id;
+  function _makeSocket(index = 0, key) {
+    // the backend returns the full redis key, an auto-made build streams
+    // through the deploy request's channel instead of the build one
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/build/${token}/?x-token=${X_TOKEN}`);
+    const path = key ? `raw/${key}` : `build/${store.record.id}`;
+    const socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/${path}/?x-token=${X_TOKEN}`);
     socket.onopen = () => socket.send(String(index));
     socket.onmessage = e => {
       if (e.data === 'pong') {
@@ -113,7 +115,7 @@ export default observer(function Console() {
       visible
       width={fullscreen ? '100%' : 1000}
       title={[
-        <span key="1">构建控制台</span>,
+        <span key="1">{t('构建控制台')}</span>,
         <div key="2" className={styles.fullscreen} onClick={() => setFullscreen(!fullscreen)}>
           {fullscreen ? <FullscreenExitOutlined/> : <FullscreenOutlined/>}
         </div>
@@ -136,7 +138,7 @@ export default observer(function Console() {
           {loading ? (
             <LoadingOutlined className={styles.icon} style={{color: '#faad14'}}/>
           ) : (
-            <Tooltip title="终止构建">
+            <Tooltip title={t('终止构建')}>
               {status === 'doing' ? (
                 <StopOutlined style={{color: '#faad14'}} onClick={handleTerminate}/>
               ) : (

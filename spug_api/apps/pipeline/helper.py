@@ -90,6 +90,7 @@ class Helper(KitMixin):
     def get_file(self, key):
         if key in self.files:
             return self.files[key]
+        os.makedirs(settings.DEPLOY_DIR, exist_ok=True)
         file = open(os.path.join(settings.DEPLOY_DIR, f'{self.rds_key}:{key}'), 'w')
         self.files[key] = file
         return file

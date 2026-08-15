@@ -8,7 +8,7 @@ import { Card, DatePicker } from 'antd';
 import { Chart, Geom, Axis, Tooltip } from 'bizcharts';
 import styles from './index.module.css';
 import moment from 'moment';
-import { http } from 'libs';
+import { http, t } from 'libs';
 
 
 export default function () {
@@ -50,18 +50,18 @@ export default function () {
   }
 
   return (
-    <Card loading={loading} title="发布申请Top20" style={{marginTop: 20}} bodyStyle={{height: 353}} extra={(
+    <Card loading={loading} title={t('发布申请Top20')} style={{marginTop: 20}} bodyStyle={{height: 353}} extra={(
       <div style={{display: 'flex', alignItems: 'center'}}>
         <span className={range === 'day' ? styles.spanButtonActive : styles.spanButton}
-              onClick={() => handleClick('day')}>今日</span>
+              onClick={() => handleClick('day')}>{t('今日')}</span>
         <span className={range === 'week' ? styles.spanButtonActive : styles.spanButton}
-              onClick={() => handleClick('week')}>本周</span>
+              onClick={() => handleClick('week')}>{t('本周')}</span>
         <span className={range === 'month' ? styles.spanButtonActive : styles.spanButton}
-              onClick={() => handleClick('month')}>本月</span>
+              onClick={() => handleClick('month')}>{t('本月')}</span>
         <DatePicker.RangePicker allowClear={false} style={{width: 250}} value={duration} onChange={handleClick}/>
       </div>
     )}>
-      <Chart height={300} data={res} padding={[10, 0, 30, 35]} scale={{count: {alias: '发布申请数量'}}} forceFit>
+      <Chart height={300} data={res} padding={[10, 0, 30, 35]} scale={{count: {alias: t('发布申请数量')}}} forceFit>
         <Axis name="name"/>
         <Axis name="count" title/>
         <Tooltip/>

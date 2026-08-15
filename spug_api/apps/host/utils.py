@@ -14,7 +14,11 @@ from concurrent import futures
 import ipaddress
 import json
 import math
+import re
 import os
+
+# /proc/partitions 中整块磁盘（非分区）的命名模式，lsblk 不可用时的回退方案
+WHOLE_DISK_REGEX = re.compile(r'(sd[a-z]+|vd[a-z]+|xvd[a-z]+|hd[a-z]+|nvme\d+n\d+|mmcblk\d+)')
 
 
 def check_os_type(os_name):
@@ -185,25 +189,32 @@ def fetch_tencent_instances(ak, ac, region_id, page_number=1):
 def fetch_host_extend(ssh):
     public_ip_address = set()
     private_ip_address = set()
-    response = {'disk': []}
+    response = {'disk': [], 'os_name': 'unknown'}
     code, out = ssh.exec_command_raw('nproc')
-    if code != 0:
+    if code != 0 or not out.strip().isdigit():
         code, out = ssh.exec_command_raw("grep -c '^processor' /proc/cpuinfo")
-    if code == 0:
+    if code == 0 and out.strip().isdigit():
         response['cpu'] = int(out.strip())
 
     code, out = ssh.exec_command_raw("cat /etc/os-release | grep PRETTY_NAME | awk -F \\\" '{print $2}'")
-    if '/etc/os-release' in out:
+    if code != 0 or '/etc/os-release' in out or not out.strip():
         code, out = ssh.exec_command_raw("cat /etc/issue | head -1 | awk '{print $1,$2,$3}'")
-    if code == 0:
+    if code == 0 and out.strip():
         response['os_name'] = out.strip()[:50]
 
-    code, out = ssh.exec_command_raw('hostname -I')
+    code, out = ssh.exec_command_raw('hostname -I 2> /dev/null')
+    if code != 0 or not out.strip():
+        # busybox(Alpine) 等的 hostname 不支持 -I，回退解析 ip 命令
+        code, out = ssh.exec_command_raw("ip -4 addr show 2> /dev/null | awk '/inet /{sub(/\\/.*/, \"\", $2); print $2}'")
     if code == 0:
         for ip in out.strip().split():
-            if len(ip) > 15:   # ignore ipv6
+            try:
+                ip_obj = ipaddress.ip_address(ip)
+            except ValueError:
                 continue
-            if ipaddress.ip_address(ip).is_global:
+            if ip_obj.version != 4 or ip_obj.is_loopback or ip_obj.is_link_local:
+                continue
+            if ip_obj.is_global:
                 if len(public_ip_address) < 10:
                     public_ip_address.add(ip)
             elif len(private_ip_address) < 10:
@@ -221,28 +232,50 @@ def fetch_host_extend(ssh):
             private_ip_address = [ssh_hostname] + list(private_ip_address)
 
     code, out = ssh.exec_command_raw('lsblk -dbn -o SIZE -e 11 2> /dev/null')
-    if code == 0:
+    if code == 0 and out.strip():
         disks = []
         for item in out.strip().splitlines():
             item = item.strip()
+            if not item.isdigit():
+                continue
             size = math.ceil(int(item) / 1024 / 1024 / 1024)
             if size > 10:
                 disks.append(size)
         response['disk'] = disks[:10]
+    else:
+        # 无 lsblk（如 Alpine/busybox）时回退 /proc/partitions，按整盘命名模式过滤分区
+        code, out = ssh.exec_command_raw('cat /proc/partitions')
+        if code == 0:
+            disks = []
+            for line in out.strip().splitlines():
+                fields = line.split()
+                if len(fields) < 4 or not fields[2].isdigit():
+                    continue
+                if not WHOLE_DISK_REGEX.fullmatch(fields[3]):
+                    continue
+                size = math.ceil(int(fields[2]) / 1024 / 1024)  # 块单位为 1KiB
+                if size > 10:
+                    disks.append(size)
+            response['disk'] = disks[:10]
 
-    code, out = ssh.exec_command_raw("dmidecode -t 17 | grep -E 'Size: [0-9]+' | awk '{s+=$2} END {print s,$3}'")
+    code, out = ssh.exec_command_raw("dmidecode -t 17 2> /dev/null | grep -E 'Size: [0-9]+' | awk '{s+=$2} END {print s,$3}'")
     if code == 0:
         fields = out.strip().split()
-        if len(fields) == 2 and fields[1] in ('GB', 'MB'):
-            size, unit = out.strip().split()
+        if len(fields) == 2 and fields[0].isdigit() and fields[1] in ('GB', 'MB'):
+            size, unit = fields
             if unit == 'GB':
-                response['memory'] = size
+                response['memory'] = int(size)
             else:
                 response['memory'] = round(int(size) / 1024, 0)
     if 'memory' not in response:
         code, out = ssh.exec_command_raw("free -m | awk 'NR==2{print $2}'")
-        if code == 0:
-            response['memory'] = math.ceil(int(out) / 1024)
+        if code == 0 and out.strip().isdigit():
+            response['memory'] = math.ceil(int(out.strip()) / 1024)
+    if 'memory' not in response:
+        # busybox free 输出格式差异或 free 缺失时，直接读 /proc/meminfo（单位 KiB）
+        code, out = ssh.exec_command_raw("awk '/^MemTotal:/{print $2}' /proc/meminfo")
+        if code == 0 and out.strip().isdigit():
+            response['memory'] = math.ceil(int(out.strip()) / 1024 / 1024)
 
     response['public_ip_address'] = list(public_ip_address)
     response['private_ip_address'] = list(private_ip_address)

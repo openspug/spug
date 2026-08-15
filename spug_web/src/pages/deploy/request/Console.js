@@ -18,7 +18,7 @@ import {
 import { FitAddon } from 'xterm-addon-fit';
 import { Terminal } from 'xterm';
 import styles from './console.module.less';
-import { clsNames, http, X_TOKEN } from 'libs';
+import { clsNames, http, X_TOKEN, t } from 'libs';
 import store from './store';
 import gStore from 'gStore';
 import lds from 'lodash';
@@ -152,7 +152,7 @@ function Console(props) {
   }
 
   const cItem = outputs[current] || {}
-  const localTitle = props.request.app_extend === '2' ? '本地动作' : '构建'
+  const localTitle = props.request.app_extend === '2' ? t('本地动作') : t('构建')
   return (
     <React.Fragment>
       {miniMode && (
@@ -205,7 +205,7 @@ function Console(props) {
         <Spin spinning={fetching}>
           <div className={styles.output}>
             <div className={styles.side}>
-              <div className={styles.title}>任务列表</div>
+              <div className={styles.title}>{t('任务列表')}</div>
               <div className={styles.list}>
                 {sides.map(item => (
                   <div key={item.id} className={clsNames(styles.item, item.id === current && styles.active)}
@@ -234,7 +234,7 @@ function Console(props) {
                 {loading ? (
                   <LoadingOutlined className={styles.icon} style={{color: '#faad14'}}/>
                 ) : (
-                  <Tooltip title="终止发布">
+                  <Tooltip title={t('终止发布')}>
                     {cItem.status === 'doing' ? (
                       <StopOutlined className={styles.icon} style={{color: '#faad14'}} onClick={handleTerminate}/>
                     ) : (
@@ -243,7 +243,7 @@ function Console(props) {
                   </Tooltip>
                 )}
                 {cItem.id !== 'local' && (
-                  <Tooltip title="打开web终端">
+                  <Tooltip title={t('打开web终端')}>
                     <CodeOutlined className={styles.icon} onClick={() => openTerminal(current)}/>
                   </Tooltip>
                 )}

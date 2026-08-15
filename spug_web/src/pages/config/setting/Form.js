@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input, Checkbox, Row, Col, message } from 'antd';
 import http from 'libs/http';
+import { t } from 'libs';
 import store from './store';
 import envStore from '../environment/store'
 import styles from './index.module.less';
@@ -32,7 +33,7 @@ export default observer(function () {
       request = http.post('/api/config/', formData)
     }
     request.then(res => {
-      message.success('操作成功');
+      message.success(t('操作成功'));
       store.formVisible = false;
       store.fetchRecords()
     }, () => setLoading(false))
@@ -56,22 +57,22 @@ export default observer(function () {
       visible
       width={800}
       maskClosable={false}
-      title={store.record.id ? '更新配置' : '新增配置'}
+      title={store.record.id ? t('更新配置') : t('新增配置')}
       onCancel={() => store.formVisible = false}
       confirmLoading={loading}
       onOk={handleSubmit}>
       <Form form={form} initialValues={store.record} labelCol={{span: 6}} wrapperCol={{span: 14}}>
-        <Form.Item required name="key" label="Key" tooltip="变量前缀由_SPUG_加唯一标识符组成，用于防止变量名冲突。" extra="可以由字母、数字和下划线组成。">
-          <Input addonBefore={`_SPUG_${store.obj.key.toUpperCase()}_`} placeholder="请输入变量名"/>
+        <Form.Item required name="key" label="Key" tooltip={t('变量前缀由_SPUG_加唯一标识符组成，用于防止变量名冲突。')} extra={t('可以由字母、数字和下划线组成。')}>
+          <Input addonBefore={`_SPUG_${store.obj.key.toUpperCase()}_`} placeholder={t('请输入变量名')}/>
         </Form.Item>
         <Form.Item name="value" label="Value">
-          <Input.TextArea placeholder="请输入变量值"/>
+          <Input.TextArea placeholder={t('请输入变量值')}/>
         </Form.Item>
-        <Form.Item name="desc" label="备注">
-          <Input.TextArea placeholder="请输入备注信息"/>
+        <Form.Item name="desc" label={t('备注')}>
+          <Input.TextArea placeholder={t('请输入备注信息')}/>
         </Form.Item>
         {isModify ? null : (
-          <Form.Item label="选择环境" style={{lineHeight: '40px'}} tooltip="可多选环境，复制到所有选择的环境内。">
+          <Form.Item label={t('选择环境')} style={{lineHeight: '40px'}} tooltip={t('可多选环境，复制到所有选择的环境内。')}>
             {envStore.records.map((item, index) => (
               <Row
                 key={item.id}

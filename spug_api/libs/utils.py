@@ -86,6 +86,23 @@ def render_str(template, datasheet):
     return Template(template).safe_substitute(datasheet)
 
 
+def wrap_python_command(command):
+    """将 python 脚本包装为可执行的 shell 命令，供批量执行与计划任务共用。
+
+    POSIX sh 语法（避免 &> 等 bash 专属写法），需兼容 dash/ash 等登录 shell；
+    heredoc 结束符加引号，防止脚本内的 $var/`cmd` 被 shell 展开。
+    """
+    return (
+        'SPUG_PY=$(command -v python3 || command -v python)\n'
+        'if [ -z "$SPUG_PY" ]; then\n'
+        '  echo "[Spug] python interpreter not found on this host" >&2\n'
+        '  false\n'
+        'else\n'
+        f"$SPUG_PY << 'SPUG_PY_EOF'\n# -*- coding: UTF-8 -*-\n{command}\nSPUG_PY_EOF\n"
+        'fi'
+    )
+
+
 def json_response(data='', error=''):
     content = AttrDict(data=data, error=error)
     if error:

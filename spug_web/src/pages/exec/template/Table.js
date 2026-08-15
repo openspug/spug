@@ -7,7 +7,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { Table, Modal, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import { http, hasPermission } from 'libs';
+import { http, hasPermission, t } from 'libs';
 import { Action, TableCard, AuthButton } from "components";
 import store from './store';
 
@@ -19,12 +19,12 @@ class ComTable extends React.Component {
 
   handleDelete = (text) => {
     Modal.confirm({
-      title: '删除确认',
-      content: `确定要删除【${text['name']}】?`,
+      title: t('删除确认'),
+      content: t('确定要删除【{}】?', text['name']),
       onOk: () => {
         return http.delete('/api/exec/template/', {params: {id: text.id}})
           .then(() => {
-            message.success('删除成功');
+            message.success(t('删除成功'));
             store.fetchRecords()
           })
       }
@@ -35,7 +35,7 @@ class ComTable extends React.Component {
     return (
       <TableCard
         tKey="et"
-        title="模板列表"
+        title={t('模板列表')}
         rowKey="id"
         loading={store.isFetching}
         dataSource={store.dataSource}
@@ -45,23 +45,23 @@ class ComTable extends React.Component {
             auth="exec.template.add"
             type="primary"
             icon={<PlusOutlined/>}
-            onClick={() => store.showForm()}>新建</AuthButton>
+            onClick={() => store.showForm()}>{t('新建')}</AuthButton>
         ]}
         pagination={{
           showSizeChanger: true,
           showLessItems: true,
-          showTotal: total => `共 ${total} 条`,
+          showTotal: total => t('共 {} 条', total),
           pageSizeOptions: ['10', '20', '50', '100']
         }}>
-        <Table.Column title="模版名称" dataIndex="name"/>
-        <Table.Column title="模版类型" dataIndex="type"/>
-        <Table.Column ellipsis title="模版内容" dataIndex="body"/>
-        <Table.Column ellipsis title="描述信息" dataIndex="desc"/>
+        <Table.Column title={t('模版名称')} dataIndex="name"/>
+        <Table.Column title={t('模版类型')} dataIndex="type"/>
+        <Table.Column ellipsis title={t('模版内容')} dataIndex="body"/>
+        <Table.Column ellipsis title={t('描述信息')} dataIndex="desc"/>
         {hasPermission('exec.template.edit|exec.template.del') && (
-          <Table.Column title="操作" render={info => (
+          <Table.Column title={t('操作')} render={info => (
             <Action>
-              <Action.Button auth="exec.template.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-              <Action.Button danger auth="exec.template.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+              <Action.Button auth="exec.template.edit" onClick={() => store.showForm(info)}>{t('编辑')}</Action.Button>
+              <Action.Button danger auth="exec.template.del" onClick={() => this.handleDelete(info)}>{t('删除')}</Action.Button>
             </Action>
           )}/>
         )}

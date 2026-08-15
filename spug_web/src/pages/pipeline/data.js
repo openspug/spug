@@ -1,11 +1,13 @@
+import { t } from 'libs';
+
 export const NODES = [
-  {module: 'ssh_exec', name: '执行命令'},
-  {module: 'build', name: '构建'},
-  {module: 'parameter', name: '参数化'},
-  {module: 'data_transfer', name: '数据传输'},
-  {module: 'data_upload', name: '数据上传'},
-  {module: 'push_dd', name: '钉钉推送'},
-  {module: 'push_spug', name: '推送助手'},
+  {module: 'ssh_exec', name: t('执行命令')},
+  {module: 'build', name: t('构建')},
+  {module: 'parameter', name: t('参数化')},
+  {module: 'data_transfer', name: t('数据传输')},
+  {module: 'data_upload', name: t('数据上传')},
+  {module: 'push_dd', name: t('钉钉推送')},
+  {module: 'push_spug', name: t('推送助手')},
 ]
 
 export const DATAS = {

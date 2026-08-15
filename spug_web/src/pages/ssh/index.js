@@ -24,7 +24,7 @@ import { NotFound, AuthButton } from 'components';
 import Terminal from './Terminal';
 import FileManager from './FileManager';
 import Setting from './Setting';
-import { http, hasPermission, includes } from 'libs';
+import { http, hasPermission, includes, t } from 'libs';
 import gStore from 'gStore';
 import styles from './index.module.less';
 import LogoSpugText from 'layout/logo-spug-white.png';
@@ -66,7 +66,7 @@ function WebSSH(props) {
   }, [searchValue])
 
   function leaveTips(e) {
-    e.returnValue = '确定要离开页面？'
+    e.returnValue = t('确定要离开页面？')
   }
 
   function fetchNodes() {
@@ -196,13 +196,13 @@ function WebSSH(props) {
     return (
       <Dropdown trigger={['contextMenu']} overlay={(
         <Menu onClick={({key, domEvent}) => handeTabAction(key, host, domEvent)}>
-          <Menu.Item key="copy" icon={<CopyOutlined/>}>复制窗口</Menu.Item>
-          <Menu.Item key="reconnect" icon={<ReloadOutlined/>}>重新连接</Menu.Item>
+          <Menu.Item key="copy" icon={<CopyOutlined/>}>{t('复制窗口')}</Menu.Item>
+          <Menu.Item key="reconnect" icon={<ReloadOutlined/>}>{t('重新连接')}</Menu.Item>
           <Menu.Item key="rClose"
-                     icon={<VerticalAlignBottomOutlined style={{transform: 'rotate(90deg)'}}/>}>关闭右侧</Menu.Item>
+                     icon={<VerticalAlignBottomOutlined style={{transform: 'rotate(90deg)'}}/>}>{t('关闭右侧')}</Menu.Item>
           <Menu.Item key="oClose"
-                     icon={<VerticalAlignMiddleOutlined style={{transform: 'rotate(90deg)'}}/>}>关闭其他</Menu.Item>
-          <Menu.Item key="aClose" icon={<CloseOutlined/>}>关闭所有</Menu.Item>
+                     icon={<VerticalAlignMiddleOutlined style={{transform: 'rotate(90deg)'}}/>}>{t('关闭其他')}</Menu.Item>
+          <Menu.Item key="aClose" icon={<CloseOutlined/>}>{t('关闭所有')}</Menu.Item>
         </Menu>
       )}>
         <div className={styles.tabRender} onDoubleClick={() => handeTabAction('copy', host)}>{host.title}</div>
@@ -227,7 +227,7 @@ function WebSSH(props) {
         <div className={styles.hosts}>
           <Spin spinning={fetching}>
             <Input allowClear className={styles.search} prefix={<SearchOutlined style={{color: '#999'}}/>}
-                   placeholder="输入主机名/IP检索" onChange={e => setSearchValue(e.target.value)}/>
+                   placeholder={t('输入主机名/IP检索')} onChange={e => setSearchValue(e.target.value)}/>
             <Button icon={<SyncOutlined/>} type="link" loading={fetching} onClick={fetchNodes}/>
             {treeData.length > 0 ? (
               <Tree.DirectoryTree
@@ -250,7 +250,7 @@ function WebSSH(props) {
           onEdit={(key, action) => action === 'remove' ? handleRemove(key, 'self') : null}
           style={{background: '#fff', width: `calc(100vw - ${width}px)`}}
           tabBarExtraContent={hosts.length === 0 ? (
-            <div className={styles.tips}>小提示：双击标签快速复制窗口，右击标签展开更多操作。</div>
+            <div className={styles.tips}>{t('小提示：双击标签快速复制窗口，右击标签展开更多操作。')}</div>
           ) : sshMode ? (
             <React.Fragment>
               <AuthButton
@@ -258,7 +258,7 @@ function WebSSH(props) {
                 type="link"
                 disabled={!activeId}
                 onClick={handleOpenFileManager}
-                icon={<LeftOutlined/>}>文件管理器</AuthButton>
+                icon={<LeftOutlined/>}>{t('文件管理器')}</AuthButton>
               <SkinFilled className={styles.setting} onClick={() => setVisible2(true)}/>
             </React.Fragment>
           ) : null}>
@@ -279,7 +279,7 @@ function WebSSH(props) {
         )}
       </div>
       <Drawer
-        title="文件管理器"
+        title={t('文件管理器')}
         placement="right"
         width={900}
         className={styles.drawerContainer}

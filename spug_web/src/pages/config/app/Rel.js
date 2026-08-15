@@ -6,7 +6,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Transfer, message, Tabs } from 'antd';
-import { http, hasPermission } from 'libs';
+import { http, hasPermission, t } from 'libs';
 import serviceStore from '../service/store';
 import store from './store';
 
@@ -41,7 +41,7 @@ class Rel extends React.Component {
     const {app, service} = store.confRel;
     http.patch('/api/app/', {id: store.record.id, rel_apps: app, rel_services: service})
       .then(res => {
-        message.success('操作成功');
+        message.success(t('操作成功'));
         store.relVisible = false;
         store.fetchRecords()
       }, () => this.setState({loading: false}))
@@ -53,28 +53,28 @@ class Rel extends React.Component {
         visible
         width={700}
         maskClosable={false}
-        title="配置服务依赖"
+        title={t('配置服务依赖')}
         onCancel={() => store.relVisible = false}
         confirmLoading={this.state.loading}
         footer={hasPermission('config.app.edit_config') ? undefined : null}
         onOk={this.handleSubmit}>
         <Tabs tabPosition="left">
-          <Tabs.TabPane tab="应用依赖" key="app">
-            <Form.Item extra="设置依赖后，该应用将能够获取到所依赖应用的配置。">
+          <Tabs.TabPane tab={t('应用依赖')} key="app">
+            <Form.Item extra={t('设置依赖后，该应用将能够获取到所依赖应用的配置。')}>
               <Transfer
                 listStyle={{width: 280, minHeight: 300}}
-                titles={['所有应用', '已选应用']}
+                titles={[t('所有应用'), t('已选应用')]}
                 dataSource={this.state.apps}
                 targetKeys={store.confRel.app}
                 onChange={keys => store.confRel.app = keys}
                 render={item => `${item.name}(${item._key})`}/>
             </Form.Item>
           </Tabs.TabPane>
-          <Tabs.TabPane tab="服务依赖" key="service">
-            <Form.Item extra="设置依赖后，该应用将能够获取到所依赖服务的配置。">
+          <Tabs.TabPane tab={t('服务依赖')} key="service">
+            <Form.Item extra={t('设置依赖后，该应用将能够获取到所依赖服务的配置。')}>
               <Transfer
                 listStyle={{width: 280, minHeight: 300}}
-                titles={['所有服务', '已选服务']}
+                titles={[t('所有服务'), t('已选服务')]}
                 dataSource={this.state.services}
                 targetKeys={store.confRel.service}
                 onChange={keys => store.confRel.service = keys}

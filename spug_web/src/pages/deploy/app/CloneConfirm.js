@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Select, Form } from 'antd';
 import envStore from 'pages/config/environment/store';
-import { includes } from 'libs';
+import { includes, t } from 'libs';
 import store from './store';
 import lds from 'lodash';
 
@@ -34,18 +34,18 @@ export default observer(function (props) {
 
   return (
     <Form form={form} layout="vertical" style={{marginTop: 24}}>
-      <Form.Item required label="克隆的应用">
-        <Select showSearch filterOption={(i, o) => includes(o.children, i)} placeholder="请选择要克隆的应用" onChange={setAppId}>
+      <Form.Item required label={t('克隆的应用')}>
+        <Select showSearch filterOption={(i, o) => includes(o.children, i)} placeholder={t('请选择要克隆的应用')} onChange={setAppId}>
           {apps.map(item => (
             <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
           ))}
         </Select>
       </Form.Item>
-      <Form.Item required name="env_id" label="克隆的环境">
+      <Form.Item required name="env_id" label={t('克隆的环境')}>
         <Select
           showSearch
           filterOption={(i, o) => includes(o.children, i)}
-          placeholder="请选择要克隆的环境"
+          placeholder={t('请选择要克隆的环境')}
           disabled={deploys.length === 0}
           onChange={handleChange}>
           {deploys.map(item => (

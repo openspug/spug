@@ -58,7 +58,7 @@ class TransferView(View):
                     command = f'sshfs -o ro -o ssh_command="ssh -p {host.port} -i {fp.name}" {target} {base_dir}'
                     task = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                     if task.returncode != 0:
-                        os.system(f'umount -f {base_dir} &> /dev/null ; rm -rf {base_dir}')
+                        os.system(f'umount -f {base_dir} > /dev/null 2>&1; rm -rf {base_dir}')
                         return json_response(error=task.stdout.decode())
             else:
                 os.makedirs(base_dir)

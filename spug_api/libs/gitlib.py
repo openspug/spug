@@ -67,9 +67,11 @@ class Git:
                     shutil.rmtree(self.repo_dir)
                 else:
                     os.remove(self.repo_dir)
+        os.makedirs(self.repo_dir, exist_ok=True)
         try:
             repo = Repo.clone_from(self.git_repo, self.repo_dir)
         except GitCommandError as e:
+            shutil.rmtree(self.repo_dir, ignore_errors=True)
             if self.env:
                 repo = Repo.clone_from(self.git_repo, self.repo_dir, env=self.env)
             else:
@@ -139,10 +141,10 @@ class RemoteGit:
             self._ask_env = dict(GIT_SSH=ask_file)
             key_file = f'{self.ssh.exec_file}.2'
             self.ssh.put_file_by_fl(StringIO(self.credential.secret), key_file)
-            self.ssh.sftp.chmod(key_file, 0o600)
+            self.ssh.chmod(key_file, 0o600)
             body = f'ssh -o StrictHostKeyChecking=no -i {key_file} $@'
             self.ssh.put_file_by_fl(StringIO(body), ask_file)
-        self.ssh.sftp.chmod(ask_file, 0o755)
+        self.ssh.chmod(ask_file, 0o755)
         return self._ask_env
 
     def _check_path(self):
@@ -158,8 +160,9 @@ class RemoteGit:
         self.remote_exec = partial(remote_exec, self.ssh)
 
     @classmethod
-    def check_auth(cls, url, credential=None):
-        env = dict()
+    def _make_local_ask_env(cls, credential=None):
+        # the returned files must stay referenced while the git command runs
+        env, files = dict(), []
         if credential:
             if credential.type == 'pw':
                 ask_command = '#!/bin/bash\n'
@@ -175,6 +178,7 @@ class RemoteGit:
                 ask_file.flush()
                 os.chmod(ask_file.name, 0o755)
                 env.update(GIT_ASKPASS=ask_file.name)
+                files.append(ask_file)
             else:
                 key_file = NamedTemporaryFile()
                 key_file.write(credential.secret.encode())
@@ -186,21 +190,53 @@ class RemoteGit:
                 ask_file.flush()
                 os.chmod(ask_file.name, 0o755)
                 env.update(GIT_SSH=ask_file.name)
+                files.extend([key_file, ask_file])
+        return env, files
 
+    @classmethod
+    def check_auth(cls, url, credential=None):
+        env, files = cls._make_local_ask_env(credential)
         command = f'git ls-remote -h {url}'
-        res = subprocess.run(command, shell=True, capture_output=True, env=env)
+        try:
+            res = subprocess.run(command, shell=True, capture_output=True, env=env, timeout=30)
+        except subprocess.TimeoutExpired:
+            return False, f'git ls-remote timeout: {url}'
         if res.returncode == 0:
             lines = res.stdout.decode().strip().split('\n')
             branches = [x.split('/')[-1] for x in lines]
             return True, branches
         return False, res.stderr.decode()
 
+    @classmethod
+    def fetch_remote_tags(cls, url, credential=None):
+        """List remote tag names via a local `git ls-remote`, newest last."""
+        env, files = cls._make_local_ask_env(credential)
+        command = f'git ls-remote --tags --refs {url}'
+        # 在请求线程内同步执行，必须限时，避免不可达的 git 服务拖死 worker
+        try:
+            res = subprocess.run(command, shell=True, capture_output=True, env=env, timeout=15)
+        except subprocess.TimeoutExpired:
+            return False, f'git ls-remote timeout: {url}'
+        if res.returncode == 0:
+            tags = []
+            for line in res.stdout.decode().strip().split('\n'):
+                if '\trefs/tags/' in line:
+                    tags.append(line.split('refs/tags/', 1)[1])
+            return True, list(reversed(tags))
+        return False, res.stderr.decode()
+
     def fetch_branches_tags(self):
         body = f'set -e\ncd {self.path}\n'
         if not self._check_path():
-            code, out = self._clone()
-            if code != 0:
-                raise Exception(out)
+            # _clone() returns (code, out) by default, but a bool once
+            # set_remote_exec() replaced the executor with a streaming one
+            result = self._clone()
+            if isinstance(result, tuple):
+                code, out = result
+                if code != 0:
+                    raise Exception(out)
+            elif not result:
+                raise Exception(f'clone {self.url} failed')
         else:
             body += 'git fetch -q --tags --force\n'
 
@@ -227,7 +263,7 @@ class RemoteGit:
                 each.append(line)
         return branches, tags
 
-    def checkout(self, marker):
+    def checkout(self, marker=None):
         body = f'set -e\ncd {self.path}\n'
         if not self._check_path():
             is_success = self._clone()
@@ -236,7 +272,13 @@ class RemoteGit:
         else:
             body += 'git fetch -q --tags --force\n'
 
-        body += f'git checkout -f {marker}'
+        if marker:
+            body += f'git checkout -f {marker}'
+        else:  # checkout the latest tag
+            body += 'marker=$(git tag --sort=-creatordate | head -1)\n'
+            body += '[ -n "$marker" ] || { echo "no tags found in the repository"; exit 1; }\n'
+            body += 'echo checkout tag: $marker\n'
+            body += 'git checkout -f $marker'
         env = self._make_ask_env()
         return self.remote_exec(body, env)
 

@@ -6,6 +6,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Row } from 'antd';
+import { t } from 'libs';
 import Sider from './Sider';
 import Body from './Body';
 import Ask from './Ask';
@@ -21,7 +22,7 @@ function Index() {
     <Modal
       open={S.record}
       width={S.dynamicParams ? '540px' : '80%'}
-      title={S.dynamicParams ? '执行参数设置' : '执行控制台'}
+      title={S.dynamicParams ? t('执行参数设置') : t('执行控制台')}
       footer={null}
       destroyOnClose
       maskClosable={false}

@@ -29,9 +29,11 @@ Push Assistant is a message push platform that integrates multiple channels such
 - **Task Planning**: It supports online configuration of crontab, interval and other task schedules
 
 - **Build and deploy**: Support application custom build deployment
+- **Pipelines**: Orchestrate build, command, file sync and upload nodes into a DAG workflow
 - **Configuration center**: Support KV, text, json and other formats online configuration
 - **monitoring center**: Support site, port, process, custom and other monitoring
 - **Alarm center**: Support SMS, email, Dingtalk, wechat and other alarm methods
+- **Bilingual UI**: Full English and Simplified Chinese interface, switchable from the header
 - **Elegant and beautiful**: UI interface based on Ant Design
 - **Open source and free**: The front-end and back-end code is completely open source
 

@@ -7,17 +7,17 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react';
 import { Form, Select, Radio, Transfer, Checkbox, Button, message } from 'antd';
-import { http } from 'libs';
+import { http, t } from 'libs';
 import groupStore from '../alarm/group/store';
 import store from './store';
 import lds from 'lodash';
 
 const modeOptions = [
-  {label: '微信', 'value': '1'},
-  {label: '短信', 'value': '2', disabled: true},
-  {label: '钉钉', 'value': '3'},
-  {label: '邮件', 'value': '4'},
-  {label: '企业微信', 'value': '5'},
+  {label: t('微信'), 'value': '1'},
+  {label: t('短信'), 'value': '2', disabled: true},
+  {label: t('钉钉'), 'value': '3'},
+  {label: t('邮件'), 'value': '4'},
+  {label: t('企业微信'), 'value': '5'},
 ];
 
 export default observer(function () {
@@ -39,7 +39,7 @@ export default observer(function () {
     formData['id'] = store.record.id;
     http.post('/api/monitor/', formData)
       .then(() => {
-        message.success('操作成功');
+        message.success(t('操作成功'));
         store.record = {};
         store.formVisible = false;
         store.fetchRecords();
@@ -55,55 +55,55 @@ export default observer(function () {
   const info = store.record;
   return (
     <Form form={form} labelCol={{span: 6}} wrapperCol={{span: 14}}>
-      <Form.Item name="rate" initialValue={info.rate || 5} label="监控频率" tooltip="每隔N分钟检测一次">
+      <Form.Item name="rate" initialValue={info.rate || 5} label={t('监控频率')} tooltip={t('每隔N分钟检测一次')}>
         <Radio.Group>
-          <Radio value={1}>1分钟</Radio>
-          <Radio value={5}>5分钟</Radio>
-          <Radio value={15}>15分钟</Radio>
-          <Radio value={30}>30分钟</Radio>
-          <Radio value={60}>60分钟</Radio>
+          <Radio value={1}>{t('{}分钟', 1)}</Radio>
+          <Radio value={5}>{t('{}分钟', 5)}</Radio>
+          <Radio value={15}>{t('{}分钟', 15)}</Radio>
+          <Radio value={30}>{t('{}分钟', 30)}</Radio>
+          <Radio value={60}>{t('{}分钟', 60)}</Radio>
         </Radio.Group>
       </Form.Item>
-      <Form.Item name="threshold" initialValue={info.threshold || 3} label="报警阈值" tooltip="连续N次检测失败，则发送告警">
+      <Form.Item name="threshold" initialValue={info.threshold || 3} label={t('报警阈值')} tooltip={t('连续N次检测失败，则发送告警')}>
         <Radio.Group>
-          <Radio value={1}>1次</Radio>
-          <Radio value={2}>2次</Radio>
-          <Radio value={3}>3次</Radio>
-          <Radio value={4}>4次</Radio>
-          <Radio value={5}>5次</Radio>
+          <Radio value={1}>{t('{}次', 1)}</Radio>
+          <Radio value={2}>{t('{}次', 2)}</Radio>
+          <Radio value={3}>{t('{}次', 3)}</Radio>
+          <Radio value={4}>{t('{}次', 4)}</Radio>
+          <Radio value={5}>{t('{}次', 5)}</Radio>
         </Radio.Group>
       </Form.Item>
-      <Form.Item required name="notify_grp" valuePropName="targetKeys" initialValue={info.notify_grp} label="报警联系人组"
-                 extra={<>去创建 <Link to="/alarm/contact">报警联系人</Link> 和 <Link to="/alarm/group">联系人组</Link>。</>}>
+      <Form.Item required name="notify_grp" valuePropName="targetKeys" initialValue={info.notify_grp} label={t('报警联系人组')}
+                 extra={<>{t('去创建')} <Link to="/alarm/contact">{t('报警联系人')}</Link> {t('和')} <Link to="/alarm/group">{t('联系人组')}</Link>{t('。')}</>}>
         <Transfer
           lazy={false}
           rowKey={item => item.id}
-          titles={['已有联系组', '已选联系组']}
+          titles={[t('已有联系组'), t('已选联系组')]}
           listStyle={{width: 199}}
           dataSource={groupStore.records}
           render={item => item.name}/>
       </Form.Item>
-      <Form.Item required name="notify_mode" initialValue={info.notify_mode} label="报警方式">
+      <Form.Item required name="notify_mode" initialValue={info.notify_mode} label={t('报警方式')}>
         <Checkbox.Group options={modeOptions}/>
       </Form.Item>
-      <Form.Item name="quiet" initialValue={info.quiet || 24 * 60} label="通道沉默" extra="相同的告警信息，沉默期内只发送一次。">
-        <Select placeholder="请选择">
-          <Select.Option value={5}>5分钟</Select.Option>
-          <Select.Option value={10}>10分钟</Select.Option>
-          <Select.Option value={15}>15分钟</Select.Option>
-          <Select.Option value={30}>30分钟</Select.Option>
-          <Select.Option value={60}>60分钟</Select.Option>
-          <Select.Option value={3 * 60}>3小时</Select.Option>
-          <Select.Option value={6 * 60}>6小时</Select.Option>
-          <Select.Option value={12 * 60}>12小时</Select.Option>
-          <Select.Option value={24 * 60}>24小时</Select.Option>
+      <Form.Item name="quiet" initialValue={info.quiet || 24 * 60} label={t('通道沉默')} extra={t('相同的告警信息，沉默期内只发送一次。')}>
+        <Select placeholder={t('请选择')}>
+          <Select.Option value={5}>{t('{}分钟', 5)}</Select.Option>
+          <Select.Option value={10}>{t('{}分钟', 10)}</Select.Option>
+          <Select.Option value={15}>{t('{}分钟', 15)}</Select.Option>
+          <Select.Option value={30}>{t('{}分钟', 30)}</Select.Option>
+          <Select.Option value={60}>{t('{}分钟', 60)}</Select.Option>
+          <Select.Option value={3 * 60}>{t('{}小时', 3)}</Select.Option>
+          <Select.Option value={6 * 60}>{t('{}小时', 6)}</Select.Option>
+          <Select.Option value={12 * 60}>{t('{}小时', 12)}</Select.Option>
+          <Select.Option value={24 * 60}>{t('{}小时', 24)}</Select.Option>
         </Select>
       </Form.Item>
       <Form.Item shouldUpdate wrapperCol={{span: 14, offset: 6}} style={{marginTop: 12}}>
         {() => (
           <React.Fragment>
-            <Button disabled={!canNext()} loading={loading} type="primary" onClick={handleSubmit}>提交</Button>
-            <Button style={{marginLeft: 20}} onClick={() => store.page -= 1}>上一步</Button>
+            <Button disabled={!canNext()} loading={loading} type="primary" onClick={handleSubmit}>{t('提交')}</Button>
+            <Button style={{marginLeft: 20}} onClick={() => store.page -= 1}>{t('上一步')}</Button>
           </React.Fragment>
         )}
       </Form.Item>

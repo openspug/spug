@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Table, Space, Divider, Popover, Checkbox, Button, Input, Select } from 'antd';
 import { ReloadOutlined, SettingOutlined, FullscreenOutlined, SearchOutlined } from '@ant-design/icons';
+import { t } from 'libs';
 import styles from './index.module.less';
 
 let TableFields = localStorage.getItem('TableFields')
@@ -19,7 +20,7 @@ function Search(props) {
     <Input
       allowClear
       style={{width: '280px'}}
-      placeholder="输入检索"
+      placeholder={t('输入检索')}
       prefix={<SearchOutlined style={{color: '#c0c0c0'}}/>}
       onChange={e => props.onChange(key, e.target.value)}
       addonBefore={(
@@ -37,7 +38,7 @@ function Footer(props) {
   const length = props.selected.length;
   return length > 0 ? (
     <div className={styles.tableFooter}>
-      <div className={styles.left}>已选择 <span>{length}</span> 项</div>
+      <div className={styles.left}>{t('已选择')} <span>{length}</span> {t('项')}</div>
       <Space size="middle">
         {actions.map((item, index) => (
           <React.Fragment key={index}>{item}</React.Fragment>
@@ -101,12 +102,12 @@ function Header(props) {
                 key="1"
                 checked={fields.length === columns.length}
                 indeterminate={![0, columns.length].includes(fields.length)}
-                onChange={handleCheckAll}>列展示</Checkbox>,
+                onChange={handleCheckAll}>{t('列展示')}</Checkbox>,
               <Button
                 key="2"
                 type="link"
                 style={{padding: 0}}
-                onClick={() => onFieldsChange(props.defaultFields)}>重置</Button>
+                onClick={() => onFieldsChange(props.defaultFields)}>{t('重置')}</Button>
             ]}
             overlayClassName={styles.tableFields}
             trigger="click"

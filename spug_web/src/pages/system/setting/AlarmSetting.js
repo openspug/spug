@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { observer } from 'mobx-react';
 import { Button, Form, Input, Radio, Space, message } from 'antd';
 import styles from './index.module.css';
-import { http } from 'libs';
+import { http, t } from 'libs';
 import store from './store';
 
 export default observer(function () {
@@ -21,7 +21,7 @@ export default observer(function () {
     const formData = form.getFieldsValue();
     http.post('/api/setting/email_test/', formData)
       .then(() => {
-        message.success('邮件服务连接成功')
+        message.success(t('邮件服务连接成功'))
       }).finally(() => setLoading(false))
   }
 
@@ -29,7 +29,7 @@ export default observer(function () {
     store.loading = true;
     http.post('/api/setting/', {data: formData})
       .then(() => {
-        message.success('保存成功');
+        message.success(t('保存成功'));
         store.fetchSettings()
       })
       .finally(() => store.loading = false)
@@ -40,47 +40,47 @@ export default observer(function () {
     if (mode === '1') {
       formData = {}
     } else if (!formData.server || !formData.port || !formData.username || !formData.password) {
-      return message.error('请完成邮件服务配置');
+      return message.error(t('请完成邮件服务配置'));
     }
     _doSubmit([{key: 'mail_service', value: formData}])
   }
 
   return (
     <React.Fragment>
-      <div className={styles.title}>报警服务设置</div>
+      <div className={styles.title}>{t('报警服务设置')}</div>
       <div style={{maxWidth: 340}}>
-        <Form.Item label="邮件服务" labelCol={{span: 24}} style={{marginTop: 12}} extra="用于通过邮件方式发送报警信息">
+        <Form.Item label={t('邮件服务')} labelCol={{span: 24}} style={{marginTop: 12}} extra={t('用于通过邮件方式发送报警信息')}>
           <Radio.Group
             value={mode}
             style={{marginBottom: 8}}
             buttonStyle="solid"
             onChange={e => setMode(e.target.value)}>
-            <Radio.Button value="1">内置</Radio.Button>
-            <Radio.Button value="2">自定义</Radio.Button>
+            <Radio.Button value="1">{t('内置')}</Radio.Button>
+            <Radio.Button value="2">{t('自定义')}</Radio.Button>
           </Radio.Group>
           <div style={{marginTop: 12, display: mode === '1' ? 'none' : 'block'}}>
             <Form form={form} initialValues={setting} labelCol={{span: 7}} wrapperCol={{span: 17}}>
-              <Form.Item required name="server" label="邮件服务器">
-                <Input placeholder="例如：smtp.exmail.qq.com"/>
+              <Form.Item required name="server" label={t('邮件服务器')}>
+                <Input placeholder={t('例如：smtp.exmail.qq.com')}/>
               </Form.Item>
-              <Form.Item required name="port" label="端口">
-                <Input placeholder="例如：465"/>
+              <Form.Item required name="port" label={t('端口')}>
+                <Input placeholder={t('例如：465')}/>
               </Form.Item>
-              <Form.Item required name="username" label="邮箱账号">
-                <Input placeholder="例如：dev@exmail.com"/>
+              <Form.Item required name="username" label={t('邮箱账号')}>
+                <Input placeholder={t('例如：dev@exmail.com')}/>
               </Form.Item>
-              <Form.Item required name="password" label="密码/授权码">
-                <Input.Password placeholder="请输入对应的密码或授权码"/>
+              <Form.Item required name="password" label={t('密码/授权码')}>
+                <Input.Password placeholder={t('请输入对应的密码或授权码')}/>
               </Form.Item>
-              <Form.Item name="nickname" label="发件人昵称">
-                <Input placeholder="请输入发件人昵称"/>
+              <Form.Item name="nickname" label={t('发件人昵称')}>
+                <Input placeholder={t('请输入发件人昵称')}/>
               </Form.Item>
             </Form>
           </div>
         </Form.Item>
         <Space style={{marginTop: 24}}>
-          {mode !== '1' && <Button type="danger" loading={loading} onClick={handleEmailTest}>测试邮件服务</Button>}
-          <Button type="primary" loading={store.loading} onClick={handleSubmit}>保存设置</Button>
+          {mode !== '1' && <Button type="danger" loading={loading} onClick={handleEmailTest}>{t('测试邮件服务')}</Button>}
+          <Button type="primary" loading={store.loading} onClick={handleSubmit}>{t('保存设置')}</Button>
         </Space>
       </div>
     </React.Fragment>

@@ -6,6 +6,7 @@
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Steps } from 'antd';
+import { t } from 'libs';
 import Step1 from './Step1';
 import Step2 from './Step2';
 import Step3 from './Step3';
@@ -23,13 +24,13 @@ export default observer(function () {
       visible
       width={800}
       maskClosable={false}
-      title={store.record.id ? '编辑任务' : '新建任务'}
+      title={store.record.id ? t('编辑任务') : t('新建任务')}
       onCancel={() => store.formVisible = false}
       footer={null}>
       <Steps current={store.page} className={styles.steps}>
-        <Steps.Step key={0} title="创建任务"/>
-        <Steps.Step key={1} title="设置触发器"/>
-        <Steps.Step key={2} title="选择执行对象"/>
+        <Steps.Step key={0} title={t('创建任务')}/>
+        <Steps.Step key={1} title={t('设置触发器')}/>
+        <Steps.Step key={2} title={t('选择执行对象')}/>
       </Steps>
       <Step1 visible={store.page === 0}/>
       <Step2 visible={store.page === 1}/>

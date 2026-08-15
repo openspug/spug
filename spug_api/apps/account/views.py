@@ -23,7 +23,7 @@ import json
 class UserView(AdminView):
     def get(self, request):
         users = []
-        for u in User.objects.filter(deleted_by_id__isnull=True):
+        for u in User.objects.filter(is_deleted=False):
             tmp = u.to_dict(excludes=('access_token', 'password_hash'))
             tmp['role_ids'] = [x.id for x in u.roles.all()]
             tmp['password'] = '******'

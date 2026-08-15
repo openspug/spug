@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Card, Input, Select, Space, Tooltip, Spin, message } from 'antd';
 import { FrownOutlined, ReloadOutlined, SyncOutlined } from '@ant-design/icons';
+import { t } from 'libs';
 import styles from './index.module.less';
 import store from './store';
 
@@ -19,24 +20,24 @@ const StyleMap = {
 }
 
 const StatusMap = {
-  '1': '正常',
-  '2': '警告',
-  '3': '紧急',
-  '0': '未激活',
-  '10': '待调度'
+  '1': t('正常'),
+  '2': t('警告'),
+  '3': t('紧急'),
+  '0': t('未激活'),
+  '10': t('待调度')
 }
 
 function CardItem(props) {
   const {status, type, group, desc, name, target, latest_run_time} = props.data
   const title = (
     <div>
-      <div>分组: {group}</div>
-      <div>类型: {type}</div>
-      <div>名称: {name}</div>
-      <div>目标: {target}</div>
-      <div>状态: {StatusMap[status]}</div>
-      <div>更新: {latest_run_time || '---'}</div>
-      <div>描述: {desc}</div>
+      <div>{t('分组')}: {group}</div>
+      <div>{t('类型')}: {type}</div>
+      <div>{t('名称')}: {name}</div>
+      <div>{t('目标')}: {target}</div>
+      <div>{t('状态')}: {StatusMap[status]}</div>
+      <div>{t('更新')}: {latest_run_time || '---'}</div>
+      <div>{t('描述')}: {desc}</div>
     </div>
   )
   return (
@@ -59,34 +60,34 @@ function MonitorCard() {
 
   function handleAutoReload() {
     store.autoReload = !autoReload
-    message.info(autoReload ? '关闭自动刷新' : '开启自动刷新')
+    message.info(autoReload ? t('关闭自动刷新') : t('开启自动刷新'))
     if (!autoReload) store.fetchOverviews()
     setAutoReload(!autoReload)
   }
 
   const filteredRecords = store.ovDataSource.filter(x => !status || x.status === status)
   return (
-    <Card title="总览" style={{marginBottom: 24}} bodyStyle={{padding: '12px 24px'}} extra={(
+    <Card title={t('总览')} style={{marginBottom: 24}} bodyStyle={{padding: '12px 24px'}} extra={(
       <Space size="middle">
         <Space>
-          <div>分组：</div>
+          <div>{t('分组：')}</div>
           <Select allowClear style={{minWidth: 150}} value={store.f_group} onChange={v => store.f_group = v}
-                  placeholder="请选择">
+                  placeholder={t('请选择')}>
             {store.groups.map(item => (
               <Select.Option value={item} key={item}>{item}</Select.Option>
             ))}
           </Select>
         </Space>
         <Space>
-          <div>类型：</div>
+          <div>{t('类型：')}</div>
           <Select allowClear style={{width: 120}} value={store.f_type} onChange={v => store.f_type = v}
-                  placeholder="请选择">
+                  placeholder={t('请选择')}>
             {store.types.map(item => <Select.Option key={item} value={item}>{item}</Select.Option>)}
           </Select>
         </Space>
         <Space>
-          <div>名称：</div>
-          <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
+          <div>{t('名称：')}</div>
+          <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder={t('请输入')}/>
         </Space>
       </Space>
     )}>
@@ -105,7 +106,7 @@ function MonitorCard() {
               </Tooltip>
             ) : null
           })}
-          <Tooltip title="自动刷新">
+          <Tooltip title={t('自动刷新')}>
             <div className={styles.autoLoad} onClick={handleAutoReload}>
               {autoReload ? <SyncOutlined spin style={{color: '#2563fc'}}/> : <ReloadOutlined/>}
             </div>

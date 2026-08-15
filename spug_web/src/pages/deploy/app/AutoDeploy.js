@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, Radio, Button, Alert, message } from 'antd';
 import { LoadingOutlined, SyncOutlined } from '@ant-design/icons';
-import { http } from 'libs';
+import { http, t } from 'libs';
 import store from './store';
 import styles from './index.module.css';
 
@@ -40,13 +40,13 @@ export default observer(function AutoDeploy() {
   }
 
   function copyToClipBoard(data) {
-    const t = document.createElement('input');
-    t.value = data;
-    document.body.appendChild(t);
-    t.select();
+    const el = document.createElement('input');
+    el.value = data;
+    document.body.appendChild(el);
+    el.select();
     document.execCommand('copy');
-    t.remove();
-    message.success('已复制')
+    el.remove();
+    message.success(t('已复制'))
   }
 
   const tagMode = type === 'tag';
@@ -57,22 +57,22 @@ export default observer(function AutoDeploy() {
       title="Webhook"
       footer={null}
       onCancel={() => store.autoVisible = false}>
-      <Alert showIcon type="info" style={{width: 440, margin: '0 auto 24px'}} message="Webhook可以用来与Git结合实现触发后自动发布。"/>
+      <Alert showIcon type="info" style={{width: 440, margin: '0 auto 24px'}} message={t('Webhook可以用来与Git结合实现触发后自动发布。')}/>
       <Form labelCol={{span: 6}} wrapperCol={{span: 16}}>
-        <Form.Item required label="触发方式">
+        <Form.Item required label={t('触发方式')}>
           <Radio.Group value={type} onChange={e => setType(e.target.value)}>
             <Radio.Button value="branch">Branch</Radio.Button>
             <Radio.Button value="tag">Tag</Radio.Button>
           </Radio.Group>
         </Form.Item>
         {store.deploy.extend === '1' ? (
-          <Form.Item hidden={tagMode} required={!tagMode} label="选择分支" extra={<span>
-            根据你的网络情况，首次刷新可能会很慢，请耐心等待。
+          <Form.Item hidden={tagMode} required={!tagMode} label={t('选择分支')} extra={<span>
+            {t('根据你的网络情况，首次刷新可能会很慢，请耐心等待。')}
             <a target="_blank" rel="noopener noreferrer"
-               href="https://spug.cc/docs/use-problem#clone">刷新失败？</a>
+               href="https://spug.cc/docs/use-problem#clone">{t('刷新失败？')}</a>
           </span>}>
             <Form.Item style={{display: 'inline-block', marginBottom: 0, width: '246px'}}>
-              <Select placeholder="仅指定分支的事件触发自动发布" value={branch} onChange={setBranch}>
+              <Select placeholder={t('仅指定分支的事件触发自动发布')} value={branch} onChange={setBranch}>
                 {branches.map(item => (
                   <Select.Option key={item} value={item}>{item}</Select.Option>
                 ))}
@@ -81,37 +81,37 @@ export default observer(function AutoDeploy() {
             <Form.Item style={{display: 'inline-block', width: 82, textAlign: 'center', marginBottom: 0}}>
               {fetching ? <LoadingOutlined style={{fontSize: 18, color: '#1890ff'}}/> :
                 <Button type="link" icon={<SyncOutlined/>} disabled={fetching || tagMode}
-                        onClick={fetchVersions}>刷新</Button>
+                        onClick={fetchVersions}>{t('刷新')}</Button>
               }
             </Form.Item>
           </Form.Item>
         ) : (
-          <Form.Item required hidden={tagMode} label="指定分支">
+          <Form.Item required hidden={tagMode} label={t('指定分支')}>
             <Input
               value={branch}
               onChange={e => setBranch(e.target.value)}
-              placeholder="仅指定分支的事件触发自动发布"/>
+              placeholder={t('仅指定分支的事件触发自动发布')}/>
           </Form.Item>
         )}
         {type === 'branch' && !branch ? (
           <Form.Item label="Webhook URL">
-            <div style={{color: '#ff4d4f'}}>请指定分支名称。</div>
+            <div style={{color: '#ff4d4f'}}>{t('请指定分支名称。')}</div>
           </Form.Item>
         ) : (
-          <Form.Item label="Webhook URL" extra="点击复制链接，目前支持Gitee、Github、Gitlab、Gogs、Coding和Codeup(阿里云)。">
+          <Form.Item label="Webhook URL" extra={t('点击复制链接，目前支持Gitee、Github、Gitlab、Gogs、Coding和Codeup(阿里云)。')}>
             <div className={styles.webhook} onClick={() => copyToClipBoard(url)}>{url}</div>
           </Form.Item>
         )}
         {key ? (
           <Form.Item
             label="Secret Token"
-            tooltip="调用该Webhook接口的访问凭据，在Gitee中为WebHook密码，Gogs中为密钥文本。"
-            extra={`点击复制，老版本gitlab等无该项设置的可以在上述Webhook URL后边附加 &token=${key}`}>
+            tooltip={t('调用该Webhook接口的访问凭据，在Gitee中为WebHook密码，Gogs中为密钥文本。')}
+            extra={t('点击复制，老版本gitlab等无该项设置的可以在上述Webhook URL后边附加 &token={}', key)}>
             <div className={styles.webhook} onClick={() => copyToClipBoard(key)}>{key}</div>
           </Form.Item>
         ) : (
-          <Form.Item label="Secret Token" tooltip="调用该Webhook接口的访问凭据，在Gitee中为WebHook密码，Gogs中为密钥文本。">
-            <div style={{color: '#ff4d4f'}}>请在系统管理/系统设置/开放服务设置中设置。</div>
+          <Form.Item label="Secret Token" tooltip={t('调用该Webhook接口的访问凭据，在Gitee中为WebHook密码，Gogs中为密钥文本。')}>
+            <div style={{color: '#ff4d4f'}}>{t('请在系统管理/系统设置/开放服务设置中设置。')}</div>
           </Form.Item>
         )}
       </Form>

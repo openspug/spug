@@ -9,7 +9,7 @@ import { Drawer, Button } from 'antd';
 import { AppstoreOutlined, SettingOutlined, SaveOutlined } from '@ant-design/icons';
 import ModuleConfig from './modules/index';
 import Icon from './Icon';
-import { clsNames } from 'libs';
+import { clsNames, t } from 'libs';
 import S from './store';
 import css from './nodeConfig.module.less';
 import { NODES } from './data';
@@ -57,16 +57,16 @@ function NodeConfig(props) {
         <div className={css.header}>
           <div className={clsNames(css.item, tab === 'node' && css.active)} onClick={() => setTab('node')}>
             <AppstoreOutlined/>
-            <span>选择模块</span>
+            <span>{t('选择模块')}</span>
           </div>
           <div className={clsNames(css.item, tab === 'conf' && css.active)} onClick={() => setTab('conf')}>
             <SettingOutlined/>
-            <span>模块配置</span>
+            <span>{t('模块配置')}</span>
           </div>
         </div>
 
         <div style={{marginTop: 72, display: tab === 'node' ? 'block' : 'none'}}>
-          <div className={css.category}>内置模块</div>
+          <div className={css.category}>{t('内置模块')}</div>
           <div className={css.items}>
             {NODES.map(item => (
               <div key={item.module} className={clsNames(css.item, S.node?.module === item.module && css.active)}
@@ -83,7 +83,7 @@ function NodeConfig(props) {
         </div>
 
         <div className={css.footer} style={{display: tab === 'conf' ? 'block' : 'none'}}>
-          <Button icon={<SaveOutlined/>} size="large" type="primary" loading={loading} onClick={handleSave}>保存</Button>
+          <Button icon={<SaveOutlined/>} size="large" type="primary" loading={loading} onClick={handleSave}>{t('保存')}</Button>
         </div>
       </div>
     </Drawer>

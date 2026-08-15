@@ -7,6 +7,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Table, Tooltip, Tag } from 'antd';
 import http from 'libs/http';
+import { t } from 'libs';
 import store from './store';
 
 @observer
@@ -42,14 +43,14 @@ class Record extends React.Component {
     dataIndex: 'value',
     ellipsis: true
   }, {
-    title: '动作',
+    title: t('动作'),
     render: info => <Tag color={this.colorMap[info.action]}>{info['action_alias']}</Tag>
   }, {
-    title: '操作人',
+    title: t('操作人'),
     width: 120,
     dataIndex: 'update_user'
   }, {
-    title: '操作时间',
+    title: t('操作时间'),
     width: 180,
     dataIndex: 'updated_at'
   }];
@@ -61,7 +62,7 @@ class Record extends React.Component {
         visible
         width={1000}
         maskClosable={false}
-        title={`${store.env.name} - 更改历史记录`}
+        title={t('{} - 更改历史记录', store.env.name)}
         onCancel={() => store.recordVisible = false}
         footer={null}>
         <Table
@@ -72,7 +73,7 @@ class Record extends React.Component {
             showSizeChanger: true,
             showLessItems: true,
             hideOnSinglePage: true,
-            showTotal: total => `共 ${total} 条`,
+            showTotal: total => t('共 {} 条', total),
             pageSizeOptions: ['10', '20', '50', '100']
           }}
           columns={this.columns}/>

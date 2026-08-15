@@ -8,7 +8,7 @@ import { observer } from 'mobx-react';
 import { Button, Form, Upload, message } from 'antd';
 import { ThunderboltOutlined, UploadOutlined } from '@ant-design/icons';
 import Parameter from '../modules/Parameter';
-import { http, X_TOKEN } from 'libs';
+import { http, X_TOKEN, t } from 'libs';
 import S from './store';
 import lds from 'lodash';
 
@@ -21,7 +21,7 @@ function Ask(props) {
     const params = {};
     for (let item of S.dynamicParams) {
       if (item.required && lds.isEmpty(data[item.variable])) {
-        message.error(`请设置参数 ${item.name}`);
+        message.error(t('请设置参数 {}', item.name));
         return
       }
       if (item.type !== 'upload') params[item.variable] = data[item.variable]
@@ -37,7 +37,7 @@ function Ask(props) {
     if (size) {
       const fileSize = file.size / 1024 / 1024;
       if (fileSize > size) {
-        message.error(`上传文件大小不能超过 ${size}MB`);
+        message.error(t('上传文件大小不能超过 {}MB', size));
         return Upload.LIST_IGNORE;
       }
     }
@@ -50,7 +50,7 @@ function Ask(props) {
                    getValueFromEvent={e => Array.isArray(e) ? e : e?.fileList}>
           <Upload multiple accept={item.accept} action="/api/pipeline/upload/" headers={{'X-Token': X_TOKEN}}
                   data={{token: S.token, id: item.variable}} beforeUpload={file => beforeUpload(file, item.size)}>
-            <Button icon={<UploadOutlined/>}>点击上传</Button>
+            <Button icon={<UploadOutlined/>}>{t('点击上传')}</Button>
           </Upload>
         </Form.Item>
       ) : (
@@ -59,7 +59,7 @@ function Ask(props) {
         </Form.Item>
       ))}
       <Form.Item wrapperCol={{offset: 6, span: 16}}>
-        <Button icon={<ThunderboltOutlined/>} loading={loading} type="primary" onClick={handleOk}>开始执行</Button>
+        <Button icon={<ThunderboltOutlined/>} loading={loading} type="primary" onClick={handleOk}>{t('开始执行')}</Button>
       </Form.Item>
     </Form>
   )

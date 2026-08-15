@@ -2,7 +2,7 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django_redis import get_redis_connection
-from libs.utils import human_seconds_time
+from libs.utils import human_seconds_time, wrap_python_command
 from libs.ssh import SSH
 import threading
 import socket
@@ -39,8 +39,7 @@ class Job:
 
     def _handle_command(self, command, interpreter):
         if interpreter == 'python':
-            attach = 'INTERPRETER=python\ncommand -v python3 &> /dev/null && INTERPRETER=python3'
-            return f'{attach}\n$INTERPRETER << EOF\n# -*- coding: UTF-8 -*-\n{command}\nEOF'
+            return wrap_python_command(command)
         return command
 
     def send(self, data):
@@ -55,7 +54,9 @@ class Job:
         code = -1
         try:
             with self.ssh:
-                self.rds.set(self.rds_key, self.ssh.get_pid(), 3600)
+                pid = self.ssh.get_pid()
+                if pid:
+                    self.rds.set(self.rds_key, pid, 3600)
                 for code, out in self.ssh.exec_command_with_stream(self.command, self.env):
                     self.send(out)
             human_time = human_seconds_time(time.time() - flag)

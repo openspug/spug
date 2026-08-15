@@ -3,184 +3,200 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
+import { t } from 'libs';
+
 export default [{
   key: 'dashboard',
-  label: 'Dashboard',
+  label: t('Dashboard'),
   pages: [{
     key: 'dashboard',
-    label: 'Dashboard',
+    label: t('Dashboard'),
     perms: [
-      {key: 'view', label: '查看Dashboard'}
+      {key: 'view', label: t('查看Dashboard')}
     ]
   }]
 }, {
   key: 'host',
-  label: '主机管理',
+  label: t('主机管理'),
   pages: [{
     key: 'host',
-    label: '主机管理',
+    label: t('主机管理'),
     perms: [
-      {key: 'view', label: '查看主机'},
-      {key: 'add', label: '新建主机'},
-      {key: 'edit', label: '编辑主机'},
-      {key: 'del', label: '删除主机'},
+      {key: 'view', label: t('查看主机')},
+      {key: 'add', label: t('新建主机')},
+      {key: 'edit', label: t('编辑主机')},
+      {key: 'del', label: t('删除主机')},
     ]
   }, {
     key: 'console',
-    label: 'Web终端',
+    label: t('Web终端'),
     perms: [
-      {key: 'view', label: 'Web终端'},
-      {key: 'list', label: '文件管理'},
-      {key: 'upload', label: '上传文件'},
-      {key: 'del', label: '删除文件'},
+      {key: 'view', label: t('Web终端')},
+      {key: 'list', label: t('文件管理')},
+      {key: 'upload', label: t('上传文件')},
+      {key: 'del', label: t('删除文件')},
     ]
   }]
 }, {
   key: 'exec',
-  label: '批量执行',
+  label: t('批量执行'),
   pages: [{
     key: 'task',
-    label: '执行任务',
+    label: t('执行任务'),
     perms: [
-      {key: 'do', label: '执行任务'}
+      {key: 'do', label: t('执行任务')}
     ]
   }, {
     key: 'template',
-    label: '模板管理',
+    label: t('模板管理'),
     perms: [
-      {key: 'view', label: '查看模板'},
-      {key: 'add', label: '新建模板'},
-      {key: 'edit', label: '编辑模板'},
-      {key: 'del', label: '删除模板'},
+      {key: 'view', label: t('查看模板')},
+      {key: 'add', label: t('新建模板')},
+      {key: 'edit', label: t('编辑模板')},
+      {key: 'del', label: t('删除模板')},
     ]
   }, {
     key: 'transfer',
-    label: '文件分发',
+    label: t('文件分发'),
     perms: [
-      {key: 'do', label: '文件分发'}
+      {key: 'do', label: t('文件分发')}
     ]
   }]
 }, {
   key: 'deploy',
-  label: '应用发布',
+  label: t('应用发布'),
   pages: [{
     key: 'app',
-    label: '应用管理',
+    label: t('应用管理'),
     perms: [
-      {key: 'view', label: '查看应用'},
-      {key: 'add', label: '新建应用'},
-      {key: 'edit', label: '编辑应用'},
-      {key: 'del', label: '删除应用'},
-      {key: 'config', label: '查看配置'},
+      {key: 'view', label: t('查看应用')},
+      {key: 'add', label: t('新建应用')},
+      {key: 'edit', label: t('编辑应用')},
+      {key: 'del', label: t('删除应用')},
+      {key: 'config', label: t('查看配置')},
     ]
   }, {
     key: 'repository',
-    label: '构建仓库',
+    label: t('构建仓库'),
     perms: [
-      {key: 'view', label: '查看构建'},
-      {key: 'add', label: '新建版本'},
-      {key: 'build', label: '执行构建'},
-      {key: 'del', label: '删除版本'},
+      {key: 'view', label: t('查看构建')},
+      {key: 'add', label: t('新建版本')},
+      {key: 'build', label: t('执行构建')},
+      {key: 'del', label: t('删除版本')},
     ]
   },{
     key: 'request',
-    label: '发布申请',
+    label: t('发布申请'),
     perms: [
-      {key: 'view', label: '查看申请'},
-      {key: 'add', label: '新建申请'},
-      {key: 'edit', label: '编辑申请'},
-      {key: 'del', label: '删除申请'},
-      {key: 'approve', label: '审核申请'},
-      {key: 'do', label: '执行发布'}
+      {key: 'view', label: t('查看申请')},
+      {key: 'add', label: t('新建申请')},
+      {key: 'edit', label: t('编辑申请')},
+      {key: 'del', label: t('删除申请')},
+      {key: 'approve', label: t('审核申请')},
+      {key: 'do', label: t('执行发布')}
+    ]
+  }]
+}, {
+  key: 'pipeline',
+  label: t('流水线'),
+  pages: [{
+    key: 'pipeline',
+    label: t('流水线'),
+    perms: [
+      {key: 'view', label: t('查看流水线')},
+      {key: 'add', label: t('新建流水线')},
+      {key: 'edit', label: t('编辑流水线')},
+      {key: 'del', label: t('删除流水线')},
+      {key: 'do', label: t('执行流水线')}
     ]
   }]
 }, {
   key: 'schedule',
-  label: '任务计划',
+  label: t('任务计划'),
   pages: [{
     key: 'schedule',
-    label: '任务计划',
+    label: t('任务计划'),
     perms: [
-      {key: 'view', label: '查看任务'},
-      {key: 'add', label: '新建任务'},
-      {key: 'edit', label: '编辑任务'},
-      {key: 'del', label: '删除任务'},
+      {key: 'view', label: t('查看任务')},
+      {key: 'add', label: t('新建任务')},
+      {key: 'edit', label: t('编辑任务')},
+      {key: 'del', label: t('删除任务')},
     ]
   }]
 }, {
   key: 'config',
-  label: '配置中心',
+  label: t('配置中心'),
   pages: [{
     key: 'env',
-    label: '环境管理',
+    label: t('环境管理'),
     perms: [
-      {key: 'view', label: '查看环境'},
+      {key: 'view', label: t('查看环境')},
       // {key: 'add', label: '新建环境'},
-      {key: 'edit', label: '编辑环境'},
-      {key: 'del', label: '删除环境'}
+      {key: 'edit', label: t('编辑环境')},
+      {key: 'del', label: t('删除环境')}
     ]
   }, {
     key: 'src',
-    label: '服务管理',
+    label: t('服务管理'),
     perms: [
-      {key: 'view', label: '查看服务'},
-      {key: 'add', label: '新建服务'},
-      {key: 'edit', label: '编辑服务'},
-      {key: 'del', label: '删除服务'},
-      {key: 'view_config', label: '查看配置'},
-      {key: 'edit_config', label: '修改配置'},
+      {key: 'view', label: t('查看服务')},
+      {key: 'add', label: t('新建服务')},
+      {key: 'edit', label: t('编辑服务')},
+      {key: 'del', label: t('删除服务')},
+      {key: 'view_config', label: t('查看配置')},
+      {key: 'edit_config', label: t('修改配置')},
     ]
   }, {
     key: 'app',
-    label: '应用管理',
+    label: t('应用管理'),
     perms: [
-      {key: 'view', label: '查看应用'},
+      {key: 'view', label: t('查看应用')},
       // {key: 'add', label: '新建应用'},
-      {key: 'edit', label: '编辑应用'},
-      {key: 'del', label: '删除应用'},
-      {key: 'view_config', label: '查看配置'},
-      {key: 'edit_config', label: '修改配置'},
+      {key: 'edit', label: t('编辑应用')},
+      {key: 'del', label: t('删除应用')},
+      {key: 'view_config', label: t('查看配置')},
+      {key: 'edit_config', label: t('修改配置')},
     ]
   }]
 }, {
   key: 'monitor',
-  label: '监控中心',
+  label: t('监控中心'),
   pages: [{
     key: 'monitor',
-    label: '监控中心',
+    label: t('监控中心'),
     perms: [
-      {key: 'view', label: '查看监控'},
-      {key: 'add', label: '新建监控'},
-      {key: 'edit', label: '编辑监控'},
-      {key: 'del', label: '删除监控'},
+      {key: 'view', label: t('查看监控')},
+      {key: 'add', label: t('新建监控')},
+      {key: 'edit', label: t('编辑监控')},
+      {key: 'del', label: t('删除监控')},
     ]
   }]
 }, {
   key: 'alarm',
-  label: '报警中心',
+  label: t('报警中心'),
   pages: [{
     key: 'alarm',
-    label: '报警记录',
+    label: t('报警记录'),
     perms: [
-      {key: 'view', label: '查看记录'}
+      {key: 'view', label: t('查看记录')}
     ]
   }, {
     key: 'contact',
-    label: '报警联系人',
+    label: t('报警联系人'),
     perms: [
-      {key: 'view', label: '查看联系人'},
-      {key: 'add', label: '新建联系人'},
-      {key: 'edit', label: '编辑联系人'},
-      {key: 'del', label: '删除联系人'},
+      {key: 'view', label: t('查看联系人')},
+      {key: 'add', label: t('新建联系人')},
+      {key: 'edit', label: t('编辑联系人')},
+      {key: 'del', label: t('删除联系人')},
     ]
   }, {
     key: 'group',
-    label: '报警联系组',
+    label: t('报警联系组'),
     perms: [
-      {key: 'view', label: '查看联系组'},
-      {key: 'add', label: '新建联系组'},
-      {key: 'edit', label: '编辑联系组'},
-      {key: 'del', label: '删除联系组'},
+      {key: 'view', label: t('查看联系组')},
+      {key: 'add', label: t('新建联系组')},
+      {key: 'edit', label: t('编辑联系组')},
+      {key: 'del', label: t('删除联系组')},
     ]
   }]
 }]

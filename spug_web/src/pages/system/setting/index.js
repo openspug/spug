@@ -6,6 +6,7 @@
 import React from 'react';
 import { Menu } from 'antd';
 import { AuthDiv, Breadcrumb } from 'components';
+import { t } from 'libs';
 import BasicSetting from './BasicSetting';
 import AlarmSetting from './AlarmSetting';
 import LDAPSetting from './LDAPSetting';
@@ -34,9 +35,9 @@ class Index extends React.Component {
     return (
       <AuthDiv auth="system.setting.view">
         <Breadcrumb>
-          <Breadcrumb.Item>首页</Breadcrumb.Item>
-          <Breadcrumb.Item>系统管理</Breadcrumb.Item>
-          <Breadcrumb.Item>系统设置</Breadcrumb.Item>
+          <Breadcrumb.Item>{t('首页')}</Breadcrumb.Item>
+          <Breadcrumb.Item>{t('系统管理')}</Breadcrumb.Item>
+          <Breadcrumb.Item>{t('系统设置')}</Breadcrumb.Item>
         </Breadcrumb>
         <div className={styles.container}>
           <div className={styles.left}>
@@ -45,13 +46,13 @@ class Index extends React.Component {
               selectedKeys={selectedKeys}
               style={{border: 'none'}}
               onSelect={({selectedKeys}) => this.setState({selectedKeys})}>
-              <Menu.Item key="basic">基本设置</Menu.Item>
-              <Menu.Item key="security">安全设置</Menu.Item>
-              <Menu.Item key="ldap">LDAP设置</Menu.Item>
-              <Menu.Item key="key">密钥设置</Menu.Item>
-              <Menu.Item key="alarm">报警服务设置</Menu.Item>
-              <Menu.Item key="service">开放服务设置</Menu.Item>
-              <Menu.Item key="about">关于</Menu.Item>
+              <Menu.Item key="basic">{t('基本设置')}</Menu.Item>
+              <Menu.Item key="security">{t('安全设置')}</Menu.Item>
+              <Menu.Item key="ldap">{t('LDAP设置')}</Menu.Item>
+              <Menu.Item key="key">{t('密钥设置')}</Menu.Item>
+              <Menu.Item key="alarm">{t('报警服务设置')}</Menu.Item>
+              <Menu.Item key="service">{t('开放服务设置')}</Menu.Item>
+              <Menu.Item key="about">{t('关于')}</Menu.Item>
             </Menu>
           </div>
           <div className={styles.right}>

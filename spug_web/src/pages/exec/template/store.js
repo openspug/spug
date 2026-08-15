@@ -4,13 +4,13 @@
  * Released under the AGPL-3.0 License.
  */
 import { observable } from "mobx";
-import { http, includes } from 'libs';
+import { http, includes, t } from 'libs';
 
 class Store {
   ParameterTypes = {
-    'string': '文本框',
-    'password': '密码框',
-    'select': '下拉选择'
+    'string': t('文本框'),
+    'password': t('密码框'),
+    'select': t('下拉选择')
   }
   @observable records = [];
   @observable types = [];

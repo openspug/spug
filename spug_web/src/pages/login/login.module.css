@@ -9,6 +9,13 @@
     flex-direction: column;
 }
 
+.language {
+    position: absolute;
+    top: 12px;
+    right: 24px;
+    color: rgba(0, 0, 0, 0.65);
+}
+
 .titleContainer {
     padding-top: 70px;
     text-align: center;

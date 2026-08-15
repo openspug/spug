@@ -15,7 +15,7 @@ import {
   EditOutlined
 } from '@ant-design/icons';
 import { AuthButton, Action } from 'components';
-import { http, uniqueId, X_TOKEN } from 'libs';
+import { http, t, uniqueId, X_TOKEN } from 'libs';
 import lds from 'lodash';
 import styles from './index.module.less'
 import moment from 'moment';
@@ -51,7 +51,7 @@ class FileManager extends React.Component {
   }
 
   columns = [{
-    title: '名称',
+    title: t('名称'),
     key: 'name',
     render: info => info.kind === 'd' ? (
       <div onClick={() => this.handleChdir(info.name, '1')} style={{cursor: 'pointer'}}>
@@ -66,22 +66,22 @@ class FileManager extends React.Component {
     ),
     ellipsis: true
   }, {
-    title: '大小',
+    title: t('大小'),
     dataIndex: 'size',
     align: 'right',
     className: styles.fileSize,
     width: 90
   }, {
-    title: '修改时间',
+    title: t('修改时间'),
     dataIndex: 'date',
     sorter: (a, b) => moment(a.date).unix() - moment(b.date).unix(),
     width: 190
   }, {
-    title: '属性',
+    title: t('属性'),
     dataIndex: 'code',
     width: 110
   }, {
-    title: '操作',
+    title: t('操作'),
     width: 100,
     align: 'right',
     key: 'action',
@@ -195,18 +195,18 @@ class FileManager extends React.Component {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    message.warning('即将开始下载，请勿重复点击。')
+    message.warning(t('即将开始下载，请勿重复点击。'))
   };
 
   handleDelete = (name) => {
     const file = `/${this.state.pwd.join('/')}/${name}`;
     Modal.confirm({
-      title: '删除文件确认',
-      content: `确认删除文件：${file} ?`,
+      title: t('删除文件确认'),
+      content: t('确认删除文件：{} ?', file),
       onOk: () => {
         return http.delete('/api/file/object/', {params: {id: this.props.id, file}})
           .then(() => {
-            message.success('删除成功');
+            message.success(t('删除成功'));
             this.fetchFiles()
           })
       }
@@ -225,7 +225,7 @@ class FileManager extends React.Component {
         <div className={styles.drawerHeader}>
           {this.state.inputPath !== null ? (
             <Input size="small" className={styles.input}
-                   suffix={<div style={{color: '#999', fontSize: 12}}>回车确认</div>}
+                   suffix={<div style={{color: '#999', fontSize: 12}}>{t('回车确认')}</div>}
                    value={this.state.inputPath} onChange={e => this.setState({inputPath: e.target.value})}
                    onBlur={this.handleInputEnter}
                    onPressEnter={this.handleInputEnter}/>
@@ -246,11 +246,11 @@ class FileManager extends React.Component {
           )}
 
           <div className={styles.action}>
-            <span>显示隐藏文件：</span>
+            <span>{t('显示隐藏文件：')}</span>
             <Switch
               checked={this.state.showDot}
-              checkedChildren="开启"
-              unCheckedChildren="关闭"
+              checkedChildren={t('开启')}
+              unCheckedChildren={t('关闭')}
               onChange={v => this.setState({showDot: v})}/>
             {this.state.uploading ? (
               <Progress className={styles.progress} strokeWidth={14} status={this.state.uploadStatus}
@@ -262,7 +262,7 @@ class FileManager extends React.Component {
                 size="small"
                 type="primary"
                 icon={<UploadOutlined/>}
-                onClick={this.handleUpload}>上传文件</AuthButton>
+                onClick={this.handleUpload}>{t('上传文件')}</AuthButton>
             )}
           </div>
         </div>

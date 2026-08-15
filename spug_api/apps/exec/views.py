@@ -121,42 +121,36 @@ class TaskView(View):
         return json_response(error=error)
 
 
-KILLER = '''
-function kill_tree {
-  local pid=$1
-  local and_self=${2:-0}
-  local children=$(pgrep -P $pid)
-  for child in $children; do
-    kill_tree $child 1
-  done
-  if [ $and_self -eq 1 ]; then
-    kill $pid
-  fi
-}
-
-kill_tree %s
-'''
-
-
-@auth('exec.task.do|deploy.request.do')
+@auth('exec.task.do|deploy.request.do|deploy.repository.add|deploy.repository.build|pipeline.pipeline.do')
 def handle_terminate(request):
     form, error = JsonParser(
-        Argument('token', help='参数错误')
+        Argument('token', help='参数错误'),
+        Argument('target', required=False)
     ).parse(request.body)
     if error is None:
         rds = get_redis_connection()
-        pid_str = rds.get(form.token)
+        # two addressing styles are used across the app:
+        # - pipeline stores '{host_id}.{pid}' at key '{token}.{node_id}.{host_id}' (no target)
+        # - exec/deploy/build store the raw pid at key 'PID:{token}:{target}'
+        rds_key = f'PID:{form.token}:{form.target}' if form.target is not None else form.token
+        pid_str = rds.get(rds_key)
         if not pid_str:
             return json_response(error='未找到关联进程')
-        target, pid = pid_str.decode().split('.')
+        pid_str = pid_str.decode()
+        if '.' in pid_str:
+            target, pid = pid_str.split('.', 1)
+        else:
+            target, pid = str(form.target), pid_str
         if target.isdigit():
             host = Host.objects.get(pk=target)
             with host.get_ssh() as ssh:
-                command = KILLER % pid
-                ssh.exec_command_raw(command)
+                ssh.terminate(pid)
         elif target == 'local':
-            gid = os.getpgid(int(pid))
-            if gid:
-                os.killpg(gid, 9)
-        rds.delete(form.token)
+            try:
+                os.killpg(os.getpgid(int(pid)), 9)
+            except ProcessLookupError:
+                pass  # 进程已自行退出，视为终止成功，继续清理 redis 键
+        else:
+            return json_response(error='未找到关联进程')
+        rds.delete(rds_key)
     return json_response(error=error)

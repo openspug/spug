@@ -13,7 +13,7 @@ import Console from './console';
 import PipeForm from './Form';
 import Node from './Node';
 import { transfer } from './utils';
-import { history } from 'libs';
+import { history, t } from 'libs';
 import S from './store';
 import lds from 'lodash';
 import css from './editor.module.less';
@@ -25,7 +25,7 @@ function Editor(props) {
 
   useEffect(() => {
     if (params.id === 'new') {
-      S.record = {name: '新建流水线', nodes: []}
+      S.record = {name: t('新建流水线'), nodes: []}
       handleAddDownstream()
     } else {
       S.fetchRecord(params.id)
@@ -109,7 +109,7 @@ function Editor(props) {
     const {downstream} = S.actionNode
     const [index, upNode, streamIdx] = _findIndexAndUpNode()
     if (index === 0 && downstream && downstream.length > 1) {
-      return message.error('该节点为起始节点且有多个下游节点无法删除')
+      return message.error(t('该节点为起始节点且有多个下游节点无法删除'))
     }
     if (upNode) {
       upNode.downstream.splice(streamIdx, 1)
@@ -136,11 +136,11 @@ function Editor(props) {
         <div className={css.title}>{S.record.name}</div>
         <EditOutlined className={css.edit} onClick={() => setVisible(true)}/>
         <div style={{flex: 1}}/>
-        <Popconfirm title="确定要执行吗？" onConfirm={() => S.showConsole(S.record)}>
+        <Popconfirm title={t('确定要执行吗？')} onConfirm={() => S.showConsole(S.record)}>
           <Button  className={css.back} type="link" icon={<ThunderboltOutlined/>}/>
         </Popconfirm>
         <Button className={css.back} type="link" icon={<RollbackOutlined/>}
-                onClick={() => history.goBack()}>返回列表</Button>
+                onClick={() => history.goBack()}>{t('返回列表')}</Button>
       </div>
       <div className={css.body}>
         <div className={css.nodes}>

@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { Menu } from 'antd';
 import { Breadcrumb } from 'components';
+import { t } from 'libs';
 import Basic from './Basic';
 import Reset from './Reset';
 import styles from './index.module.css';
@@ -16,8 +17,8 @@ function Index() {
   return (
     <div>
       <Breadcrumb>
-        <Breadcrumb.Item>首页</Breadcrumb.Item>
-        <Breadcrumb.Item>个人中心</Breadcrumb.Item>
+        <Breadcrumb.Item>{t('首页')}</Breadcrumb.Item>
+        <Breadcrumb.Item>{t('个人中心')}</Breadcrumb.Item>
       </Breadcrumb>
       <div className={styles.container}>
         <div className={styles.left}>
@@ -26,8 +27,8 @@ function Index() {
             selectedKeys={selectedKeys}
             style={{border: 'none'}}
             onSelect={({selectedKeys}) => setSelectedKeys(selectedKeys)}>
-            <Menu.Item key="basic">基本设置</Menu.Item>
-            <Menu.Item key="reset">修改密码</Menu.Item>
+            <Menu.Item key="basic">{t('基本设置')}</Menu.Item>
+            <Menu.Item key="reset">{t('修改密码')}</Menu.Item>
           </Menu>
         </div>
         <div className={styles.right}>

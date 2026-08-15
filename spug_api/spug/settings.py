@@ -15,6 +15,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 import re
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -47,12 +48,15 @@ INSTALLED_APPS = [
     'apps.home',
     'apps.credential',
     'apps.pipeline',
+    'apps.repository',
+    'apps.deploy',
     'channels',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'libs.middleware.TranslateMiddleware',
     'libs.middleware.AuthenticationMiddleware',
     'libs.middleware.HandleExceptionMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -76,9 +80,14 @@ DATABASES = {
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        # django_redis is required, the deploy/build/pipeline consoles use
+        # get_redis_connection() to stream their output through redis lists.
+        "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/1",
         "KEY_PREFIX": "spug",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
     }
 }
 
@@ -103,8 +112,11 @@ EXEC_WORKER_KEY = 'spug:exec:worker'
 REQUEST_KEY = 'spug:request'
 BUILD_KEY = 'spug:build'
 PIPELINE_KEY = 'spug:pipeline'
-TRANSFER_DIR = BASE_DIR / 'storage' / 'transfer'
-DEPLOY_DIR = BASE_DIR / 'storage' / 'deploy'
+TRANSFER_DIR = str(BASE_DIR / 'storage' / 'transfer')
+DEPLOY_DIR = str(BASE_DIR / 'storage' / 'deploy')
+# kept outside of the source tree, the docker image mounts it as /data/repos
+REPOS_DIR = str(BASE_DIR.parent.parent / 'repos')
+BUILD_DIR = os.path.join(REPOS_DIR, 'build')
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/

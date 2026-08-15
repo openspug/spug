@@ -4,6 +4,7 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
+import { t } from 'libs';
 
 function IPAddress(props) {
   const style = {
@@ -25,7 +26,7 @@ function IPAddress(props) {
   }
   return (props.ip && props.ip.length > 0) ? (
     <div style={{width: 150, display: 'flex', alignItems: 'center'}}>
-      {props.isPublic ? <span style={style}>公</span> : <span style={style2}>内</span>}
+      {props.isPublic ? <span style={style}>{t('公')}</span> : <span style={style2}>{t('内')}</span>}
       <span>{props.ip[0]}</span>
     </div>
   ) : null

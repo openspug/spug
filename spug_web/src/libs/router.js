@@ -6,6 +6,7 @@
 import React, { Suspense } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import moduleRoutes from '../routes';
+import { t } from './i18n';
 import styles from './libs.module.css';
 
 
@@ -28,7 +29,7 @@ function NotFound() {
       </div>
       <div>
         <h1 className={styles.title}>404</h1>
-        <div className={styles.desc}>抱歉，你访问的页面不存在</div>
+        <div className={styles.desc}>{t('抱歉，你访问的页面不存在')}</div>
       </div>
     </div>
   )

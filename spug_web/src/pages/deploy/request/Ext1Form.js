@@ -8,7 +8,7 @@ import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, DatePicker, Button, message } from 'antd';
 import { LoadingOutlined, SyncOutlined } from '@ant-design/icons';
 import HostSelector from './HostSelector';
-import { http, history, includes } from 'libs';
+import { http, history, includes, t } from 'libs';
 import store from './store';
 import lds from 'lodash';
 import moment from 'moment';
@@ -16,12 +16,12 @@ import moment from 'moment';
 function NoVersions() {
   return (
     <div>
-      <span>未找到符合条件的版本，</span>
+      <span>{t('未找到符合条件的版本，')}</span>
       <Button
         type="link"
         style={{padding: 0}}
         onClick={() => history.push('/deploy/repository')}>
-        去构建新版本？</Button>
+        {t('去构建新版本？')}</Button>
     </div>
   )
 }
@@ -63,7 +63,7 @@ export default observer(function () {
 
   function handleSubmit() {
     if (host_ids.length === 0) {
-      return message.error('请至少选择一个要发布的主机')
+      return message.error(t('请至少选择一个要发布的主机'))
     }
     setLoading(true);
     const formData = form.getFieldsValue();
@@ -75,7 +75,7 @@ export default observer(function () {
     if (plan) formData.plan = plan.format('YYYY-MM-DD HH:mm:00');
     http.post('/api/deploy/request/ext1/', formData)
       .then(res => {
-        message.success('操作成功');
+        message.success(t('操作成功'));
         store.ext1Visible = false;
         store.fetchRecords()
       }, () => setLoading(false))
@@ -143,31 +143,31 @@ export default observer(function () {
       visible
       width={800}
       maskClosable={false}
-      title={`${store.record.id ? '编辑' : '新建'}发布申请`}
+      title={store.record.id ? t('编辑发布申请') : t('新建发布申请')}
       onCancel={() => store.ext1Visible = false}
       confirmLoading={loading}
       onOk={handleSubmit}>
       <Form form={form} initialValues={store.record} labelCol={{span: 5}} wrapperCol={{span: 17}}>
-        <Form.Item required name="name" label="申请标题">
-          <Input placeholder="请输入申请标题"/>
+        <Form.Item required name="name" label={t('申请标题')}>
+          <Input placeholder={t('请输入申请标题')}/>
         </Form.Item>
-        <Form.Item required label="选择分支/标签/版本" style={{marginBottom: 12}} extra={<span>
-            根据网络情况，首次刷新可能会很慢，请耐心等待。
+        <Form.Item required label={t('选择分支/标签/版本')} style={{marginBottom: 12}} extra={<span>
+            {t('根据网络情况，首次刷新可能会很慢，请耐心等待。')}
             <a target="_blank" rel="noopener noreferrer"
-               href="https://spug.cc/docs/use-problem#clone">clone 失败？</a>
+               href="https://spug.cc/docs/use-problem#clone">{t('clone 失败？')}</a>
           </span>}>
           <Form.Item style={{display: 'inline-block', marginBottom: 0, width: '450px'}}>
             <Input.Group compact>
               <Select value={git_type} onChange={switchType} style={{width: 100}}>
                 <Select.Option value="branch">Branch</Select.Option>
                 <Select.Option value="tag">Tag</Select.Option>
-                <Select.Option value="repository">构建仓库</Select.Option>
+                <Select.Option value="repository">{t('构建仓库')}</Select.Option>
               </Select>
               <Select
                 showSearch
                 style={{width: 350}}
                 value={extra1}
-                placeholder="请稍等"
+                placeholder={t('请稍等')}
                 onChange={switchExtra1}
                 notFoundContent={git_type === 'repository' ? <NoVersions/> : undefined}
                 filterOption={(input, option) => includes(option.content, input)}>
@@ -194,7 +194,7 @@ export default observer(function () {
                                    disabled={type === '2' && item.id >= rb_id}>
                       <div style={{display: 'flex', justifyContent: 'space-between'}}>
                         <span>{item.env_name} - {item.version}</span>
-                        <span style={{color: '#999', fontSize: 12}}>构建于 {moment(item.created_at).fromNow()}</span>
+                        <span style={{color: '#999', fontSize: 12}}>{t('构建于')} {moment(item.created_at).fromNow()}</span>
                       </div>
                     </Select.Option>
                   ))
@@ -204,13 +204,13 @@ export default observer(function () {
           </Form.Item>
           <Form.Item style={{display: 'inline-block', width: 82, textAlign: 'center', marginBottom: 0}}>
             {fetching ? <LoadingOutlined style={{fontSize: 18, color: '#1890ff'}}/> :
-              <Button type="link" icon={<SyncOutlined/>} disabled={fetching} onClick={fetchVersions}>刷新</Button>
+              <Button type="link" icon={<SyncOutlined/>} disabled={fetching} onClick={fetchVersions}>{t('刷新')}</Button>
             }
           </Form.Item>
         </Form.Item>
         {git_type === 'branch' && (
-          <Form.Item required label="选择Commit ID">
-            <Select value={extra2} placeholder="请选择" onChange={v => setExtra2(v)}>
+          <Form.Item required label={t('选择Commit ID')}>
+            <Select value={extra2} placeholder={t('请选择')} onChange={v => setExtra2(v)}>
               {extra1 && branches ? branches[extra1].map(item => (
                 <Select.Option key={item.id}>
                   <div style={{display: 'flex', justifyContent: 'space-between'}}>
@@ -226,30 +226,30 @@ export default observer(function () {
             </Select>
           </Form.Item>
         )}
-        <Form.Item required label="目标主机" tooltip="可以通过创建多个发布申请单，选择主机分批发布。">
+        <Form.Item required label={t('目标主机')} tooltip={t('可以通过创建多个发布申请单，选择主机分批发布。')}>
           {host_ids.length > 0 && (
-            <span style={{marginRight: 16}}>已选择 {host_ids.length} 台（可选{app_host_ids.length}）</span>
+            <span style={{marginRight: 16}}>{t('已选择 {} 台（可选{}）', host_ids.length, app_host_ids.length)}</span>
           )}
-          <Button type="link" style={{padding: 0}} onClick={() => setVisible(true)}>选择主机</Button>
+          <Button type="link" style={{padding: 0}} onClick={() => setVisible(true)}>{t('选择主机')}</Button>
         </Form.Item>
-        <Form.Item name="desc" label="备注信息">
-          <Input placeholder="请输入备注信息"/>
+        <Form.Item name="desc" label={t('备注信息')}>
+          <Input placeholder={t('请输入备注信息')}/>
         </Form.Item>
         {type !== '2' && (
-          <Form.Item label="定时发布" tooltip="在到达指定时间后自动发布，会有最多1分钟的延迟。">
+          <Form.Item label={t('定时发布')} tooltip={t('在到达指定时间后自动发布，会有最多1分钟的延迟。')}>
             <DatePicker
               showTime
               value={plan}
               style={{width: 180}}
               format="YYYY-MM-DD HH:mm"
-              placeholder="请设置发布时间"
+              placeholder={t('请设置发布时间')}
               onChange={setPlan}/>
-            {plan ? <span style={{marginLeft: 24, fontSize: 12, color: '#888'}}>大约 {plan.fromNow()}</span> : null}
+            {plan ? <span style={{marginLeft: 24, fontSize: 12, color: '#888'}}>{t('大约 {}', plan.fromNow())}</span> : null}
           </Form.Item>
         )}
       </Form>
       {visible && <HostSelector
-        title="可选主机列表"
+        title={t('可选主机列表')}
         host_ids={host_ids}
         app_host_ids={app_host_ids}
         onCancel={() => setVisible(false)}

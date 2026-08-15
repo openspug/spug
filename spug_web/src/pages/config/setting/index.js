@@ -19,6 +19,7 @@ import {
 import envStore from '../environment/store';
 import styles from './index.module.less';
 import history from 'libs/history';
+import { t } from 'libs';
 import { AuthDiv, AuthButton, Breadcrumb } from 'components';
 import DiffConfig from './DiffConfig';
 import TableView from './TableView';
@@ -48,8 +49,8 @@ class Index extends React.Component {
           envStore.fetchRecords().then(() => {
             if (envStore.records.length === 0) {
               Modal.error({
-                title: '无可用环境',
-                content: <div>配置依赖应用的运行环境，请在 <a href="/config/environment">环境管理</a> 中创建环境。</div>
+                title: t('无可用环境'),
+                content: <div>{t('配置依赖应用的运行环境，请在')} <a href="/config/environment">{t('环境管理')}</a> {t('中创建环境。')}</div>
               })
             } else {
               this.updateEnv()
@@ -92,19 +93,19 @@ class Index extends React.Component {
     return (
       <AuthDiv auth={`config.${store.type}.view_config`}>
         <Breadcrumb extra={(<Button type="primary" className={styles.historyBtn} icon={<HistoryOutlined/>}
-                                    onClick={store.showRecord}>更改历史</Button>)}>
-          <Breadcrumb.Item>首页</Breadcrumb.Item>
-          <Breadcrumb.Item>配置中心</Breadcrumb.Item>
-          <Breadcrumb.Item onClick={() => history.goBack()}>{isApp ? '应用配置' : '服务配置'}</Breadcrumb.Item>
+                                    onClick={store.showRecord}>{t('更改历史')}</Button>)}>
+          <Breadcrumb.Item>{t('首页')}</Breadcrumb.Item>
+          <Breadcrumb.Item>{t('配置中心')}</Breadcrumb.Item>
+          <Breadcrumb.Item onClick={() => history.goBack()}>{isApp ? t('应用配置') : t('服务配置')}</Breadcrumb.Item>
           <Breadcrumb.Item>{store.obj.name}</Breadcrumb.Item>
         </Breadcrumb>
         <div className={styles.container}>
           <div className={styles.left}>
             <PageHeader
-              title="环境列表"
+              title={t('环境列表')}
               style={{padding: '0 0 10px 10px'}}
               onBack={() => history.goBack()}
-              extra={<Button type="link" icon={<DiffOutlined/>} onClick={store.showDiff}>对比配置</Button>}/>
+              extra={<Button type="link" icon={<DiffOutlined/>} onClick={store.showDiff}>{t('对比配置')}</Button>}/>
             <Menu
               mode="inline"
               selectedKeys={[String(store.env.id)]}
@@ -117,16 +118,16 @@ class Index extends React.Component {
           </div>
           <div className={styles.right}>
             <Form layout="inline" style={{marginBottom: 16}}>
-              <Form.Item label="视图" style={{paddingLeft: 0}}>
+              <Form.Item label={t('视图')} style={{paddingLeft: 0}}>
                 <Radio.Group value={view} onChange={e => this.setState({view: e.target.value})}>
-                  <Radio.Button value="1"><TableOutlined title="表格视图"/></Radio.Button>
-                  <Radio.Button value="2"><UnorderedListOutlined title="文本视图"/></Radio.Button>
-                  <Radio.Button value="3"><NumberOutlined title="JSON视图"/></Radio.Button>
+                  <Radio.Button value="1"><TableOutlined title={t('表格视图')}/></Radio.Button>
+                  <Radio.Button value="2"><UnorderedListOutlined title={t('文本视图')}/></Radio.Button>
+                  <Radio.Button value="3"><NumberOutlined title={t('JSON视图')}/></Radio.Button>
                 </Radio.Group>
               </Form.Item>
               <Form.Item label="Key">
                 <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value}
-                       placeholder="请输入"/>
+                       placeholder={t('请输入')}/>
               </Form.Item>
               <Space style={{flex: 1, justifyContent: 'flex-end'}}>
                 {['2', '3'].includes(view) ? editable ? (
@@ -134,20 +135,20 @@ class Index extends React.Component {
                     icon={<SaveOutlined/>}
                     type="primary"
                     loading={loading}
-                    onClick={this.handleSubmit}>保存</Button>
+                    onClick={this.handleSubmit}>{t('保存')}</Button>
                 ) : (
                   <AuthButton
                     icon={<EditOutlined/>}
                     type="primary"
                     auth={`config.${store.type}.edit_config`}
-                    onClick={() => this.setState({editable: true})}>编辑</AuthButton>
+                    onClick={() => this.setState({editable: true})}>{t('编辑')}</AuthButton>
                 ) : (
                   <AuthButton
                     auth="config.app.edit_config|config.service.edit_config"
                     disabled={view !== '1'}
                     type="primary"
                     icon={<PlusOutlined/>}
-                    onClick={() => store.showForm()}>新增配置</AuthButton>
+                    onClick={() => store.showForm()}>{t('新增配置')}</AuthButton>
                 )}
 
               </Space>

@@ -22,9 +22,8 @@ class ComConsumer(BaseConsumer):
             self.key = f'{settings.BUILD_KEY}:{token}'
         elif module == 'request':
             self.key = f'{settings.REQUEST_KEY}:{token}'
-        elif module == 'pipeline':
-            self.key = token
-        elif module == 'host':
+        elif module in ('pipeline', 'host', 'raw'):
+            # the token already is the full redis key
             self.key = token
         else:
             raise TypeError(f'unknown module for {module}')

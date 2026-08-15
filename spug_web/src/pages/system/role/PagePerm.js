@@ -7,6 +7,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import {Modal, Checkbox, Row, Col, message, Alert} from 'antd';
 import http from 'libs/http';
+import { t } from 'libs';
 import store from './store';
 import codes from './codes';
 import styles from './index.module.css';
@@ -25,7 +26,7 @@ class PagePerm extends React.Component {
     this.setState({loading: true});
     http.patch('/api/account/role/', {id: store.record.id, page_perms: store.permissions})
       .then(res => {
-        message.success('操作成功');
+        message.success(t('操作成功'));
         store.pagePermVisible = false;
         store.fetchRecords()
       }, () => this.setState({loading: false}))
@@ -66,7 +67,7 @@ class PagePerm extends React.Component {
         visible
         width={1000}
         maskClosable={false}
-        title="功能权限设置"
+        title={t('功能权限设置')}
         className={styles.container}
         onCancel={() => store.pagePermVisible = false}
         confirmLoading={this.state.loading}
@@ -76,13 +77,13 @@ class PagePerm extends React.Component {
           showIcon
           type="info"
           style={{marginBottom: 12}}
-          message="功能权限仅影响页面功能，管理应用的发布权限请在发布权限中设置。权限更改成功后会强制属于该角色的账户重新登录。"/>
+          message={t('功能权限仅影响页面功能，管理应用的发布权限请在发布权限中设置。权限更改成功后会强制属于该角色的账户重新登录。')}/>
         <table border="1" bordercolor="#dfdfdf" className={styles.table}>
           <thead>
           <tr>
-            <th>模块</th>
-            <th>页面</th>
-            <th>功能</th>
+            <th>{t('模块')}</th>
+            <th>{t('页面')}</th>
+            <th>{t('功能')}</th>
           </tr>
           </thead>
           <tbody>

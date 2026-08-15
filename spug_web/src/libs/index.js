@@ -8,6 +8,7 @@ import _history from './history';
 
 export * from './functools';
 export * from './router';
+export * from './i18n';
 export const http = _http;
 export const history = _history;
-export const VERSION = 'v3.2.4';
+export const VERSION = 'v4.0.0';

@@ -8,6 +8,7 @@ import { observer } from 'mobx-react';
 import { LoadingOutlined, SyncOutlined } from '@ant-design/icons';
 import { Modal, Form, Input, Select, Button } from 'antd';
 import http from 'libs/http';
+import { t } from 'libs';
 import store from './store';
 import lds from 'lodash';
 
@@ -105,18 +106,18 @@ export default observer(function () {
       visible
       width={800}
       maskClosable={false}
-      title="新建构建"
+      title={t('新建构建')}
       onCancel={() => store.formVisible = false}
       confirmLoading={loading}
       onOk={handleSubmit}>
       <Form form={form} initialValues={store.record} labelCol={{span: 5}} wrapperCol={{span: 17}}>
-        <Form.Item required name="version" label="构建版本">
-          <Input placeholder="请输入构建版本"/>
+        <Form.Item required name="version" label={t('构建版本')}>
+          <Input placeholder={t('请输入构建版本')}/>
         </Form.Item>
-        <Form.Item required label="选择分支/标签/版本" style={{marginBottom: 12}} extra={<span>
-            根据网络情况，首次刷新可能会很慢，请耐心等待。
+        <Form.Item required label={t('选择分支/标签/版本')} style={{marginBottom: 12}} extra={<span>
+            {t('根据网络情况，首次刷新可能会很慢，请耐心等待。')}
             <a target="_blank" rel="noopener noreferrer"
-               href="https://spug.cc/docs/use-problem#clone">clone 失败？</a>
+               href="https://spug.cc/docs/use-problem#clone">{t('clone 失败？')}</a>
           </span>}>
           <Form.Item style={{display: 'inline-block', marginBottom: 0, width: '450px'}}>
             <Input.Group compact>
@@ -128,7 +129,7 @@ export default observer(function () {
                 showSearch
                 style={{width: 350}}
                 value={extra1}
-                placeholder="请稍等"
+                placeholder={t('请稍等')}
                 onChange={switchExtra1}
                 filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
                 {git_type === 'branch' ? (
@@ -152,13 +153,13 @@ export default observer(function () {
           </Form.Item>
           <Form.Item style={{display: 'inline-block', width: 82, textAlign: 'center', marginBottom: 0}}>
             {fetching ? <LoadingOutlined style={{fontSize: 18, color: '#1890ff'}}/> :
-              <Button type="link" icon={<SyncOutlined/>} disabled={fetching} onClick={fetchVersions}>刷新</Button>
+              <Button type="link" icon={<SyncOutlined/>} disabled={fetching} onClick={fetchVersions}>{t('刷新')}</Button>
             }
           </Form.Item>
         </Form.Item>
         {git_type === 'branch' && (
-          <Form.Item required label="选择Commit ID">
-            <Select value={extra2} placeholder="请选择" onChange={v => setExtra2(v)}>
+          <Form.Item required label={t('选择Commit ID')}>
+            <Select value={extra2} placeholder={t('请选择')} onChange={v => setExtra2(v)}>
               {extra1 && branches ? branches[extra1].map(item => (
                 <Select.Option key={item.id}>
                   <div style={{display: 'flex', justifyContent: 'space-between'}}>
@@ -174,8 +175,8 @@ export default observer(function () {
             </Select>
           </Form.Item>
         )}
-        <Form.Item name="remarks" label="备注信息">
-          <Input placeholder="请输入备注信息"/>
+        <Form.Item name="remarks" label={t('备注信息')}>
+          <Input placeholder={t('请输入备注信息')}/>
         </Form.Item>
       </Form>
     </Modal>

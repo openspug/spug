@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Cascader } from 'antd';
 import { Chart, Geom, Axis, Tooltip } from 'bizcharts';
-import { http } from 'libs';
+import { http, t } from 'libs';
 
 export default function () {
   const [loading, setLoading] = useState(true);
@@ -49,10 +49,10 @@ export default function () {
   }
 
   return (
-    <Card loading={loading} title="报警趋势" bodyStyle={{height: 353}} extra={(
-      <Cascader changeOnSelect style={{width: 260}} options={options} onChange={handleChange} placeholder="过滤监控项，默认所有"/>
+    <Card loading={loading} title={t('报警趋势')} bodyStyle={{height: 353}} extra={(
+      <Cascader changeOnSelect style={{width: 260}} options={options} onChange={handleChange} placeholder={t('过滤监控项，默认所有')}/>
     )}>
-      <Chart height={300} data={res} padding={[10, 10, 30, 35]} scale={{value: {alias: '报警次数'}}} forceFit>
+      <Chart height={300} data={res} padding={[10, 10, 30, 35]} scale={{value: {alias: t('报警次数')}}} forceFit>
         <Axis name="date"/>
         <Axis name="value"/>
         <Tooltip

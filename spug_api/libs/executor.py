@@ -57,9 +57,13 @@ class Executor:
         return exit_code, message
 
     def __enter__(self):
+        env = None
+        if self.default_env is not None:
+            env = dict(os.environ)
+            env.update({k: str(v) for k, v in self.default_env.items()})
         self.task = subprocess.Popen(
             'bash',
-            env=self.default_env,
+            env=env,
             shell=True,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,

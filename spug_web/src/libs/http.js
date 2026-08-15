@@ -6,13 +6,14 @@
 import http from 'axios'
 import history from './history'
 import { X_TOKEN } from './functools';
+import { t, langMode } from './i18n';
 import { message } from 'antd';
 
 // response处理
 function handleResponse(response) {
   let result;
   if (response.status === 401) {
-    result = '会话过期，请重新登录';
+    result = t('会话过期，请重新登录');
     if (history.location.pathname !== '/') {
       history.push('/', {from: history.location})
     } else {
@@ -28,10 +29,10 @@ function handleResponse(response) {
     } else if (!response.config.isInternal) {
       return Promise.resolve(response.data)
     } else {
-      result = '无效的数据格式'
+      result = t('无效的数据格式')
     }
   } else {
-    result = `请求失败: ${response.status} ${response.statusText}`
+    result = t('请求失败: {}', `${response.status} ${response.statusText}`)
   }
   message.error(result);
   return Promise.reject(result)
@@ -41,7 +42,8 @@ function handleResponse(response) {
 http.interceptors.request.use(request => {
   request.isInternal = request.url.startsWith('/api/');
   if (request.isInternal) {
-    request.headers['X-Token'] = X_TOKEN
+    request.headers['X-Token'] = X_TOKEN;
+    request.headers['X-Language'] = langMode
   }
   request.timeout = request.timeout || 30000;
   return request;
@@ -54,7 +56,7 @@ http.interceptors.response.use(response => {
   if (error.response) {
     return handleResponse(error.response)
   }
-  const result = '请求异常: ' + error.message;
+  const result = t('请求异常: {}', error.message);
   message.error(result);
   return Promise.reject(result)
 });

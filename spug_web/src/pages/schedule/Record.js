@@ -7,7 +7,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Table, Tag } from 'antd';
 import { LinkButton } from 'components';
-import { http } from 'libs';
+import { http, t } from 'libs';
 import store from './store';
 
 @observer
@@ -29,14 +29,14 @@ class Record extends React.Component {
   colors = ['orange', 'green', 'red'];
 
   columns = [{
-    title: '执行时间',
+    title: t('执行时间'),
     dataIndex: 'run_time'
   }, {
-    title: '执行状态',
+    title: t('执行状态'),
     render: info => <Tag color={this.colors[info['status']]}>{info['status_alias']}</Tag>
   }, {
-    title: '操作',
-    render: info => <LinkButton onClick={() => store.showInfo(null, info.id)}>详情</LinkButton>
+    title: t('操作'),
+    render: info => <LinkButton onClick={() => store.showInfo(null, info.id)}>{t('详情')}</LinkButton>
   }];
 
   render() {
@@ -45,7 +45,7 @@ class Record extends React.Component {
         visible
         width={800}
         maskClosable={false}
-        title={`任务执行记录 - ${store.record.name}`}
+        title={t('任务执行记录 - {}', store.record.name)}
         onCancel={() => store.recordVisible = false}
         footer={null}>
         <Table
@@ -56,7 +56,7 @@ class Record extends React.Component {
             showSizeChanger: true,
             showLessItems: true,
             hideOnSinglePage: true,
-            showTotal: total => `共 ${total} 条`,
+            showTotal: total => t('共 {} 条', total),
             pageSizeOptions: ['10', '20', '50', '100']
           }}
           loading={this.state.loading}/>

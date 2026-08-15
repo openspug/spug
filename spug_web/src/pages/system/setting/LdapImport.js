@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Input, message, Badge, Button } from 'antd';
 import http from 'libs/http';
+import { t } from 'libs';
 import { TableCard } from 'components';
 import store from './store';
 
@@ -36,7 +37,7 @@ export default observer(function () {
       http.post('/api/setting/ldap_import/', 
       {'ldap_data': data, 'username': store.username, 'nickname': store.nickname})
       .then(() => {
-        message.success('操作成功');
+        message.success(t('操作成功'));
         store.importVisible = false;
       }, () => setLoading(false))
     }
@@ -63,14 +64,14 @@ export default observer(function () {
   }
 
   let columns = [{
-    title: '登录名',
+    title: t('登录名'),
     dataIndex: "cn",
   }, {
-    title: '姓名',
+    title: t('姓名'),
     dataIndex: "sn",
   }, {
-    title: '是否存在',
-    render: text => text.is_exist ? <Badge status="success" text='是' /> : <Badge status="error" text='否' />,
+    title: t('是否存在'),
+    render: text => text.is_exist ? <Badge status="success" text={t('是')} /> : <Badge status="error" text={t('否')} />,
   }
   ];
   
@@ -80,20 +81,20 @@ export default observer(function () {
       visible
       width={700}
       maskClosable={false}
-      title={'Ldap用户导入'}
+      title={t('Ldap用户导入')}
       onCancel={() => store.importVisible = false}
       confirmLoading={loading}
       onOk={handleImportAll}
       footer={[
-        <Button key="back" onClick={() => store.importVisible = false}>取消</Button>,
-        <Button key="select" type="primary" loading={loading} onClick={handleImportSelect}>导入选中</Button>,
-        <Button key="import" type="primary" loading={loading} onClick={handleImportAll}>导入全部</Button>,
+        <Button key="back" onClick={() => store.importVisible = false}>{t('取消')}</Button>,
+        <Button key="select" type="primary" loading={loading} onClick={handleImportSelect}>{t('导入选中')}</Button>,
+        <Button key="import" type="primary" loading={loading} onClick={handleImportAll}>{t('导入全部')}</Button>,
       ]}>
       
       <TableCard
         tKey="sa"
         rowKey="id"
-        title="LDAP用户列表"
+        title={t('LDAP用户列表')}
         loading={store.isFetching}
         dataSource={store.dataSource}
         onReload={store.fetchLdapRecords}
@@ -103,12 +104,12 @@ export default observer(function () {
           }
         }}
         actions={[
-          <Input value={store.f_name}  onChange={e => store.f_name = e.target.value } placeholder="搜索LDAP用户" />,
+          <Input value={store.f_name}  onChange={e => store.f_name = e.target.value } placeholder={t('搜索LDAP用户')} />,
         ]}
         pagination={{
           showSizeChanger: true,
           showLessItems: true,
-          showTotal: total => `共 ${total} 条`,
+          showTotal: total => t('共 {} 条', total),
           pageSizeOptions: ['10', '20', '50', '100']
         }} 
         rowSelection={{

@@ -21,6 +21,7 @@ def parse_envs(text):
 
 
 def fetch_versions(deploy: Deploy):
+    os.makedirs(settings.REPOS_DIR, exist_ok=True)
     git_repo = deploy.extend_obj.git_repo
     repo_dir = os.path.join(settings.REPOS_DIR, str(deploy.id))
     pkey = AppSetting.get_default('private_key')
@@ -29,6 +30,7 @@ def fetch_versions(deploy: Deploy):
 
 
 def fetch_repo(deploy_id, git_repo):
+    os.makedirs(settings.REPOS_DIR, exist_ok=True)
     repo_dir = os.path.join(settings.REPOS_DIR, str(deploy_id))
     pkey = AppSetting.get_default('private_key')
     with Git(git_repo, repo_dir, pkey) as git:

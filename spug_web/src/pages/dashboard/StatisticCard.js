@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { Statistic, Card, Row, Col } from 'antd';
-import { http } from 'libs';
+import { http, t } from 'libs';
 
 export default class StatisticCard extends React.Component {
   constructor(props) {
@@ -29,36 +29,36 @@ export default class StatisticCard extends React.Component {
         <Col span={6}>
           <Card loading={loading}>
             <Statistic
-              title="应用"
+              title={t('应用')}
               value={res.app}
-              suffix={<span style={{fontSize: 16}}>个</span>}
+              suffix={<span style={{fontSize: 16}}>{t('个')}</span>}
               formatter={v => <a href="/deploy/app">{v}</a>}/>
           </Card>
         </Col>
         <Col span={6}>
           <Card loading={loading}>
             <Statistic
-              title="主机"
+              title={t('主机')}
               value={res.host}
-              suffix={<span style={{fontSize: 16}}>台</span>}
+              suffix={<span style={{fontSize: 16}}>{t('台')}</span>}
               formatter={v => <a href="/host">{v}</a>}/>
           </Card>
         </Col>
         <Col span={6}>
           <Card loading={loading}>
             <Statistic
-              title="任务"
+              title={t('任务')}
               value={res.task}
-              suffix={<span style={{fontSize: 16}}>个</span>}
+              suffix={<span style={{fontSize: 16}}>{t('个')}</span>}
               formatter={v => <a href="/schedule">{v}</a>}/>
           </Card>
         </Col>
         <Col span={6}>
           <Card loading={loading}>
             <Statistic
-              title="监控"
+              title={t('监控')}
               value={res['detection']}
-              suffix={<span style={{fontSize: 16}}>项</span>}
+              suffix={<span style={{fontSize: 16}}>{t('项')}</span>}
               formatter={v => <a href="/monitor">{v}</a>}/>
           </Card>
         </Col>

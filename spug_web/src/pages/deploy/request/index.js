@@ -15,7 +15,7 @@ import ComTable from './Table';
 import Console from './Console';
 import BatchDelete from './BatchDelete';
 import Rollback from './Rollback';
-import { includes } from 'libs';
+import { includes, t } from 'libs';
 import envStore from 'pages/config/environment/store';
 import appStore from 'pages/config/app/store';
 import store from './store';
@@ -33,38 +33,38 @@ function Index() {
   return (
     <AuthDiv auth="deploy.request.view">
       <Breadcrumb>
-        <Breadcrumb.Item>首页</Breadcrumb.Item>
-        <Breadcrumb.Item>应用发布</Breadcrumb.Item>
-        <Breadcrumb.Item>发布申请</Breadcrumb.Item>
+        <Breadcrumb.Item>{t('首页')}</Breadcrumb.Item>
+        <Breadcrumb.Item>{t('应用发布')}</Breadcrumb.Item>
+        <Breadcrumb.Item>{t('发布申请')}</Breadcrumb.Item>
       </Breadcrumb>
       <SearchForm>
-        <SearchForm.Item span={6} title="发布环境">
+        <SearchForm.Item span={6} title={t('发布环境')}>
           <Select
             allowClear
             showSearch
             value={store.f_env_id}
             filterOption={(i, o) => includes(o.children, i)}
             onChange={v => store.f_env_id = v}
-            placeholder="请选择">
+            placeholder={t('请选择')}>
             {envStore.records.map(item => (
               <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
             ))}
           </Select>
         </SearchForm.Item>
-        <SearchForm.Item span={6} title="应用名称">
+        <SearchForm.Item span={6} title={t('应用名称')}>
           <Select
             allowClear
             showSearch
             value={store.f_app_id}
             filterOption={(i, o) => includes(o.children, i)}
             onChange={v => store.f_app_id = v}
-            placeholder="请选择">
+            placeholder={t('请选择')}>
             {appStore.records.map(item => (
               <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
             ))}
           </Select>
         </SearchForm.Item>
-        <SearchForm.Item span={8} title="申请时间">
+        <SearchForm.Item span={8} title={t('申请时间')}>
           <DatePicker.RangePicker
             value={store.f_s_date ? [moment(store.f_s_date), moment(store.f_e_date)] : undefined}
             onChange={store.updateDate}/>
@@ -74,7 +74,7 @@ function Index() {
             auth="deploy.request.del"
             type="danger"
             icon={<DeleteOutlined/>}
-            onClick={() => store.batchVisible = true}>批量删除</AuthButton>
+            onClick={() => store.batchVisible = true}>{t('批量删除')}</AuthButton>
         </SearchForm.Item>
       </SearchForm>
       <ComTable/>

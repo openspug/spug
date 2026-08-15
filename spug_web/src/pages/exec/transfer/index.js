@@ -16,7 +16,7 @@ import { Form, Button, Tooltip, Space, Card, Table, Input, Upload, message } fro
 import { AuthDiv, Breadcrumb } from 'components';
 import HostSelector from 'pages/host/Selector';
 import Output from './Output';
-import { http, uniqueId } from 'libs';
+import { http, uniqueId, t } from 'libs';
 import moment from 'moment';
 import store from './store';
 import style from './index.module.less';
@@ -45,9 +45,9 @@ function TransferIndex() {
 
   function handleSubmit() {
     const formData = new FormData();
-    if (files.length === 0) return message.error('请添加数据源')
-    if (!dir) return message.error('请输入目标路径')
-    if (hosts.length === 0) return message.error('请选择目标主机')
+    if (files.length === 0) return message.error(t('请添加数据源'))
+    if (!dir) return message.error(t('请输入目标路径'))
+    if (hosts.length === 0) return message.error(t('请选择目标主机'))
     const data = {dst_dir: dir, host_ids: hosts.map(x => x.id)}
     for (let index in files) {
       const item = files[index]
@@ -91,7 +91,7 @@ function TransferIndex() {
   function handleUpload(_, fileList) {
     const tmp = files.length > 0 && files[0].type === 'upload' ? [...files] : []
     for (let file of fileList) {
-      tmp.push({id: uniqueId(), type: 'upload', name: '本地上传', path: file})
+      tmp.push({id: uniqueId(), type: 'upload', name: t('本地上传'), path: file})
     }
     setFiles(tmp)
     return Upload.LIST_IGNORE
@@ -111,53 +111,53 @@ function TransferIndex() {
 
   return (<AuthDiv auth="exec.transfer.do">
     <Breadcrumb>
-      <Breadcrumb.Item>首页</Breadcrumb.Item>
-      <Breadcrumb.Item>批量执行</Breadcrumb.Item>
-      <Breadcrumb.Item>文件分发</Breadcrumb.Item>
+      <Breadcrumb.Item>{t('首页')}</Breadcrumb.Item>
+      <Breadcrumb.Item>{t('批量执行')}</Breadcrumb.Item>
+      <Breadcrumb.Item>{t('文件分发')}</Breadcrumb.Item>
     </Breadcrumb>
     <div className={style.index} hidden={token}>
       <div className={style.left}>
-        <Card type="inner" title={`数据源${files.length ? `（${files.length}）` : ''}`} extra={(<Space size={24}>
+        <Card type="inner" title={files.length ? t('数据源（{}）', files.length) : t('数据源')} extra={(<Space size={24}>
           <Upload multiple beforeUpload={handleUpload}><Space
-            className="btn"><UploadOutlined/>上传本地文件</Space></Upload>
+            className="btn"><UploadOutlined/>{t('上传本地文件')}</Space></Upload>
           <HostSelector onlyOne mode="rows" onChange={row => makeFile(row)}>
-            <Space className="btn"><CloudServerOutlined/>添加主机文件</Space>
+            <Space className="btn"><CloudServerOutlined/>{t('添加主机文件')}</Space>
           </HostSelector>
         </Space>)}>
           <Table rowKey="id" className={style.table} showHeader={false} pagination={false} size="small"
                  dataSource={files}>
-            <Table.Column title="文件来源" dataIndex="name"/>
-            <Table.Column title="文件名称/路径" render={info => info.type === 'upload' ? info.path.name : (
-              <Input onChange={e => info.path = e.target.value} placeholder="请输入要同步的目录路径"/>)}/>
-            <Table.Column title="操作" render={(_, __, index) => (
-              <Button danger type="link" onClick={() => handleRemove(index)}>移除</Button>)}/>
+            <Table.Column title={t('文件来源')} dataIndex="name"/>
+            <Table.Column title={t('文件名称/路径')} render={info => info.type === 'upload' ? info.path.name : (
+              <Input onChange={e => info.path = e.target.value} placeholder={t('请输入要同步的目录路径')}/>)}/>
+            <Table.Column title={t('操作')} render={(_, __, index) => (
+              <Button danger type="link" onClick={() => handleRemove(index)}>{t('移除')}</Button>)}/>
           </Table>
         </Card>
-        <Card type="inner" title="分发目标" style={{margin: '24px 0'}} bodyStyle={{paddingBottom: 0}} extra={(
+        <Card type="inner" title={t('分发目标')} style={{margin: '24px 0'}} bodyStyle={{paddingBottom: 0}} extra={(
           <Tooltip className={style.tips}
-                   title="文件分发功能依赖rsync，大部分linux发行版默认都已安装，如未安装可通过「批量执行/执行任务」进行批量安装。">
-            <BulbOutlined/> 小提示
+                   title={t('文件分发功能依赖rsync，大部分linux发行版默认都已安装，如未安装可通过「批量执行/执行任务」进行批量安装。')}>
+            <BulbOutlined/> {t('小提示')}
           </Tooltip>
         )}>
           <Form>
-            <Form.Item required label="目标路径">
-              <Input value={dir} onChange={e => setDir(e.target.value)} placeholder="请输入目标路径"/>
+            <Form.Item required label={t('目标路径')}>
+              <Input value={dir} onChange={e => setDir(e.target.value)} placeholder={t('请输入目标路径')}/>
             </Form.Item>
-            <Form.Item required label="目标主机">
+            <Form.Item required label={t('目标主机')}>
               <HostSelector type="button" mode="rows" value={hosts.map(x => x.id)} onChange={rows => setHosts(rows)}/>
             </Form.Item>
           </Form>
         </Card>
 
         <Button loading={loading} icon={<ThunderboltOutlined/>} type="primary" onClick={() => handleSubmit()}>
-          {percent ? `上传中 ${percent}%` : '开始执行'}
+          {percent ? t('上传中 {}%', percent) : t('开始执行')}
         </Button>
       </div>
 
       <div className={style.right}>
         <div className={style.title}>
-          分发记录
-          <Tooltip title="每天自动清理，保留最近30条记录。">
+          {t('分发记录')}
+          <Tooltip title={t('每天自动清理，保留最近30条记录。')}>
             <QuestionCircleOutlined style={{color: '#999', marginLeft: 8}}/>
           </Tooltip>
         </div>

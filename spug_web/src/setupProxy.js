@@ -13,6 +13,21 @@ module.exports = function (app) {
     headers: {'X-Real-IP': '1.1.1.1'},
     pathRewrite: {
       '^/api': ''
-    }
+    },
+    // 添加错误处理
+    onError: (err, req, res) => {
+      console.log('Proxy error:', err.message);
+      if (!res.headersSent) {
+        res.writeHead(500, {
+          'Content-Type': 'application/json',
+        });
+        res.end(JSON.stringify({ error: 'Proxy error' }));
+      }
+    },
+    // 添加连接配置
+    timeout: 30000,
+    proxyTimeout: 30000,
+    // 禁用 WebSocket 自动升级，避免连接问题
+    ws: false
   }))
 };

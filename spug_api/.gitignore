@@ -7,3 +7,7 @@ migrations/
 /access.log
 /repos/*
 /logs/*
+/storage/deploy/*
+/storage/transfer/*
+!/storage/deploy/.gitkeep
+!/storage/transfer/.gitkeep

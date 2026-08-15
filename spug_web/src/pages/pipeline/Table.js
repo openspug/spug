@@ -8,7 +8,7 @@ import { observer } from 'mobx-react';
 import { Table, Modal, Popconfirm, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { Action, TableCard, AuthButton } from 'components';
-import { http, hasPermission, history } from 'libs';
+import { http, hasPermission, history, t } from 'libs';
 import S from './store';
 
 function ComTable() {
@@ -18,12 +18,12 @@ function ComTable() {
 
   function handleDelete(text) {
     Modal.confirm({
-      title: '删除确认',
-      content: `确定要删除【${text['name']}】?`,
+      title: t('删除确认'),
+      content: t('确定要删除【{}】?', text['name']),
       onOk: () => {
         return http.delete('/api/pipeline/', {params: {id: text.id}})
           .then(() => {
-            message.success('删除成功');
+            message.success(t('删除成功'));
             S.fetchRecords()
           })
       }
@@ -38,7 +38,7 @@ function ComTable() {
     <TableCard
       tKey="pipe"
       rowKey="id"
-      title="流程列表"
+      title={t('流程列表')}
       loading={S.isFetching}
       dataSource={S.dataSource}
       onReload={S.fetchRecords}
@@ -47,24 +47,24 @@ function ComTable() {
           auth="pipeline.pipeline.add"
           type="primary"
           icon={<PlusOutlined/>}
-          onClick={() => toDetail()}>新建</AuthButton>
+          onClick={() => toDetail()}>{t('新建')}</AuthButton>
       ]}
       pagination={{
         showSizeChanger: true,
         showLessItems: true,
-        showTotal: total => `共 ${total} 条`,
+        showTotal: total => t('共 {} 条', total),
         pageSizeOptions: ['10', '20', '50', '100']
       }}>
-      <Table.Column title="流程名称" dataIndex="name"/>
-      <Table.Column ellipsis title="备注信息" dataIndex="desc"/>
-      {hasPermission('pipeline.pipeline.edit|pipeline.pipeline.del') && (
-        <Table.Column width={210} title="操作" render={info => (
+      <Table.Column title={t('流程名称')} dataIndex="name"/>
+      <Table.Column ellipsis title={t('备注信息')} dataIndex="desc"/>
+      {hasPermission('pipeline.pipeline.edit|pipeline.pipeline.del|pipeline.pipeline.do') && (
+        <Table.Column width={210} title={t('操作')} render={info => (
           <Action>
-            <Action.Button auth="config.app.edit" onClick={() => toDetail(info)}>编辑</Action.Button>
-            <Popconfirm title="确定要执行吗？" onConfirm={() => S.showConsole(info)}>
-              <Action.Button auth="config.app.edit">执行</Action.Button>
+            <Action.Button auth="pipeline.pipeline.edit" onClick={() => toDetail(info)}>{t('编辑')}</Action.Button>
+            <Popconfirm title={t('确定要执行吗？')} onConfirm={() => S.showConsole(info)}>
+              <Action.Button auth="pipeline.pipeline.do">{t('执行')}</Action.Button>
             </Popconfirm>
-            <Action.Button danger auth="config.app.del" onClick={() => handleDelete(info)}>删除</Action.Button>
+            <Action.Button danger auth="pipeline.pipeline.del" onClick={() => handleDelete(info)}>{t('删除')}</Action.Button>
           </Action>
         )}/>
       )}

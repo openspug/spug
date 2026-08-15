@@ -6,6 +6,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Steps } from 'antd';
+import { t } from 'libs';
 import Setup1 from './Ext1Setup1';
 import Setup2 from './Ext1Setup2';
 import Setup3 from './Ext1Setup3';
@@ -14,11 +15,11 @@ import styles from './index.module.css';
 
 export default observer(function Ext1From() {
   const appName = store.currentRecord.name;
-  let title = `常规发布 - ${appName}`;
+  let title;
   if (store.deploy.id) {
-    store.isReadOnly ? title = '查看' + title : title = '编辑' + title;
+    title = store.isReadOnly ? t('查看常规发布 - {}', appName) : t('编辑常规发布 - {}', appName);
   } else {
-    title = '新建' + title
+    title = t('新建常规发布 - {}', appName)
   }
   return (
     <Modal
@@ -29,9 +30,9 @@ export default observer(function Ext1From() {
       onCancel={() => store.ext1Visible = false}
       footer={null}>
       <Steps current={store.page} className={styles.steps}>
-        <Steps.Step key={0} title="基本配置"/>
-        <Steps.Step key={1} title="构建配置"/>
-        <Steps.Step key={2} title="发布配置"/>
+        <Steps.Step key={0} title={t('基本配置')}/>
+        <Steps.Step key={1} title={t('构建配置')}/>
+        <Steps.Step key={2} title={t('发布配置')}/>
       </Steps>
       {store.page === 0 && <Setup1/>}
       {store.page === 1 && <Setup2/>}

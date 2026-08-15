@@ -8,7 +8,7 @@ import { observer } from 'mobx-react';
 import { Form, Tabs, DatePicker, InputNumber, Input, Button, Cascader } from 'antd';
 import { LoadingOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { Container } from 'components';
-import { http, includes } from 'libs';
+import { http, includes, t } from 'libs';
 import S from './store';
 import moment from 'moment';
 import lds from 'lodash';
@@ -102,59 +102,59 @@ export default observer(function (props) {
       <Form layout="vertical" wrapperCol={{span: 14, offset: 5}}>
         <Form.Item>
           <Tabs activeKey={S.trigger} className={styles.tabs} onChange={v => S.trigger = v} tabPosition="left">
-            <Tabs.TabPane tab="普通间隔" key="interval">
-              <Form.Item required label="间隔时间(秒)" extra="每隔指定n秒执行一次。">
+            <Tabs.TabPane tab={t('普通间隔')} key="interval">
+              <Form.Item required label={t('间隔时间(秒)')} extra={t('每隔指定n秒执行一次。')}>
                 <InputNumber
                   min={10}
                   style={{width: 200}}
-                  placeholder="请输入"
+                  placeholder={t('请输入')}
                   value={S.trigger_args.interval}
                   onChange={v => handleArgs('interval', v)}/>
               </Form.Item>
             </Tabs.TabPane>
-            <Tabs.TabPane tab="一次性" key="date">
-              <Form.Item required label="执行时间" extra="仅在指定时间运行一次。">
+            <Tabs.TabPane tab={t('一次性')} key="date">
+              <Form.Item required label={t('执行时间')} extra={t('仅在指定时间运行一次。')}>
                 <DatePicker
                   showTime
                   disabledDate={v => v < moment()}
                   style={{width: 200}}
-                  placeholder="请选择执行时间"
+                  placeholder={t('请选择执行时间')}
                   onOk={() => false}
                   value={S.trigger_args.date}
                   onChange={v => handleArgs('date', v)}/>
               </Form.Item>
             </Tabs.TabPane>
             <Tabs.TabPane tab="UNIX Cron" key="cron">
-              <Form.Item required label="执行规则" extra="兼容Cron风格，可参考官方例子。">
+              <Form.Item required label={t('执行规则')} extra={t('兼容Cron风格，可参考官方例子。')}>
                 <Input
                   suffix={nextRunTime || <span/>}
                   value={S.trigger_args.cron?.rule}
-                  placeholder="例如每天凌晨1点执行：0 1 * * *"
+                  placeholder={t('例如每天凌晨1点执行：0 1 * * *')}
                   onChange={e => handleCronArgs('rule', e.target.value)}/>
               </Form.Item>
-              <Form.Item label="生效时间" extra="定义的执行规则在到达该时间后生效。">
+              <Form.Item label={t('生效时间')} extra={t('定义的执行规则在到达该时间后生效。')}>
                 <DatePicker
                   showTime
                   style={{width: '100%'}}
-                  placeholder="可选输入"
+                  placeholder={t('可选输入')}
                   value={S.trigger_args.cron?.start}
                   onChange={v => handleCronArgs('start', v)}/>
               </Form.Item>
-              <Form.Item label="结束时间" extra="执行规则在到达该时间后不再执行。">
+              <Form.Item label={t('结束时间')} extra={t('执行规则在到达该时间后不再执行。')}>
                 <DatePicker
                   showTime
                   style={{width: '100%'}}
-                  placeholder="可选输入"
+                  placeholder={t('可选输入')}
                   value={S.trigger_args.cron?.stop}
                   onChange={v => handleCronArgs('stop', v)}/>
               </Form.Item>
             </Tabs.TabPane>
-            <Tabs.TabPane tab="监控告警" key="monitor">
-              <Form.Item required label="监控项目">
+            <Tabs.TabPane tab={t('监控告警')} key="monitor">
+              <Form.Item required label={t('监控项目')}>
                 {lds.get(S.trigger_args, 'monitor', [[]]).map((item, index) => (
                   <React.Fragment key={index}>
                     <Cascader
-                      placeholder="请选择"
+                      placeholder={t('请选择')}
                       value={item}
                       options={mStore.cascaderOptions}
                       style={{width: '80%', marginRight: 10, marginBottom: 12}}
@@ -166,17 +166,17 @@ export default observer(function (props) {
                   </React.Fragment>
                 ))}
               </Form.Item>
-              <Form.Item extra="当监控项触发告警时执行。">
+              <Form.Item extra={t('当监控项触发告警时执行。')}>
                 <Button type="dashed" style={{width: '80%'}} onClick={() => handleMonitorArgs()}>
-                  <PlusOutlined/>添加监控项
+                  <PlusOutlined/>{t('添加监控项')}
                 </Button>
               </Form.Item>
             </Tabs.TabPane>
           </Tabs>
         </Form.Item>
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
-          <Button type="primary" disabled={!isValid()} onClick={() => S.page += 1}>下一步</Button>
-          <Button style={{marginLeft: 20}} onClick={() => S.page -= 1}>上一步</Button>
+          <Button type="primary" disabled={!isValid()} onClick={() => S.page += 1}>{t('下一步')}</Button>
+          <Button style={{marginLeft: 20}} onClick={() => S.page -= 1}>{t('上一步')}</Button>
         </Form.Item>
       </Form>
     </Container>

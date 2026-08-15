@@ -8,7 +8,7 @@ import { Avatar, Card, Col, Row, Modal } from 'antd';
 import { LeftSquareOutlined, RightSquareOutlined, EditOutlined, PlusOutlined, CloseOutlined } from '@ant-design/icons';
 import { AuthButton } from 'components';
 import NavForm from './NavForm';
-import { http } from 'libs';
+import { http, t } from 'libs';
 import styles from './index.module.less';
 
 function NavIndex(props) {
@@ -38,8 +38,8 @@ function NavIndex(props) {
 
   function handleDelete(item) {
     Modal.confirm({
-      title: '操作确认',
-      content: `确定要删除【${item.title}】？`,
+      title: t('操作确认'),
+      content: t('确定要删除【{}】？', item.title),
       onOk: () => http.delete('/api/home/navigation/', {params: {id: item.id}})
         .then(fetchRecords)
     })
@@ -47,11 +47,11 @@ function NavIndex(props) {
 
   return (
     <Card
-      title="便捷导航"
+      title={t('便捷导航')}
       className={styles.nav}
       bodyStyle={{paddingBottom: 0, minHeight: 166}}
       extra={<AuthButton auth="admin" type="link"
-                         onClick={() => setIsEdit(!isEdit)}>{isEdit ? '完成' : '编辑'}</AuthButton>}>
+                         onClick={() => setIsEdit(!isEdit)}>{isEdit ? t('完成') : t('编辑')}</AuthButton>}>
       {isEdit ? (
         <Row gutter={24}>
           <Col span={6} style={{marginBottom: 24}}>
@@ -59,7 +59,7 @@ function NavIndex(props) {
               className={styles.add}
               onClick={() => setRecord({links: [{}]})}>
               <PlusOutlined/>
-              <span>新建</span>
+              <span>{t('新建')}</span>
             </div>
           </Col>
           {records.map(item => (
