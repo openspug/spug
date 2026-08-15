@@ -28,7 +28,7 @@ export default observer(function () {
 
   return (
     <Modal
-      visible
+      open
       maskClosable={false}
       title={store.record.id ? t('编辑服务') : t('新建服务')}
       onCancel={() => store.formVisible = false}

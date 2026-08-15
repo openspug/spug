@@ -114,7 +114,7 @@ export default observer(function () {
       title={host.name}
       placement="right"
       onClose={handleClose}
-      visible={store.detailVisible}>
+      open={store.detailVisible}>
       <Descriptions
         bordered
         size="small"

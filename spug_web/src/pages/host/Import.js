@@ -50,7 +50,7 @@ export default observer(function () {
 
   return (
     <Modal
-      visible
+      open
       maskClosable={false}
       title={t('批量导入')}
       okText={t('导入')}

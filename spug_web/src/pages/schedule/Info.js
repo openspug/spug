@@ -37,7 +37,7 @@ class ComForm extends React.Component {
     };
     return (
       <Modal
-        visible
+        open
         width={800}
         maskClosable={false}
         title={t('任务执行详情')}
@@ -50,18 +50,22 @@ class ComForm extends React.Component {
             <StatisticsCard.Item bordered={false} title={t('平均耗时(秒)')} value={<span style={{color: ''}}>{duration}</span>}/>
           </StatisticsCard>
           {outputs && (
-            <Tabs tabPosition="left" defaultActiveKey="0" style={{width: 700, height: 350, margin: 'auto'}}>
-              {outputs.map((item, index) => (
-                <Tabs.TabPane
-                  key={`${index}`}
-                  tab={item.code === 0 ? item.name : <span style={{color: 'red'}}>{item.name}</span>}>
-                  <div>{t('执行时间： {}（{}）', run_time, moment(run_time).fromNow())}</div>
-                  <div style={{marginTop: 5}}>{t('运行耗时： {} s', item.duration)}</div>
-                  <div style={{marginTop: 5}}>{t('返回状态： {}（非 0 则判定为失败）', item.code)}</div>
-                  <div style={{marginTop: 5}}>{t('执行输出：')} <pre style={preStyle}>{item.output}</pre></div>
-                </Tabs.TabPane>
-              ))}
-            </Tabs>
+            <Tabs
+              tabPosition="left"
+              defaultActiveKey="0"
+              style={{width: 700, height: 350, margin: 'auto'}}
+              items={outputs.map((item, index) => ({
+                key: `${index}`,
+                label: item.code === 0 ? item.name : <span style={{color: 'red'}}>{item.name}</span>,
+                children: (
+                  <>
+                    <div>{t('执行时间： {}（{}）', run_time, moment(run_time).fromNow())}</div>
+                    <div style={{marginTop: 5}}>{t('运行耗时： {} s', item.duration)}</div>
+                    <div style={{marginTop: 5}}>{t('返回状态： {}（非 0 则判定为失败）', item.code)}</div>
+                    <div style={{marginTop: 5}}>{t('执行输出：')} <pre style={preStyle}>{item.output}</pre></div>
+                  </>
+                )
+              }))}/>
           )}
         </Spin>
       </Modal>

@@ -65,7 +65,7 @@ class TemplateSelector extends React.Component {
     const {selectedRows} = this.state;
     return (
       <Modal
-        visible
+        open
         width={1000}
         title={t('选择执行模板')}
         onCancel={this.props.onCancel}

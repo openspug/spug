@@ -62,7 +62,7 @@ function NavForm(props) {
 
   return (
     <Modal
-      visible
+      open
       title={record.id ? t('编辑链接') : t('新建链接')}
       onCancel={props.onCancel}
       confirmLoading={loading}

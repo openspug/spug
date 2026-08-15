@@ -5,7 +5,7 @@
  */
 import React, { useState } from 'react';
 import { observer } from 'mobx-react';
-import { Table, Modal, Dropdown, Button, Menu, Avatar, Tooltip, Space, Tag, Radio, Input, message } from 'antd';
+import { Table, Modal, Dropdown, Button, Avatar, Tooltip, Space, Tag, Radio, Input, message } from 'antd';
 import { PlusOutlined, DownOutlined, SyncOutlined, FormOutlined, ExportOutlined } from '@ant-design/icons';
 import { Action, TableCard, AuthButton, AuthFragment } from 'components';
 import IPAddress from './IPAddress';
@@ -74,34 +74,47 @@ function ComTable() {
       onReload={store.fetchRecords}
       actions={[
         <AuthFragment auth="host.host.add">
-          <Dropdown overlay={(
-            <Menu onClick={handleImport}>
-              <Menu.Item key="form">
-                <Space>
-                  <FormOutlined style={{fontSize: 16, marginRight: 4, color: '#1890ff'}}/>
-                  <span>{t('新建主机')}</span>
-                </Space>
-              </Menu.Item>
-              <Menu.Item key="excel">
-                <Space>
-                  <Avatar shape="square" size={20} src={icons.excel}/>
-                  <span>Excel</span>
-                </Space>
-              </Menu.Item>
-              <Menu.Item key="ali">
-                <Space>
-                  <Avatar shape="square" size={20} src={icons.alibaba}/>
-                  <span>{t('阿里云')}</span>
-                </Space>
-              </Menu.Item>
-              <Menu.Item key="tencent">
-                <Space>
-                  <Avatar shape="square" size={20} src={icons.tencent}/>
-                  <span>{t('腾讯云')}</span>
-                </Space>
-              </Menu.Item>
-            </Menu>
-          )}>
+          <Dropdown menu={{
+            onClick: handleImport,
+            items: [
+              {
+                key: 'form',
+                label: (
+                  <Space>
+                    <FormOutlined style={{fontSize: 16, marginRight: 4, color: '#1890ff'}}/>
+                    <span>{t('新建主机')}</span>
+                  </Space>
+                )
+              },
+              {
+                key: 'excel',
+                label: (
+                  <Space>
+                    <Avatar shape="square" size={20} src={icons.excel}/>
+                    <span>Excel</span>
+                  </Space>
+                )
+              },
+              {
+                key: 'ali',
+                label: (
+                  <Space>
+                    <Avatar shape="square" size={20} src={icons.alibaba}/>
+                    <span>{t('阿里云')}</span>
+                  </Space>
+                )
+              },
+              {
+                key: 'tencent',
+                label: (
+                  <Space>
+                    <Avatar shape="square" size={20} src={icons.tencent}/>
+                    <span>{t('腾讯云')}</span>
+                  </Space>
+                )
+              }
+            ]
+          }}>
             <Button type="primary" icon={<PlusOutlined/>}>{t('新建')} <DownOutlined/></Button>
           </Dropdown>
         </AuthFragment>,

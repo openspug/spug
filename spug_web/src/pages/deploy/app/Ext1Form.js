@@ -23,17 +23,20 @@ export default observer(function Ext1From() {
   }
   return (
     <Modal
-      visible
+      open
       width={800}
       maskClosable={false}
       title={title}
       onCancel={() => store.ext1Visible = false}
       footer={null}>
-      <Steps current={store.page} className={styles.steps}>
-        <Steps.Step key={0} title={t('基本配置')}/>
-        <Steps.Step key={1} title={t('构建配置')}/>
-        <Steps.Step key={2} title={t('发布配置')}/>
-      </Steps>
+      <Steps
+        current={store.page}
+        className={styles.steps}
+        items={[
+          {title: t('基本配置')},
+          {title: t('构建配置')},
+          {title: t('发布配置')}
+        ]}/>
       {store.page === 0 && <Setup1/>}
       {store.page === 1 && <Setup2/>}
       {store.page === 2 && <Setup3/>}

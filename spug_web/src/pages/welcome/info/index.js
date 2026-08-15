@@ -26,10 +26,11 @@ function Index() {
             mode="inline"
             selectedKeys={selectedKeys}
             style={{border: 'none'}}
-            onSelect={({selectedKeys}) => setSelectedKeys(selectedKeys)}>
-            <Menu.Item key="basic">{t('基本设置')}</Menu.Item>
-            <Menu.Item key="reset">{t('修改密码')}</Menu.Item>
-          </Menu>
+            onSelect={({selectedKeys}) => setSelectedKeys(selectedKeys)}
+            items={[
+              {key: 'basic', label: t('基本设置')},
+              {key: 'reset', label: t('修改密码')}
+            ]}/>
         </div>
         <div className={styles.right}>
           {selectedKeys[0] === 'basic' && <Basic/>}

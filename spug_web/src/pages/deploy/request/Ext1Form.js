@@ -140,7 +140,7 @@ export default observer(function () {
   const {branches, tags} = versions;
   return (
     <Modal
-      visible
+      open
       width={800}
       maskClosable={false}
       title={store.record.id ? t('编辑发布申请') : t('新建发布申请')}

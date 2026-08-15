@@ -60,7 +60,7 @@ class Record extends React.Component {
     }
     return (
       <Modal
-        visible
+        open
         width={1000}
         maskClosable={false}
         title={t('对比配置')}

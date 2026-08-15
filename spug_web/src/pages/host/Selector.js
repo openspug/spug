@@ -163,7 +163,7 @@ function HostSelector(props) {
       )}
 
       <Modal
-        visible={props.mode === 'group' || visible}
+        open={props.mode === 'group' || visible}
         width={1000}
         className={styles.modal}
         title={props.title || t('主机列表')}

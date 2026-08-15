@@ -81,7 +81,7 @@ export default observer(function () {
   const info = S.record;
   return (
     <Modal
-      visible
+      open
       width={800}
       maskClosable={false}
       title={S.record.id ? t('编辑模板') : t('新建模板')}

@@ -26,7 +26,7 @@ export default function Parameter(props) {
 
   return (
     <Modal
-      visible
+      open
       width={600}
       maskClosable={false}
       title={t('编辑参数')}

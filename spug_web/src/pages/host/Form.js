@@ -96,7 +96,7 @@ export default observer(function () {
   const info = store.record;
   return (
     <Modal
-      visible
+      open
       width={700}
       maskClosable={false}
       title={store.record.id ? t('编辑主机') : t('新建主机')}

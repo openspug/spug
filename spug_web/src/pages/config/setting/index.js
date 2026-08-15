@@ -110,11 +110,11 @@ class Index extends React.Component {
               mode="inline"
               selectedKeys={[String(store.env.id)]}
               style={{border: 'none'}}
-              onSelect={({item}) => this.updateEnv(item.props.env)}>
-              {envStore.records.map(item => (
-                <Menu.Item key={item.id} env={item}>{item.name} ({item.key})</Menu.Item>
-              ))}
-            </Menu>
+              onSelect={({key}) => this.updateEnv(envStore.records.find(x => String(x.id) === key))}
+              items={envStore.records.map(item => ({
+                key: String(item.id),
+                label: `${item.name} (${item.key})`
+              }))}/>
           </div>
           <div className={styles.right}>
             <Form layout="inline" style={{marginBottom: 16}}>

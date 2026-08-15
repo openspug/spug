@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, List, Dropdown, Badge, Button, notification } from 'antd';
+import { List, Dropdown, Badge, Button, notification } from 'antd';
 import {
   NotificationOutlined,
   MonitorOutlined,
@@ -105,11 +105,14 @@ export default function () {
   }
 
   const count = notifies.length - reads.length;
-  return (
-    <div className={styles.notification}>
-      <Dropdown trigger={['click']} onVisibleChange={handleVisible} overlay={(
-        <Menu className={styles.notify}>
-          <Menu.Item style={{padding: 0, whiteSpace: 'unset'}}>
+  const notifyMenu = {
+    className: styles.notify,
+    items: [
+      {
+        key: 'list',
+        style: {padding: 0, whiteSpace: 'unset'},
+        label: (
+          <>
             <List
               loading={loading}
               style={{maxHeight: 500, overflow: 'scroll'}}
@@ -130,9 +133,14 @@ export default function () {
             {notifies.length !== 0 && (
               <div className={styles.btn} onClick={handleReadAll}>{t('全部 已读')}</div>
             )}
-          </Menu.Item>
-        </Menu>
-      )}>
+          </>
+        )
+      }
+    ]
+  };
+  return (
+    <div className={styles.notification}>
+      <Dropdown trigger={['click']} onOpenChange={handleVisible} menu={notifyMenu}>
         <div className={styles.trigger}>
           <Badge count={count > 0 ? count : 0}>
             <NotificationOutlined style={{fontSize: 16}}/>

@@ -5,7 +5,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Tabs, Tree, Input, Spin, Dropdown, Menu, Button, Drawer } from 'antd';
+import { Tabs, Tree, Input, Spin, Dropdown, Button, Drawer } from 'antd';
 import {
   FolderOutlined,
   FolderOpenOutlined,
@@ -194,17 +194,24 @@ function WebSSH(props) {
   function TabRender(props) {
     const host = props.host;
     return (
-      <Dropdown trigger={['contextMenu']} overlay={(
-        <Menu onClick={({key, domEvent}) => handeTabAction(key, host, domEvent)}>
-          <Menu.Item key="copy" icon={<CopyOutlined/>}>{t('复制窗口')}</Menu.Item>
-          <Menu.Item key="reconnect" icon={<ReloadOutlined/>}>{t('重新连接')}</Menu.Item>
-          <Menu.Item key="rClose"
-                     icon={<VerticalAlignBottomOutlined style={{transform: 'rotate(90deg)'}}/>}>{t('关闭右侧')}</Menu.Item>
-          <Menu.Item key="oClose"
-                     icon={<VerticalAlignMiddleOutlined style={{transform: 'rotate(90deg)'}}/>}>{t('关闭其他')}</Menu.Item>
-          <Menu.Item key="aClose" icon={<CloseOutlined/>}>{t('关闭所有')}</Menu.Item>
-        </Menu>
-      )}>
+      <Dropdown trigger={['contextMenu']} menu={{
+        onClick: ({key, domEvent}) => handeTabAction(key, host, domEvent),
+        items: [
+          {key: 'copy', icon: <CopyOutlined/>, label: t('复制窗口')},
+          {key: 'reconnect', icon: <ReloadOutlined/>, label: t('重新连接')},
+          {
+            key: 'rClose',
+            icon: <VerticalAlignBottomOutlined style={{transform: 'rotate(90deg)'}}/>,
+            label: t('关闭右侧')
+          },
+          {
+            key: 'oClose',
+            icon: <VerticalAlignMiddleOutlined style={{transform: 'rotate(90deg)'}}/>,
+            label: t('关闭其他')
+          },
+          {key: 'aClose', icon: <CloseOutlined/>, label: t('关闭所有')}
+        ]
+      }}>
         <div className={styles.tabRender} onDoubleClick={() => handeTabAction('copy', host)}>{host.title}</div>
       </Dropdown>
     )
@@ -261,19 +268,18 @@ function WebSSH(props) {
                 icon={<LeftOutlined/>}>{t('文件管理器')}</AuthButton>
               <SkinFilled className={styles.setting} onClick={() => setVisible2(true)}/>
             </React.Fragment>
-          ) : null}>
-          {hosts.map(item => (
-            <Tabs.TabPane key={item.vId} tab={<TabRender host={item}/>}>
-              {sshMode ? (
-                <Terminal id={item.id} vId={item.vId} activeId={activeId}/>
-              ) : (
-                <div className={styles.fileManger}>
-                  <FileManager id={item.id}/>
-                </div>
-              )}
-            </Tabs.TabPane>
-          ))}
-        </Tabs>
+          ) : null}
+          items={hosts.map(item => ({
+            key: item.vId,
+            label: <TabRender host={item}/>,
+            children: sshMode ? (
+              <Terminal id={item.id} vId={item.vId} activeId={activeId}/>
+            ) : (
+              <div className={styles.fileManger}>
+                <FileManager id={item.id}/>
+              </div>
+            )
+          }))}/>
         {hosts.length === 0 && (
           <pre className={sshMode ? styles.fig : styles.fig2}>{spug_web_terminal}</pre>
         )}
@@ -283,7 +289,7 @@ function WebSSH(props) {
         placement="right"
         width={900}
         className={styles.drawerContainer}
-        visible={visible}
+        open={visible}
         onClose={() => setVisible(false)}>
         <FileManager id={hostId}/>
       </Drawer>

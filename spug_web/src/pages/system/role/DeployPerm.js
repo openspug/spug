@@ -72,7 +72,7 @@ class DeployPerm extends React.Component {
   render() {
     return (
       <Modal
-        visible
+        open
         width={800}
         maskClosable={false}
         title={t('发布权限设置')}
@@ -85,34 +85,44 @@ class DeployPerm extends React.Component {
           type="info"
           style={{margin: '0 24px 24px 24px'}}
           message={t('环境权限和应用权限都需要设置，应用的创建者将默认拥有该应用的发布权限。')}/>
-        <Tabs tabPosition="left">
-          <Tabs.TabPane tab={t('环境权限')} key="env">
-            <Form.Item label={t('设置可发布至哪个环境')}>
-              <Transfer
-                showSearch
-                listStyle={{width: 280, minHeight: 300}}
-                titles={[t('所有环境'), t('已选环境')]}
-                dataSource={this.state.envs}
-                targetKeys={store.deployRel.envs}
-                filterOption={this.handleFilter}
-                onChange={keys => store.deployRel.envs = keys}
-                render={item => `${item.name} - ${item._key}`}/>
-            </Form.Item>
-          </Tabs.TabPane>
-          <Tabs.TabPane tab={t('应用权限')} key="app">
-            <Form.Item label={t('设置可发布的应用')}>
-              <Transfer
-                showSearch
-                listStyle={{width: 280, minHeight: 300}}
-                titles={[t('所有应用'), t('已选应用')]}
-                dataSource={this.state.apps}
-                targetKeys={store.deployRel.apps}
-                filterOption={this.handleFilter}
-                onChange={keys => store.deployRel.apps = keys}
-                render={item => `${item.name} - ${item._key}`}/>
-            </Form.Item>
-          </Tabs.TabPane>
-        </Tabs>
+        <Tabs
+          tabPosition="left"
+          items={[
+            {
+              key: 'env',
+              label: t('环境权限'),
+              children: (
+                <Form.Item label={t('设置可发布至哪个环境')}>
+                  <Transfer
+                    showSearch
+                    listStyle={{width: 280, minHeight: 300}}
+                    titles={[t('所有环境'), t('已选环境')]}
+                    dataSource={this.state.envs}
+                    targetKeys={store.deployRel.envs}
+                    filterOption={this.handleFilter}
+                    onChange={keys => store.deployRel.envs = keys}
+                    render={item => `${item.name} - ${item._key}`}/>
+                </Form.Item>
+              )
+            },
+            {
+              key: 'app',
+              label: t('应用权限'),
+              children: (
+                <Form.Item label={t('设置可发布的应用')}>
+                  <Transfer
+                    showSearch
+                    listStyle={{width: 280, minHeight: 300}}
+                    titles={[t('所有应用'), t('已选应用')]}
+                    dataSource={this.state.apps}
+                    targetKeys={store.deployRel.apps}
+                    filterOption={this.handleFilter}
+                    onChange={keys => store.deployRel.apps = keys}
+                    render={item => `${item.name} - ${item._key}`}/>
+                </Form.Item>
+              )
+            }
+          ]}/>
       </Modal>
     )
   }

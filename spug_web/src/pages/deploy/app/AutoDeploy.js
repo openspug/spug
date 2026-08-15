@@ -52,7 +52,7 @@ export default observer(function AutoDeploy() {
   const tagMode = type === 'tag';
   return (
     <Modal
-      visible
+      open
       width={540}
       title="Webhook"
       footer={null}

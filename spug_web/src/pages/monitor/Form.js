@@ -22,16 +22,19 @@ export default observer(function () {
 
   return (
     <Modal
-      visible
+      open
       width={800}
       maskClosable={false}
       title={store.record.id ? t('编辑任务') : t('新建任务')}
       onCancel={() => store.formVisible = false}
       footer={null}>
-      <Steps current={store.page} className={styles.steps}>
-        <Steps.Step key={0} title={t('创建任务')}/>
-        <Steps.Step key={1} title={t('设置规则')}/>
-      </Steps>
+      <Steps
+        current={store.page}
+        className={styles.steps}
+        items={[
+          {title: t('创建任务')},
+          {title: t('设置规则')}
+        ]}/>
       {store.page === 0 && <Step1/>}
       {store.page === 1 && <Step2/>}
     </Modal>

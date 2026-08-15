@@ -42,7 +42,7 @@ class Record extends React.Component {
   render() {
     return (
       <Modal
-        visible
+        open
         width={800}
         maskClosable={false}
         title={t('任务执行记录 - {}', store.record.name)}

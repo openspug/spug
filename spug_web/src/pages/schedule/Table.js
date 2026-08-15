@@ -6,7 +6,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { DownOutlined, PlusOutlined } from '@ant-design/icons';
-import { Modal, Tag, Dropdown, Menu, Radio, message } from 'antd';
+import { Modal, Tag, Dropdown, Radio, message } from 'antd';
 import { LinkButton, Action, TableCard, AuthButton } from 'components';
 import { http, t } from 'libs';
 import store from './store';
@@ -19,26 +19,32 @@ class ComTable extends React.Component {
 
   colors = ['orange', 'green', 'red'];
 
-  moreMenus = (info) => (
-    <Menu>
-      <Menu.Item>
-        <LinkButton auth="schedule.schedule.edit" onClick={() => this.handleTest(info)}>{t('执行测试')}</LinkButton>
-      </Menu.Item>
-      <Menu.Item>
-        <LinkButton
-          auth="schedule.schedule.edit"
-          onClick={() => this.handleActive(info)}>
-          {info.is_active ? t('禁用任务') : t('激活任务')}</LinkButton>
-      </Menu.Item>
-      <Menu.Item>
-        <LinkButton onClick={() => store.showRecord(info)}>{t('历史记录')}</LinkButton>
-      </Menu.Item>
-      <Menu.Divider/>
-      <Menu.Item>
-        <LinkButton danger auth="schedule.schedule.del" onClick={() => this.handleDelete(info)}>{t('删除')}</LinkButton>
-      </Menu.Item>
-    </Menu>
-  );
+  moreMenus = (info) => ({
+    items: [
+      {
+        key: 'test',
+        label: <LinkButton auth="schedule.schedule.edit" onClick={() => this.handleTest(info)}>{t('执行测试')}</LinkButton>
+      },
+      {
+        key: 'active',
+        label: (
+          <LinkButton
+            auth="schedule.schedule.edit"
+            onClick={() => this.handleActive(info)}>
+            {info.is_active ? t('禁用任务') : t('激活任务')}</LinkButton>
+        )
+      },
+      {
+        key: 'record',
+        label: <LinkButton onClick={() => store.showRecord(info)}>{t('历史记录')}</LinkButton>
+      },
+      {type: 'divider'},
+      {
+        key: 'delete',
+        label: <LinkButton danger auth="schedule.schedule.del" onClick={() => this.handleDelete(info)}>{t('删除')}</LinkButton>
+      }
+    ]
+  });
 
   columns = [{
     title: t('任务名称'),
@@ -78,7 +84,7 @@ class ComTable extends React.Component {
         <Action.Button disabled={info['latest_run_time'] === '1970-01-01'}
                        onClick={() => store.showInfo(info)}>{t('详情')}</Action.Button>
         <Action.Button auth="schedule.schedule.edit" onClick={() => store.showForm(info)}>{t('编辑')}</Action.Button>
-        <Dropdown overlay={() => this.moreMenus(info)} trigger={['click']}>
+        <Dropdown menu={this.moreMenus(info)} trigger={['click']}>
           <LinkButton>
             {t('更多')} <DownOutlined/>
           </LinkButton>

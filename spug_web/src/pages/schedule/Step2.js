@@ -101,78 +101,103 @@ export default observer(function (props) {
     <Container visible={props.visible}>
       <Form layout="vertical" wrapperCol={{span: 14, offset: 5}}>
         <Form.Item>
-          <Tabs activeKey={S.trigger} className={styles.tabs} onChange={v => S.trigger = v} tabPosition="left">
-            <Tabs.TabPane tab={t('普通间隔')} key="interval">
-              <Form.Item required label={t('间隔时间(秒)')} extra={t('每隔指定n秒执行一次。')}>
-                <InputNumber
-                  min={10}
-                  style={{width: 200}}
-                  placeholder={t('请输入')}
-                  value={S.trigger_args.interval}
-                  onChange={v => handleArgs('interval', v)}/>
-              </Form.Item>
-            </Tabs.TabPane>
-            <Tabs.TabPane tab={t('一次性')} key="date">
-              <Form.Item required label={t('执行时间')} extra={t('仅在指定时间运行一次。')}>
-                <DatePicker
-                  showTime
-                  disabledDate={v => v < moment()}
-                  style={{width: 200}}
-                  placeholder={t('请选择执行时间')}
-                  onOk={() => false}
-                  value={S.trigger_args.date}
-                  onChange={v => handleArgs('date', v)}/>
-              </Form.Item>
-            </Tabs.TabPane>
-            <Tabs.TabPane tab="UNIX Cron" key="cron">
-              <Form.Item required label={t('执行规则')} extra={t('兼容Cron风格，可参考官方例子。')}>
-                <Input
-                  suffix={nextRunTime || <span/>}
-                  value={S.trigger_args.cron?.rule}
-                  placeholder={t('例如每天凌晨1点执行：0 1 * * *')}
-                  onChange={e => handleCronArgs('rule', e.target.value)}/>
-              </Form.Item>
-              <Form.Item label={t('生效时间')} extra={t('定义的执行规则在到达该时间后生效。')}>
-                <DatePicker
-                  showTime
-                  style={{width: '100%'}}
-                  placeholder={t('可选输入')}
-                  value={S.trigger_args.cron?.start}
-                  onChange={v => handleCronArgs('start', v)}/>
-              </Form.Item>
-              <Form.Item label={t('结束时间')} extra={t('执行规则在到达该时间后不再执行。')}>
-                <DatePicker
-                  showTime
-                  style={{width: '100%'}}
-                  placeholder={t('可选输入')}
-                  value={S.trigger_args.cron?.stop}
-                  onChange={v => handleCronArgs('stop', v)}/>
-              </Form.Item>
-            </Tabs.TabPane>
-            <Tabs.TabPane tab={t('监控告警')} key="monitor">
-              <Form.Item required label={t('监控项目')}>
-                {lds.get(S.trigger_args, 'monitor', [[]]).map((item, index) => (
-                  <React.Fragment key={index}>
-                    <Cascader
-                      placeholder={t('请选择')}
-                      value={item}
-                      options={mStore.cascaderOptions}
-                      style={{width: '80%', marginRight: 10, marginBottom: 12}}
-                      showSearch={{filter: (i, p) => p.some(o => includes(o.label, i))}}
-                      onChange={v => handleMonitorArgs(index, v)}/>
-                    {S.trigger_args.monitor?.length > 1 && (
-                      <MinusCircleOutlined className={styles.delIcon} onClick={() => handleMonitorArgs(index)}/>
-                    )}
-                  </React.Fragment>
-                ))}
-              </Form.Item>
-              <Form.Item extra={t('当监控项触发告警时执行。')}>
-                <Button type="dashed" style={{width: '80%'}} onClick={() => handleMonitorArgs()}>
-                  <PlusOutlined/>{t('添加监控项')}
-                </Button>
-              </Form.Item>
-            </Tabs.TabPane>
-          </Tabs>
+          <Tabs
+            activeKey={S.trigger}
+            className={styles.tabs}
+            onChange={v => S.trigger = v}
+            tabPosition="left"
+            items={[
+              {
+                key: 'interval',
+                label: t('普通间隔'),
+                children: (
+                  <Form.Item required label={t('间隔时间(秒)')} extra={t('每隔指定n秒执行一次。')}>
+                    <InputNumber
+                      min={10}
+                      style={{width: 200}}
+                      placeholder={t('请输入')}
+                      value={S.trigger_args.interval}
+                      onChange={v => handleArgs('interval', v)}/>
+                  </Form.Item>
+                )
+              },
+              {
+                key: 'date',
+                label: t('一次性'),
+                children: (
+                  <Form.Item required label={t('执行时间')} extra={t('仅在指定时间运行一次。')}>
+                    <DatePicker
+                      showTime
+                      disabledDate={v => v < moment()}
+                      style={{width: 200}}
+                      placeholder={t('请选择执行时间')}
+                      onOk={() => false}
+                      value={S.trigger_args.date}
+                      onChange={v => handleArgs('date', v)}/>
+                  </Form.Item>
+                )
+              },
+              {
+                key: 'cron',
+                label: 'UNIX Cron',
+                children: (
+                  <>
+                    <Form.Item required label={t('执行规则')} extra={t('兼容Cron风格，可参考官方例子。')}>
+                      <Input
+                        suffix={nextRunTime || <span/>}
+                        value={S.trigger_args.cron?.rule}
+                        placeholder={t('例如每天凌晨1点执行：0 1 * * *')}
+                        onChange={e => handleCronArgs('rule', e.target.value)}/>
+                    </Form.Item>
+                    <Form.Item label={t('生效时间')} extra={t('定义的执行规则在到达该时间后生效。')}>
+                      <DatePicker
+                        showTime
+                        style={{width: '100%'}}
+                        placeholder={t('可选输入')}
+                        value={S.trigger_args.cron?.start}
+                        onChange={v => handleCronArgs('start', v)}/>
+                    </Form.Item>
+                    <Form.Item label={t('结束时间')} extra={t('执行规则在到达该时间后不再执行。')}>
+                      <DatePicker
+                        showTime
+                        style={{width: '100%'}}
+                        placeholder={t('可选输入')}
+                        value={S.trigger_args.cron?.stop}
+                        onChange={v => handleCronArgs('stop', v)}/>
+                    </Form.Item>
+                  </>
+                )
+              },
+              {
+                key: 'monitor',
+                label: t('监控告警'),
+                children: (
+                  <>
+                    <Form.Item required label={t('监控项目')}>
+                      {lds.get(S.trigger_args, 'monitor', [[]]).map((item, index) => (
+                        <React.Fragment key={index}>
+                          <Cascader
+                            placeholder={t('请选择')}
+                            value={item}
+                            options={mStore.cascaderOptions}
+                            style={{width: '80%', marginRight: 10, marginBottom: 12}}
+                            showSearch={{filter: (i, p) => p.some(o => includes(o.label, i))}}
+                            onChange={v => handleMonitorArgs(index, v)}/>
+                          {S.trigger_args.monitor?.length > 1 && (
+                            <MinusCircleOutlined className={styles.delIcon} onClick={() => handleMonitorArgs(index)}/>
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </Form.Item>
+                    <Form.Item extra={t('当监控项触发告警时执行。')}>
+                      <Button type="dashed" style={{width: '80%'}} onClick={() => handleMonitorArgs()}>
+                        <PlusOutlined/>{t('添加监控项')}
+                      </Button>
+                    </Form.Item>
+                  </>
+                )
+              }
+            ]}/>
         </Form.Item>
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
           <Button type="primary" disabled={!isValid()} onClick={() => S.page += 1}>{t('下一步')}</Button>

@@ -103,7 +103,7 @@ export default observer(function () {
   const {branches, tags} = versions;
   return (
     <Modal
-      visible
+      open
       width={800}
       maskClosable={false}
       title={t('新建构建')}

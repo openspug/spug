@@ -65,7 +65,7 @@ function Repo(props) {
 
   return (
     <Modal
-      visible
+      open
       maskClosable={false}
       title={t('设置Git仓库')}
       onCancel={props.onCancel}

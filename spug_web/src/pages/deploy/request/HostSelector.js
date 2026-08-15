@@ -49,7 +49,7 @@ export default observer(function (props) {
 
   return (
     <Modal
-      visible
+      open
       width={800}
       title={props.title}
       onOk={handleSubmit}

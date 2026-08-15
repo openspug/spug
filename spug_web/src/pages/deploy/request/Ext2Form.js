@@ -71,7 +71,7 @@ export default observer(function () {
   const {app_host_ids, deploy_id, type, require_upload} = store.record;
   return (
     <Modal
-      visible
+      open
       width={700}
       maskClosable={false}
       title={store.record.id ? t('编辑发布申请') : t('新建发布申请')}

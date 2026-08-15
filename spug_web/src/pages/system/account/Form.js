@@ -31,7 +31,7 @@ export default observer(function () {
 
   return (
     <Modal
-      visible
+      open
       width={700}
       maskClosable={false}
       title={store.record.id ? t('编辑账户') : t('新建账户')}

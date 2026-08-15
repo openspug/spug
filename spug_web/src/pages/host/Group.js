@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Input, Card, Tree, Dropdown, Menu, Switch, Tooltip, Spin, Modal } from 'antd';
+import { Input, Card, Tree, Dropdown, Switch, Tooltip, Spin, Modal } from 'antd';
 import {
   FolderOutlined,
   FolderAddOutlined,
@@ -49,19 +49,20 @@ export default observer(function () {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.treeData])
 
-  const menus = (
-    <Menu onClick={() => setVisible(false)}>
-      <Menu.Item key="0" icon={<FolderOutlined/>} onClick={handleAddRoot}>{t('新建根分组')}</Menu.Item>
-      <Menu.Item key="1" icon={<FolderAddOutlined/>} onClick={handleAdd}>{t('新建子分组')}</Menu.Item>
-      <Menu.Item key="2" icon={<EditOutlined/>} onClick={() => setAction('edit')}>{t('重命名')}</Menu.Item>
-      <Menu.Divider/>
-      <Menu.Item key="3" icon={<CopyOutlined/>} onClick={() => store.showSelector(true)}>{t('添加主机')}</Menu.Item>
-      <Menu.Item key="4" icon={<ScissorOutlined/>} onClick={() => store.showSelector(false)}>{t('移动主机')}</Menu.Item>
-      <Menu.Item key="5" icon={<CloseOutlined/>} danger onClick={handleRemoveHosts}>{t('删除主机')}</Menu.Item>
-      <Menu.Divider/>
-      <Menu.Item key="6" icon={<DeleteOutlined/>} danger onClick={handleRemove}>{t('删除此分组')}</Menu.Item>
-    </Menu>
-  )
+  const menus = {
+    onClick: () => setVisible(false),
+    items: [
+      {key: '0', icon: <FolderOutlined/>, label: t('新建根分组'), onClick: handleAddRoot},
+      {key: '1', icon: <FolderAddOutlined/>, label: t('新建子分组'), onClick: handleAdd},
+      {key: '2', icon: <EditOutlined/>, label: t('重命名'), onClick: () => setAction('edit')},
+      {type: 'divider'},
+      {key: '3', icon: <CopyOutlined/>, label: t('添加主机'), onClick: () => store.showSelector(true)},
+      {key: '4', icon: <ScissorOutlined/>, label: t('移动主机'), onClick: () => store.showSelector(false)},
+      {key: '5', icon: <CloseOutlined/>, label: t('删除主机'), danger: true, onClick: handleRemoveHosts},
+      {type: 'divider'},
+      {key: '6', icon: <DeleteOutlined/>, label: t('删除此分组'), danger: true, onClick: handleRemove}
+    ]
+  }
 
   function handleSubmit() {
     if (store.group.title) {
@@ -191,10 +192,10 @@ export default observer(function () {
         </AuthFragment>)}>
       <Spin spinning={store.grpFetching}>
         <Dropdown
-          overlay={menus}
-          visible={visible}
+          menu={menus}
+          open={visible}
           trigger={['contextMenu']}
-          onVisibleChange={v => v || setVisible(v)}>
+          onOpenChange={v => v || setVisible(v)}>
           <Tree.DirectoryTree
             showIcon={false}
             autoExpandParent

@@ -22,16 +22,19 @@ export default observer(function Ext2From() {
   }
   return (
     <Modal
-      visible
+      open
       width={900}
       maskClosable={false}
       title={title}
       onCancel={() => store.ext2Visible = false}
       footer={null}>
-      <Steps current={store.page} className={styles.steps}>
-        <Steps.Step key={0} title={t('基本配置')}/>
-        <Steps.Step key={1} title={t('执行动作')}/>
-      </Steps>
+      <Steps
+        current={store.page}
+        className={styles.steps}
+        items={[
+          {title: t('基本配置')},
+          {title: t('执行动作')}
+        ]}/>
       {store.page === 0 && <Setup1/>}
       {store.page === 1 && <Setup2/>}
     </Modal>

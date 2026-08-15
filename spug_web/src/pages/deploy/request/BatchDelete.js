@@ -50,7 +50,7 @@ export default observer(function () {
 
   return (
     <Modal
-      visible
+      open
       width={400}
       maskClosable={false}
       title={t('批量删除发布申请')}

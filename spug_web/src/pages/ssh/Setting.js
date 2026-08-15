@@ -45,7 +45,7 @@ function Setting(props) {
       title={t('终端设置')}
       placement="right"
       width={300}
-      visible={props.visible}
+      open={props.visible}
       onClose={props.onClose}>
       <Form layout="vertical">
         <Form.Item label={t('字体大小')}>

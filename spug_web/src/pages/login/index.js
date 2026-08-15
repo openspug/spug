@@ -4,7 +4,7 @@
  * Released under the AGPL-3.0 License.
  */
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Tabs, Modal, Dropdown, Menu, message } from 'antd';
+import { Form, Input, Button, Tabs, Modal, Dropdown, message } from 'antd';
 import {
   UserOutlined,
   LockOutlined,
@@ -101,17 +101,18 @@ export default function () {
       .finally(() => setCodeLoading(false))
   }
 
-  const LanguageMenu = (
-    <Menu selectedKeys={[langMode]}>
-      <Menu.Item key="zh" onClick={() => setLanguage('zh')}>简体中文</Menu.Item>
-      <Menu.Item key="en" onClick={() => setLanguage('en')}>English</Menu.Item>
-    </Menu>
-  );
+  const languageMenu = {
+    selectedKeys: [langMode],
+    items: [
+      {key: 'zh', label: '简体中文', onClick: () => setLanguage('zh')},
+      {key: 'en', label: 'English', onClick: () => setLanguage('en')}
+    ]
+  };
 
   return (
     <div className={styles.container}>
       <div className={styles.language}>
-        <Dropdown overlay={LanguageMenu} placement="bottomRight">
+        <Dropdown menu={languageMenu} placement="bottomRight">
           <div style={{cursor: 'pointer', fontSize: 16, padding: 8}}>
             <GlobalOutlined style={{marginRight: 4}}/>{langMode === 'zh' ? '简体中文' : 'English'}
           </div>
@@ -122,10 +123,14 @@ export default function () {
         <div className={styles.desc}>{t('灵活、强大、易用的开源运维平台')}</div>
       </div>
       <div className={styles.formContainer}>
-        <Tabs activeKey={loginType} className={styles.tabs} onTabClick={v => setLoginType(v)}>
-          <Tabs.TabPane tab={t('普通登录')} key="default"/>
-          <Tabs.TabPane tab={t('LDAP登录')} key="ldap"/>
-        </Tabs>
+        <Tabs
+          activeKey={loginType}
+          className={styles.tabs}
+          onTabClick={v => setLoginType(v)}
+          items={[
+            {key: 'default', label: t('普通登录')},
+            {key: 'ldap', label: t('LDAP登录')}
+          ]}/>
         <Form form={form}>
           <Form.Item name="username" className={styles.formItem}>
             <Input

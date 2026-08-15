@@ -50,7 +50,7 @@ class Rel extends React.Component {
   render() {
     return (
       <Modal
-        visible
+        open
         width={700}
         maskClosable={false}
         title={t('配置服务依赖')}
@@ -58,30 +58,40 @@ class Rel extends React.Component {
         confirmLoading={this.state.loading}
         footer={hasPermission('config.app.edit_config') ? undefined : null}
         onOk={this.handleSubmit}>
-        <Tabs tabPosition="left">
-          <Tabs.TabPane tab={t('应用依赖')} key="app">
-            <Form.Item extra={t('设置依赖后，该应用将能够获取到所依赖应用的配置。')}>
-              <Transfer
-                listStyle={{width: 280, minHeight: 300}}
-                titles={[t('所有应用'), t('已选应用')]}
-                dataSource={this.state.apps}
-                targetKeys={store.confRel.app}
-                onChange={keys => store.confRel.app = keys}
-                render={item => `${item.name}(${item._key})`}/>
-            </Form.Item>
-          </Tabs.TabPane>
-          <Tabs.TabPane tab={t('服务依赖')} key="service">
-            <Form.Item extra={t('设置依赖后，该应用将能够获取到所依赖服务的配置。')}>
-              <Transfer
-                listStyle={{width: 280, minHeight: 300}}
-                titles={[t('所有服务'), t('已选服务')]}
-                dataSource={this.state.services}
-                targetKeys={store.confRel.service}
-                onChange={keys => store.confRel.service = keys}
-                render={item => `${item.name}(${item._key})`}/>
-            </Form.Item>
-          </Tabs.TabPane>
-        </Tabs>
+        <Tabs
+          tabPosition="left"
+          items={[
+            {
+              key: 'app',
+              label: t('应用依赖'),
+              children: (
+                <Form.Item extra={t('设置依赖后，该应用将能够获取到所依赖应用的配置。')}>
+                  <Transfer
+                    listStyle={{width: 280, minHeight: 300}}
+                    titles={[t('所有应用'), t('已选应用')]}
+                    dataSource={this.state.apps}
+                    targetKeys={store.confRel.app}
+                    onChange={keys => store.confRel.app = keys}
+                    render={item => `${item.name}(${item._key})`}/>
+                </Form.Item>
+              )
+            },
+            {
+              key: 'service',
+              label: t('服务依赖'),
+              children: (
+                <Form.Item extra={t('设置依赖后，该应用将能够获取到所依赖服务的配置。')}>
+                  <Transfer
+                    listStyle={{width: 280, minHeight: 300}}
+                    titles={[t('所有服务'), t('已选服务')]}
+                    dataSource={this.state.services}
+                    targetKeys={store.confRel.service}
+                    onChange={keys => store.confRel.service = keys}
+                    render={item => `${item.name}(${item._key})`}/>
+                </Form.Item>
+              )
+            }
+          ]}/>
       </Modal>
     )
   }

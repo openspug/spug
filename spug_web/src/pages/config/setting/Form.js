@@ -54,7 +54,7 @@ export default observer(function () {
 
   return (
     <Modal
-      visible
+      open
       width={800}
       maskClosable={false}
       title={store.record.id ? t('更新配置') : t('新增配置')}

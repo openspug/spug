@@ -56,15 +56,18 @@ export default observer(function () {
   const helpUrl = store.cloudImport === 'ali' ? 'https://help.aliyun.com/document_detail/175967.html' : 'https://console.cloud.tencent.com/capi';
   return (
     <Modal
-      visible
+      open
       maskClosable={false}
       title={t('批量导入')}
       footer={null}
       onCancel={() => store.cloudImport = null}>
-      <Steps current={step} className={styles.steps}>
-        <Steps.Step key={0} title={t('访问凭据')}/>
-        <Steps.Step key={1} title={t('导入确认')}/>
-      </Steps>
+      <Steps
+        current={step}
+        className={styles.steps}
+        items={[
+          {title: t('访问凭据')},
+          {title: t('导入确认')}
+        ]}/>
       <Form labelCol={{span: 8}} wrapperCol={{span: 14}}>
         <Form.Item hidden={step === 1} required label="AccessKey ID">
           <Input value={ak} onChange={e => setAK(e.target.value)} placeholder={t('请输入')}/>

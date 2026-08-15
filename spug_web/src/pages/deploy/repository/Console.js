@@ -112,7 +112,7 @@ export default observer(function Console() {
 
   return (
     <Modal
-      visible
+      open
       width={fullscreen ? '100%' : 1000}
       title={[
         <span key="1">{t('构建控制台')}</span>,

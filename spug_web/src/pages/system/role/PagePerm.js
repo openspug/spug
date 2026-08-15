@@ -64,7 +64,7 @@ class PagePerm extends React.Component {
     const PermBox = this.PermBox;
     return (
       <Modal
-        visible
+        open
         width={1000}
         maskClosable={false}
         title={t('功能权限设置')}

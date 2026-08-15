@@ -34,7 +34,7 @@ export default observer(function () {
   }
   return (
     <Modal
-      visible
+      open
       width={600}
       maskClosable={false}
       title={t('审核发布申请')}

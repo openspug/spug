@@ -42,7 +42,7 @@ export default observer(function () {
   const {app_host_ids, deploy_id, deploy_status} = store.record;
   return (
     <Modal
-      visible
+      open
       width={600}
       maskClosable={false}
       title={t('新建回滚发布申请')}

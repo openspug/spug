@@ -33,7 +33,7 @@ export default observer(function (props) {
   return (
     <Drawer
       width={600}
-      visible={props.visible}
+      open={props.visible}
       onClose={() => store.detailVisible = false}
       footer={(
         <AuthDiv

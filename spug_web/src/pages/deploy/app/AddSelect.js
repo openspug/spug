@@ -47,7 +47,7 @@ class AddSelect extends React.Component {
 
     return (
       <Modal
-        visible
+        open
         width={800}
         maskClosable={false}
         title={t('选择发布方式')}

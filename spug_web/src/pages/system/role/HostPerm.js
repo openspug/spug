@@ -47,7 +47,7 @@ export default observer(function () {
 
   return (
     <Modal
-      visible
+      open
       width={400}
       maskClosable={false}
       title={t('主机权限设置')}

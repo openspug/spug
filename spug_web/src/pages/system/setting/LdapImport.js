@@ -78,7 +78,7 @@ export default observer(function () {
 
   return (
     <Modal
-      visible
+      open
       width={700}
       maskClosable={false}
       title={t('Ldap用户导入')}

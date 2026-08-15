@@ -189,7 +189,7 @@ function Console(props) {
       )}
 
       <Modal
-        visible={!miniMode}
+        open={!miniMode}
         width="80%"
         footer={null}
         maskClosable={false}

@@ -35,7 +35,7 @@ export default observer(function () {
   const unVerifiedLength = store.records.filter(x => !x.is_verified).length;
   return (
     <Modal
-      visible
+      open
       maskClosable={false}
       title={t('批量验证（同步）')}
       okText={t('导入')}

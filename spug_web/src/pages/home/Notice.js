@@ -118,7 +118,7 @@ function NoticeIndex(props) {
       )}
       <Modal
         title={t('编辑公告')}
-        visible={record}
+        open={record}
         onCancel={() => setRecord(null)}
         confirmLoading={loading}
         onOk={handleSubmit}>
@@ -135,7 +135,7 @@ function NoticeIndex(props) {
         </Form>
       </Modal>
       {notice ? (
-        <Modal title={notice.title} visible={notice} footer={null} onCancel={handleRead}>
+        <Modal title={notice.title} open={notice} footer={null} onCancel={handleRead}>
           <Typography>
             {notice.content.split('\n').map((item, index) => (
               <Typography.Paragraph key={index}>{item}</Typography.Paragraph>

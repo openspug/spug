@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Layout, Dropdown, Menu, Avatar } from 'antd';
+import { Layout, Dropdown, Avatar } from 'antd';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -34,30 +34,44 @@ export default function (props) {
     window.open('/ssh')
   }
 
-  const UserMenu = (
-    <Menu>
-      <Menu.Item>
-        <Link to="/welcome/info">
-          <UserOutlined style={{marginRight: 10}}/>{t('个人中心')}
-        </Link>
-      </Menu.Item>
-      <Menu.Divider/>
-      <Menu.Item onClick={handleLogout}>
-        <LogoutOutlined style={{marginRight: 10}}/>{t('退出登录')}
-      </Menu.Item>
-    </Menu>
-  );
+  const userMenu = {
+    items: [
+      {
+        key: 'profile',
+        label: (
+          <Link to="/welcome/info">
+            <UserOutlined style={{marginRight: 10}}/>{t('个人中心')}
+          </Link>
+        )
+      },
+      {type: 'divider'},
+      {
+        key: 'logout',
+        onClick: handleLogout,
+        label: <span><LogoutOutlined style={{marginRight: 10}}/>{t('退出登录')}</span>
+      }
+    ]
+  };
 
-  const LanguageMenu = (
-    <Menu selectedKeys={[langMode]}>
-      <Menu.Item key="zh" onClick={() => setLanguage('zh')}>
-        {langMode === 'zh' ? <CheckOutlined style={{marginRight: 8}}/> : <span style={{marginRight: 22}}/>}简体中文
-      </Menu.Item>
-      <Menu.Item key="en" onClick={() => setLanguage('en')}>
-        {langMode === 'en' ? <CheckOutlined style={{marginRight: 8}}/> : <span style={{marginRight: 22}}/>}English
-      </Menu.Item>
-    </Menu>
-  );
+  const languageMenu = {
+    selectedKeys: [langMode],
+    items: [
+      {
+        key: 'zh',
+        onClick: () => setLanguage('zh'),
+        label: <span>
+          {langMode === 'zh' ? <CheckOutlined style={{marginRight: 8}}/> : <span style={{marginRight: 22}}/>}简体中文
+        </span>
+      },
+      {
+        key: 'en',
+        onClick: () => setLanguage('en'),
+        label: <span>
+          {langMode === 'en' ? <CheckOutlined style={{marginRight: 8}}/> : <span style={{marginRight: 22}}/>}English
+        </span>
+      }
+    ]
+  };
 
   return (
     <Layout.Header className={styles.header}>
@@ -71,12 +85,12 @@ export default function (props) {
         <CodeOutlined style={{fontSize: 16}}/>
       </AuthDiv>
       <div className={styles.terminal}>
-        <Dropdown overlay={LanguageMenu} placement="bottomRight">
+        <Dropdown menu={languageMenu} placement="bottomRight">
           <GlobalOutlined style={{fontSize: 16}}/>
         </Dropdown>
       </div>
       <div className={styles.user}>
-        <Dropdown overlay={UserMenu} style={{background: '#000'}}>
+        <Dropdown menu={userMenu} style={{background: '#000'}}>
           <span className={styles.action}>
             <Avatar size="small" src={avatar} style={{marginRight: 8}}/>
             {localStorage.getItem('nickname')}

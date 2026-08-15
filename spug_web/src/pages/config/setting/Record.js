@@ -59,7 +59,7 @@ class Record extends React.Component {
     const {loading, records} = this.state;
     return (
       <Modal
-        visible
+        open
         width={1000}
         maskClosable={false}
         title={t('{} - 更改历史记录', store.env.name)}

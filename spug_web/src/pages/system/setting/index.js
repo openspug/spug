@@ -45,15 +45,16 @@ class Index extends React.Component {
               mode="inline"
               selectedKeys={selectedKeys}
               style={{border: 'none'}}
-              onSelect={({selectedKeys}) => this.setState({selectedKeys})}>
-              <Menu.Item key="basic">{t('基本设置')}</Menu.Item>
-              <Menu.Item key="security">{t('安全设置')}</Menu.Item>
-              <Menu.Item key="ldap">{t('LDAP设置')}</Menu.Item>
-              <Menu.Item key="key">{t('密钥设置')}</Menu.Item>
-              <Menu.Item key="alarm">{t('报警服务设置')}</Menu.Item>
-              <Menu.Item key="service">{t('开放服务设置')}</Menu.Item>
-              <Menu.Item key="about">{t('关于')}</Menu.Item>
-            </Menu>
+              onSelect={({selectedKeys}) => this.setState({selectedKeys})}
+              items={[
+                {key: 'basic', label: t('基本设置')},
+                {key: 'security', label: t('安全设置')},
+                {key: 'ldap', label: t('LDAP设置')},
+                {key: 'key', label: t('密钥设置')},
+                {key: 'alarm', label: t('报警服务设置')},
+                {key: 'service', label: t('开放服务设置')},
+                {key: 'about', label: t('关于')}
+              ]}/>
           </div>
           <div className={styles.right}>
             {selectedKeys[0] === 'basic' && <BasicSetting/>}
