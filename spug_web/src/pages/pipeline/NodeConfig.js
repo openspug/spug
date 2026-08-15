@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Drawer, Button } from 'antd';
+import { Drawer, Button, message } from 'antd';
 import { AppstoreOutlined, SettingOutlined, SaveOutlined } from '@ant-design/icons';
 import ModuleConfig from './modules/index';
 import Icon from './Icon';
@@ -33,8 +33,11 @@ function NodeConfig(props) {
   }
 
   function handleSave() {
+    // handler 由各模块组件挂载时注册；未选择模块（或模块无配置组件）时它仍是上一个
+    // 节点残留的函数，直接调用会把上个节点的配置写到当前节点上，这里先挡掉。
+    if (typeof handler !== 'function') return message.error(t('请选择节点模块'))
     const data = handler()
-    if (typeof data === 'object') {
+    if (typeof data === 'object' && data !== null) {
       setLoading(true)
       const basic = lds.pick(S.node, ['id', 'module', 'downstream'])
       S.node = Object.assign(data, basic)

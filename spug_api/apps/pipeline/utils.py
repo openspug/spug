@@ -4,9 +4,11 @@
 from django.conf import settings
 from apps.credential.models import Credential
 from apps.host.models import Host
-from libs.utils import AttrDict
+from libs.utils import AttrDict, human_datetime, render_str
 from libs.executor import Executor
 from libs.gitlib import RemoteGit
+from libs.push import send_message
+from libs import webhook
 from apps.pipeline.helper import Helper
 from apps.setting.utils import AppSetting
 from functools import partial
@@ -21,10 +23,27 @@ import time
 import os
 
 
+PUSH_MODULES = {
+    'push_dd': '钉钉',
+    'push_fs': '飞书',
+    'push_wx': '企业微信',
+    'push_spug': '推送助手',
+}
+
+DEFAULT_PUSH_TITLE = '流水线执行通知'
+
+DEFAULT_PUSH_BODY = (
+    '**流水线：** $SPUG_PIPE_NAME\n'
+    '**状态：** $SPUG_STATE_TEXT\n'
+    '**时间：** $SPUG_DATETIME'
+)
+
+
 class NodeExecutor:
-    def __init__(self, rds, token, nodes, params=None):
+    def __init__(self, rds, token, nodes, params=None, pipe_name=None):
         self.rds = rds
         self.token = token
+        self.pipe_name = pipe_name or ''
         self.nodes = {x.id: x for x in map(AttrDict, nodes)}
         self.node = AttrDict(nodes[0])
         self.helper = Helper.make(self.rds, self.token)
@@ -40,13 +59,13 @@ class NodeExecutor:
             available_nodes = [x for x in down_nodes if x.get('condition', 'success') in (state, 'always')]
             if len(available_nodes) >= 2:
                 for node in available_nodes[1:]:
-                    Thread(target=self._dispatch, args=(node,)).start()
+                    Thread(target=self._dispatch, args=(node, state)).start()
             if available_nodes:
-                self._dispatch(available_nodes[0])
+                self._dispatch(available_nodes[0], state)
         else:
             self._dispatch(self.node)
 
-    def _dispatch(self, node):
+    def _dispatch(self, node, state=None):
         if node.module == 'build':
             self._do_build(node)
         elif node.module == 'ssh_exec':
@@ -57,6 +76,13 @@ class NodeExecutor:
             self._do_data_upload(node)
         elif node.module == 'parameter':
             self._do_parameter(node)
+        elif node.module in PUSH_MODULES:
+            self._do_push(node, state)
+        else:
+            # 没有 else 分支时，未知/未配置模块会静默返回且不再调用 run()，
+            # 整条下游会永远停在无状态，界面上看不出任何异常。
+            self.helper.send_error(node.id, f'不支持的节点模块: {node.get("module")}')
+            self.run(node, 'error')
 
     def _do_parameter(self, node):
         self.helper.send_info(node.id, '解析参数配置\r\n', 'processing')
@@ -75,6 +101,82 @@ class NodeExecutor:
                 self.env[item[0]] = item[1]
         self.helper.send_success(node.id, '参数解析完成')
         self.run(node, 'success')
+
+    def _push_context(self, node, state):
+        """推送节点可用的变量，在流水线全局变量之上追加本次执行的上下文。
+
+        这里刻意复制而不是写回 self.env：多个下游分支可能并行推送，写回会互相串味。
+        """
+        state_text = {'success': '执行成功', 'error': '执行失败'}.get(state, '开始执行')
+        env = dict(self.env)
+        env.update({
+            'SPUG_PIPE_NAME': self.pipe_name,
+            'SPUG_NODE_NAME': node.get('name') or '',
+            'SPUG_DATETIME': human_datetime(),
+            'SPUG_UPSTREAM_STATE': state or '',
+            'SPUG_STATE_TEXT': state_text,
+        })
+        return env
+
+    def _push_send(self, node, state):
+        """实际投递推送消息，成功返回 None，失败返回错误描述。
+
+        这里刻意不调用 self.run：run() 会在当前线程同步派发下游节点，若放在 try 内，
+        下游抛出的异常会回卷到本方法的 except 里，既污染本节点的输出，又会二次派发。
+        """
+        mode = node.module
+        env = self._push_context(node, state)
+        title = render_str(node.get('title') or DEFAULT_PUSH_TITLE, env)
+        body = node.get('body') or DEFAULT_PUSH_BODY
+        content = render_str(body, env)
+        at_all = bool(node.get('at_all'))
+        warning = None
+
+        if mode == 'push_spug':
+            targets = node.get('targets') or []
+            if not targets:
+                return '未选择推送对象'
+            token = AppSetting.get_default('spug_push_key')
+            if not token:
+                return '未绑定推送助手账户，请在 系统管理/系统设置/推送服务设置 中完成绑定'
+            send_message(token, targets, 'monitor', {
+                'title': title,
+                'target': self.pipe_name or node.get('name') or '',
+                'message': content,
+                'duration': '',
+                'event': '1' if state == 'error' else '2',
+            })
+            self.helper.send(node.id, f'推送对象: {", ".join(str(x) for x in targets)}\r\n')
+        else:
+            url = node.get('url')
+            if not url:
+                return '未配置 Webhook 地址'
+            secret = node.get('secret') or None
+            if mode == 'push_dd':
+                webhook.push_dd(url, secret, title, content, at_all)
+            elif mode == 'push_fs':
+                color = {'success': 'green', 'error': 'red'}.get(state, 'blue')
+                webhook.push_fs(url, secret, title, content, at_all, color)
+            else:
+                warning = webhook.push_wx(url, title, content, at_all)
+
+        self.helper.send(node.id, f'标题: {title}\r\n')
+        if warning:
+            self.helper.send_warn(node.id, warning)
+        return None
+
+    def _do_push(self, node, state=None):
+        mode_name = PUSH_MODULES[node.module]
+        self.helper.send_info(node.id, f'开始推送{mode_name}消息\r\n', 'processing')
+        try:
+            error = self._push_send(node, state)
+        except Exception as e:
+            error = f'{e}'
+        if error:
+            self.helper.send_error(node.id, f'{mode_name}消息推送失败: {error}')
+        else:
+            self.helper.send_success(node.id, f'{mode_name}消息推送完成')
+        self.run(node, 'error' if error else 'success')
 
     def _do_build(self, node):
         timestamp = time.time()

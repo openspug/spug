@@ -82,23 +82,23 @@ class DoView(View):
         if error is None:
             pipe = Pipeline.objects.get(pk=form.id)
             nodes, ids = json.loads(pipe.nodes), set()
-            for item in filter(lambda x: x['module'] == 'ssh_exec', nodes):
+            for item in filter(lambda x: x.get('module') == 'ssh_exec', nodes):
                 ids.update(item['targets'])
-            for item in filter(lambda x: x['module'] == 'data_transfer', nodes):
+            for item in filter(lambda x: x.get('module') == 'data_transfer', nodes):
                 ids.update(item['destination']['targets'])
 
             dynamic_params = []
             host_map = {x.id: f'{x.name}({x.hostname})' for x in Host.objects.filter(id__in=ids)}
             for item in nodes:
-                if item['module'] in ('ssh_exec', 'data_upload'):
+                if item.get('module') in ('ssh_exec', 'data_upload'):
                     item['_targets'] = [{'id': x, 'name': host_map[x]} for x in item['targets']]
-                elif item['module'] == 'data_transfer':
+                elif item.get('module') == 'data_transfer':
                     item['_targets'] = [{'id': x, 'name': host_map[x]} for x in item['destination']['targets']]
 
-                if item['module'] == 'parameter':
+                if item.get('module') == 'parameter':
                     if item.get('dynamic_params'):
                         dynamic_params.extend(item['dynamic_params'])
-                elif item['module'] == 'build':
+                elif item.get('module') == 'build':
                     if item.get('git_mode') == 'tag':
                         if item.get('git_tag') == 'selective':
                             credential = None
@@ -118,7 +118,7 @@ class DoView(View):
                         dynamic_params.append(
                             {'variable': '_spug_git_commit', 'name': 'Git Commit', 'type': 'text', 'required': False,
                              'help': '要构建的Commit ID，留空则使用所选分支的最新提交'})
-                elif item['module'] == 'data_upload':
+                elif item.get('module') == 'data_upload':
                     tmp = {'variable': item['id'], 'name': item['name'], 'type': 'upload', 'required': True}
                     if item.get('accept'):
                         tmp['accept'] = item['accept']
@@ -135,7 +135,7 @@ class DoView(View):
                 PipeHistory.objects.create(pipeline=pipe, ordinal=ordinal, created_by=request.user)
 
                 rds = get_redis_connection()
-                executor = NodeExecutor(rds, token, json.loads(pipe.nodes))
+                executor = NodeExecutor(rds, token, json.loads(pipe.nodes), pipe_name=pipe.name)
                 Thread(target=executor.run).start()
                 response = AttrDict(token=token, nodes=nodes)
             return json_response(response)
@@ -155,7 +155,7 @@ class DoView(View):
             pipe = Pipeline.objects.get(pk=form.id)
             nodes = json.loads(pipe.nodes)
             for item in nodes:
-                if item['module'] == 'parameter':
+                if item.get('module') == 'parameter':
                     item['dynamic_params'] = form.params
                     break
 
@@ -164,7 +164,7 @@ class DoView(View):
             PipeHistory.objects.create(pipeline=pipe, ordinal=ordinal, created_by=request.user)
             rds = get_redis_connection()
 
-            executor = NodeExecutor(rds, form.token, nodes, form.params)
+            executor = NodeExecutor(rds, form.token, nodes, form.params, pipe_name=pipe.name)
             Thread(target=executor.run).start()
             return json_response()
         return json_response(error=error)

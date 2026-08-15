@@ -89,7 +89,8 @@ function Editor(props) {
   function handleAddDownstream() {
     const oldID = S.actionNode.id
     const newID = new Date().getTime()
-    const newNode = {id: new Date().getTime()}
+    // 必须复用 newID：两次 getTime() 跨毫秒时上游 downstream 会指向不存在的节点
+    const newNode = {id: newID}
     if (S.record.nodes.length) {
       const idx = lds.findIndex(S.record.nodes, {id: oldID})
       if (S.record.nodes[idx].downstream) {

@@ -32,6 +32,10 @@ class AppSetting:
             raise KeyError('invalid key')
 
     @classmethod
+    def delete(cls, key):
+        Setting.objects.filter(key=key).delete()
+
+    @classmethod
     def get_ssh_key(cls):
         public_key = cls.get_default('public_key')
         private_key = cls.get_default('private_key')

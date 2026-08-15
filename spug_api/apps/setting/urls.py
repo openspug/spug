@@ -14,5 +14,8 @@ urlpatterns = [
     path('ldap_import/', ldap_import),
     path('email_test/', email_test),
     path('mfa/', MFAView.as_view()),
-    path('about/', get_about)
+    path('about/', get_about),
+    path('push/bind/', handle_push_bind),
+    path('push/balance/', handle_push_balance),
+    path('push/contacts/', handle_push_contacts),
 ]

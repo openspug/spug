@@ -128,6 +128,22 @@ const dict = {
   '请输入验证码': 'Verification code',
   '{} 秒后重新获取': 'Resend in {} seconds',
   '获取验证码': 'Get Code',
+
+  // PushSetting.js
+  '推送服务设置': 'Push Service',
+  '推送助手账户绑定': 'Push Assistant account',
+  '请登录推送助手，至个人中心 / 个人设置查看用户ID，注意保密该ID请勿泄漏给第三方。': 'Sign in to Push Assistant and find your user ID under Profile / Settings. Keep this ID secret and never share it with third parties. ',
+  '配置手册': 'Setup guide',
+  '请输入要绑定的推送助手用户ID': 'Enter the Push Assistant user ID to link',
+  '绑定成功': 'Linked successfully',
+  '解绑成功': 'Unlinked successfully',
+  '确定要解除绑定？': 'Are you sure you want to unlink this account?',
+  '解绑': 'Unlink',
+  '充值': 'Top up',
+  '短信余额': 'SMS balance',
+  '语音余额': 'Voice balance',
+  '邮件余额': 'Email balance',
+  '微信公众号余额': 'WeChat Official Account balance',
 };
 
 export default dict;

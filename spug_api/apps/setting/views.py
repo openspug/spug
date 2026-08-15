@@ -9,6 +9,7 @@ from libs.utils import generate_random_str
 from libs.ldap import LDAP
 from libs.mail import Mail
 from libs.spug import send_login_wx_code
+from libs.push import get_balance, get_contacts
 from libs.mixins import AdminView
 from apps.setting.utils import AppSetting
 from apps.setting.models import Setting, KEYS_DEFAULT
@@ -18,11 +19,26 @@ import platform
 import json
 
 
+def _mask_secret(value):
+    """只回显首尾各若干位，短值整体打码，避免下发完整凭据到浏览器。"""
+    if not isinstance(value, str) or not value:
+        return value
+    if len(value) <= 16:
+        return '*' * len(value)
+    return f'{value[:8]}********{value[-8:]}'
+
+
 class SettingView(AdminView):
+    # 这些 key 是对外服务的凭据，GET 时打码，前端只用它判断「是否已配置」
+    MASK_KEYS = ('spug_push_key',)
+
     def get(self, request):
         response = deepcopy(KEYS_DEFAULT)
         for item in Setting.objects.all():
-            response[item.key] = item.real_val
+            if item.key in self.MASK_KEYS:
+                response[item.key] = _mask_secret(item.real_val)
+            else:
+                response[item.key] = item.real_val
         return json_response(response)
 
     def post(self, request):
@@ -180,3 +196,50 @@ def get_about(request):
         'spug_version': settings.SPUG_VERSION,
         'django_version': django.get_version()
     })
+
+
+@auth('admin')
+def handle_push_bind(request):
+    form, error = JsonParser(
+        Argument('spug_push_key', required=False),
+    ).parse(request.body)
+    if error is None:
+        if not form.spug_push_key:
+            AppSetting.delete('spug_push_key')
+            return json_response()
+
+        try:
+            res = get_balance(form.spug_push_key)
+        except Exception as e:
+            return json_response(error=f'绑定失败：{e}')
+
+        AppSetting.set('spug_push_key', form.spug_push_key)
+        return json_response(res)
+    return json_response(error=error)
+
+
+@auth('admin')
+def handle_push_balance(request):
+    token = AppSetting.get_default('spug_push_key')
+    if not token:
+        return json_response(error='请先配置推送服务绑定账户')
+    try:
+        return json_response(get_balance(token))
+    except Exception as e:
+        return json_response(error=f'{e}')
+
+
+@auth('pipeline.pipeline.add|pipeline.pipeline.edit')
+def handle_push_contacts(request):
+    """供流水线「推送助手」节点选择推送对象。
+
+    返回 {bound, contacts}：未绑定时 bound 为 false，节点配置页据此给出去绑定的引导；
+    已绑定但取联系人失败则直接返回错误，避免被误认为「还没绑定」。
+    """
+    token = AppSetting.get_default('spug_push_key')
+    if not token:
+        return json_response({'bound': False, 'contacts': []})
+    try:
+        return json_response({'bound': True, 'contacts': get_contacts(token)})
+    except Exception as e:
+        return json_response(error=f'获取推送对象失败：{e}')
