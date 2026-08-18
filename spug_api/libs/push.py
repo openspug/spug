@@ -21,10 +21,11 @@ def get_contacts(token):
     try:
         res = requests.post(f'{push_server}/spug/contacts/', json={'token': token})
         res = res.json()
-        if res['data']:
+        if res.get('data'):
             return res['data']
     except Exception:
-        return []
+        pass
+    return []
 
 
 def send_login_code(token, user, code):
