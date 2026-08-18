@@ -31,7 +31,10 @@ export default observer(function () {
     setLoading(true);
     const formData = form.getFieldsValue();
     formData['host_ids'] = host_ids;
-    http.post('/api/deploy/request/ext1/rollback/', formData)
+    const rollbackUrl = store.record.app_extend === '2'
+      ? '/api/deploy/request/ext2/rollback/'
+      : '/api/deploy/request/ext1/rollback/';
+    http.post(rollbackUrl, formData)
       .then(res => {
         message.success(t('操作成功'));
         store.rollbackVisible = false;
@@ -39,7 +42,12 @@ export default observer(function () {
       }, () => setLoading(false))
   }
 
-  const {app_host_ids, deploy_id, deploy_status} = store.record;
+  const {app_host_ids, deploy_id, deploy_status, app_extend} = store.record;
+  const rollbackRecords = store.records.filter(x => {
+    if (x.deploy_id !== deploy_id || !['3', '-3'].includes(x.status)) return false;
+    if (app_extend === '1') return x.repository_id;
+    return true;
+  });
   return (
     <Modal
       open
@@ -58,7 +66,7 @@ export default observer(function () {
             showSearch
             placeholder={t('请选择回滚至哪个版本')}
             filterOption={(input, option) => includes(option.props.children, input)}>
-            {store.records.filter(x => x.repository_id && x.deploy_id === deploy_id && ['3', '-3'].includes(x.status)).map((item, index) => (
+            {rollbackRecords.map((item, index) => (
               <Select.Option key={item.id} value={item.id} record={item} disabled={index === 0}>
                 <div style={{display: 'flex', justifyContent: 'space-between'}}>
                   <span>{`${item.name} (${item.version})`}</span>

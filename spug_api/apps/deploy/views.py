@@ -27,6 +27,12 @@ class RequestView(View):
             perms = request.user.deploy_perms
             query['deploy__app_id__in'] = perms['apps']
             query['deploy__env_id__in'] = perms['envs']
+        rollback_deploys = set()
+        for ext2 in DeployExtend2.objects.all():
+            s_acts = json.loads(ext2.rollback_server_actions) if ext2.rollback_server_actions else []
+            h_acts = json.loads(ext2.rollback_host_actions) if ext2.rollback_host_actions else []
+            if s_acts or h_acts:
+                rollback_deploys.add(ext2.deploy_id)
         for item in DeployRequest.objects.filter(**query).annotate(
                 env_id=F('deploy__env_id'),
                 env_name=F('deploy__env__name'),
@@ -55,6 +61,9 @@ class RequestView(View):
             tmp['do_by_user'] = item.do_by_user
             if item.app_extend == '1':
                 tmp['visible_rollback'] = item.deploy_id not in counter
+                counter[item.deploy_id] = True
+            elif item.app_extend == '2':
+                tmp['visible_rollback'] = item.deploy_id in rollback_deploys and item.deploy_id not in counter
                 counter[item.deploy_id] = True
             data.append(tmp)
         return json_response(data)
@@ -106,8 +115,13 @@ class RequestDetailView(View):
         outputs = {x.id: {'id': x.id, 'title': x.name, 'data': ''} for x in hosts}
         outputs['local'] = {'id': 'local', 'data': ''}
         if req.deploy.extend == '2':
-            s_actions = json.loads(req.deploy.extend_obj.server_actions)
-            h_actions = json.loads(req.deploy.extend_obj.host_actions)
+            extend_obj = req.deploy.extend_obj
+            if req.type == '2':
+                s_actions = json.loads(extend_obj.rollback_server_actions) if extend_obj.rollback_server_actions else []
+                h_actions = json.loads(extend_obj.rollback_host_actions) if extend_obj.rollback_host_actions else []
+            else:
+                s_actions = json.loads(extend_obj.server_actions)
+                h_actions = json.loads(extend_obj.host_actions)
             if not s_actions:
                 outputs.pop('local', None)
             if not h_actions and 'local' in outputs:
@@ -164,8 +178,13 @@ class RequestDetailView(View):
                     with_local = True
                     outputs['local'] = {'id': 'local', 'data': Helper.term_message('等待初始化...        ')}
             elif req.deploy.extend == '2':
-                s_actions = json.loads(req.deploy.extend_obj.server_actions)
-                h_actions = json.loads(req.deploy.extend_obj.host_actions)
+                extend_obj = req.deploy.extend_obj
+                if req.type == '2':
+                    s_actions = json.loads(extend_obj.rollback_server_actions) if extend_obj.rollback_server_actions else []
+                    h_actions = json.loads(extend_obj.rollback_host_actions) if extend_obj.rollback_host_actions else []
+                else:
+                    s_actions = json.loads(extend_obj.server_actions)
+                    h_actions = json.loads(extend_obj.host_actions)
                 if s_actions:
                     if deploy_status.get('local') == '2':
                         outputs['local'] = {
@@ -334,6 +353,37 @@ def post_request_ext2(request):
             is_required_notify = deploy.is_audit
         if is_required_notify:
             Thread(target=Helper.send_deploy_notify, args=(req, 'approve_req')).start()
+    return json_response(error=error)
+
+
+@auth('deploy.request.do')
+def post_request_ext2_rollback(request):
+    form, error = JsonParser(
+        Argument('request_id', type=int, help='请选择要回滚的版本'),
+        Argument('name', help='请输入申请标题'),
+        Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
+        Argument('desc', required=False),
+    ).parse(request.body)
+    if error is None:
+        req = DeployRequest.objects.get(pk=form.pop('request_id'))
+        extend_obj = req.deploy.extend_obj
+        s_acts = json.loads(extend_obj.rollback_server_actions) if extend_obj.rollback_server_actions else []
+        h_acts = json.loads(extend_obj.rollback_host_actions) if extend_obj.rollback_host_actions else []
+        if not s_acts and not h_acts:
+            return json_response(error='该发布配置未设置回滚动作，无法回滚，请先在发布配置中配置回滚动作')
+        form.status = '0' if req.deploy.is_audit else '1'
+        form.host_ids = json.dumps(sorted(form.host_ids))
+        new_req = DeployRequest.objects.create(
+            deploy_id=req.deploy_id,
+            type='2',
+            extra=req.extra,
+            version=req.version,
+            spug_version=req.spug_version,
+            created_by=request.user,
+            **form
+        )
+        if req.deploy.is_audit:
+            Thread(target=Helper.send_deploy_notify, args=(new_req, 'approve_req')).start()
     return json_response(error=error)
 
 
