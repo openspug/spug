@@ -65,7 +65,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'spug.urls'
 
 WSGI_APPLICATION = 'spug.wsgi.application'
-ASGI_APPLICATION = 'spug.routing.application'
+ASGI_APPLICATION = 'spug.asgi.application'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Database

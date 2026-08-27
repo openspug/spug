@@ -6,8 +6,8 @@ from channels.routing import URLRouter
 from consumer.consumers import *
 
 ws_router = URLRouter([
-    path('ws/ssh/<int:id>/', SSHConsumer),
-    path('ws/subscribe/<str:token>/', PubSubConsumer),
-    path('ws/<str:module>/<str:token>/', ComConsumer),
-    path('ws/notify/', NotifyConsumer),
+    path('ws/ssh/<int:id>/', SSHConsumer.as_asgi()),
+    path('ws/subscribe/<str:token>/', PubSubConsumer.as_asgi()),
+    path('ws/<str:module>/<str:token>/', ComConsumer.as_asgi()),
+    path('ws/notify/', NotifyConsumer.as_asgi()),
 ])

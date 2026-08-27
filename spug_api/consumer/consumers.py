@@ -16,6 +16,11 @@ import json
 class ComConsumer(BaseConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.key = None
+        self.rds = None
+
+    def init(self):
+        # scope is only available after the connection is accepted (channels 3+)
         token = self.scope['url_route']['kwargs']['token']
         module = self.scope['url_route']['kwargs']['module']
         if module == 'build':
@@ -30,7 +35,8 @@ class ComConsumer(BaseConsumer):
         self.rds = get_redis_connection()
 
     def disconnect(self, code):
-        self.rds.close()
+        if self.rds:
+            self.rds.close()
 
     def get_response(self, index):
         counter = 0
@@ -42,6 +48,8 @@ class ComConsumer(BaseConsumer):
             time.sleep(0.2)
 
     def receive(self, text_data='', **kwargs):
+        if not self.rds:
+            return
         if text_data.isdigit():
             index = int(text_data)
             response = self.get_response(index)
@@ -55,7 +63,7 @@ class ComConsumer(BaseConsumer):
 class SSHConsumer(BaseConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.id = self.scope['url_route']['kwargs']['id']
+        self.id = None
         self.chan = None
         self.ssh = None
 
@@ -99,6 +107,7 @@ class SSHConsumer(BaseConsumer):
             self.ssh.close()
 
     def init(self):
+        self.id = self.scope['url_route']['kwargs']['id']
         if has_host_perm(self.user, self.id):
             self.send(text_data='\r\n正在连接至主机 ...')
             host = Host.objects.filter(pk=self.id).first()
@@ -134,16 +143,25 @@ class NotifyConsumer(BaseConsumer):
 class PubSubConsumer(BaseConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.token = None
+        self.rds = None
+        self.p = None
+
+    def init(self):
         self.token = self.scope['url_route']['kwargs']['token']
         self.rds = get_redis_connection()
         self.p = self.rds.pubsub(ignore_subscribe_messages=True)
         self.p.subscribe(self.token)
 
     def disconnect(self, code):
-        self.p.close()
-        self.rds.close()
+        if self.p:
+            self.p.close()
+        if self.rds:
+            self.rds.close()
 
     def receive(self, **kwargs):
+        if not self.p:
+            return
         response = self.p.get_message(timeout=10)
         while response:
             data = str_decode(response['data'])
