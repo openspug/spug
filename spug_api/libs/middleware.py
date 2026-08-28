@@ -61,6 +61,12 @@ class TranslateMiddleware(MiddlewareMixin):
                         if translated != value:
                             node[key] = translated
                             changed = True
+                    elif key.endswith('_alias') and isinstance(value, list) \
+                            and all(isinstance(x, str) for x in value):
+                        translated = [translate_choice(x) for x in value]
+                        if translated != value:
+                            node[key] = translated
+                            changed = True
                     else:
                         walk(value)
             elif isinstance(node, list):

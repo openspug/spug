@@ -40,6 +40,16 @@ const dict = {
   '输入检索': 'Search',
   '已选择': 'Selected',
   '项': 'item(s)',
+  // backend notifications pushed over WebSocket (Chinese text is the key)
+  '通知发送失败': 'Failed to send the notification',
+  '发送报警信息失败': 'Failed to send the alert',
+  '未配置报警服务调用凭据，请在系统管理/系统设置/基本设置/调用凭据中配置。': 'The alert service credential is not configured, please set it in System / System Settings / Basic Settings / API credential.',
+  '未配置报警服务调用凭据，请在系统管理/系统设置/报警服务设置中配置。': 'The alert service credential is not configured, please set it in System / System Settings / Alert Service.',
+  '未找到可用的通知对象，请确保设置了相关报警联系人的微信Token。': 'No available recipient, please make sure the alert contacts have a WeChat token configured.',
+  '未找到可用的通知对象，请确保设置了相关报警联系人的钉钉。': 'No available recipient, please make sure the alert contacts have DingTalk configured.',
+  '未找到可用的通知对象，请确保设置了相关报警联系人的邮件地址。': 'No available recipient, please make sure the alert contacts have an email address configured.',
+  '未找到可用的通知对象，请确保设置了相关报警联系人的企业微信。': 'No available recipient, please make sure the alert contacts have WeChat Work configured.',
+  '请检查监控、任务计划或批量执行等避免长耗时任务，必要时可重启服务清空队列。': 'Check monitoring, scheduled tasks and batch execution for long-running jobs, restart the service to drain the queue if necessary.',
 };
 
 export default dict;

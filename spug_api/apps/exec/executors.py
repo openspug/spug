@@ -4,6 +4,7 @@
 from django_redis import get_redis_connection
 from libs.utils import human_seconds_time, wrap_python_command
 from libs.ssh import SSH
+from libs.locale import translate_console
 import threading
 import socket
 import json
@@ -16,13 +17,16 @@ def exec_worker_handler(job):
 
 
 class Job:
-    def __init__(self, token, key, name, hostname, port, username, pkey, command, interpreter, params=None, term=None):
+    def __init__(self, token, key, name, hostname, port, username, pkey, command, interpreter, params=None,
+                 term=None, language='zh'):
         self.ssh = SSH(hostname, port, username, pkey, term=term)
         self.key = key
         self.command = self._handle_command(command, interpreter)
         self.token = token
         self.rds = get_redis_connection()
         self.rds_key = f'PID:{self.token}:{self.key}'
+        # 发起执行的用户界面语言，仅用于翻译 Spug 自身产生的提示，命令输出原样透传
+        self.language = language
         self.env = dict(
             SPUG_HOST_ID=str(self.key),
             SPUG_HOST_NAME=name,
@@ -60,7 +64,7 @@ class Job:
                 for code, out in self.ssh.exec_command_with_stream(self.command, self.env):
                     self.send(out)
             human_time = human_seconds_time(time.time() - flag)
-            self.send(f'\r\n\x1b[36m** 执行结束，耗时：{human_time} **\x1b[0m')
+            self.send(translate_console(f'\r\n\x1b[36m** 执行结束，耗时：{human_time} **\x1b[0m', self.language))
         except socket.timeout:
             code = 130
             self.send('\r\n\x1b[31m### Time out\x1b[0m')

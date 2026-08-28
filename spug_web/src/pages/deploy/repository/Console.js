@@ -50,10 +50,10 @@ export default observer(function Console() {
   useEffect(() => {
     const fitPlugin = new FitAddon()
     term.loadAddon(fitPlugin)
-    term.setOption('fontSize', 14)
-    term.setOption('lineHeight', 1.2)
-    term.setOption('fontFamily', gStore.terminal.fontFamily)
-    term.setOption('theme', {background: '#2b2b2b', foreground: '#A9B7C6', cursor: '#2b2b2b'})
+    term.options.fontSize = 14
+    term.options.lineHeight = 1.2
+    term.options.fontFamily = gStore.terminal.fontFamily
+    term.options.theme = {background: '#2b2b2b', foreground: '#A9B7C6', cursor: '#2b2b2b'}
     term.attachCustomKeyEventHandler((arg) => {
       if (arg.ctrlKey && arg.code === 'KeyC' && arg.type === 'keydown') {
         document.execCommand('copy')

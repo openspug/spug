@@ -40,13 +40,13 @@ DEFAULT_PUSH_BODY = (
 
 
 class NodeExecutor:
-    def __init__(self, rds, token, nodes, params=None, pipe_name=None):
+    def __init__(self, rds, token, nodes, params=None, pipe_name=None, language='zh'):
         self.rds = rds
         self.token = token
         self.pipe_name = pipe_name or ''
         self.nodes = {x.id: x for x in map(AttrDict, nodes)}
         self.node = AttrDict(nodes[0])
-        self.helper = Helper.make(self.rds, self.token)
+        self.helper = Helper.make(self.rds, self.token, language)
         self.max_workers = max(10, os.cpu_count() * 5)
         self.env = {}
         if params:
@@ -166,7 +166,7 @@ class NodeExecutor:
         return None
 
     def _do_push(self, node, state=None):
-        mode_name = PUSH_MODULES[node.module]
+        mode_name = self.helper.tc(PUSH_MODULES[node.module])
         self.helper.send_info(node.id, f'开始推送{mode_name}消息\r\n', 'processing')
         try:
             error = self._push_send(node, state)

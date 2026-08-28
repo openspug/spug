@@ -10,6 +10,7 @@ from apps.deploy.models import DeployRequest
 from apps.app.models import Deploy, DeployExtend2
 from apps.repository.models import Repository
 from apps.deploy.utils import dispatch, Helper
+from libs.locale import get_request_language
 from apps.host.models import Host
 from collections import defaultdict
 from threading import Thread
@@ -185,7 +186,7 @@ class RequestDetailView(View):
             req.do_at = human_datetime()
             req.do_by = request.user
             req.save()
-            Thread(target=dispatch, args=(req, host_ids, with_local)).start()
+            Thread(target=dispatch, args=(req, host_ids, with_local, get_request_language(request))).start()
             return json_response({'outputs': outputs, 'token': req.deploy_key})
         return json_response(error=error)
 

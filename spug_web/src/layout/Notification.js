@@ -73,9 +73,9 @@ export default function () {
         try {
           const {title, content} = JSON.parse(e.data);
           const key = `open${Date.now()}`;
-          const description = <div style={{whiteSpace: 'pre-wrap'}}>{content}</div>;
+          const description = <div style={{whiteSpace: 'pre-wrap'}}>{t(content)}</div>;
           const btn = <Button type="primary" size="small" onClick={() => notification.close(key)}>{t('知道了')}</Button>;
-          notification.warning({message: title, description, btn, key, top: 64, duration: null})
+          notification.warning({message: t(title), description, btn, key, top: 64, duration: null})
         } catch (e) {
 
         }
@@ -123,9 +123,9 @@ export default function () {
                   <List.Item.Meta
                     style={{opacity: reads.includes(item.id) ? 0.4 : 1}}
                     avatar={<Icon type={item.source}/>}
-                    title={<span style={{fontWeight: 400, color: '#404040'}}>{item.title}</span>}
+                    title={<span style={{fontWeight: 400, color: '#404040'}}>{t(item.title)}</span>}
                     description={[
-                      <div key="1" style={{fontSize: 12, overflowWrap: 'anywhere'}}>{item.content}</div>,
+                      <div key="1" style={{fontSize: 12, overflowWrap: 'anywhere'}}>{t(item.content)}</div>,
                       <div key="2" style={{fontSize: 12}}>{moment(item['created_at']).fromNow()}</div>
                     ]}/>
                 </List.Item>

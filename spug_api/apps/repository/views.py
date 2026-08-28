@@ -9,6 +9,7 @@ from libs import json_response, JsonParser, Argument, AttrDict, auth
 from apps.repository.models import Repository
 from apps.deploy.models import DeployRequest
 from apps.repository.utils import dispatch
+from libs.locale import get_request_language
 from apps.deploy.helper import Helper
 from apps.app.models import Deploy
 from threading import Thread
@@ -59,7 +60,7 @@ class RepositoryView(View):
                 env_id=deploy.env_id,
                 created_by=request.user,
                 **form)
-            Thread(target=dispatch, args=(rep,)).start()
+            Thread(target=dispatch, args=(rep, None, get_request_language(request))).start()
             return json_response(rep.to_view())
         return json_response(error=error)
 
@@ -74,7 +75,7 @@ class RepositoryView(View):
             if not rep:
                 return json_response(error='未找到指定构建记录')
             if form.action == 'rebuild':
-                Thread(target=dispatch, args=(rep,)).start()
+                Thread(target=dispatch, args=(rep, None, get_request_language(request))).start()
                 return json_response(rep.to_view())
             return json_response(error=f'不支持的操作: {form.action}')
         return json_response(error=error)

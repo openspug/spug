@@ -43,7 +43,7 @@ class ComTable extends React.Component {
     dataIndex: 'name',
   }, {
     title: t('监控类型'),
-    dataIndex: 'type',
+    dataIndex: 'type_alias',
   }, {
     title: t('监控对象'),
     dataIndex: 'target'
@@ -53,10 +53,11 @@ class ComTable extends React.Component {
     render: value => value === '1' ? <Tag color="orange">{t('报警发生')}</Tag> : <Tag color="green">{t('故障恢复')}</Tag>
   }, {
     title: t('持续时间'),
-    dataIndex: 'duration',
+    dataIndex: 'duration_alias',
   }, {
     title: t('通知方式'),
-    dataIndex: 'notify_mode',
+    dataIndex: 'notify_mode_alias',
+    render: value => (value || []).join(', ')
   }, {
     title: t('通知对象'),
     dataIndex: 'notify_grp',

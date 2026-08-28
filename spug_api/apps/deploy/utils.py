@@ -29,11 +29,11 @@ def dispatch_all(req):
     dispatch(req, host_ids, with_local)
 
 
-def dispatch(req, deploy_host_ids, with_local):
+def dispatch(req, deploy_host_ids, with_local, language='zh'):
     rds = get_redis_connection()
     rds_key = req.deploy_key
     keys = deploy_host_ids + ['local'] if with_local else deploy_host_ids
-    helper = Helper.make(rds, rds_key, keys)
+    helper = Helper.make(rds, rds_key, keys, language)
 
     try:
         api_token = uuid.uuid4().hex

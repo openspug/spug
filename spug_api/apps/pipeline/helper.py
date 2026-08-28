@@ -6,6 +6,7 @@ from django.template.defaultfilters import filesizeformat
 from django_redis import get_redis_connection
 from libs.utils import SpugError, human_time, render_str, human_seconds_time
 from apps.config.utils import update_config_by_var
+from libs.locale import translate_console, translate_choice
 from collections import defaultdict
 import time
 import json
@@ -34,9 +35,11 @@ class KitMixin:
 
 
 class Helper(KitMixin):
-    def __init__(self, rds, rds_key):
+    def __init__(self, rds, rds_key, language='zh'):
         self.rds = rds
         self.rds_key = rds_key
+        # 发起本次执行的用户界面语言，用于翻译 Spug 自身产生的控制台文案
+        self.language = language
         self.buffers = defaultdict(str)
         self.flags = defaultdict(bool)
         self.already_clear = False
@@ -46,9 +49,9 @@ class Helper(KitMixin):
         self.clear()
 
     @classmethod
-    def make(cls, rds, rds_key):
+    def make(cls, rds, rds_key, language='zh'):
         rds.delete(rds_key)
-        return cls(rds, rds_key)
+        return cls(rds, rds_key, language)
 
     @classmethod
     def fill_outputs(cls, outputs, deploy_key):
@@ -130,6 +133,7 @@ class Helper(KitMixin):
         return files
 
     def send(self, key, data, *, status=''):
+        data = self.t(data)
         message = {'key': key, 'data': data}
         if status:
             message['status'] = status
@@ -157,22 +161,35 @@ class Helper(KitMixin):
     def send_clear(self, key):
         self.send(key, '\033[2J\033[3J\033[1;1H')
 
+    def t(self, message):
+        """翻译 Spug 自身产生的控制台文案，主机上的命令输出不会被改写"""
+        return translate_console(message, self.language)
+
+    def tc(self, text):
+        """翻译选项展示值（如推送方式名称）"""
+        return translate_choice(text) if self.language == 'en' else text
+
     def send_info(self, key, message, status='', with_time=True):
-        message = self.term_message(message, 'info', with_time)
+        message = self.term_message(self.t(message), 'info', with_time)
         self.send(key, message, status=status)
 
     def send_warn(self, key, message, status=''):
-        message = self.term_message(message, 'warn')
+        message = self.term_message(self.t(message), 'warn')
         self.send(key, message, status=status)
 
     def send_success(self, key, message, with_time=True, start_time=None):
+        message = self.t(message)
         if start_time:
-            message += f', 耗时: {human_seconds_time(time.time() - start_time)}'
+            duration = human_seconds_time(time.time() - start_time)
+            if self.language == 'en':
+                message += f', duration: {self.t(duration)}'
+            else:
+                message += f', 耗时: {duration}'
         message = self.term_message(f'\r\n** {message} **', 'success', with_time)
         self.send(key, message, status='success')
 
     def send_error(self, key, message, with_break=False):
-        message = self.term_message(f'\r\n{message}', 'error')
+        message = self.term_message(f'\r\n{self.t(message)}', 'error')
         self.send(key, message, status='error')
         if with_break:
             raise SpugError

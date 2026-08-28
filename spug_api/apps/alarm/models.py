@@ -30,9 +30,15 @@ class Alarm(models.Model, ModelMixin):
 
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
-        tmp['notify_mode'] = ','.join(dict(self.MODES)[x] for x in json.loads(self.notify_mode))
+        modes = dict(self.MODES)
+        # *_alias 字段会被 TranslateMiddleware 按请求语言翻译，
+        # type/duration 在建记录时就落库为中文展示值，故一并以 alias 形式输出
+        tmp['notify_mode_alias'] = [modes[x] for x in json.loads(self.notify_mode)]
+        tmp['notify_mode'] = ','.join(tmp['notify_mode_alias'])
         tmp['notify_grp'] = json.loads(self.notify_grp)
         tmp['status_alias'] = self.get_status_display()
+        tmp['type_alias'] = self.type
+        tmp['duration_alias'] = self.duration
         return tmp
 
     def __repr__(self):

@@ -5,6 +5,7 @@ from django.views.generic import View
 from django_redis import get_redis_connection
 from django.conf import settings
 from libs import json_response, JsonParser, Argument, human_datetime, auth
+from libs.locale import get_request_language
 from apps.exec.models import ExecTemplate, ExecHistory
 from apps.host.models import Host
 from apps.account.utils import has_host_perm
@@ -115,7 +116,8 @@ class TaskView(View):
                     command=task.command,
                     pkey=host.private_key,
                     params=json.loads(task.params),
-                    term=term
+                    term=term,
+                    language=get_request_language(request),
                 )
                 rds.rpush(settings.EXEC_WORKER_KEY, json.dumps(data))
         return json_response(error=error)

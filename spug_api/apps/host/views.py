@@ -14,6 +14,7 @@ from apps.schedule.models import Task
 from apps.monitor.models import Detection
 from apps.exec.models import ExecTemplate
 from libs.ssh import SSH, AuthenticationException
+from libs.locale import translate, translate_choice
 from paramiko.ssh_exception import BadAuthenticationType
 from openpyxl import load_workbook, Workbook
 from threading import Thread
@@ -176,9 +177,10 @@ def post_export(request):
         hosts = hosts.filter(id__in=get_host_perms(request.user))
     wb = Workbook()
     ws = wb.active
-    ws.append(('主机名称', 'SSH地址', 'SSH端口', 'SSH用户', 'SSH密码', '备注信息', '实例ID', '操作系统', 'CPU核心数',
-               '内存GB', '磁盘GB', '内网IP'
-                                   '公网IP', '实例计费方式', '网络计费方式', '创建时间', '到期时间'))
+    is_en = request.headers.get('X-Language') == 'en'
+    headers = ('主机名称', 'SSH地址', 'SSH端口', 'SSH用户', 'SSH密码', '备注信息', '实例ID', '操作系统', 'CPU核心数',
+               '内存GB', '磁盘GB', '内网IP', '公网IP', '实例计费方式', '网络计费方式', '创建时间', '到期时间')
+    ws.append([translate(x) for x in headers] if is_en else list(headers))
     for item in hosts:
         data = [item.name, item.hostname, item.port, item.username, '', item.desc]
         if hasattr(item, 'hostextend'):
@@ -190,8 +192,10 @@ def post_export(request):
                 ','.join(str(x) for x in json.loads(item.hostextend.disk)),
                 ','.join(json.loads(item.hostextend.private_ip_address)),
                 ','.join(json.loads(item.hostextend.public_ip_address)),
-                item.hostextend.get_instance_charge_type_display(),
-                item.hostextend.get_internet_charge_type_display(),
+                translate_choice(item.hostextend.get_instance_charge_type_display()) if is_en
+                else item.hostextend.get_instance_charge_type_display(),
+                translate_choice(item.hostextend.get_internet_charge_type_display()) if is_en
+                else item.hostextend.get_internet_charge_type_display(),
                 item.hostextend.created_time,
                 item.hostextend.expired_time
             ])

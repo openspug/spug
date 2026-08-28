@@ -11,6 +11,7 @@ from apps.host.models import Host
 from apps.setting.utils import AppSetting
 from libs import json_response, JsonParser, Argument, auth
 from libs.utils import str_decode, human_seconds_time
+from libs.locale import get_request_language, translate_console
 from concurrent import futures
 from threading import Thread
 import subprocess
@@ -89,17 +90,17 @@ class TransferView(View):
         ).parse(request.body)
         if error is None:
             task = Transfer.objects.get(digest=form.token)
-            Thread(target=_dispatch_sync, args=(task,)).start()
+            Thread(target=_dispatch_sync, args=(task, get_request_language(request))).start()
         return json_response(error=error)
 
 
-def _dispatch_sync(task):
+def _dispatch_sync(task, language='zh'):
     rds = get_redis_connection()
     threads = []
     max_workers = max(10, os.cpu_count() * 5)
     with futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         for host in Host.objects.filter(id__in=json.loads(task.host_ids)):
-            t = executor.submit(_do_sync, rds, task, host)
+            t = executor.submit(_do_sync, rds, task, host, language)
             t.token = task.digest
             t.key = host.id
             threads.append(t)
@@ -118,7 +119,7 @@ def _dispatch_sync(task):
     close_old_connections()
 
 
-def _do_sync(rds, task, host):
+def _do_sync(rds, task, host, language='zh'):
     token = task.digest
     rds.publish(token, json.dumps({'key': host.id, 'data': '\r\n\x1b[36m### Executing ...\x1b[0m\r\n'}))
     with tempfile.NamedTemporaryFile(mode='w') as fp:
@@ -140,7 +141,9 @@ def _do_sync(rds, task, host):
                 message += b'\r\n' if output == b'\n' else b'\r'
                 message = str_decode(message)
                 if 'rsync: command not found' in message:
-                    data = '\r\n\x1b[31m检测到该主机未安装rsync，可通过批量执行/执行任务模块进行以下命令批量安装\x1b[0m'
+                    data = translate_console(
+                        '\r\n\x1b[31m检测到该主机未安装rsync，可通过批量执行/执行任务模块进行以下命令批量安装\x1b[0m',
+                        language)
                     data += '\r\nCentos/Redhat: yum install -y rsync'
                     data += '\r\nUbuntu/Debian: apt install -y rsync'
                     rds.publish(token, json.dumps({'key': host.id, 'data': data}))
@@ -152,5 +155,6 @@ def _do_sync(rds, task, host):
         status = task.wait()
         if status == 0:
             human_time = human_seconds_time(time.time() - flag)
-            rds.publish(token, json.dumps({'key': host.id, 'data': f'\r\n\x1b[32m** 分发完成，总耗时：{human_time} **\x1b[0m'}))
+            data = translate_console(f'\r\n\x1b[32m** 分发完成，总耗时：{human_time} **\x1b[0m', language)
+            rds.publish(token, json.dumps({'key': host.id, 'data': data}))
         rds.publish(token, json.dumps({'key': host.id, 'status': task.wait()}))

@@ -7,6 +7,7 @@ from django.http.response import HttpResponseBadRequest
 from django_redis import get_redis_connection
 from libs import JsonParser, Argument, json_response, auth
 from libs.utils import AttrDict
+from libs.locale import get_request_language
 from libs.gitlib import RemoteGit
 from apps.pipeline.models import Pipeline, PipeHistory
 from apps.pipeline.utils import NodeExecutor
@@ -135,7 +136,8 @@ class DoView(View):
                 PipeHistory.objects.create(pipeline=pipe, ordinal=ordinal, created_by=request.user)
 
                 rds = get_redis_connection()
-                executor = NodeExecutor(rds, token, json.loads(pipe.nodes), pipe_name=pipe.name)
+                executor = NodeExecutor(rds, token, json.loads(pipe.nodes), pipe_name=pipe.name,
+                                        language=get_request_language(request))
                 Thread(target=executor.run).start()
                 response = AttrDict(token=token, nodes=nodes)
             return json_response(response)
@@ -164,7 +166,8 @@ class DoView(View):
             PipeHistory.objects.create(pipeline=pipe, ordinal=ordinal, created_by=request.user)
             rds = get_redis_connection()
 
-            executor = NodeExecutor(rds, form.token, nodes, form.params, pipe_name=pipe.name)
+            executor = NodeExecutor(rds, form.token, nodes, form.params, pipe_name=pipe.name,
+                                    language=get_request_language(request))
             Thread(target=executor.run).start()
             return json_response()
         return json_response(error=error)

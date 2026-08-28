@@ -184,6 +184,74 @@ MESSAGES = {
     '验证失败，请重新登录': 'Verification failed, please sign in again',
     '验证码已失效，请重新获取': 'The verification code has expired, please request a new one',
     '验证码错误': 'Incorrect verification code',
+    # host export column headers
+    '主机名称': 'Host name',
+    'SSH地址': 'SSH address',
+    'SSH端口': 'SSH port',
+    'SSH用户': 'SSH user',
+    'SSH密码': 'SSH password',
+    '备注信息': 'Description',
+    '实例ID': 'Instance ID',
+    '操作系统': 'OS',
+    'CPU核心数': 'CPU cores',
+    '内存GB': 'Memory (GB)',
+    '磁盘GB': 'Disk (GB)',
+    '内网IP': 'Private IP',
+    '公网IP': 'Public IP',
+    '实例计费方式': 'Instance billing',
+    '网络计费方式': 'Network billing',
+    '创建时间': 'Created at',
+    '到期时间': 'Expires at',
+    # realtime console output (deploy / build / pipeline / batch execution)
+    '数据准备...': 'Preparing data...',
+    '发布前任务...': 'Pre-deploy tasks...',
+    '发布后任务...': 'Post-deploy tasks...',
+    '执行发布...': 'Deploying...',
+    '终止发布': 'Deployment aborted',
+    '串行模式，终止发布': 'Serial mode, deployment aborted',
+    '完成√': 'Done √',
+    '跳过√': 'Skipped √',
+    '未找到上传的文件信息，请尝试新建发布申请': 'No uploaded file found, please create a new deploy request',
+    '检测到来源为本地路径的数据传输动作，执行打包...': 'Found a data transfer action with a local source, packaging...',
+    '打包完成': 'Packaging completed',
+    '构建准备...': 'Preparing build...',
+    '检出前任务...': 'Pre-checkout tasks...',
+    '检出后任务...': 'Post-checkout tasks...',
+    '执行检出...': 'Checking out...',
+    '执行打包...': 'Packaging...',
+    '解析参数配置': 'Parsing parameters',
+    '动态参数：': 'Dynamic parameters:',
+    '静态参数：': 'Static parameters:',
+    '参数解析完成': 'Parameters parsed',
+    '同步并检出Git仓库': 'Syncing and checking out the Git repository',
+    '执行构建命令': 'Running build commands',
+    '构建完成': 'Build completed',
+    '开始执行': 'Running',
+    '执行结束': 'Finished',
+    '开始传输数据': 'Transferring data',
+    '传输完成': 'Transfer completed',
+    '未找到上传的文件': 'The uploaded file was not found',
+    '未指定要构建的Git标签': 'No Git tag specified for the build',
+    '未配置要构建的Git分支': 'No Git branch configured for the build',
+    '未配置 Webhook 地址': 'No webhook URL configured',
+    '未选择推送对象': 'No push recipient selected',
+    '未绑定推送助手账户，请在 系统管理/系统设置/推送服务设置 中完成绑定': 'No Spug Push account bound, please bind it in System / System Settings / Push Service',
+    '检测到该主机未安装rsync，可通过批量执行/执行任务模块进行以下命令批量安装': 'rsync is not installed on this host, you can install it in batch via Batch Execution / Run Task with the commands below',
+    # host connectivity verification (raised as exceptions)
+    '上传的独立密钥认证失败，请检查该密钥是否能正常连接主机（推荐使用全局密钥）': 'Authentication with the uploaded private key failed, please make sure the key can connect to the host (using the global key is recommended)',
+    '该主机不支持密码认证，请参考官方文档，错误代码：E00': 'The host does not support password authentication, please refer to the documentation, error code: E00',
+    '该主机不支持密钥认证，请参考官方文档，错误代码：E01': 'The host does not support public key authentication, please refer to the documentation, error code: E01',
+    '密钥认证失败，请参考官方文档，错误代码：E02': 'Public key authentication failed, please refer to the documentation, error code: E02',
+    '密码连接认证失败，请检查密码是否正确': 'Password authentication failed, please check whether the password is correct',
+    '连接主机超时，请检查网络': 'Connecting to the host timed out, please check the network',
+    # ldap / setting
+    '账户未找到': 'Account not found',
+    '请先配置推送服务绑定账户': 'Please configure the bound account of the push service first',
+    # monitor check results
+    '端口状态检测正常': 'Port check passed',
+    'Ping检测正常': 'Ping check passed',
+    'Ping检测失败': 'Ping check failed',
+    '检测状态正常': 'Check passed',
 }
 
 import re
@@ -293,10 +361,27 @@ CHOICES = {
     '按带宽计费': 'Pay-by-bandwidth',
     '按流量计费': 'Pay-by-traffic',
     '其他': 'Other',
+    # monitor / task status
+    '正常': 'Normal',
+    '异常': 'Abnormal',
+    '执行中': 'Running',
     # misc module names
     '应用发布': 'Deployment',
     '监控中心': 'Monitoring',
 }
+
+
+_DURATION_RE = re.compile(r'^(?:(\d+)小时)?(?:(\d+)分钟?)?(?:(\d+(?:\.\d+)?)秒)?$')
+_DURATION_UNITS = ('h', 'm', 's')
+_EXCEPTION_PREFIX = 'Exception: '
+
+
+def _translate_duration(text):
+    """把 seconds_to_human() 生成的中文时长（如 1小时5分钟）转成 1h 5m"""
+    match = _DURATION_RE.fullmatch(text)
+    if not match or not any(match.groups()):
+        return None
+    return ' '.join(f'{v}{u}' for v, u in zip(match.groups(), _DURATION_UNITS) if v)
 
 
 def translate(text):
@@ -309,11 +394,91 @@ def translate(text):
         match = regex.fullmatch(text)
         if match:
             return template.format(*match.groups())
+    duration = _translate_duration(text)
+    if duration:
+        return duration
+    # 未捕获的异常经中间件包装为 "Exception: 原始消息"，对内层消息再翻译一次
+    if text.startswith(_EXCEPTION_PREFIX):
+        inner = text[len(_EXCEPTION_PREFIX):]
+        translated = translate(inner)
+        if translated != inner:
+            return _EXCEPTION_PREFIX + translated
     return text
+
+
+_CONSOLE_PATTERNS = [
+    (re.compile(r'^\*\* 发布成功，耗时：(.*) \*\*$', re.S),
+     '** Deployed successfully, duration: {0} **'),
+    (re.compile(r'^\*\* 执行完成，耗时：(.*) \*\*$', re.S),
+     '** Finished, duration: {0} **'),
+    (re.compile(r'^\*\* 构建成功，耗时：(.*) \*\*$', re.S),
+     '** Build succeeded, duration: {0} **'),
+    (re.compile(r'^\*\* 执行结束，耗时：(.*) \*\*$', re.S),
+     '** Finished, duration: {0} **'),
+    (re.compile(r'^\*\* 分发完成，总耗时：(.*) \*\*$', re.S),
+     '** Transfer completed, total duration: {0} **'),
+    (re.compile(r'^检测到该主机的发布目录 (.*) 已存在，为了数据安全请自行备份后删除该目录，Spug 将会创建并接管该目录。$', re.S),
+     'The deploy directory {0} already exists on this host, please back it up and remove it yourself for data safety, Spug will create and take over this directory.'),
+    (re.compile(r'^不支持的节点模块: (.*)$', re.S),
+     'Unsupported node module: {0}'),
+    (re.compile(r'^应用名称: (.*)$', re.S), 'App: {0}'),
+    (re.compile(r'^执行环境: (.*)$', re.S), 'Environment: {0}'),
+    (re.compile(r'^代码分支: (.*)$', re.S), 'Branch: {0}'),
+    (re.compile(r'^代码版本: (.*)$', re.S), 'Version: {0}'),
+    (re.compile(r'^执行人员: (.*)$', re.S), 'Operator: {0}'),
+    (re.compile(r'^执行时间: (.*)$', re.S), 'Time: {0}'),
+    (re.compile(r'^推送对象: (.*)$', re.S), 'Recipients: {0}'),
+    (re.compile(r'^标题: (.*)$', re.S), 'Title: {0}'),
+    (re.compile(r'^获取动态环境变量失败: (.*)$', re.S),
+     'Failed to read dynamic environment variables: {0}'),
+    (re.compile(r'^开始推送(.*)消息$', re.S), 'Sending {0} message'),
+    (re.compile(r'^(.*)消息推送完成$', re.S), '{0} push completed'),
+    (re.compile(r'^(.*)消息推送失败: (.*)$', re.S), '{0} push failed: {1}'),
+]
+
+_CONSOLE_EDGE = r'(?:[\s\r\n]|\x1b\[[0-9;]*[A-Za-z])*'
+_CONSOLE_RE = re.compile(rf'^({_CONSOLE_EDGE})(.*?)({_CONSOLE_EDGE})$', re.S)
+
+
+def get_request_language(request):
+    """请求语言，用于把后台执行产生的实时输出翻译成用户界面的语言"""
+    return 'en' if request.headers.get('X-Language') == 'en' else 'zh'
+
+
+def translate_console(text, language='zh'):
+    """翻译发布/构建/流水线等实时控制台里由 Spug 自身产生的文案。
+
+    首尾的空白、换行与 ANSI 颜色序列原样保留，只翻译中间的正文；
+    字典未命中时原样返回，因此主机上命令的真实输出不会被改写。
+    """
+    if language != 'en' or not isinstance(text, str) or not text:
+        return text
+    match = _CONSOLE_RE.fullmatch(text)
+    if not match:
+        return text
+    lead, core, tail = match.groups()
+    if not core:
+        return text
+    return lead + _translate_console_core(core) + tail
+
+
+def _translate_console_core(core):
+    hit = MESSAGES.get(core)
+    if hit:
+        return hit
+    for regex, template in _CONSOLE_PATTERNS:
+        match = regex.fullmatch(core)
+        if match:
+            # 组内可能仍是可翻译的文案（推送方式名、内层错误、中文时长）
+            return template.format(*(translate(x) if x else x for x in match.groups()))
+    return translate(core)
 
 
 def translate_choice(text):
     """Translate a model choice display value, used for the *_alias fields."""
     if not isinstance(text, str):
         return text
-    return CHOICES.get(text, text)
+    hit = CHOICES.get(text)
+    if hit:
+        return hit
+    return translate(text)

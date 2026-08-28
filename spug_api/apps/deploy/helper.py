@@ -6,6 +6,7 @@ from django.template.defaultfilters import filesizeformat
 from django_redis import get_redis_connection
 from libs.utils import SpugError, human_datetime, render_str, str_decode
 from libs.spug import Notification
+from libs.locale import translate_console, translate_choice
 from apps.host.models import Host
 from apps.config.utils import update_config_by_var
 from functools import partial
@@ -237,9 +238,11 @@ class KitMixin:
 
 
 class Helper(NotifyMixin, KitMixin):
-    def __init__(self, rds, rds_key):
+    def __init__(self, rds, rds_key, language='zh'):
         self.rds = rds
         self.rds_key = rds_key
+        # 发起本次执行的用户界面语言，用于翻译 Spug 自身产生的控制台文案
+        self.language = language
         self.callback = []
         self.buffers = defaultdict(str)
         self.flags = defaultdict(bool)
@@ -252,9 +255,9 @@ class Helper(NotifyMixin, KitMixin):
         self.clear()
 
     @classmethod
-    def make(cls, rds, rds_key, keys):
+    def make(cls, rds, rds_key, keys, language='zh'):
         rds.delete(rds_key)
-        instance = cls(rds, rds_key)
+        instance = cls(rds, rds_key, language)
         for key in keys:
             if key != 'local':
                 instance.deploy_host_ids.append(key)
@@ -381,20 +384,28 @@ class Helper(NotifyMixin, KitMixin):
     def send_clear(self, key):
         self._send(key, '\033[2J\033[3J\033[1;1H')
 
+    def t(self, message):
+        """翻译 Spug 自身产生的控制台文案，主机上的命令输出不会被改写"""
+        return translate_console(message, self.language)
+
+    def tc(self, text):
+        """翻译选项展示值（如推送方式名称）"""
+        return translate_choice(text) if self.language == 'en' else text
+
     def send_info(self, key, message, status='', with_time=True):
-        message = self.term_message(message, 'info', with_time)
+        message = self.term_message(self.t(message), 'info', with_time)
         self._send(key, message, status=status)
 
     def send_warn(self, key, message, status=''):
-        message = self.term_message(message, 'warn')
+        message = self.term_message(self.t(message), 'warn')
         self._send(key, message, status=status)
 
     def send_success(self, key, message, status=''):
-        message = self.term_message(message, 'success')
+        message = self.term_message(self.t(message), 'success')
         self._send(key, message, status=status)
 
     def send_error(self, key, message, with_break=True):
-        message = self.term_message(message, 'error')
+        message = self.term_message(self.t(message), 'error')
         if not message.endswith('\r\n'):
             message += '\r\n'
         self._send(key, message, status='error')

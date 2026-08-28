@@ -4,7 +4,7 @@ English | [简体中文](./README-zh_CN.md)
 
 <div align="center">
 
-Spug is a lightweight agent-free automatic operation and maintenance platform designed for small and medium-sized enterprises.  It integrates a series of functions such as host management, host batch execution, host online terminal, application release and deployment, online task planning, configuration center, monitoring, alarm and so on.
+Spug is a lightweight agent-free automatic operation and maintenance platform designed for small and medium-sized enterprises. It integrates host management, host batch execution, host online terminal, file management, application release and deployment, pipelines, online task planning, configuration center, monitoring, alarm and so on.
 
 </div>
 
@@ -13,6 +13,8 @@ Spug is a lightweight agent-free automatic operation and maintenance platform de
 ## Demo
 
 Demo：https://demo.spug.cc
+
+The demo environment runs the latest version and resets its data every hour, both the English and the Simplified Chinese interface are available from the globe icon in the header.
 
 
 
@@ -23,16 +25,19 @@ Push Assistant is a message push platform that integrates multiple channels such
 
 ## Features
 
-- **Host Batch Execution**: Support host batch online command execution
+- **Host Management**: Manage hosts by group, import them from cloud providers or an Excel file, and check connectivity in batch
+- **Host Batch Execution**: Support host batch online command execution, with parameterized commands, reusable templates and execution history
 - **Host Online Terminal**: The host supports browser online terminal login
 - **Host File Management**: Support host files online upload and download
+- **File Distribution**: Distribute files and directories from one host to many hosts
+- **Build and Deploy**: Support application custom build deployment, with review flow, canary release and rollback
+- **Pipelines**: Orchestrate parameter, build, remote command, data transfer, data upload and DingTalk / Feishu / WeChat Work / Push Assistant notification nodes into a workflow, with conditional branches and a live console
 - **Task Planning**: It supports online configuration of crontab, interval and other task schedules
-
-- **Build and deploy**: Support application custom build deployment
-- **Pipelines**: Orchestrate build, command, file sync and upload nodes into a DAG workflow
-- **Configuration center**: Support KV, text, json and other formats online configuration
-- **monitoring center**: Support site, port, process, custom and other monitoring
-- **Alarm center**: Support SMS, email, Dingtalk, wechat and other alarm methods
+- **Configuration Center**: Support KV, text, json and other formats online configuration
+- **Monitoring Center**: Support site, port, process, ping, custom script and other monitoring
+- **Alarm Center**: Support SMS, email, DingTalk, WeChat, WeChat Work and other alarm methods
+- **Credential Management**: Keep passwords and private keys in one place and share them across hosts
+- **Permission Control**: Fine-grained role and permission control, LDAP login and MFA are supported
 - **Bilingual UI**: Full English and Simplified Chinese interface, switchable from the header
 - **Elegant and beautiful**: UI interface based on Ant Design
 - **Open source and free**: The front-end and back-end code is completely open source
@@ -40,17 +45,18 @@ Push Assistant is a message push platform that integrates multiple channels such
 
 ## Environment
 
-* Python 3.6+
-* Django 2.2
-* Node 12.14
-* React 16.11
+* Python 3.8+
+* Django 4.2
+* Node.js 14+
+* React 16.13
+* Redis 5.0+
 
 ## Install Doc
 
-- Home Page：https://spug.cc/docs/install-docker/
-- Useage Doc：https://spug.cc/docs/about-spug/
-- Change Log：https://spug.cc/docs/change-log/
-- FAQ：https://spug.cc/docs/faq/
+- Home Page：https://ops.spug.cc/docs/install-docker/
+- Useage Doc：https://ops.spug.cc/docs/about-spug/
+- Change Log：https://ops.spug.cc/docs/change-log/
+- FAQ：https://ops.spug.cc/docs/faq/
 - Spug Push：https://push.spug.cc
 
 
@@ -60,29 +66,48 @@ Push Assistant is a message push platform that integrates multiple channels such
 
 ## PreView
 
+### Workbench
+![workbench](docs/img/4.0/en/workbench.jpg)
+
+### Dashboard
+![dashboard](docs/img/4.0/en/dashboard.jpg)
+
 ### Host Management
-![image](https://cdn.spug.cc/img/3.0/host.jpg)
-
-#### Host Batch Execution
-![image](https://cdn.spug.cc/img/3.0/host-exec.jpg)
-![image](https://cdn.spug.cc/img/3.0/host-exec2.jpg)
-
+![hosts](docs/img/4.0/en/host.jpg)
 
 #### Host Online Terminal
-![image](https://cdn.spug.cc/img/3.0/web-terminal.jpg)
-
+![web terminal](docs/img/4.0/en/web-terminal.jpg)
 
 #### File Online Upload and Download
-![image](https://cdn.spug.cc/img/3.0/file-manager.jpg)
+![file manager](docs/img/4.0/en/file-manager.jpg)
 
-#### Application Release
-![image](https://cdn.spug.cc/img/3.0/deploy.jpg)
+#### Host Batch Execution
+![batch execution](docs/img/4.0/en/host-exec.jpg)
+![batch execution output](docs/img/4.0/en/host-exec2.jpg)
 
-#### Monitoring and Alarm
-![image](https://cdn.spug.cc/img/3.0/monitor.jpg)
+### Pipelines
+Orchestrate build, command, data transfer, upload and notification nodes into a workflow.
 
-#### Role and Permission
-![image](https://cdn.spug.cc/img/3.0/user-role.jpg)
+![pipeline editor](docs/img/4.0/en/pipeline.jpg)
+![built-in pipeline modules](docs/img/4.0/en/pipeline-modules.jpg)
+![pipeline node config](docs/img/4.0/en/pipeline-node.jpg)
+![pipeline console](docs/img/4.0/en/pipeline-console.jpg)
+
+### Application Release
+![deploy configuration](docs/img/4.0/en/deploy.jpg)
+![deploy request](docs/img/4.0/en/deploy-request.jpg)
+![deploy console](docs/img/4.0/en/deploy-console.jpg)
+
+### Task Planning
+![scheduled tasks](docs/img/4.0/en/schedule.jpg)
+
+### Configuration Center
+![configuration center](docs/img/4.0/en/config.jpg)
+
+### Monitoring and Alarm
+![monitoring](docs/img/4.0/en/monitor.jpg)
+![alarm](docs/img/4.0/en/alarm.jpg)
+
 
 
 ## Sponsor

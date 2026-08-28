@@ -208,7 +208,7 @@ class Ext2Setup2 extends React.Component {
               type="dashed"
               style={{marginTop: 8}}
               disabled={store.isReadOnly || lds.findIndex(host_actions, x => x.type === 'transfer') !== -1}
-              onClick={() => host_actions.push({type: 'transfer', title: '数据传输', mode: '0', src_mode: '0'})}>
+              onClick={() => host_actions.push({type: 'transfer', title: t('数据传输'), mode: '0', src_mode: '0'})}>
               <PlusOutlined/>{t('添加数据传输动作（仅能添加一个）')}
             </Button>
           </Form.Item>

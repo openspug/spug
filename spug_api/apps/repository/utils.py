@@ -19,12 +19,12 @@ REPOS_DIR = settings.REPOS_DIR
 BUILD_DIR = settings.BUILD_DIR
 
 
-def dispatch(rep: Repository, helper=None):
+def dispatch(rep: Repository, helper=None, language='zh'):
     rep.status = '1'
     alone_build = helper is None
     if not helper:
         rds = get_redis_connection()
-        helper = Helper.make(rds, rep.deploy_key, ['local'])
+        helper = Helper.make(rds, rep.deploy_key, ['local'], language)
         rep.save()
     try:
         helper.set_deploy_process('local')
