@@ -15,6 +15,11 @@ class LDAP:
         self.base_dn = base_dn
 
     def valid_user(self, username, password):
+        # 带 DN 的空密码 simple bind 会被多数目录服务视为匿名绑定并返回成功
+        # （RFC 4513 unauthenticated bind），必须在绑定前拒绝。
+        # 注意不能只判空串：parser 的判空发生在 strip 之前，纯空白密码到这里已是空串。
+        if not password or not password.strip():
+            return False, '密码不能为空'
         try:
             conn = ldap.initialize("ldap://{0}:{1}".format(self.server, self.port), bytes_mode=False)
             conn.simple_bind_s(self.admin_dn, self.password)
