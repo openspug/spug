@@ -68,6 +68,8 @@ class ContactView(View):
             Argument('ding', required=False),
             Argument('wx_token', required=False),
             Argument('qy_wx', required=False),
+            Argument('feishu', required=False),
+            Argument('secret', required=False),
         ).parse(request.body)
         if error is None:
             if form.id:
@@ -94,7 +96,9 @@ class ContactView(View):
 def handle_test(request):
     form, error = JsonParser(
         Argument('mode', help='参数错误'),
-        Argument('value', help='参数错误')
+        Argument('value', help='参数错误'),
+        # 机器人开启加签时前端会一并传来，未开启则为空
+        Argument('secret', required=False),
     ).parse(request.body)
     if error is None:
         notify = Notification(None, '1', 'https://spug.cc', 'Spug官网（测试）', '这是一条测试告警信息', None)
@@ -106,11 +110,13 @@ def handle_test(request):
         elif form.mode == '2':
             return json_response(error='目前暂不支持短信告警，请关注后续更新。')
         elif form.mode == '3':
-            notify.monitor_by_dd([form.value])
+            notify.monitor_by_dd([(form.value, form.secret)])
         elif form.mode == '4':
             notify.monitor_by_email([form.value])
         elif form.mode == '5':
             notify.monitor_by_qy_wx([form.value])
+        elif form.mode == '7':
+            notify.monitor_by_fs([(form.value, form.secret)])
         else:
             return json_response(error='不支持的报警方式')
     return json_response(error=error)

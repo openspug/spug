@@ -6,6 +6,8 @@ from apps.setting.utils import AppSetting
 from apps.notify.models import Notify
 from libs.mail import Mail
 from libs.utils import human_datetime
+from libs.webhook import gen_dd_sign, gen_fs_sign
+from urllib.parse import urlencode
 import requests
 import json
 
@@ -121,8 +123,35 @@ class Notification:
                 'isAtAll': True
             }
         }
-        for url in users:
+        for url, secret in users:
+            if secret:
+                timestamp, sign = gen_dd_sign(secret)
+                sep = '&' if '?' in url else '?'
+                url = f'{url}{sep}{urlencode({"timestamp": timestamp, "sign": sign})}'
             self.handle_request(url, data, 'dd')
+
+    def monitor_by_fs(self, users):
+        title = '监控告警通知' if self.event == '1' else '告警恢复通知'
+        content = [
+            [{'tag': 'text', 'text': f'告警名称：{self.title}'}],
+            [{'tag': 'text', 'text': f'告警对象：{self.target}'}],
+            [{'tag': 'text', 'text': f'{"告警" if self.event == "1" else "恢复"}时间：{human_datetime()}'}],
+            [{'tag': 'text', 'text': f'告警描述：{self.message}'}],
+        ]
+        if self.event == '2':
+            content.append([{'tag': 'text', 'text': f'持续时间：{self.duration}'}])
+        content.append([{'tag': 'text', 'text': '来自 Spug运维平台'}])
+        for url, secret in users:
+            data = {
+                'msg_type': 'post',
+                'content': {'post': {'zh_cn': {'title': title, 'content': content}}}
+            }
+            if secret:
+                # 飞书的 timestamp/sign 放在请求体里，与钉钉放 query 不同
+                timestamp, sign = gen_fs_sign(secret)
+                data['timestamp'] = timestamp
+                data['sign'] = sign
+            self.handle_request(url, data, 'fs')
 
     def monitor_by_qy_wx(self, users):
         color, title = ('warning', '监控告警通知') if self.event == '1' else ('info', '告警恢复通知')
@@ -144,6 +173,22 @@ class Notification:
         for url in users:
             self.handle_request(url, data, 'wx')
 
+    def _webhook_targets(self, field):
+        """取该渠道的 [(webhook地址, 加签密钥)]，密钥可能为空（机器人未开启加签）。"""
+        targets = []
+        for c in Contact.objects.filter(**{'id__in': self.u_ids, f'{field}__isnull': False}):
+            url = getattr(c, field)
+            if not url:
+                continue
+            secret = None
+            if c.secret:
+                try:
+                    secret = json.loads(c.secret).get(field)
+                except (ValueError, AttributeError):
+                    secret = None
+            targets.append((url, secret))
+        return targets
+
     def dispatch_monitor(self, modes):
         self.u_ids = sum([json.loads(x.contacts) for x in Group.objects.filter(id__in=self.grp)], [])
         for mode in modes:
@@ -154,7 +199,7 @@ class Notification:
                     continue
                 self.monitor_by_wx(users)
             elif mode == '3':
-                users = set(x.ding for x in Contact.objects.filter(id__in=self.u_ids, ding__isnull=False))
+                users = self._webhook_targets('ding')
                 if not users:
                     Notify.make_monitor_notify('发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的钉钉。')
                     continue
@@ -171,3 +216,9 @@ class Notification:
                     Notify.make_monitor_notify('发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的企业微信。')
                     continue
                 self.monitor_by_qy_wx(users)
+            elif mode == '7':
+                users = self._webhook_targets('feishu')
+                if not users:
+                    Notify.make_monitor_notify('发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的飞书。')
+                    continue
+                self.monitor_by_fs(users)

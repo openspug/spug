@@ -18,6 +18,7 @@ const modeOptions = [
   {label: t('钉钉'), 'value': '3'},
   {label: t('邮件'), 'value': '4'},
   {label: t('企业微信'), 'value': '5'},
+  {label: t('飞书'), 'value': '7'},
 ];
 
 export default observer(function () {

@@ -44,6 +44,8 @@ const dict = {
   '已有联系人': 'Available',
   '已选联系人': 'Selected',
   '成员': 'Members',
+  '钉钉 Secret': 'DingTalk secret',
+  '飞书 Secret': 'Feishu secret',
 };
 
 export default dict;
