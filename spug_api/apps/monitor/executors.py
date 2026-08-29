@@ -76,6 +76,10 @@ def ping_check(addr):
             return True, 'Ping检测正常'
         else:
             return False, 'Ping检测失败'
+    except FileNotFoundError:
+        # 改为参数化调用后，缺少 ping 会抛 FileNotFoundError 而不是像
+        # shell=True 那样静默返回非零退出码；给出可操作的提示而非裸异常。
+        return False, 'Ping检测失败：服务器未安装 ping 命令'
     except subprocess.TimeoutExpired:
         return False, 'Ping检测失败：超时'
     except Exception as e:
