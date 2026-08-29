@@ -18,7 +18,7 @@ export default observer(function () {
     const {mode, value} = store.record.rst_notify
     setRstValue({[mode]: value})
     http.get('/api/alarm/contact/?only_push=1')
-      .then(res => setContacts(res))
+      .then(res => setContacts(res || []))
   }, []);
 
   function handleAddZone() {

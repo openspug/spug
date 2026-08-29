@@ -19,7 +19,7 @@ export default observer(function () {
 
   useEffect(() => {
     http.get('/api/alarm/contact/?only_push=1')
-      .then(res => setContacts(res))
+      .then(res => setContacts(res || []))
   }, []);
 
   function handleSubmit() {
