@@ -6,6 +6,7 @@ from apps.host.models import Host
 from apps.monitor.utils import handle_notify, handle_trigger_event
 from socket import socket
 import subprocess
+import ipaddress
 import platform
 import requests
 import logging
@@ -44,17 +45,39 @@ def port_check(addr, port):
         return False, f'异常信息：{e}'
 
 
+# 主机名规则：每段 1-63 字符，不以连字符开头或结尾。
+# 开头的连字符必须拒绝，否则 addr 会被 ping 当成命令行选项（参数注入）。
+host_regex = re.compile(
+    r'(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*\.?\Z'
+)
+
+
+def is_valid_host(addr):
+    if not addr or len(addr) > 253:
+        return False
+    try:
+        ipaddress.ip_address(addr)
+        return True
+    except ValueError:
+        return bool(host_regex.match(addr))
+
+
 def ping_check(addr):
     try:
+        addr = (addr or '').strip()
+        if not is_valid_host(addr):
+            return False, 'Ping检测失败：无效的主机地址'
         if platform.system().lower() == 'windows':
-            command = f'ping -n 1 -w 3000 {addr}'
+            command = ['ping', '-n', '1', '-w', '3000', addr]
         else:
-            command = f'ping -c 1 -W 3 {addr}'
-        task = subprocess.run(command, shell=True, stdout=subprocess.PIPE)
+            command = ['ping', '-c', '1', '-W', '3', addr]
+        task = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=15)
         if task.returncode == 0:
             return True, 'Ping检测正常'
         else:
             return False, 'Ping检测失败'
+    except subprocess.TimeoutExpired:
+        return False, 'Ping检测失败：超时'
     except Exception as e:
         return False, f'异常信息：{e}'
 

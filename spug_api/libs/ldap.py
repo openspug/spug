@@ -2,6 +2,7 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 import ldap
+from ldap.filter import escape_filter_chars
 
 
 class LDAP:
@@ -54,10 +55,15 @@ class LDAP:
             return False, conn
 
     def verify_user(self, username, password):
+        # 带 DN 的空密码 simple bind 会被多数目录服务视为匿名绑定并返回成功
+        # （RFC 4513 unauthenticated bind），必须在绑定前拒绝。
+        # 注意不能只判空串：parser 的判空发生在 strip 之前，纯空白密码到这里已是空串。
+        if not password or not password.strip():
+            return False, '密码不能为空'
         status, conn = self.connect()
         if status:
             try:
-                user_filter = f'({self.map_username}={username})'
+                user_filter = f'({self.map_username}={escape_filter_chars(username)})'
                 ldap_result_id = conn.search(self.user_ou, ldap.SCOPE_SUBTREE, user_filter, [self.map_username])
                 _, result_data = conn.result(ldap_result_id, 0)
                 if result_data:
