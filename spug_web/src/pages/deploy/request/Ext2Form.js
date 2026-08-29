@@ -6,11 +6,12 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { UploadOutlined } from '@ant-design/icons';
-import { Modal, Form, Input, Upload, DatePicker, message, Button } from 'antd';
+import { Modal, Form, Input, Upload, DatePicker, message, Button, Select } from 'antd';
 import HostSelector from './HostSelector';
 import { http, clsNames, X_TOKEN } from 'libs';
 import styles from './index.module.less';
 import store from './store';
+import hostStore from 'pages/host/store';
 import lds from 'lodash';
 
 export default observer(function () {
@@ -20,13 +21,31 @@ export default observer(function () {
   const [uploading, setUploading] = useState(false);
   const [fileList, setFileList] = useState([]);
   const [host_ids, setHostIds] = useState([]);
+  const [group_ids, setGroupIds] = useState([]);
   const [plan, setPlan] = useState(store.record.plan);
 
   useEffect(() => {
     const {app_host_ids, host_ids, extra} = store.record;
     setHostIds(lds.clone(host_ids || app_host_ids));
+    hostStore.initial()
     if (store.record.extra) setFileList([{...extra, uid: '0'}])
   }, [])
+
+  function handleChangeGroups(ids) {
+    setGroupIds(ids)
+    const selected = new Set(host_ids);
+    for (let id of ids) {
+      const counter = hostStore.counter[id];
+      if (counter) {
+        counter.forEach(h_id => {
+          if (app_host_ids.includes(h_id)) {
+            selected.add(h_id)
+          }
+        })
+      }
+    }
+    setHostIds([...selected])
+  }
 
   function handleSubmit() {
     if (host_ids.length === 0) {
@@ -36,6 +55,7 @@ export default observer(function () {
     const formData = form.getFieldsValue();
     formData['id'] = store.record.id;
     formData['host_ids'] = host_ids;
+    formData['group_ids'] = group_ids;
     formData['type'] = store.record.type;
     formData['deploy_id'] = store.record.deploy_id;
     if (plan) formData.plan = plan.format('YYYY-MM-DD HH:mm:00');
@@ -102,6 +122,13 @@ export default observer(function () {
             <span style={{marginRight: 16}}>已选择 {host_ids.length} 台（可选{app_host_ids.length}）</span>
           )}
           <Button type="link" style={{padding: 0}} onClick={() => setVisible(true)}>选择主机</Button>
+        </Form.Item>
+        <Form.Item label="机器组选择" tooltip="可按机器组批量加入发布主机，之后仍可手动调整。">
+          <Select mode="multiple" allowClear value={group_ids} onChange={handleChangeGroups} placeholder="请选择机器组">
+            {Object.entries(hostStore.groups).map(([id, name]) => (
+              <Select.Option key={id} value={Number(id)}>{name}</Select.Option>
+            ))}
+          </Select>
         </Form.Item>
         <Form.Item name="desc" label="备注信息">
           <Input placeholder="请输入备注信息"/>

@@ -13,6 +13,7 @@ from apps.deploy.models import DeployRequest
 from apps.deploy.helper import Helper, SpugError
 from concurrent import futures
 from functools import partial
+import requests
 import json
 import uuid
 import os
@@ -141,7 +142,10 @@ def _ext2_deploy(req, helper, env):
         helper.send_info('local', f'\033[32m完成√\033[0m\r\n')
         for action in server_actions:
             helper.send_step('local', step, f'{human_time()} {action["title"]}...\r\n')
-            helper.local(f'cd /tmp && {action["data"]}', env)
+            if action.get('type') == 'jenkins':
+                _deploy_jenkins(helper, action, env)
+            else:
+                helper.local(f'cd /tmp && {action["data"]}', env)
             step += 1
 
     for action in host_actions:
@@ -219,6 +223,39 @@ def _ext2_deploy(req, helper, env):
     else:
         req.fail_host_ids = []
         helper.send_step('local', 100, f'\r\n{human_time()} ** 发布成功 **')
+
+
+def _deploy_jenkins(helper, action, env):
+    url = (action.get('url') or '').strip()
+    if not url:
+        helper.send_error('local', 'Jenkins URL is required')
+    auth = None
+    user = action.get('user')
+    token = action.get('token')
+    if user and token:
+        auth = (user, token)
+    try:
+        timeout = int(action.get('timeout') or 20)
+    except (TypeError, ValueError):
+        timeout = 20
+    params = {}
+    raw_params = action.get('params') or {}
+    if not isinstance(raw_params, dict):
+        raw_params = {}
+    for k, v in raw_params.items():
+        params[k] = render_str(str(v), env)
+    build_url = url.rstrip('/')
+    if params:
+        if not build_url.endswith('/buildWithParameters'):
+            build_url = f'{build_url}/buildWithParameters'
+    elif not build_url.endswith('/build'):
+        build_url = f'{build_url}/build'
+    helper.send_info('local', f'{human_time()} Trigger Jenkins: {build_url}\\r\\n')
+    response = requests.post(build_url, data=params or None, auth=auth, timeout=timeout)
+    if response.status_code not in (200, 201, 202):
+        helper.send_error('local', f'Jenkins trigger failed with status {response.status_code}: {response.text[:500]}')
+    queue_url = response.headers.get('Location') or '-'
+    helper.send_info('local', f'{human_time()} Jenkins accepted, queue url: {queue_url}\\r\\n')
 
 
 def _deploy_ext1_host(req, helper, h_id, env):

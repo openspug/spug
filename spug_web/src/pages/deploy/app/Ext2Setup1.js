@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { Form, Switch, Select, Button, Input, Radio } from 'antd';
 import envStore from 'pages/config/environment/store';
 import HostSelector from 'pages/host/Selector';
+import hostStore from 'pages/host/store';
 import store from './store';
 
 export default observer(function Ext2Setup1() {
@@ -20,12 +21,28 @@ export default observer(function Ext2Setup1() {
   }
 
   useEffect(() => {
+    hostStore.initial()
+    if (!Array.isArray(store.deploy.group_ids)) {
+      store.deploy.group_ids = []
+    }
     if (store.currentRecord['deploys'] === undefined) {
       store.loadDeploys(store.app_id).then(updateEnvs)
     } else {
       updateEnvs()
     }
   }, [])
+
+  function handleChangeGroups(group_ids) {
+    info.group_ids = group_ids;
+    const host_ids = new Set(info.host_ids || []);
+    for (let id of group_ids) {
+      const counter = hostStore.counter[id];
+      if (counter) {
+        counter.forEach(h_id => host_ids.add(h_id))
+      }
+    }
+    info.host_ids = [...host_ids]
+  }
 
   const info = store.deploy;
   let modePlaceholder;
@@ -61,6 +78,18 @@ export default observer(function Ext2Setup1() {
       </Form.Item>
       <Form.Item required label="目标主机" tooltip="该发布配置作用于哪些目标主机。">
         <HostSelector value={info.host_ids} onChange={ids => info.host_ids = ids}/>
+      </Form.Item>
+      <Form.Item label="机器组选择" tooltip="可按机器组批量加入目标主机，之后仍可手动调整主机列表。">
+        <Select
+          mode="multiple"
+          allowClear
+          value={info.group_ids || []}
+          onChange={handleChangeGroups}
+          placeholder="请选择机器组">
+          {Object.entries(hostStore.groups).map(([id, name]) => (
+            <Select.Option key={id} value={Number(id)}>{name}</Select.Option>
+          ))}
+        </Select>
       </Form.Item>
       <Form.Item label="发布模式" tooltip="串行即发布时一台完成后再发布下一台，期间出现异常则终止发布。并行则每个主机相互独立发布同时进行。">
         <Radio.Group

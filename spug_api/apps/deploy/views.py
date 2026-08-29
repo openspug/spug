@@ -11,6 +11,7 @@ from apps.deploy.models import DeployRequest
 from apps.app.models import Deploy, DeployExtend2
 from apps.repository.models import Repository
 from apps.deploy.utils import dispatch, Helper
+from apps.host.utils import parse_group_host_ids
 from apps.host.models import Host
 from collections import defaultdict
 from threading import Thread
@@ -18,6 +19,13 @@ from datetime import datetime
 import subprocess
 import json
 import os
+
+def merge_host_ids(host_ids, group_ids, limited_host_ids=None):
+    ids = set(host_ids or [])
+    ids.update(parse_group_host_ids(group_ids))
+    if limited_host_ids is not None:
+        ids = ids.intersection(set(limited_host_ids))
+    return sorted(ids)
 
 
 class RequestView(View):
@@ -211,13 +219,17 @@ def post_request_ext1(request):
         Argument('deploy_id', type=int, help='参数错误'),
         Argument('name', help='请输入申请标题'),
         Argument('extra', type=list, help='请选择发布版本'),
-        Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
+        Argument('host_ids', type=list, required=False, default=[]),
+        Argument('group_ids', type=list, required=False, default=[]),
         Argument('type', default='1'),
         Argument('plan', required=False),
         Argument('desc', required=False),
     ).parse(request.body)
     if error is None:
         deploy = Deploy.objects.get(pk=form.deploy_id)
+        host_ids = merge_host_ids(form.host_ids, form.group_ids, json.loads(deploy.host_ids))
+        if not host_ids:
+            return json_response(error='请选择要部署的主机')
         form.spug_version = Repository.make_spug_version(deploy.id)
         if form.extra[0] == 'tag':
             if not form.extra[1]:
@@ -240,7 +252,8 @@ def post_request_ext1(request):
 
         form.extra = json.dumps(form.extra)
         form.status = '0' if deploy.is_audit else '1'
-        form.host_ids = json.dumps(sorted(form.host_ids))
+        form.pop('group_ids')
+        form.host_ids = json.dumps(host_ids)
         if form.id:
             req = DeployRequest.objects.get(pk=form.id)
             is_required_notify = deploy.is_audit and req.status == '-1'
@@ -258,18 +271,23 @@ def post_request_ext1_rollback(request):
     form, error = JsonParser(
         Argument('request_id', type=int, help='请选择要回滚的版本'),
         Argument('name', help='请输入申请标题'),
-        Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
+        Argument('host_ids', type=list, required=False, default=[]),
+        Argument('group_ids', type=list, required=False, default=[]),
         Argument('desc', required=False),
     ).parse(request.body)
     if error is None:
         req = DeployRequest.objects.get(pk=form.pop('request_id'))
+        host_ids = merge_host_ids(form.host_ids, form.group_ids, json.loads(req.deploy.host_ids))
+        if not host_ids:
+            return json_response(error='请选择要部署的主机')
         requests = DeployRequest.objects.filter(deploy=req.deploy, status__in=('3', '-3'))
         versions = list({x.spug_version: 1 for x in requests}.keys())
         if req.spug_version not in versions[:req.deploy.extend_obj.versions + 1]:
             return json_response(error='选择的版本超出了发布配置中设置的版本数量，无法快速回滚，可通过新建发布申请选择构建仓库里的该版本再次发布。')
 
         form.status = '0' if req.deploy.is_audit else '1'
-        form.host_ids = json.dumps(sorted(form.host_ids))
+        form.pop('group_ids')
+        form.host_ids = json.dumps(host_ids)
         new_req = DeployRequest.objects.create(
             deploy_id=req.deploy_id,
             repository_id=req.repository_id,
@@ -291,7 +309,8 @@ def post_request_ext2(request):
         Argument('id', type=int, required=False),
         Argument('deploy_id', type=int, help='缺少必要参数'),
         Argument('name', help='请输申请标题'),
-        Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
+        Argument('host_ids', type=list, required=False, default=[]),
+        Argument('group_ids', type=list, required=False, default=[]),
         Argument('extra', type=dict, required=False),
         Argument('version', default=''),
         Argument('type', default='1'),
@@ -302,6 +321,9 @@ def post_request_ext2(request):
         deploy = Deploy.objects.filter(pk=form.deploy_id).first()
         if not deploy:
             return json_response(error='未找到该发布配置')
+        host_ids = merge_host_ids(form.host_ids, form.group_ids, json.loads(deploy.host_ids))
+        if not host_ids:
+            return json_response(error='请选择要部署的主机')
         extra = form.pop('extra')
         if DeployExtend2.objects.filter(deploy=deploy, host_actions__contains='"src_mode": "1"').exists():
             if not extra:
@@ -312,7 +334,8 @@ def post_request_ext2(request):
             form.spug_version = Repository.make_spug_version(deploy.id)
         form.name = form.name.replace("'", '')
         form.status = '0' if deploy.is_audit else '1'
-        form.host_ids = json.dumps(form.host_ids)
+        form.pop('group_ids')
+        form.host_ids = json.dumps(host_ids)
         if form.id:
             req = DeployRequest.objects.get(pk=form.id)
             is_required_notify = deploy.is_audit and req.status == '-1'
