@@ -12,6 +12,7 @@ import {
   UserOutlined,
   LogoutOutlined,
   CodeOutlined,
+  DatabaseOutlined,
   GlobalOutlined,
   CheckOutlined
 } from '@ant-design/icons';
@@ -32,6 +33,10 @@ export default function (props) {
 
   function openTerminal() {
     window.open('/ssh')
+  }
+
+  function openDatabase() {
+    window.open('/db')
   }
 
   const userMenu = {
@@ -81,8 +86,11 @@ export default function (props) {
         </div>
       </div>
       <Notification/>
-      <AuthDiv className={styles.terminal} auth="host.console.view|host.console.list" onClick={openTerminal}>
+      <AuthDiv className={styles.terminal} auth="host.console.view|host.console.list" title={t('Web终端')} onClick={openTerminal}>
         <CodeOutlined style={{fontSize: 16}}/>
+      </AuthDiv>
+      <AuthDiv className={styles.terminal} auth="database.connection.view" title={t('数据库终端')} onClick={openDatabase}>
+        <DatabaseOutlined style={{fontSize: 16}}/>
       </AuthDiv>
       <div className={styles.terminal}>
         <Dropdown menu={languageMenu} placement="bottomRight">

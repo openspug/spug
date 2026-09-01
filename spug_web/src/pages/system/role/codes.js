@@ -211,6 +211,25 @@ export default [{
     ]
   }]
 }, {
+  key: 'database',
+  label: t('数据库终端'),
+  pages: [{
+    key: 'connection',
+    label: t('连接管理'),
+    perms: [
+      {key: 'view', label: t('查看数据库连接')},
+      {key: 'add', label: t('新建数据库连接')},
+      {key: 'edit', label: t('编辑数据库连接')},
+      {key: 'del', label: t('删除数据库连接')},
+    ]
+  }, {
+    key: 'query',
+    label: t('命令执行'),
+    perms: [
+      {key: 'do', label: t('执行数据库命令')},
+    ]
+  }]
+}, {
   key: 'alarm',
   label: t('报警中心'),
   pages: [{

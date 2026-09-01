@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'apps.repository',
     'apps.deploy',
     'apps.ai',
+    'apps.database',
     'channels',
 ]
 

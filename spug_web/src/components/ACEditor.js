@@ -10,16 +10,21 @@ import 'ace-builds/src-noconflict/mode-text';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-space';
 import 'ace-builds/src-noconflict/mode-python';
+import 'ace-builds/src-noconflict/mode-sql';
+import 'ace-builds/src-noconflict/ext-language_tools';
 import 'ace-builds/src-noconflict/theme-tomorrow';
+import 'ace-builds/src-noconflict/theme-one_dark';
 
 function ACEditor (props) {
+  const {editorRef, ...editorProps} = props;
   const style = {fontFamily: 'Source Code Pro, Courier New, Courier, Monaco, monospace, PingFang SC, Microsoft YaHei', ...props.style}
   return (
     <Editor
+      ref={editorRef}
       theme="tomorrow"
       fontSize={13}
       tabSize={2}
-      {...props}
+      {...editorProps}
       style={style}
     />
   )
