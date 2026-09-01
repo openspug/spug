@@ -1,0 +1,12 @@
+FROM openspug/spug-service:latest
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends docker.io \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --no-cache-dir \
+    'Django==3.2.25' \
+    'django-redis==5.4.0' \
+    'channels==3.0.5' \
+    'channels-redis==3.4.1' \
+    'daphne==3.0.2'

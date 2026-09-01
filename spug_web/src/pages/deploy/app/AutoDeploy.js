@@ -79,7 +79,7 @@ export default observer(function AutoDeploy() {
               </Select>
             </Form.Item>
             <Form.Item style={{display: 'inline-block', width: 82, textAlign: 'center', marginBottom: 0}}>
-              {fetching ? <LoadingOutlined style={{fontSize: 18, color: '#1890ff'}}/> :
+              {fetching ? <LoadingOutlined style={{fontSize: 18, color: '#6c7cff'}}/> :
                 <Button type="link" icon={<SyncOutlined/>} disabled={fetching || tagMode}
                         onClick={fetchVersions}>{t('刷新')}</Button>
               }

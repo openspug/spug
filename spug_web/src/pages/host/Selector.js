@@ -139,7 +139,7 @@ function HostSelector(props) {
         <Alert
           type="info"
           className={styles.area}
-          message={<div>{t('已选择')} <b style={{fontSize: 18, color: '#1890ff'}}>{props.value.length}</b> {t('台主机')}</div>}
+          message={<div>{t('已选择')} <b style={{fontSize: 18, color: '#6c7cff'}}>{props.value.length}</b> {t('台主机')}</div>}
           onClick={() => setVisible(true)}/>
       )
     }

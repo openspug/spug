@@ -15,6 +15,7 @@ import {
   DeploymentUnitOutlined,
   MonitorOutlined,
   AlertOutlined,
+  RobotOutlined,
   SettingOutlined
 } from '@ant-design/icons';
 
@@ -32,6 +33,9 @@ import ConfigEnvironment from './pages/config/environment';
 import ConfigService from './pages/config/service';
 import ConfigApp from './pages/config/app';
 import ConfigSetting from './pages/config/setting';
+import ConfigModel from './pages/config/model';
+import AgentIndex from './pages/ai/agent';
+import AISetting from './pages/ai/setting';
 import MonitorIndex from './pages/monitor';
 import AlarmIndex from './pages/alarm/alarm';
 import AlarmGroup from './pages/alarm/group';
@@ -80,11 +84,18 @@ export default [
     component: ScheduleIndex
   },
   {
-    icon: <DeploymentUnitOutlined/>, title: t('配置中心'), auth: 'config.env.view|config.src.view|config.app.view', child: [
+    icon: <DeploymentUnitOutlined/>, title: t('配置中心'), auth: 'config.env.view|config.src.view|config.app.view|config.model.view', child: [
       {title: t('环境管理'), auth: 'config.env.view', path: '/config/environment', component: ConfigEnvironment},
       {title: t('服务配置'), auth: 'config.src.view', path: '/config/service', component: ConfigService},
       {title: t('应用配置'), auth: 'config.app.view', path: '/config/app', component: ConfigApp},
+      {title: t('模型配置'), auth: 'config.model.view', path: '/config/model', component: ConfigModel},
       {path: '/config/setting/:type/:id', component: ConfigSetting},
+    ]
+  },
+  {
+    icon: <RobotOutlined/>, title: t('智能体'), auth: 'ai.agent.view|ai.mcp.view|ai.skill.view', child: [
+      {title: t('智能对话'), auth: 'ai.agent.view', path: '/ai/agent', component: AgentIndex},
+      {title: t('扩展管理'), auth: 'ai.mcp.view|ai.skill.view', path: '/ai/setting', component: AISetting},
     ]
   },
   {icon: <MonitorOutlined/>, title: t('监控中心'), auth: 'monitor.monitor.view', path: '/monitor', component: MonitorIndex},

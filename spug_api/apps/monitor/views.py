@@ -34,11 +34,21 @@ class DetectionView(View):
             Argument('quiet', type=int, default=24 * 60),
             Argument('notify_grp', type=list, help='请选择报警联系组'),
             Argument('notify_mode', type=list, help='请选择报警方式'),
+            Argument('ai_mode', default='', filter=lambda x: x in ('', 'diagnose', 'repair'),
+                     help='请选择正确的AI前置任务类型'),
+            Argument('ai_host_id', type=int, required=False),
+            Argument('ai_max_loops', type=int, default=3),
         ).parse(request.body)
         if error is None:
             if set(form.notify_mode).intersection(['1', '2', '4']):
                 if not AppSetting.get_default('spug_key'):
                     return json_response(error='报警方式 微信、短信、邮件需要配置调用凭据（系统设置/基本设置），请配置后再启用该报警方式。')
+            if form.ai_mode:
+                if not form.ai_host_id:
+                    return json_response(error='启用AI前置任务时必须选择用于排查的主机')
+                form.ai_max_loops = max(1, min(form.ai_max_loops or 3, 20))
+            else:
+                form.ai_host_id = None
 
             form.targets = json.dumps(form.targets)
             form.notify_grp = json.dumps(form.notify_grp)

@@ -24,6 +24,7 @@ import { NotFound, AuthButton } from 'components';
 import Terminal from './Terminal';
 import FileManager from './FileManager';
 import Setting from './Setting';
+import HostMetrics from 'pages/ai/agent/Metrics';
 import { http, hasPermission, includes, t } from 'libs';
 import gStore from 'gStore';
 import styles from './index.module.less';
@@ -273,7 +274,14 @@ function WebSSH(props) {
             key: item.vId,
             label: <TabRender host={item}/>,
             children: sshMode ? (
-              <Terminal id={item.id} vId={item.vId} activeId={activeId}/>
+              <React.Fragment>
+                {item.vId === activeId && (
+                  <div className={styles.metricsBar}>
+                    <HostMetrics hostId={item.id} hostName={item.title}/>
+                  </div>
+                )}
+                <Terminal id={item.id} vId={item.vId} activeId={activeId}/>
+              </React.Fragment>
             ) : (
               <div className={styles.fileManger}>
                 <FileManager id={item.id}/>

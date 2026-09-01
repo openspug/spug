@@ -57,7 +57,7 @@ export default observer(function (props) {
       onCancel={props.onCancel}>
       <Alert
         style={{marginBottom: 12}}
-        message={<span>{t('已选择')} <b style={{color: '#2563fc', fontSize: 18}}>{selectedRowKeys.length}</b> {t('台主机')}</span>}
+        message={<span>{t('已选择')} <b style={{color: '#6c7cff', fontSize: 18}}>{selectedRowKeys.length}</b> {t('台主机')}</span>}
         action={<Button type="link" disabled={selectedRowKeys.length === 0}
                         onClick={() => setSelectedRowKeys([])}>{t('取消选择')}</Button>}/>
       <Table

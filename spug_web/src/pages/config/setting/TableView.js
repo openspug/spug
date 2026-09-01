@@ -21,7 +21,7 @@ class TableView extends React.Component {
       const value = `_SPUG_${store.obj.key}_${info.key}`.toUpperCase()
       return info.desc ? (
         <Tooltip title={info.desc}>
-          <span style={{color: '#2563fc'}}>{value}</span>
+          <span style={{color: '#6c7cff'}}>{value}</span>
         </Tooltip>
       ) : value
     }

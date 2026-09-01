@@ -19,6 +19,11 @@ class Detection(models.Model, ModelMixin):
         (0, '正常'),
         (1, '异常'),
     )
+    AI_MODES = (
+        ('', '不启用'),
+        ('diagnose', 'AI诊断'),
+        ('repair', 'AI修复'),
+    )
     name = models.CharField(max_length=50)
     type = models.CharField(max_length=2, choices=TYPES)
     group = models.CharField(max_length=255, null=True)
@@ -34,6 +39,11 @@ class Detection(models.Model, ModelMixin):
     notify_grp = models.CharField(max_length=255)
     latest_run_time = models.CharField(max_length=20, null=True)
 
+    # AI 前置任务：告警触发后先由智能体诊断/修复，并以其结果替代原始告警
+    ai_mode = models.CharField(max_length=20, choices=AI_MODES, default='')
+    ai_host = models.ForeignKey('host.Host', models.SET_NULL, null=True, related_name='+')
+    ai_max_loops = models.IntegerField(default=3)
+
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
     updated_at = models.CharField(max_length=20, null=True)
@@ -45,6 +55,7 @@ class Detection(models.Model, ModelMixin):
         tmp['notify_mode'] = json.loads(self.notify_mode)
         tmp['notify_grp'] = json.loads(self.notify_grp)
         tmp['targets'] = json.loads(self.targets)
+        tmp['ai_host_name'] = self.ai_host.name if self.ai_host else None
         return tmp
 
     def __repr__(self):

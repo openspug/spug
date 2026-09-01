@@ -132,7 +132,7 @@ export default observer(function Console() {
           ) : status === 'success' ? (
             <CheckCircleOutlined style={{color: '#52c41a'}}/>
           ) : (
-            <LoadingOutlined style={{color: '#1890ff'}}/>
+            <LoadingOutlined style={{color: '#6c7cff'}}/>
           )}
           <div style={{flex: 1}}/>
           {loading ? (

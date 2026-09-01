@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'apps.pipeline',
     'apps.repository',
     'apps.deploy',
+    'apps.ai',
     'channels',
 ]
 

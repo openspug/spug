@@ -18,11 +18,11 @@ let timer;
 function Icon(props) {
   switch (props.type) {
     case 'monitor':
-      return <MonitorOutlined style={{fontSize: 24, color: '#1890ff'}}/>
+      return <MonitorOutlined style={{fontSize: 24, color: '#6c7cff'}}/>
     case 'schedule':
-      return <ScheduleOutlined style={{fontSize: 24, color: '#1890ff'}}/>
+      return <ScheduleOutlined style={{fontSize: 24, color: '#6c7cff'}}/>
     case 'flag':
-      return <FlagOutlined style={{fontSize: 24, color: '#1890ff'}}/>
+      return <FlagOutlined style={{fontSize: 24, color: '#6c7cff'}}/>
     case 'alert':
       return <AlertOutlined style={{fontSize: 24, color: '#ff4d4f'}}/>
     default:

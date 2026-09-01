@@ -3,7 +3,7 @@
 # Released under the AGPL-3.0 License.
 from django_redis import get_redis_connection
 from apps.host.models import Host
-from apps.monitor.utils import handle_notify, handle_trigger_event
+from apps.monitor.utils import handle_notify, handle_trigger_event, handle_ai_pre_task
 from socket import socket
 import subprocess
 import ipaddress
@@ -131,8 +131,16 @@ def monitor_worker_handler(job):
     if v_count >= threshold:
         if not v_time or int(time.time()) - int(v_time) >= quiet * 60:
             rds.hset(key, f_time, int(time.time()))
-            logging.warning('send fault alarm notification')
             handle_trigger_event(task_id, addr if tp in ('3', '4') else None)
+            # AI 前置任务：接管成功则以其结论替代原始告警
+            try:
+                verifier = lambda: dispatch(tp, addr, extra)
+                if handle_ai_pre_task(task_id, target, message, verifier):
+                    logging.warning('ai pre task handled the alarm')
+                    return
+            except Exception as e:
+                logging.warning(f'ai pre task error: {e}')
+            logging.warning('send fault alarm notification')
             handle_notify(task_id, target, is_ok, message, v_count)
 
 
