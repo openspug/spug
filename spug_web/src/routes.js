@@ -9,6 +9,7 @@ import {
   DashboardOutlined,
   CloudServerOutlined,
   CodeOutlined,
+  DockerOutlined,
   FlagOutlined,
   ScheduleOutlined,
   DeploymentUnitOutlined,
@@ -20,6 +21,7 @@ import {
 
 import DashboardIndex from './pages/dashboard';
 import HostIndex from './pages/host';
+import DockerIndex from './pages/docker';
 import ExecTask from './pages/exec/task';
 import ExecTemplate from './pages/exec/template';
 import ExecTransfer from './pages/exec/transfer';
@@ -57,6 +59,7 @@ const routes = [
     component: DashboardIndex
   },
   {icon: <CloudServerOutlined/>, title: t('主机管理'), auth: 'host.host.view', path: '/host', component: HostIndex},
+  {icon: <DockerOutlined/>, title: t('Docker 管理'), auth: 'docker.project.view', path: '/docker', component: DockerIndex},
   {
     icon: <CodeOutlined/>, title: t('批量执行'), auth: 'exec.task.do|exec.template.view', child: [
       {title: t('执行任务'), auth: 'exec.task.do', path: '/exec/task', component: ExecTask},

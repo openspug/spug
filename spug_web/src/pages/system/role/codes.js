@@ -38,6 +38,20 @@ export default [{
     ]
   }]
 }, {
+  key: 'docker',
+  label: t('Docker 管理'),
+  pages: [{
+    key: 'project',
+    label: t('项目'),
+    perms: [
+      {key: 'view', label: t('查看 Docker 项目')},
+      {key: 'add', label: t('新建项目并启动')},
+      {key: 'edit', label: t('编辑 Compose 配置')},
+      {key: 'del', label: t('删除项目')},
+      {key: 'do', label: t('发布和操作容器')},
+    ]
+  }]
+}, {
   key: 'exec',
   label: t('批量执行'),
   pages: [{

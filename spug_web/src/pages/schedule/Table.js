@@ -17,7 +17,7 @@ class ComTable extends React.Component {
     store.fetchRecords()
   }
 
-  colors = ['orange', 'green', 'red'];
+  colors = ['orange', 'green', 'red', 'gold'];
 
   moreMenus = (info) => ({
     items: [

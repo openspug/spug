@@ -5,7 +5,7 @@
  */
 import React, { useState } from 'react';
 import { observer } from 'mobx-react';
-import { Form, Input, Select, Modal, Button, Radio } from 'antd';
+import { Form, Input, Select, Modal, Button, Radio, Switch } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { LinkButton, ACEditor, Container } from 'components';
 import TemplateSelector from '../exec/task/TemplateSelector';
@@ -68,6 +68,9 @@ export default observer(function (props) {
     case '4':
       modePlaceholder = 'https://open.feishu.cn/open-apis/bot/v2/hook/xxx'
       break
+    case '5':
+      modePlaceholder = t('收件人邮箱，多个用逗号分隔')
+      break
     default:
       modePlaceholder = t('请输入')
   }
@@ -105,11 +108,24 @@ export default observer(function (props) {
             )}
           </Form.Item>
         </Form.Item>
-        <Form.Item label={t('失败通知')} extra={(
+        <Form.Item label={t('AI 分析')} extra={t('脚本执行完成后由 AI 汇总全部主机结果；启用通知时发送 AI 分析结论。')}>
+          <Switch
+            checked={Boolean(store.record.ai_analysis)}
+            checkedChildren={t('启用')}
+            unCheckedChildren={t('关闭')}
+            onChange={value => store.record.ai_analysis = value}/>
+        </Form.Item>
+        <Form.Item label={store.record.ai_analysis ? t('结果通知') : t('失败通知')} extra={(
           <span>
-            {t('任务执行失败告警通知，')}
-            <a target="_blank" rel="noopener noreferrer"
-               href="https://spug.cc/docs/use-problem#use-dd">{t('钉钉收不到通知？')}</a>
+            {store.record.ai_analysis
+              ? t('任务完成后发送 AI 分析结果。')
+              : t('任务执行失败告警通知，')}
+            {store.record.rst_notify.mode === '5'
+              ? t('邮件发送依赖系统设置中的报警服务设置。')
+              : !store.record.ai_analysis && (
+                <a target="_blank" rel="noopener noreferrer"
+                   href="https://spug.cc/docs/use-problem#use-dd">{t('钉钉收不到通知？')}</a>
+              )}
           </span>)}>
           <Input
             value={store.record.rst_notify.value}
@@ -122,6 +138,7 @@ export default observer(function (props) {
                 <Select.Option value="4">{t('飞书')}</Select.Option>
                 <Select.Option value="3">{t('企业微信')}</Select.Option>
                 <Select.Option value="2">Webhook</Select.Option>
+                <Select.Option value="5">{t('邮件')}</Select.Option>
               </Select>
             )}
             disabled={store.record.rst_notify.mode === '0'}

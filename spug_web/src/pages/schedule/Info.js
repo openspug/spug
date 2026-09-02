@@ -4,7 +4,7 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
-import { Modal, Tabs, Spin } from 'antd';
+import { Alert, Modal, Tabs, Spin } from 'antd';
 import { StatisticsCard } from 'components';
 import http from 'libs/http';
 import { t } from 'libs';
@@ -27,7 +27,7 @@ class ComForm extends React.Component {
   }
 
   render() {
-    const {run_time, success, failure, duration, outputs} = this.state.info;
+    const {run_time, success, failure, interrupted, duration, outputs, ai_status, ai_summary, ai_model} = this.state.info;
     const preStyle = {
       marginTop: 5,
       backgroundColor: '#eee',
@@ -47,8 +47,19 @@ class ComForm extends React.Component {
           <StatisticsCard loading={this.state.loading}>
             <StatisticsCard.Item title={t('执行成功')} value={<span style={{color: '#3f8600'}}>{success}</span>}/>
             <StatisticsCard.Item title={t('执行失败')} value={<span style={{color: '#cf1322'}}>{failure}</span>}/>
+            {interrupted > 0 && (
+              <StatisticsCard.Item title={t('已中断')} value={<span style={{color: '#d48806'}}>{interrupted}</span>}/>
+            )}
             <StatisticsCard.Item bordered={false} title={t('平均耗时(秒)')} value={<span style={{color: ''}}>{duration}</span>}/>
           </StatisticsCard>
+          {ai_summary && (
+            <Alert
+              showIcon
+              type={ai_status === 'success' ? 'info' : 'warning'}
+              message={ai_status === 'success' ? t('AI 分析结果') : t('AI 分析异常')}
+              description={<div style={{whiteSpace: 'pre-wrap'}}>{ai_summary}{ai_model ? `\n\n${t('模型')}: ${ai_model}` : ''}</div>}
+              style={{margin: '12px 0 16px'}}/>
+          )}
           {outputs && (
             <Tabs
               tabPosition="left"
