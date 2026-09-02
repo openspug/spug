@@ -84,6 +84,10 @@ class AgentSession(models.Model, ModelMixin):
     summary = models.TextField(null=True)
     # 高危命令等待用户确认时的断点现场（消息上下文、剩余命令等），JSON 文本
     pending = models.TextField(null=True)
+    # PydanticAI 消息历史（all_messages 的 JSON 序列化），会话恢复与审批续跑的唯一依据
+    messages = models.TextField(null=True)
+    # 产生该消息历史的 SDK 版本；挂起的审批可能跨版本恢复，反序列化前需校验
+    sdk_version = models.CharField(max_length=20, null=True)
     # 上下文压缩：历史对话超过阈值后压缩为摘要，从摘要处继续会话
     context_summary = models.TextField(null=True)
     # 摘要已覆盖的最后一条记录 id，此前的原始历史不再进入上下文

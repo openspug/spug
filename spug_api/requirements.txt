@@ -12,7 +12,10 @@ python-ldap==3.4.3
 GitPython==3.1.40
 openpyxl==3.1.2
 user_agents==2.2.0
+pydantic-ai-slim[openai] == 2.37.0
 PyMySQL >= 1.1.0, < 2.0.0
 psycopg[binary] >= 3.1.0, < 4.0.0
 clickhouse-connect >= 0.7.0, < 1.0.0
+# 智能体循环与原生 function calling；版本锁定，挂起的审批可能跨版本恢复
+pydantic-ai-slim[openai] == 2.37.0
 redis >= 5.0.0, < 7.0.0
