@@ -1,21 +1,32 @@
 services:
   spug:
     image: spug-service-4.0:latest
+
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+      labels:
+        io.spug.app: spug-ai
+
     container_name: spug
     restart: always
     privileged: true
+
     ports:
       - "127.0.0.1:8089:80"
+
     volumes:
       - /opt/spug/releases/latest:/data/spug
       - /opt/spug/repos:/data/repos
       - /var/run/docker.sock:/var/run/docker.sock
+
     environment:
-      - SPUG_DB_ENGINE=${SPUG_DB_ENGINE}
-      - SPUG_DB_NAME=${SPUG_DB_NAME}
-      - SPUG_DB_USER=${SPUG_DB_USER}
-      - SPUG_DB_PASSWORD=${SPUG_DB_PASSWORD}
-      - SPUG_DB_HOST=${SPUG_DB_HOST}
-      - SPUG_DB_PORT=${SPUG_DB_PORT}
+      SPUG_DB_ENGINE: "${SPUG_DB_ENGINE}"
+      SPUG_DB_NAME: "${SPUG_DB_NAME}"
+      SPUG_DB_USER: "${SPUG_DB_USER}"
+      SPUG_DB_PASSWORD: "${SPUG_DB_PASSWORD}"
+      SPUG_DB_HOST: "${SPUG_DB_HOST}"
+      SPUG_DB_PORT: "${SPUG_DB_PORT}"
+
     extra_hosts:
       - "host.docker.internal:host-gateway"
