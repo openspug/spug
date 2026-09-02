@@ -19,6 +19,8 @@ services:
       - /opt/spug/releases/latest:/data/spug
       - /opt/spug/repos:/data/repos
       - /var/run/docker.sock:/var/run/docker.sock
+      # 覆盖镜像内置配置，为智能体 SSE 关闭缓冲，否则流式回复会被攒到最后一次性下发
+      - ./docs/docker/nginx.conf:/etc/nginx/nginx.conf:ro
 
     environment:
       SPUG_SECRET_KEY: "${SPUG_SECRET_KEY:?SPUG_SECRET_KEY is required}"

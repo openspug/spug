@@ -186,7 +186,9 @@ def login(request):
         Argument('username', help='请输入用户名'),
         Argument('password', help='请输入密码'),
         Argument('captcha', required=False),
-        Argument('type', required=False)
+        # type 为空会写入 login_histories.type(NOT NULL) 导致登录接口异常，
+        # 与 User.type 保持同一默认值。
+        Argument('type', default='default', required=False)
     ).parse(request.body)
     if error is None:
         handle_response = partial(handle_login_record, request, form.username, form.type)
