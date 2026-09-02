@@ -25,12 +25,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'vk0do47)egwzz!uk49%(y3s(fpx4+ha@ugt-hcv&%&d@hwr&p7'
+# 生产环境必须通过 SPUG_SECRET_KEY 注入；仅显式开启调试时使用本地开发密钥。
+_DEBUG_ENABLED = os.environ.get('SPUG_DEBUG', '').strip().lower() in ('1', 'true', 'yes', 'on')
+SECRET_KEY = os.environ.get('SPUG_SECRET_KEY', '').strip()
+if not SECRET_KEY and not _DEBUG_ENABLED:
+    raise RuntimeError('SPUG_SECRET_KEY is required when SPUG_DEBUG is disabled')
+SECRET_KEY = SECRET_KEY or 'vk0do47)egwzz!uk49%(y3s(fpx4+ha@ugt-hcv&%&d@hwr&p7'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = _DEBUG_ENABLED
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = [x.strip() for x in os.environ.get(
+    'SPUG_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',') if x.strip()]
 
 # Application definition
 
@@ -73,12 +79,45 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# 生产/容器环境通过 SPUG_DB_* 注入连接信息；未配置时回落到本地 sqlite。
+# 例如 PostgreSQL: SPUG_DB_ENGINE=django.db.backends.postgresql
+#      MySQL:      SPUG_DB_ENGINE=django.db.backends.mysql
+_DB_ENGINE = os.environ.get('SPUG_DB_ENGINE', '').strip()
+if not _DB_ENGINE and not DEBUG:
+    raise RuntimeError('SPUG_DB_ENGINE is required when SPUG_DEBUG is disabled')
+
+if _DB_ENGINE:
+    _DB_REQUIRED = ('SPUG_DB_NAME', 'SPUG_DB_USER', 'SPUG_DB_PASSWORD',
+                    'SPUG_DB_HOST', 'SPUG_DB_PORT')
+    _DB_MISSING = [name for name in _DB_REQUIRED if not os.environ.get(name, '').strip()]
+    if _DB_MISSING:
+        raise RuntimeError(f'Missing database settings: {", ".join(_DB_MISSING)}')
+
+    # charset/sql_mode 仅 MySQL 后端可用，传给 PostgreSQL 会导致连接失败。
+    _DB_OPTIONS = {
+        'charset': 'utf8mb4',
+        'sql_mode': 'STRICT_TRANS_TABLES',
+    } if _DB_ENGINE.endswith('mysql') else {}
+
+    DATABASES = {
+        'default': {
+            'ATOMIC_REQUESTS': True,
+            'ENGINE': _DB_ENGINE,
+            'NAME': os.environ.get('SPUG_DB_NAME', 'spug'),
+            'USER': os.environ.get('SPUG_DB_USER', ''),
+            'PASSWORD': os.environ.get('SPUG_DB_PASSWORD', ''),
+            'HOST': os.environ.get('SPUG_DB_HOST', ''),
+            'PORT': os.environ.get('SPUG_DB_PORT', ''),
+            'OPTIONS': _DB_OPTIONS,
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 CACHES = {
     "default": {
@@ -140,9 +179,3 @@ AUTHENTICATION_EXCLUDES = (
 )
 
 SPUG_VERSION = 'v4.0.0'
-
-# override default config
-try:
-    from spug.overrides import *
-except ImportError:
-    pass

@@ -21,12 +21,14 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
     environment:
-      SPUG_DB_ENGINE: "${SPUG_DB_ENGINE}"
-      SPUG_DB_NAME: "${SPUG_DB_NAME}"
-      SPUG_DB_USER: "${SPUG_DB_USER}"
-      SPUG_DB_PASSWORD: "${SPUG_DB_PASSWORD}"
-      SPUG_DB_HOST: "${SPUG_DB_HOST}"
-      SPUG_DB_PORT: "${SPUG_DB_PORT}"
+      SPUG_SECRET_KEY: "${SPUG_SECRET_KEY:?SPUG_SECRET_KEY is required}"
+      SPUG_ALLOWED_HOSTS: "${SPUG_ALLOWED_HOSTS:-127.0.0.1,localhost}"
+      SPUG_DB_ENGINE: "${SPUG_DB_ENGINE:?SPUG_DB_ENGINE is required}"
+      SPUG_DB_NAME: "${SPUG_DB_NAME:?SPUG_DB_NAME is required}"
+      SPUG_DB_USER: "${SPUG_DB_USER:?SPUG_DB_USER is required}"
+      SPUG_DB_PASSWORD: "${SPUG_DB_PASSWORD:?SPUG_DB_PASSWORD is required}"
+      SPUG_DB_HOST: "${SPUG_DB_HOST:?SPUG_DB_HOST is required}"
+      SPUG_DB_PORT: "${SPUG_DB_PORT:?SPUG_DB_PORT is required}"
 
     extra_hosts:
       - "host.docker.internal:host-gateway"

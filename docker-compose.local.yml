@@ -36,11 +36,13 @@ services:
     ports:
       - "127.0.0.1:8000:80"
     environment:
-      MYSQL_DATABASE: spug
-      MYSQL_USER: spug
-      MYSQL_PASSWORD: spug.cc
-      MYSQL_HOST: db
-      MYSQL_PORT: 3306
+      SPUG_DEBUG: "true"
+      SPUG_DB_ENGINE: django.db.backends.mysql
+      SPUG_DB_NAME: spug
+      SPUG_DB_USER: spug
+      SPUG_DB_PASSWORD: spug.cc
+      SPUG_DB_HOST: db
+      SPUG_DB_PORT: 3306
     depends_on:
       db:
         condition: service_healthy
