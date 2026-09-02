@@ -6,6 +6,14 @@ from libs import ModelMixin, human_datetime
 from apps.account.models import User
 import json
 
+# AI 前置任务的轮次上限与默认值：{模式: (上限, 默认值)}
+# 诊断只读排查，定位到原因即应收尾，轮次过多只会让模型发散；
+# 修复需要多轮「执行 → 自动复检」试错，给更大的余量。
+AI_LOOP_LIMITS = {
+    'diagnose': (10, 5),
+    'repair': (20, 8),
+}
+
 
 class Detection(models.Model, ModelMixin):
     TYPES = (

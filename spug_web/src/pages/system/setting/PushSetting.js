@@ -43,8 +43,11 @@ export default observer(function () {
   }
 
   function handleUnbind() {
-    // 3.0 里这里挡了一道「先关闭MFA」，因为 3.0 的 MFA 验证码走推送助手；
-    // 4.0 的 MFA 走 libs/spug.py 的 spug_key（api.spug.cc），与推送助手无关，故不再拦截。
+    // MFA 验证码的唯一下发通道就是推送助手，开着 MFA 解绑会导致所有账户无法登录。
+    // 后端同样有拦截，这里只是提前给出更直接的提示。
+    if (store.settings.MFA && store.settings.MFA.enable) {
+      return message.error(t('已开启登录MFA认证，请先在安全设置中关闭MFA后再解除绑定。'))
+    }
     setLoading(true);
     http.post('/api/setting/push/bind/', {spug_push_key: ''})
       .then(() => {

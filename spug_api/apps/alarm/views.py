@@ -6,6 +6,7 @@ from libs import json_response, JsonParser, Argument, auth
 from libs.spug import Notification
 from apps.alarm.models import Alarm, Group, Contact
 from apps.monitor.models import Detection
+from apps.setting.utils import AppSetting
 import json
 
 
@@ -66,7 +67,6 @@ class ContactView(View):
             Argument('phone', required=False),
             Argument('email', required=False),
             Argument('ding', required=False),
-            Argument('wx_token', required=False),
             Argument('qy_wx', required=False),
             Argument('feishu', required=False),
             Argument('secret', required=False),
@@ -102,16 +102,12 @@ def handle_test(request):
     ).parse(request.body)
     if error is None:
         notify = Notification(None, '1', 'https://spug.cc', 'Spug官网（测试）', '这是一条测试告警信息', None)
-        if form.mode in ('1', '2', '4') and not notify.spug_key:
-            return json_response(error='未配置调用凭据（系统设置/基本设置），请配置后再尝试。')
-
-        if form.mode == '1':
-            notify.monitor_by_wx([form.value])
-        elif form.mode == '2':
-            return json_response(error='目前暂不支持短信告警，请关注后续更新。')
-        elif form.mode == '3':
+        if form.mode == '3':
             notify.monitor_by_dd([(form.value, form.secret)])
         elif form.mode == '4':
+            # 邮件只支持自建 SMTP，未配置时直接报错，避免测试「成功」但实际没发出去
+            if not AppSetting.get_default('mail_service', {}).get('server'):
+                return json_response(error='未配置邮件服务，请在系统设置/报警服务设置中配置后再测试。')
             notify.monitor_by_email([form.value])
         elif form.mode == '5':
             notify.monitor_by_qy_wx([form.value])

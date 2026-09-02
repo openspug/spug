@@ -3,7 +3,7 @@
 # Released under the AGPL-3.0 License.
 from django_redis import get_redis_connection
 from apps.host.models import Host
-from apps.monitor.utils import handle_notify, handle_trigger_event, handle_ai_pre_task
+from apps.monitor.utils import handle_notify, handle_trigger_event, handle_ai_post_task
 from socket import socket
 import subprocess
 import ipaddress
@@ -113,10 +113,13 @@ def monitor_worker_handler(job):
         command = f'ps -ef|grep -v grep|grep {extra!r}' if tp == '3' else extra
         host = Host.objects.filter(pk=addr).first()
         if not host:
+            # 主机被删除时 host 为 None，早期实现在此处直接取 host.name 会抛
+            # AttributeError，导致整个探测任务中断、告警一条都发不出去
             is_ok, message = False, f'unknown host id for {addr!r}'
+            target = f'主机(id={addr})不存在或已被删除'
         else:
             is_ok, message = host_executor(host, command)
-        target = f'{host.name}({host.hostname})'
+            target = f'{host.name}({host.hostname})'
 
     rds, key, f_count, f_time = get_redis_connection(), f'spug:det:{task_id}', f'c_{addr}', f't_{addr}'
     v_count, v_time = rds.hmget(key, f_count, f_time)
@@ -132,16 +135,22 @@ def monitor_worker_handler(job):
         if not v_time or int(time.time()) - int(v_time) >= quiet * 60:
             rds.hset(key, f_time, int(time.time()))
             handle_trigger_event(task_id, addr if tp in ('3', '4') else None)
-            # AI 前置任务：接管成功则以其结论替代原始告警
-            try:
-                verifier = lambda: dispatch(tp, addr, extra)
-                if handle_ai_pre_task(task_id, target, message, verifier):
-                    logging.warning('ai pre task handled the alarm')
-                    return
-            except Exception as e:
-                logging.warning(f'ai pre task error: {e}')
+            # 第一条通知：先把故障本身发出去。AI 处理可能耗时数分钟，
+            # 若等它结束再通知，这段时间内没有任何人知道服务已经挂了。
             logging.warning('send fault alarm notification')
             handle_notify(task_id, target, is_ok, message, v_count)
+            # 第二条通知：AI 处理结束后追加结论（诊断原因 / 修复结果）
+            try:
+                verifier = lambda: dispatch(tp, addr, extra)
+                ai_result = handle_ai_post_task(task_id, target, message, v_count, verifier)
+                if ai_result:
+                    logging.warning(f'ai post task notified: {ai_result}')
+                    if ai_result == 'recovered':
+                        # AI 已确认恢复并发过恢复通知，清掉故障计数，
+                        # 否则下一轮探测正常时会重复发送一次恢复通知
+                        rds.hdel(key, f_count, f_time)
+            except Exception as e:
+                logging.warning(f'ai post task error: {e}')
 
 
 def dispatch(tp, addr, extra):

@@ -12,9 +12,14 @@ import groupStore from '../alarm/group/store';
 import store from './store';
 import lds from 'lodash';
 
+// AI 前置任务的轮次上限与默认值，需与后端 apps/monitor/models.py 的 AI_LOOP_LIMITS 保持一致
+const AI_LOOP_LIMITS = {
+  '': {ceiling: 20, fallback: 3},
+  diagnose: {ceiling: 10, fallback: 5},
+  repair: {ceiling: 20, fallback: 8},
+};
+
 const modeOptions = [
-  {label: t('微信'), 'value': '1'},
-  {label: t('短信'), 'value': '2', disabled: true},
   {label: t('钉钉'), 'value': '3'},
   {label: t('邮件'), 'value': '4'},
   {label: t('企业微信'), 'value': '5'},
@@ -51,6 +56,20 @@ export default observer(function () {
       }, () => setLoading(false))
   }
 
+  // 诊断与修复共用 ai_max_loops 字段但上限不同，切换模式时要把超出新上限的值夹回来，
+  // 否则从「修复20轮」切到诊断会提交一个越界值（后端虽有兜底，但界面显示会误导）
+  function handleAiModeChange(mode) {
+    setAiMode(mode);
+    if (!mode) return;
+    const {ceiling, fallback} = AI_LOOP_LIMITS[mode];
+    const current = form.getFieldValue('ai_max_loops');
+    if (!current) {
+      form.setFieldsValue({ai_max_loops: fallback})
+    } else if (current > ceiling) {
+      form.setFieldsValue({ai_max_loops: ceiling})
+    }
+  }
+
   function canNext() {
     const {notify_grp, notify_mode, ai_mode, ai_host_id} = form.getFieldsValue();
     if (ai_mode && !ai_host_id) return false;
@@ -78,9 +97,9 @@ export default observer(function () {
           <Radio value={5}>{t('{}次', 5)}</Radio>
         </Radio.Group>
       </Form.Item>
-      <Form.Item name="ai_mode" initialValue={info.ai_mode || ''} label={t('前置任务')}
-                 tooltip={t('达到报警阈值后，先由智能体处理，并以处理结果替代原始告警通知')}>
-        <Radio.Group onChange={e => setAiMode(e.target.value)}>
+      <Form.Item name="ai_mode" initialValue={info.ai_mode || ''} label={t('智能处理')}
+                 tooltip={t('达到报警阈值后立即发出告警通知，随后由智能体处理，处理完成再追加一条结论通知（共两条）')}>
+        <Radio.Group onChange={e => handleAiModeChange(e.target.value)}>
           <Radio value="">{t('不启用')}</Radio>
           <Radio value="diagnose">{t('AI诊断')}</Radio>
           <Radio value="repair">{t('AI修复')}</Radio>
@@ -96,18 +115,21 @@ export default observer(function () {
               ))}
             </Select>
           </Form.Item>
-          {aiMode === 'repair' && (
-            <Form.Item name="ai_max_loops" initialValue={info.ai_max_loops || 3} label={t('最大修复轮次')}
-                       extra={t('每轮为：AI给出命令 → 执行 → 自动复检；超过该次数仍未恢复则终止并通知。')}>
-              <InputNumber min={1} max={20} style={{width: 160}} addonAfter={t('轮')}/>
-            </Form.Item>
-          )}
+          <Form.Item
+            name="ai_max_loops"
+            initialValue={info.ai_max_loops || AI_LOOP_LIMITS[aiMode].fallback}
+            label={aiMode === 'diagnose' ? t('最大排查轮次') : t('最大修复轮次')}
+            extra={aiMode === 'diagnose'
+              ? t('每轮为：AI给出命令 → 执行 → 分析；定位到原因会提前结束，达到该次数仍未定位则终止并通知。')
+              : t('每轮为：AI给出命令 → 执行 → 自动复检；超过该次数仍未恢复则终止并通知。')}>
+            <InputNumber min={1} max={AI_LOOP_LIMITS[aiMode].ceiling} style={{width: 160}} addonAfter={t('轮')}/>
+          </Form.Item>
           <Form.Item wrapperCol={{span: 14, offset: 6}}>
             <Alert
               type={aiMode === 'repair' ? 'warning' : 'info'}
               message={aiMode === 'repair'
-                ? t('AI修复会在排查主机上执行变更命令（已内置高危命令拦截），处理过程可在智能体模块查看。')
-                : t('AI诊断只执行只读命令，不会修改服务器任何内容，分析结果将随告警一并推送。')}/>
+                ? t('故障时先发告警通知，随后AI在排查主机上执行修复命令（已内置高危命令拦截），修复结束再发一条结果通知，处理过程可在智能体模块查看。')
+                : t('故障时先发告警通知，随后AI只执行只读命令排查，不会修改服务器任何内容，排查结束再发一条结论通知。')}/>
           </Form.Item>
         </React.Fragment>
       )}

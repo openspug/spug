@@ -4,10 +4,9 @@
  * Released under the AGPL-3.0 License.
  */
 import React from 'react';
-import { t } from 'libs';
+import { t, hasPermission } from 'libs';
 import {
   DashboardOutlined,
-  DesktopOutlined,
   CloudServerOutlined,
   CodeOutlined,
   FlagOutlined,
@@ -19,7 +18,6 @@ import {
   SettingOutlined
 } from '@ant-design/icons';
 
-import HomeIndex from './pages/home';
 import DashboardIndex from './pages/dashboard';
 import HostIndex from './pages/host';
 import ExecTask from './pages/exec/task';
@@ -50,8 +48,7 @@ import WelcomeInfo from './pages/welcome/info';
 import PipelineIndex from './pages/pipeline';
 import PipelineEditor from './pages/pipeline/Editor';
 
-export default [
-  {icon: <DesktopOutlined/>, title: t('工作台'), path: '/home', component: HomeIndex},
+const routes = [
   {
     icon: <DashboardOutlined/>,
     title: 'Dashboard',
@@ -118,3 +115,24 @@ export default [
   {path: '/welcome/index', component: WelcomeIndex},
   {path: '/welcome/info', component: WelcomeInfo},
 ]
+
+// 系统默认首页（工作台已移除，默认进入 Dashboard）
+export const DEFAULT_PATH = '/dashboard';
+
+// 无 Dashboard 权限时，回退到第一个有权限的菜单页
+export function getDefaultPath() {
+  if (hasPermission('dashboard.dashboard.view')) return DEFAULT_PATH;
+  for (let item of routes) {
+    if (!item.title) continue;
+    if (item.child) {
+      for (let sub of item.child) {
+        if (sub.title && sub.path && (!sub.auth || hasPermission(sub.auth))) return sub.path;
+      }
+    } else if (item.path && (!item.auth || hasPermission(item.auth))) {
+      return item.path;
+    }
+  }
+  return DEFAULT_PATH;
+}
+
+export default routes;

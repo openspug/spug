@@ -9,21 +9,10 @@ from libs.utils import human_datetime
 from libs.webhook import gen_dd_sign, gen_fs_sign
 from urllib.parse import urlencode
 import requests
+import logging
 import json
 
-spug_server = 'https://api.spug.cc'
 notify_source = 'monitor'
-
-
-def send_login_wx_code(wx_token, code):
-    url = f'{spug_server}/apis/login/wx/'
-    spug_key = AppSetting.get_default('spug_key')
-    res = requests.post(url, json={'token': spug_key, 'user': wx_token, 'code': code}, timeout=30)
-    if res.status_code != 200:
-        raise Exception(f'status code: {res.status_code}')
-    res = res.json()
-    if res.get('error'):
-        raise Exception(res['error'])
 
 
 class Notification:
@@ -34,7 +23,6 @@ class Notification:
         self.target = target
         self.message = message
         self.duration = duration
-        self.spug_key = AppSetting.get_default('spug_key')
         self.u_ids = []
 
     @staticmethod
@@ -50,10 +38,6 @@ class Notification:
             res = res.json()
             if res.get('errcode') == 0:
                 return
-        elif mode == 'spug':
-            res = res.json()
-            if not res.get('error'):
-                return
         elif mode == 'fs':
             res = res.json()
             if res.get('StatusCode') == 0:
@@ -61,20 +45,6 @@ class Notification:
         else:
             raise NotImplementedError
         Notify.make_system_notify('通知发送失败', f'返回数据：{res}')
-
-    def monitor_by_wx(self, users):
-        if not self.spug_key:
-            Notify.make_monitor_notify('发送报警信息失败', '未配置报警服务调用凭据，请在系统管理/系统设置/基本设置/调用凭据中配置。')
-            return
-        data = {
-            'token': self.spug_key,
-            'event': self.event,
-            'subject': f'{self.title} >> {self.target}',
-            'desc': self.message,
-            'remark': f'故障持续{self.duration}' if self.event == '2' else None,
-            'users': list(users)
-        }
-        self.handle_request(f'{spug_server}/apis/notify/wx/', data, 'spug')
 
     def monitor_by_email(self, users):
         mail_service = AppSetting.get_default('mail_service', {})
@@ -86,22 +56,21 @@ class Notification:
         ]
         if self.event == '2':
             body.append('故障持续：' + self.duration)
-        if mail_service.get('server'):
-            event_map = {'1': '监控告警通知', '2': '告警恢复通知'}
-            subject = f'{event_map[self.event]}-{self.title}'
+        # 邮件仅支持自建 SMTP，未配置时明确告知去哪配，避免静默失败
+        if not mail_service.get('server'):
+            Notify.make_monitor_notify('发送报警信息失败', '未配置邮件服务，请在系统管理/系统设置/报警服务设置中配置。')
+            return
+        event_map = {'1': '监控告警通知', '2': '告警恢复通知'}
+        subject = f'{event_map[self.event]}-{self.title}'
+        try:
             mail = Mail(**mail_service)
             mail.send_text_mail(users, subject, '\r\n'.join(body) + '\r\n\r\n自动发送，请勿回复。')
-        elif self.spug_key:
-            data = {
-                'token': self.spug_key,
-                'event': self.event,
-                'subject': self.title,
-                'body': '\r\n'.join(body),
-                'users': list(users)
-            }
-            self.handle_request(f'{spug_server}/apis/notify/mail/', data, 'spug')
-        else:
-            Notify.make_monitor_notify('发送报警信息失败', '未配置报警服务调用凭据，请在系统管理/系统设置/报警服务设置中配置。')
+        except Exception as e:
+            # 不能让异常往上冒：告警发送失败会中断整个探测流程（后续的 AI 处理也被跳过），
+            # 且失败原因完全不可见。这里转成站内通知，保留可排查的现场。
+            logging.warning(f'send alarm mail failed: {e}')
+            Notify.make_monitor_notify(
+                '发送报警邮件失败', f'收件人：{"、".join(sorted(users))}\n失败原因：{e}')
 
     def monitor_by_dd(self, users):
         texts = [
@@ -192,20 +161,17 @@ class Notification:
     def dispatch_monitor(self, modes):
         self.u_ids = sum([json.loads(x.contacts) for x in Group.objects.filter(id__in=self.grp)], [])
         for mode in modes:
-            if mode == '1':
-                users = set(x.wx_token for x in Contact.objects.filter(id__in=self.u_ids, wx_token__isnull=False))
-                if not users:
-                    Notify.make_monitor_notify('发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的微信Token。')
-                    continue
-                self.monitor_by_wx(users)
-            elif mode == '3':
+            if mode == '3':
                 users = self._webhook_targets('ding')
                 if not users:
                     Notify.make_monitor_notify('发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的钉钉。')
                     continue
                 self.monitor_by_dd(users)
             elif mode == '4':
-                users = set(x.email for x in Contact.objects.filter(id__in=self.u_ids, email__isnull=False))
+                # 只判 isnull 会漏掉空字符串（表单未填时存的是 ''），
+                # 空地址混进收件人列表会让整封邮件被服务端拒收
+                users = set(x.email.strip() for x in Contact.objects.filter(id__in=self.u_ids)
+                            if (x.email or '').strip())
                 if not users:
                     Notify.make_monitor_notify('发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的邮件地址。')
                     continue
@@ -222,3 +188,6 @@ class Notification:
                     Notify.make_monitor_notify('发送报警信息失败', '未找到可用的通知对象，请确保设置了相关报警联系人的飞书。')
                     continue
                 self.monitor_by_fs(users)
+            else:
+                # 历史任务里可能还存着微信/短信等已下线的方式，静默跳过会让人以为告警已发出
+                Notify.make_monitor_notify('发送报警信息失败', '监控任务使用了已下线的报警方式，请编辑该任务重新选择报警方式。')

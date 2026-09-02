@@ -113,7 +113,6 @@ const base = {
   '列展示': 'Columns',
 
   // Menus / modules
-  '工作台': 'Workbench',
   '主机管理': 'Hosts',
   'Web终端': 'Web Terminal',
   '文件管理': 'File Manager',

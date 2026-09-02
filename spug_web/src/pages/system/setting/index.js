@@ -7,7 +7,6 @@ import React from 'react';
 import { Menu } from 'antd';
 import { AuthDiv, Breadcrumb } from 'components';
 import { t } from 'libs';
-import BasicSetting from './BasicSetting';
 import AlarmSetting from './AlarmSetting';
 import LDAPSetting from './LDAPSetting';
 import OpenService from './OpenService';
@@ -23,7 +22,7 @@ class Index extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedKeys: ['basic']
+      selectedKeys: ['security']
     }
   }
 
@@ -48,7 +47,6 @@ class Index extends React.Component {
               style={{border: 'none'}}
               onSelect={({selectedKeys}) => this.setState({selectedKeys})}
               items={[
-                {key: 'basic', label: t('基本设置')},
                 {key: 'security', label: t('安全设置')},
                 {key: 'ldap', label: t('LDAP设置')},
                 {key: 'key', label: t('密钥设置')},
@@ -59,7 +57,6 @@ class Index extends React.Component {
               ]}/>
           </div>
           <div className={styles.right}>
-            {selectedKeys[0] === 'basic' && <BasicSetting/>}
             {selectedKeys[0] === 'security' && <SecuritySetting/>}
             {selectedKeys[0] === 'ldap' && <LDAPSetting/>}
             {selectedKeys[0] === 'alarm' && <AlarmSetting/>}

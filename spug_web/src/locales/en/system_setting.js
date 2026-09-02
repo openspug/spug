@@ -6,7 +6,6 @@
 const dict = {
   // Menu / shared
   '首页': 'Home',
-  '基本设置': 'Basic Settings',
   '安全设置': 'Security Settings',
   'LDAP设置': 'LDAP Settings',
   '密钥设置': 'SSH Key Settings',
@@ -16,14 +15,6 @@ const dict = {
   '保存设置': 'Save Settings',
   '确认': 'Confirm',
   '设置成功': 'Saved successfully',
-
-  // BasicSetting.js
-  '请输入调用凭据': 'Please enter the service token',
-  '调用凭据': 'Service Token',
-  // The two entries below wrap around the "Spug" popover link, keep the leading/trailing spaces.
-  '如需要使用Spug的邮件、微信和MFA等内置服务，请关注公众号': 'To use Spug\'s built-in services such as email, WeChat and MFA, follow the WeChat official account ',
-  '在【我的】页面获取调用凭据，否则请留空。': ' and get the service token on its "Me" page, otherwise leave it blank.',
-  '请输入Spug微信公众号获取到的Token': 'Token obtained from the Spug WeChat official account',
 
   // AlarmSetting.js
   '邮件服务连接成功': 'Email service connected successfully',
@@ -112,7 +103,8 @@ const dict = {
   '用户导入': 'Import Users',
 
   // SecuritySetting.js
-  '开启MFA认证需要先在基本设置中配置调用凭据': 'Please configure the service token in Basic Settings before enabling MFA',
+  '开启MFA认证需要先在推送服务设置中绑定推送助手账户': 'Please bind a Push Assistant account in Push Service Settings before enabling MFA',
+  '已开启登录MFA认证，请先在安全设置中关闭MFA后再解除绑定。': 'Login MFA is enabled, please disable it in Security Settings before unbinding.',
   '访问IP校验': 'Client IP Verification',
   // Followed inline by the "Why is the real IP not detected?" link, keep the trailing space.
   '建议开启，校验是否获取了真实的访问者IP，防止因为增加的反向代理层导致基于IP的安全策略失效，当校验失败时会在登录时弹窗提醒。如果你在内网部署且仅在内网使用可以关闭该特性。': 'Recommended. Verifies that the real client IP is obtained, so IP-based security policies are not defeated by an extra reverse proxy layer. A popup will warn you at login when the check fails. If Spug is deployed and used only on an internal network, you can turn this off. ',
@@ -121,9 +113,8 @@ const dict = {
   '强烈建议开启，当开启后会把登录凭证与IP进行绑定，当该登录凭证通过其他IP访问时将自动失效。如非必要，切勿关闭该特性！': 'Strongly recommended. When enabled, the login session is bound to the client IP and is invalidated automatically if used from another IP. Do not turn this off unless you really have to!',
   '登录MFA（两步）认证': 'Login MFA (Two-Step Verification)',
   '输入验证码，通过验证后开启。': 'Enter the verification code to turn it on.',
-  // Followed inline by the "What is the WeChat Token?" link, keep the trailing space.
-  '建议开启，登录时额外使用验证码进行身份验证。开启前至少要确保管理员账户配置了微信Token（账户管理/编辑），开启后未配置微信Token的账户将无法登录，': 'Recommended. Requires an extra verification code at login. Before enabling, make sure at least the administrator account has a WeChat Token configured (Accounts / Edit); once enabled, accounts without a WeChat Token cannot sign in. ',
-  '什么是微信Token？': 'What is the WeChat Token?',
+  // Followed inline by the "Configuration guide" link, keep the trailing space.
+  '建议开启，登录时额外使用验证码进行身份验证。验证码通过推送助手下发，开启前需先在推送服务设置中绑定账户，并确保管理员账户配置了推送对象ID（账户管理/编辑），开启后未配置的账户将无法登录，': 'Recommended. Requires an extra verification code at login. Codes are delivered through the Push Assistant, so bind an account in Push Service Settings first and make sure at least the administrator account has a push target ID configured (Accounts / Edit); once enabled, accounts without one cannot sign in. ',
   '验证通过后开启MFA（两步验证）。': 'MFA (two-step verification) will be enabled once the code is verified.',
   '请输入验证码': 'Verification code',
   '{} 秒后重新获取': 'Resend in {} seconds',

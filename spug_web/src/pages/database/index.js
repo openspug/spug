@@ -208,7 +208,7 @@ export default function DatabaseConsole() {
   return (
     <div className={styles.container}>
       <aside className={styles.sider}>
-        <a className={styles.logo} href="/home" target="_blank" rel="noreferrer">
+        <a className={styles.logo} href="/dashboard" target="_blank" rel="noreferrer">
           <img src={LogoSpugText} alt="Spug"/>
         </a>
         <div className={styles.sourceHeader}>

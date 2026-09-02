@@ -41,15 +41,34 @@ DANGEROUS_PATTERNS = [
     r'\biptables\s+-F\b',
 ]
 
-# 诊断模式额外禁止的写操作前缀
+# 诊断模式额外禁止的写操作。
+# 诊断只允许「连上去看」，任何会改变服务器状态的命令都必须拦下，
+# 否则「只检测」的承诺就不成立。这里按「会不会产生副作用」而非命令名来划分。
 WRITE_COMMAND_PATTERNS = [
-    r'\b(rm|mv|cp|touch|mkdir|rmdir|truncate|tee|chmod|chown|chgrp|ln)\b',
-    r'\b(systemctl|service)\s+(start|stop|restart|reload|enable|disable)\b',
+    r'\b(rm|mv|cp|touch|mkdir|rmdir|truncate|tee|chmod|chown|chgrp|ln|install)\b',
+    # systemctl/service 只放行只读子命令，其余一律拦截
+    r'\bsystemctl\s+(?!(status|show|list-|is-|cat|get-default|show-environment)\b)',
+    r'\bservice\s+\S+\s+(?!status\b)',
     r'\b(kill|killall|pkill)\b',
-    r'\b(apt|apt-get|yum|dnf|pip|pip3|npm|docker)\b\s+(install|remove|rm|run|start|stop|restart)',
-    r'\b(iptables|firewall-cmd|ufw)\b',
-    r'>>?\s*/',
+    r'\b(apt|apt-get|yum|dnf|pip|pip3|npm|docker|podman)\b\s+'
+    r'(install|remove|rm|run|start|stop|restart|exec|cp|kill|update|prune)',
+    r'\b(iptables|ip6tables|firewall-cmd|ufw|nft)\b',
+    # sed/awk 原地改写
+    r'\bsed\b[^|;]*\s-i\b',
+    r'\bgawk\b[^|;]*\s-i\b',
+    # 下载落盘
+    r'\bcurl\b[^|;]*\s(-[oO]\b|--output\b|--remote-name\b)',
+    r'\b(wget|rsync|scp|sftp)\b',
+    # 内联脚本可绕开一切前缀判断
+    r'\b(python|python2|python3|perl|ruby|php|node)\b[^|;]*\s-(c|e)\b',
+    # 文件系统与运行环境
+    r'\b(mount|umount|swapon|swapoff|sysctl\s+-w|modprobe|insmod|rmmod)\b',
+    r'\b(useradd|usermod|passwd|chpasswd)\b',
+    r'\bgit\s+(checkout|reset|clean|pull|merge|rebase|apply|stash)\b',
+    r'\b(nohup|setsid|at|batch)\b',
     r'\bcrontab\s+-[er]\b',
+    # 输出重定向到文件（放行 2>&1 与 /dev/null）
+    r'>>?\s*(?!&)(?!/dev/null\b)[^\s&|]',
 ]
 
 CHAT_PROMPT = """你是一名资深 Linux 运维专家助手，正在与用户进行技术问答。
@@ -77,6 +96,10 @@ DIAGNOSE_PROMPT = """你是一名资深 Linux 运维专家，正在排查一台�
 2. 严禁执行任何修改系统状态的命令（不得 restart/start/stop/kill/rm/chmod/安装卸载等）。
 3. 每轮最多给出 5 条命令，命令要具体可直接执行，不要使用交互式命令。
 4. 命令必须带合理的输出截断（如 tail -n 100），避免输出过大。
+5. 排查轮次有限，必须聚焦：第一轮就直接验证「排查重点」里指明的对象
+   （如指定端口是否监听、指定进程是否存在、对应服务或容器的状态与退出原因），
+   确认根因之前不要去查与告警对象无关的组件（如无关网卡、无关服务的日志）。
+6. 一旦已经能解释告警原因，立即返回 done=true，不要为了凑轮次继续执行命令。
 
 你必须只返回 JSON，不要输出其他任何内容，格式：
 {"done": false, "reason": "本轮排查思路", "commands": ["命令1", "命令2"]}
@@ -91,6 +114,12 @@ REPAIR_PROMPT = """你是一名资深 Linux 运维专家，正在自动修复一
 3. 每轮最多给出 5 条命令，必须是非交互式的，需要确认的命令请加 -y。
 4. 优先用最小代价恢复服务，先排查再动手，不要盲目重装。
 5. 每轮执行后系统会自动复检故障是否恢复，并把结果反馈给你。
+6. 作用范围必须严格限定在本次「告警对象」对应的服务/进程/端口上：
+   - 不得重启、停止或改配置于与本次告警无关的服务，服务器上还跑着其他业务；
+   - 不得执行整机级操作（重启主机、全局防火墙规则、系统级参数变更）；
+   - 不得清理不属于该服务的文件或日志；
+   - 如果判断必须动到无关组件才能恢复，请停止操作，返回 done=true 并在
+     conclusion 中说明原因和需要人工介入的点。
 
 你必须只返回 JSON，不要输出其他任何内容，格式：
 {"done": false, "reason": "本轮修复思路", "commands": ["命令1", "命令2"]}
@@ -146,8 +175,11 @@ class Agent:
             f'告警对象：{self.session.target or "-"}',
             f'告警信息：{self.session.trigger_message or "-"}',
         ]
+        # 明确告知轮次预算，模型才知道要收敛，而不是把预算当成必须用满的额度
         if self.session.mode == 'repair':
-            lines.append(f'最大修复轮次：{self.session.max_loops}')
+            lines.append(f'最大修复轮次：{self.session.max_loops}（请尽量在更少轮次内恢复）')
+        else:
+            lines.append(f'最大排查轮次：{self.session.max_loops}（定位到原因后请立即结束，不必用满）')
         return '\n'.join(lines)
 
     def _exec(self, ssh, command):
@@ -231,8 +263,10 @@ class Agent:
 
                     self.messages.append({'role': 'user', 'content': '\n\n'.join(feedback)})
 
-            # 循环用尽仍未结束
-            return self._finish(None, max_loops, resolved=False)
+            # 循环用尽仍未结束：不能直接丢弃前面几轮采集到的证据。
+            # 追加一次不带命令的总结调用，把已知信息转成面向用户的结论，
+            # 否则用户只会看到一句「已达到最大轮次」，排查线索全部作废。
+            return self._finish(self._force_conclude(max_loops), max_loops, resolved=False)
         except AIError as e:
             self._record('error', str(e))
             return self._abort(f'AI调用失败：{e}')
@@ -241,18 +275,59 @@ class Agent:
             self._record('error', str(e))
             return self._abort(f'执行异常：{e}')
 
+    def _force_conclude(self, loop):
+        """轮次耗尽时追加一次总结调用，把已收集到的信息转成结论。
+
+        此时不再允许给出命令，只要求模型基于已有证据下判断；
+        失败时返回 None，由 _finish 退回到兜底文案。
+        """
+        if self.session.mode == 'diagnose':
+            ask = ('已达到最大排查轮次，请不要再给出任何命令。'
+                   '请基于以上已经收集到的信息直接下结论，只返回 JSON：'
+                   '{"done": true, "conclusion": "已定位的原因或最可能的原因，并说明判断依据；'
+                   '若证据不足请说明还差哪些信息", "suggestion": "建议的修复步骤"}')
+        else:
+            ask = ('已达到最大修复轮次，请不要再给出任何命令。'
+                   '请基于以上已执行的操作与结果直接总结，只返回 JSON：'
+                   '{"done": true, "conclusion": "已做的处理、当前状态与未能恢复的原因", '
+                   '"suggestion": "仍需人工处理的事项"}')
+        try:
+            messages = self.messages + [{'role': 'user', 'content': ask}]
+            content, _ = chat(messages)
+            data = extract_json(content)
+            if data and (data.get('conclusion') or data.get('suggestion')):
+                return data
+            # 模型没按格式返回，但正文本身仍有参考价值
+            if content and content.strip():
+                return {'conclusion': content.strip()[:2000]}
+        except Exception as e:
+            logging.warning(f'force conclude failed: {e}')
+            self._record('error', f'生成最终结论失败：{e}', loop)
+        return None
+
     def _finish(self, data, loop, resolved):
         session = self.session
         if data:
             conclusion = data.get('conclusion') or ''
             suggestion = data.get('suggestion') or ''
             summary = conclusion if not suggestion else f'{conclusion}\n\n【建议】{suggestion}'
+        elif session.mode == 'diagnose':
+            # 诊断模式不涉及「恢复」，不能套用修复模式的文案
+            summary = f'已达到最大排查轮次（{loop}），仍未定位到明确原因，请人工介入排查。'
         else:
-            summary = f'已达到最大轮次（{loop}），仍未确认故障恢复，已终止自动处理。'
+            summary = f'已达到最大修复轮次（{loop}），仍未确认故障恢复，已终止自动处理。'
         if session.mode == 'diagnose':
             session.status = 'success' if data else 'failed'
+        elif resolved is True:
+            session.status = 'success'
+        elif resolved is False:
+            # 轮次耗尽仍未复检通过
+            session.status = 'failed'
         else:
-            session.status = 'success' if resolved else 'failed'
+            # 模型自行判定结束：有复检器（告警触发）时必须以复检为准，
+            # 模型说修好了不算数；无复检器（手动发起）时只能以模型结论为准，
+            # 否则手动修复会话永远停在「未解决」
+            session.status = 'failed' if self.verifier else 'success'
         session.summary = summary
         session.used_loops = loop
         session.finished_at = human_datetime()
@@ -291,6 +366,22 @@ def _history_messages(session, limit=40):
             'role': 'user',
             'content': f'【历史对话摘要】更早的对话已压缩为以下摘要：\n{session.context_summary}'})
         messages.append({'role': 'assistant', 'content': '好的，我已了解此前对话的背景，请继续。'})
+    # 告警触发的会话只有 thought/command/output/summary 记录，没有 question/answer，
+    # 不补这段背景的话，用户在该会话里追问时模型完全不知道刚才发生过什么
+    if session.source == 'monitor' and session.trigger_message:
+        mode_alias = dict(AgentSession.MODES).get(session.mode, session.mode)
+        background = '\n'.join([
+            '【本会话背景】这是一次由监控告警自动触发的处理，你已经完成了处理并给出结论。',
+            f'处理模式：{mode_alias}',
+            f'告警对象：{session.target or "-"}',
+            f'原始告警：{session.trigger_message}',
+            f'处理结果：{session.get_status_display()}'
+            f'（第 {session.used_loops}/{session.max_loops} 轮结束）',
+        ])
+        messages.append({'role': 'user', 'content': background})
+        messages.append({
+            'role': 'assistant',
+            'content': session.summary or '（本次处理未产出结论）'})
     records = list(session.records
                    .filter(kind__in=('question', 'answer'), id__gt=session.summary_record_id or 0)
                    .order_by('id'))

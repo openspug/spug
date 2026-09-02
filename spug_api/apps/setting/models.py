@@ -11,7 +11,6 @@ KEYS_DEFAULT = {
     'verify_ip': True,
     'bind_ip': True,
     'ldap_service': {},
-    'spug_key': None,
     'api_key': None,
     'mail_service': {},
     'private_key': None,
