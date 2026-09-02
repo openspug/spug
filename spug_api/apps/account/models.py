@@ -90,6 +90,9 @@ class Role(models.Model, ModelMixin):
     deploy_perms = models.JSONField(default=dict)
     group_perms = models.JSONField(default=list)
     created_at = models.DateTimeField(auto_now_add=True)
+    # 与其他业务模型保持一致记录创建人；存量角色无此信息，故允许为空。
+    created_by = models.ForeignKey(
+        User, models.PROTECT, related_name='+', null=True, blank=True)
 
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)

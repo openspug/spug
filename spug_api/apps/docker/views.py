@@ -8,6 +8,7 @@ from apps.docker.client import (
     create_project,
     discover_projects,
     execute,
+    manage_resource,
     read_config,
     remove_project,
     save_config,
