@@ -54,10 +54,43 @@ WRITE_COMMAND_PATTERNS = [
 ]
 
 
+# 会波及「本次故障对象之外」的破坏性操作。
+# 修复模式虽然允许变更服务器，但作用范围必须限定在告警对象本身；
+# 下面这些命令一旦执行，影响的是整机或其他业务的数据与本体，
+# 因此即使模型有充分理由也不允许自行决定，必须由人确认。
+CROSS_SERVICE_PATTERNS = [
+    # Docker：批量清理与跨项目销毁
+    r'\bdocker\s+(system|volume|image|network|builder)\s+prune\b',
+    r'\bdocker\s+volume\s+rm\b',
+    r'\bdocker\s+(rm|stop|kill|restart)\b[^|;]*\$\(',      # $(docker ps -aq) 批量取容器
+    r'\bdocker\s+(rm|stop|kill|restart)\b[^|;]*\s-a\b',
+    r'\bdocker\s+compose\b[^|;]*\bdown\b[^|;]*(-v\b|--volumes\b)',
+    r'\bdocker\s+compose\b[^|;]*--remove-orphans\b',       # 会删除同项目名下的其他容器
+    # 数据库：删库删表
+    r'\b(drop|truncate)\s+(table|database|schema)\b',
+    r'\bdelete\s+from\b',
+    # 文件系统：批量删除与数据目录递归删除
+    r'\bfind\b[^|;]*-delete\b',
+    r'\bfind\b[^|;]*-exec\s+rm\b',
+    r'\bxargs\b[^|;]*\brm\b',
+    r'\brm\s+-[a-zA-Z]*r[a-zA-Z]*\s+[^|;]*(/var/lib|/var/www|/data|/opt|/srv|/home)\b',
+    # 包管理：批量卸载
+    r'\b(apt|apt-get|yum|dnf)\s+(autoremove|purge)\b',
+    # 服务：全局停用与批量杀进程
+    r'\bsystemctl\s+\S*\s*--all\b',
+    r'\bkillall\b',
+    r'\bpkill\s+[^|;]*-u\b',
+]
+
+
 def check_command(command, mode):
     """返回风险原因，无风险时返回 None。
 
-    mode 为 diagnose 时额外禁止一切写操作。
+    分三层：
+    * DANGEROUS_PATTERNS —— 任何模式都不允许模型自行执行；
+    * CROSS_SERVICE_PATTERNS —— 会波及告警对象之外的服务或数据，
+      修复与对话模式下同样需要人工确认，防止「为了修 A 而删掉 B」；
+    * WRITE_COMMAND_PATTERNS —— 仅诊断模式禁止，保证只读承诺成立。
     """
     text = (command or '').strip()
     if not text:
@@ -69,4 +102,8 @@ def check_command(command, mode):
         for pattern in WRITE_COMMAND_PATTERNS:
             if re.search(pattern, text, re.IGNORECASE):
                 return '诊断模式只允许只读命令'
+        return None
+    for pattern in CROSS_SERVICE_PATTERNS:
+        if re.search(pattern, text, re.IGNORECASE):
+            return '该命令会影响本次故障对象之外的服务或数据，需要人工确认'
     return None
