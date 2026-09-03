@@ -52,7 +52,7 @@ const dict = {
   'IP或域名，支持多个地址，每输入完成一个后按回车确认': 'IP or domain, multiple targets supported, press Enter after each one',
   '监控主机': 'Hosts',
   '响应时间': 'Response Time',
-  '最长响应时间（毫秒），不设置则默认10秒超时': 'Max response time in milliseconds, defaults to a 10-second timeout',
+  '最长响应时间（毫秒），不设置则默认30秒超时': 'Max response time in milliseconds, defaults to a 30-second timeout',
   '检测端口': 'Port',
   '请输入端口号': 'Enter port number',
   '进程名称': 'Process Name',

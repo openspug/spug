@@ -15,7 +15,7 @@ const dict = {
   '使用全局变量？': 'Use global variables?',
   '从执行模版中选择': 'Select Template',
   '执行记录': 'Execution History',
-  '多次相同的执行记录将会合并展示，每天自动清理，保留最近30条记录。': 'Identical executions are merged into one record. History is cleaned up daily, keeping only the latest 30 records.',
+  '多次相同的执行记录将会合并展示，每天自动清理，每个账户保留最近10条记录。': 'Identical executions are merged into one record. History is cleaned up daily, keeping only the latest 10 records per account.',
   '立即执行': 'Run Now',
   '{} 是必填项。': '{} is required.',
   '终止执行': 'Terminate execution',
@@ -84,7 +84,7 @@ const dict = {
   '请选择目标主机': 'Please select target hosts',
   '上传中 {}%': 'Uploading {}%',
   '分发记录': 'Distribution History',
-  '每天自动清理，保留最近30条记录。': 'History is cleaned up daily, keeping only the latest 30 records.',
+  '每天自动清理，每个账户保留最近10条记录。': 'History is cleaned up daily, keeping only the latest 10 records per account.',
   '文件分发功能依赖rsync，大部分linux发行版默认都已安装，如未安装可通过「批量执行/执行任务」进行批量安装。': 'File distribution relies on rsync, which is preinstalled on most Linux distributions. If it is missing, you can batch install it via Batch Execution / Run Command.',
 };
 

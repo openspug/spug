@@ -135,7 +135,7 @@ export default observer(function () {
         <HostSelector value={targets} onChange={ids => store.record.targets = ids}/>
       </Form.Item>
       <Form.Item label={t('响应时间')} style={getStyle(['1'])}>
-        <Input suffix="ms" value={extra} placeholder={t('最长响应时间（毫秒），不设置则默认10秒超时')}
+        <Input suffix="ms" value={extra} placeholder={t('最长响应时间（毫秒），不设置则默认30秒超时')}
                onChange={e => store.record.extra = e.target.value}/>
       </Form.Item>
       <Form.Item required label={t('检测端口')} style={getStyle(['2'])}>

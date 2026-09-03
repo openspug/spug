@@ -35,7 +35,7 @@ Push Assistant is a message push platform that integrates multiple channels such
 - **Task Planning**: It supports online configuration of crontab, interval and other task schedules
 - **Configuration Center**: Support KV, text, json and other formats online configuration
 - **Monitoring Center**: Support site, port, process, ping, custom script and other monitoring
-- **Alarm Center**: Support SMS, email, DingTalk, WeChat, WeChat Work and other alarm methods
+- **Alarm Center**: Support email, WeChat, DingTalk, WeChat Work, Feishu and other alarm methods
 - **Credential Management**: Keep passwords and private keys in one place and share them across hosts
 - **Permission Control**: Fine-grained role and permission control, LDAP login and MFA are supported
 - **Bilingual UI**: Full English and Simplified Chinese interface, switchable from the header
@@ -47,7 +47,7 @@ Push Assistant is a message push platform that integrates multiple channels such
 
 * Python 3.8+
 * Django 4.2
-* Node.js 14+
+* Node.js 18+
 * React 16.13
 * Redis 5.0+
 

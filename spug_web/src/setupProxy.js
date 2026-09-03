@@ -26,8 +26,6 @@ module.exports = function (app) {
     },
     // 添加连接配置
     timeout: 30000,
-    proxyTimeout: 30000,
-    // 禁用 WebSocket 自动升级，避免连接问题
-    ws: false
+    proxyTimeout: 30000
   }))
 };

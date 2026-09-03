@@ -35,6 +35,7 @@ ALLOWED_HOSTS = ['127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',  # channels 4 起 runserver 的 WebSocket 支持由 daphne 提供，需放在最前
     'apps.account',
     'apps.host',
     'apps.setting',
