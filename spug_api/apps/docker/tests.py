@@ -10,9 +10,15 @@ from apps.docker.client import (
     DockerClientError,
     build_compose_command,
     find_name_conflicts,
+    build_container_command,
+    build_container_logs_follow_command,
+    build_logs_follow_command,
     build_resource_command,
+    build_stats_command,
     cache_key,
+    iter_stats_frames,
     parse_docker_inspect,
+    parse_inspect,
     parse_resource_list,
     save_config,
     create_project,
@@ -213,8 +219,168 @@ class DockerClientTests(SimpleTestCase):
         self.assertNotIn('--remove-orphans', run_local.call_args_list[2].args[0])
 
     def test_cache_key_is_scoped_to_host(self):
-        self.assertEqual(cache_key(7), 'spug:docker:projects:7')
-        self.assertEqual(cache_key(None), 'spug:docker:projects:local')
+        self.assertEqual(cache_key(7), 'spug:docker:inspect:v2:7')
+        self.assertEqual(cache_key(None), 'spug:docker:inspect:v2:local')
+
+
+class DockerStandaloneTests(SimpleTestCase):
+    """覆盖 dgx221 上的真实形态：1 个 compose 项目 + 4 个非 compose 容器。"""
+
+    @staticmethod
+    def _item(name, labels, state='running', image='img'):
+        return {'Name': f'/{name}', 'State': {'Status': state},
+                'Config': {'Image': image, 'Labels': labels}}
+
+    def setUp(self):
+        self.output = json.dumps([
+            self._item('fun-asr-nano', {
+                'com.docker.compose.project': 'app',
+                'com.docker.compose.service': 'fun-asr-nano',
+                'com.docker.compose.project.working_dir': '/home/jks003/fun-asr-nano/app',
+                'com.docker.compose.project.config_files': '/home/jks003/fun-asr-nano/app/compose.yaml',
+            }),
+            # docker run 起的裸容器，完全没有 compose 标签
+            self._item('vllm-qwen3.8-27b-fp8', {'maintainer': 'x'}),
+            # 标签残缺：有 project/service 但没有 config_files，无法定位配置
+            self._item('tei-bge-m3', {
+                'com.docker.compose.project': 'app',
+                'com.docker.compose.service': 'fun-asr-nano',
+            }),
+            self._item('qwen35-4b', {}, state='exited'),
+        ])
+
+    def test_only_full_labeled_container_becomes_project(self):
+        payload = parse_inspect(self.output)
+
+        self.assertEqual(len(payload['projects']), 1)
+        self.assertEqual(payload['projects'][0]['name'], 'app')
+        self.assertEqual([c['name'] for c in payload['projects'][0]['containers']],
+                         ['fun-asr-nano'])
+
+    def test_unmanaged_containers_are_listed_as_standalone(self):
+        payload = parse_inspect(self.output)
+
+        self.assertEqual([c['name'] for c in payload['standalone']],
+                         ['qwen35-4b', 'tei-bge-m3', 'vllm-qwen3.8-27b-fp8'])
+        by_name = {c['name']: c for c in payload['standalone']}
+        # 残缺标签要标出来，方便运维回头清理
+        self.assertTrue(by_name['tei-bge-m3']['partial_labels'])
+        self.assertEqual(by_name['tei-bge-m3']['project'], 'app')
+        self.assertFalse(by_name['vllm-qwen3.8-27b-fp8']['partial_labels'])
+        self.assertEqual(by_name['qwen35-4b']['state'], 'exited')
+
+    def test_parse_docker_inspect_keeps_returning_projects_only(self):
+        self.assertEqual(parse_docker_inspect(self.output),
+                         parse_inspect(self.output)['projects'])
+
+    def test_container_command_is_limited_and_quoted(self):
+        self.assertEqual(build_container_command('restart', 'tei-bge-m3'),
+                         'docker restart -- tei-bge-m3')
+        self.assertEqual(build_container_command('logs', 'tei-bge-m3', 5000),
+                         'docker logs --tail 2000 -- tei-bge-m3')
+        with self.assertRaises(DockerClientError):
+            build_container_command('rm', 'tei-bge-m3')
+        with self.assertRaises(DockerClientError):
+            build_container_command('stop', 'a; rm -rf /')
+
+    def test_remove_container_does_not_touch_volumes(self):
+        command = build_container_command('remove', 'qwen35-4b')
+
+        self.assertEqual(command, 'docker rm -f -- qwen35-4b')
+        # 删卷不可逆且容易误伤共享数据，必须由「存储卷」页面单独操作
+        self.assertNotIn('-v', command.replace('-- ', ''))
+        self.assertNotIn('--volumes', command)
+
+
+class DockerLogFollowTests(SimpleTestCase):
+    PROJECT = SimpleNamespace(
+        name='app', workdir='/srv/app',
+        config_file='/srv/app/compose.yaml', config_files=['/srv/app/compose.yaml'])
+
+    def test_compose_follow_command_includes_follow_and_tail(self):
+        command = build_logs_follow_command(self.PROJECT, 'web', 500)
+
+        self.assertIn('--follow', command)
+        self.assertIn('--tail 500', command)
+        self.assertTrue(command.endswith(' web'))
+        self.assertIn('-p app -f /srv/app/compose.yaml', command)
+
+    def test_compose_follow_without_service_covers_all(self):
+        command = build_logs_follow_command(self.PROJECT)
+
+        self.assertTrue(command.endswith('--tail 200'))
+
+    def test_follow_tail_is_clamped(self):
+        self.assertIn('--tail 2000', build_logs_follow_command(self.PROJECT, None, 99999))
+        self.assertIn('--tail 20', build_logs_follow_command(self.PROJECT, None, 1))
+
+    def test_container_follow_command_quotes_name(self):
+        self.assertEqual(build_container_logs_follow_command('tei-bge-m3', 100),
+                         'docker logs --follow --tail 100 -- tei-bge-m3')
+
+    def test_long_running_wrapper_kills_child_when_stdin_closes(self):
+        from apps.docker.client import _wrap_long_running
+
+        wrapped = _wrap_long_running('docker logs --follow -- web', 3600)
+
+        self.assertTrue(wrapped.startswith('timeout 3600s sh -c '))
+        # channel 关闭 → stdin EOF → cat 返回 → kill 子进程，否则远端会挂满一小时
+        self.assertIn('cat >/dev/null', wrapped)
+        self.assertIn('kill -TERM $child', wrapped)
+
+    def test_follow_commands_reject_injection(self):
+        with self.assertRaises(DockerClientError):
+            build_logs_follow_command(self.PROJECT, 'web; rm -rf /')
+        with self.assertRaises(DockerClientError):
+            build_container_logs_follow_command('a && curl evil.sh')
+
+
+class DockerStatsTests(SimpleTestCase):
+    LINE_A = ('{"BlockIO":"0B / 360kB","CPUPerc":"0.67%","Container":"web","ID":"aaa",'
+              '"MemPerc":"6.99%","MemUsage":"547.4MiB / 7.653GiB","Name":"web",'
+              '"NetIO":"8.03MB / 3.12MB","PIDs":"41"}')
+    LINE_B = ('{"BlockIO":"14.4MB / 13.8MB","CPUPerc":"0.02%","Container":"db","ID":"bbb",'
+              '"MemPerc":"3.11%","MemUsage":"244.1MiB / 7.653GiB","Name":"db",'
+              '"NetIO":"49.2MB / 34.6MB","PIDs":"17"}')
+
+    def test_build_stats_command_uses_stream_mode_and_quotes_names(self):
+        command = build_stats_command(['web', 'db'])
+        self.assertNotIn('--no-stream', command)
+        self.assertTrue(command.endswith("'{{json .}}' web db"))
+
+    def test_build_stats_command_rejects_invalid_container_name(self):
+        with self.assertRaises(DockerClientError):
+            build_stats_command(['web; rm -rf /'])
+
+    def test_build_stats_command_rejects_empty_targets(self):
+        with self.assertRaises(DockerClientError):
+            build_stats_command([])
+
+    def test_frames_strip_ansi_and_split_by_expected_count(self):
+        lines = ['\x1b[H' + self.LINE_A, self.LINE_B + ' \x1b[K',
+                 '\x1b[J\x1b[H' + self.LINE_A, self.LINE_B]
+
+        frames = list(iter_stats_frames(lines, expected=2))
+
+        self.assertEqual(len(frames), 2)
+        self.assertEqual(sorted(frames[0]), ['db', 'web'])
+        self.assertEqual(frames[0]['web'], {
+            'cpu': '0.67%', 'mem': '547.4MiB / 7.653GiB', 'mem_percent': '6.99%',
+            'net': '8.03MB / 3.12MB', 'block': '0B / 360kB', 'pids': '41'})
+
+    def test_frames_split_on_duplicate_name_when_container_disappears(self):
+        # 期望 2 个容器但 db 已消失，靠重名规则仍要按帧切分，不能一直攒着
+        frames = list(iter_stats_frames([self.LINE_A, self.LINE_A, self.LINE_A], expected=2))
+
+        self.assertEqual(len(frames), 3)
+        self.assertEqual(list(frames[0]), ['web'])
+
+    def test_frames_ignore_noise_lines(self):
+        frames = list(iter_stats_frames(
+            ['', 'CONTAINER  CPU %', 'not json', self.LINE_A], expected=1))
+
+        self.assertEqual(len(frames), 1)
+        self.assertEqual(list(frames[0]), ['web'])
 
     @patch('apps.docker.client._run_local', return_value=(0, 'removed'))
     def test_remove_project_runs_down_with_volumes_and_keeps_config(self, run_local):
