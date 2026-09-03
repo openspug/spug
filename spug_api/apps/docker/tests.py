@@ -9,6 +9,7 @@ from django.test import SimpleTestCase
 from apps.docker.client import (
     DockerClientError,
     build_compose_command,
+    find_name_conflicts,
     build_resource_command,
     cache_key,
     parse_docker_inspect,
@@ -140,8 +141,9 @@ class DockerClientTests(SimpleTestCase):
 
         self.assertEqual(
             build_compose_command(project, 'publish'),
+            # 不带 --remove-orphans：否则会删除同项目名下不在本配置内的容器
             "cd /opt/apps/demo && docker compose -p demo -f /opt/apps/demo/compose.yaml pull "
-            "&& docker compose -p demo -f /opt/apps/demo/compose.yaml up -d --remove-orphans",
+            "&& docker compose -p demo -f /opt/apps/demo/compose.yaml up -d",
         )
 
     @patch('apps.docker.client._run_local', return_value=(0, ''))
@@ -207,28 +209,64 @@ class DockerClientTests(SimpleTestCase):
             with self.assertRaisesRegex(DockerClientError, 'start failed'):
                 create_project(None, 'demo', os.path.join(root, 'demo'), 'services: {}\n')
 
-            self.assertIn('down --remove-orphans', run_local.call_args_list[2].args[0])
+            self.assertIn('down', run_local.call_args_list[2].args[0])
+        self.assertNotIn('--remove-orphans', run_local.call_args_list[2].args[0])
 
     def test_cache_key_is_scoped_to_host(self):
         self.assertEqual(cache_key(7), 'spug:docker:projects:7')
         self.assertEqual(cache_key(None), 'spug:docker:projects:local')
 
-    @patch('apps.docker.client.discover_projects', return_value=[])
     @patch('apps.docker.client._run_local', return_value=(0, 'removed'))
-    def test_remove_project_runs_down_with_volumes_and_keeps_config(self, run_local, _discover):
+    def test_remove_project_runs_down_with_volumes_and_keeps_config(self, run_local):
         with tempfile.TemporaryDirectory() as workdir:
             config_file = os.path.join(workdir, 'compose.yaml')
             with open(config_file, 'w', encoding='utf-8') as file:
                 file.write('services: {}\n')
 
-            with patch('apps.docker.client.get_project', return_value=SimpleNamespace(
-                    name='demo', workdir=workdir, config_file=config_file,
-                    config_files=[config_file])):
+            project = {'name': 'demo', 'workdir': workdir, 'config_file': config_file,
+                       'config_files': [config_file], 'containers': []}
+            with patch('apps.docker.client.discover_projects', return_value=[project]):
                 result = remove_project(None, 'demo', config_file, delete_files=False)
 
-            self.assertIn('down --remove-orphans --volumes', run_local.call_args.args[0])
+            # --remove-orphans 会删除同项目名下不在本配置内的容器，必须不出现
+            self.assertIn('down --volumes', run_local.call_args.args[0])
+            self.assertNotIn('--remove-orphans', run_local.call_args.args[0])
             self.assertTrue(os.path.exists(config_file))
             self.assertEqual(result['output'], 'removed')
+
+    @patch('apps.docker.client._run_local')
+    def test_remove_project_rejects_duplicate_project_name(self, run_local):
+        """同名但配置不同的项目共享 compose 作用域，删除必须中止。
+
+        回归用例：曾出现「删除已停止的项目，把同名的另一个运行中项目一并删除」。
+        """
+        with tempfile.TemporaryDirectory() as workdir:
+            mine = os.path.join(workdir, 'a', 'compose.yaml')
+            other = os.path.join(workdir, 'b', 'compose.yaml')
+            projects = [
+                {'name': 'new-api', 'workdir': os.path.join(workdir, 'a'),
+                 'config_file': mine, 'config_files': [mine],
+                 'containers': [{'name': 'newapi-old'}]},
+                {'name': 'new-api', 'workdir': os.path.join(workdir, 'b'),
+                 'config_file': other, 'config_files': [other],
+                 'containers': [{'name': 'newapi-new'}]},
+            ]
+            with patch('apps.docker.client.discover_projects', return_value=projects):
+                with self.assertRaises(DockerClientError) as ctx:
+                    remove_project(None, 'new-api', mine)
+            self.assertIn('同名', str(ctx.exception))
+            self.assertIn('newapi-new', str(ctx.exception))
+            run_local.assert_not_called()
+
+    def test_find_name_conflicts_ignores_same_config(self):
+        projects = [
+            {'name': 'demo', 'workdir': '/opt/a', 'config_file': '/opt/a/compose.yaml',
+             'config_files': ['/opt/a/compose.yaml'], 'containers': []},
+            {'name': 'other', 'workdir': '/opt/b', 'config_file': '/opt/b/compose.yaml',
+             'config_files': ['/opt/b/compose.yaml'], 'containers': []},
+        ]
+        self.assertEqual(
+            find_name_conflicts(projects, 'demo', '/opt/a/compose.yaml'), [])
 
     @patch('apps.docker.client._run_local', return_value=(0, 'removed'))
     def test_remove_project_can_delete_compose_file(self, _run_local):
@@ -237,9 +275,9 @@ class DockerClientTests(SimpleTestCase):
             with open(config_file, 'w', encoding='utf-8') as file:
                 file.write('services: {}\n')
 
-            with patch('apps.docker.client.get_project', return_value=SimpleNamespace(
-                    name='demo', workdir=workdir, config_file=config_file,
-                    config_files=[config_file])):
+            project = {'name': 'demo', 'workdir': workdir, 'config_file': config_file,
+                       'config_files': [config_file], 'containers': []}
+            with patch('apps.docker.client.discover_projects', return_value=[project]):
                 remove_project(None, 'demo', config_file, delete_files=True)
 
             self.assertFalse(os.path.exists(config_file))

@@ -155,6 +155,38 @@ def validate_project_ref(projects, project_name, config_file):
     raise DockerClientError('Compose 项目已变化，请刷新服务器 Docker 列表后重试')
 
 
+def find_name_conflicts(projects, project_name, config_file):
+    """返回同名但配置不同的其他项目组。
+
+    Docker Compose 只用项目名（com.docker.compose.project 标签）界定作用域，
+    而这里按「名称 + 工作目录 + 配置文件」区分项目。两者不一致时，针对某一组
+    执行 down / up 会波及同名的其他容器与共享网络，因此涉及销毁的操作必须
+    先检测冲突并中止。
+    """
+    conflicts = []
+    for item in projects:
+        if item.get('name') != project_name:
+            continue
+        files = item.get('config_files') or [item.get('config_file')]
+        if config_file in files:
+            continue
+        conflicts.append(item)
+    return conflicts
+
+
+def _assert_no_name_conflict(projects, project_name, config_file, action):
+    conflicts = find_name_conflicts(projects, project_name, config_file)
+    if not conflicts:
+        return
+    detail = '；'.join(
+        f"{item.get('workdir') or '未知目录'}（{'、'.join(c['name'] for c in item.get('containers') or [])}）"
+        for item in conflicts)
+    raise DockerClientError(
+        f'检测到同名 Compose 项目「{project_name}」还存在其他配置：{detail}。'
+        f'Docker Compose 按项目名界定作用域，继续{action}会同时影响这些容器。'
+        f'请先为其中一组改用不同的项目名，再重试。')
+
+
 def get_project(host, project_name, config_file, ssh=None, use_cache=True):
     return validate_project_ref(
         discover_projects(host, ssh, use_cache), project_name, config_file)
@@ -181,7 +213,8 @@ def build_compose_command(project, action, service=None, tail=200):
     base, compose = _compose_base(project)
     suffix = f' {shlex.quote(service)}' if service else ''
     if action == 'publish':
-        return f'{base} pull{suffix} && {compose} up -d --remove-orphans{suffix}'
+        # 不加 --remove-orphans：同项目名下不在本配置中的容器会被当作孤儿删除
+        return f'{base} pull{suffix} && {compose} up -d{suffix}'
     if action == 'rebuild':
         return f'{base} up -d --build --force-recreate{suffix}'
     if action == 'restart':
@@ -286,9 +319,13 @@ def remove_project(host, project_name, config_file, delete_files=False):
     delete_files 为真时连同 compose.yaml 一并删除，否则保留配置，
     便于之后原地重新启动。
     """
-    project = get_project(host, project_name, config_file, use_cache=False)
+    projects = discover_projects(host, use_cache=False)
+    project = validate_project_ref(projects, project_name, config_file)
+    # 同名项目共享 compose 作用域，删除会波及对方，必须先中止
+    _assert_no_name_conflict(projects, project_name, config_file, '删除')
     base, _ = _compose_base(project)
-    command = f'{base} down --remove-orphans --volumes'
+    # 不加 --remove-orphans：该参数会删除「同项目名但不在本配置内」的容器
+    command = f'{base} down --volumes'
     code, output = _run(host, command, 600)
     if code:
         raise DockerClientError(output or 'Docker Compose 移除失败')
@@ -328,7 +365,8 @@ def create_project(host, project_name, workdir, content):
     )
     start, compose = _compose_base(final_project)
     start = f'{start} up -d'
-    down = f'cd {shlex.quote(workdir)} && {compose} down --remove-orphans'
+    # 回滚同样不加 --remove-orphans，避免连带删除同项目名下的其他容器
+    down = f'cd {shlex.quote(workdir)} && {compose} down'
 
     if host is None:
         os.makedirs(workdir, exist_ok=True)
@@ -489,15 +527,23 @@ def manage_resource(host, kind, action, target=None, force=False):
 
 
 def execute(host, project_name, config_file, action, service=None, tail=200):
+    # down 会销毁容器与共享网络，同名项目下必须先确认没有其他配置组
+    guarded = action == 'down'
     if host is None:
-        project = get_project(host, project_name, config_file)
+        projects = discover_projects(host, use_cache=not guarded)
+        project = validate_project_ref(projects, project_name, config_file)
+        if guarded:
+            _assert_no_name_conflict(projects, project_name, config_file, '停止并移除')
         command = build_compose_command(project, action, service, tail)
         code, output = _run(host, command)
     else:
         # 校验与执行共用一条 SSH 连接，避免每次操作重复付出建连成本。
         try:
             with host.get_ssh() as ssh:
-                project = get_project(host, project_name, config_file, ssh)
+                projects = discover_projects(host, ssh, use_cache=not guarded)
+                project = validate_project_ref(projects, project_name, config_file)
+                if guarded:
+                    _assert_no_name_conflict(projects, project_name, config_file, '停止并移除')
                 command = build_compose_command(project, action, service, tail)
                 code, output = _run(host, command, 900, ssh)
         except DockerClientError:
