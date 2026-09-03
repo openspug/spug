@@ -14,9 +14,9 @@ import lds from 'lodash';
 
 // AI 前置任务的轮次上限与默认值，需与后端 apps/monitor/models.py 的 AI_LOOP_LIMITS 保持一致
 const AI_LOOP_LIMITS = {
-  '': {ceiling: 20, fallback: 3},
-  diagnose: {ceiling: 10, fallback: 5},
-  repair: {ceiling: 20, fallback: 8},
+  '': {ceiling: 60, fallback: 15},
+  diagnose: {ceiling: 60, fallback: 15},
+  repair: {ceiling: 50, fallback: 20},
 };
 
 const modeOptions = [

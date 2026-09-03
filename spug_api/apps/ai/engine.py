@@ -13,6 +13,7 @@
 对外只暴露 run_session / run_chat / resume_chat 三个入口，
 所有过程仍完整写入 AgentRecord，并通过 stream 推送给前端。
 """
+from django.conf import settings
 from django.db import close_old_connections
 from pydantic_ai import (
     Agent as _PydanticAgent,
@@ -47,10 +48,15 @@ import re
 
 SDK_VERSION = getattr(pydantic_ai, '__version__', 'unknown')
 
-# 单条命令输出回传给模型的上限，避免超长日志撑爆上下文
-OUTPUT_LIMIT = 4000
-# 消息历史保留的最大条数，超出后从头裁剪（裁剪时保证工具调用与结果成对）
-HISTORY_LIMIT = 200
+# 单条命令输出回传给模型的上限。长上下文模型下不必卡得太死，
+# 否则日志类排查会因为截断丢掉关键信息。
+OUTPUT_LIMIT = int(getattr(settings, 'AI_OUTPUT_LIMIT', 20000))
+# 消息历史的字符预算。按字符而非条数控制，长会话才不会被条数上限误伤。
+# 中文约 1.5~2 字符/token，默认 120 万字符对应约 60~80 万 token，
+# 在 100 万上下文模型下留有余量。
+CONTEXT_BUDGET = int(getattr(settings, 'AI_CONTEXT_LIMIT', 1200000))
+# 兜底的条数上限，防止极端情况下消息条数过多拖慢序列化
+HISTORY_LIMIT = int(getattr(settings, 'AI_HISTORY_LIMIT', 2000))
 
 
 def _tool_slug(text):
@@ -149,27 +155,59 @@ class AgentRunner:
         except Exception as e:
             logging.warning(f'serialize agent history failed: {e}')
             return
-        if len(data) > HISTORY_LIMIT:
-            data = self._trim(data)
+        data = self._trim(data)
         self.session.messages = json.dumps(data, ensure_ascii=False)
         self.session.sdk_version = SDK_VERSION
         self.session.save(update_fields=['messages', 'sdk_version'])
 
     @staticmethod
-    def _trim(data):
-        """裁剪过长历史。
+    def _has_orphan_return(item):
+        """该消息是否含有「工具返回」——单独保留会成为孤儿。"""
+        parts = item.get('parts') or []
+        return any(p.get('part_kind') in ('tool-return', 'retry-prompt') for p in parts)
 
-        必须保证裁剪后的首条消息不是「孤儿工具结果」——只有工具返回却没有
-        对应的工具调用时，OpenAI 兼容网关会直接返回 400。
+    @classmethod
+    def _trim(cls, data):
+        """按字符预算裁剪历史，保留首条任务上下文与最近的对话。
+
+        三条约束：
+        1. 首条消息（原始任务/提问）必须保住，否则长会话跑到后期模型会忘记目标；
+        2. 保留段的首条不能是「孤儿工具返回」——有返回却无对应调用时，
+           OpenAI 兼容网关会直接返回 400；
+        3. 预算按字符计，避免长会话被固定条数上限误伤。
         """
-        kept = data[-HISTORY_LIMIT:]
-        while kept:
-            parts = kept[0].get('parts') or []
-            if any(p.get('part_kind') in ('tool-return', 'retry-prompt') for p in parts):
-                kept.pop(0)
-                continue
-            break
-        return kept
+        if not data:
+            return data
+        total = sum(len(json.dumps(x, ensure_ascii=False)) for x in data)
+        if total <= CONTEXT_BUDGET and len(data) <= HISTORY_LIMIT:
+            return data
+
+        head, rest = data[:1], data[1:]
+        head_size = len(json.dumps(head[0], ensure_ascii=False))
+        budget = max(0, CONTEXT_BUDGET - head_size)
+
+        kept, used = [], 0
+        for item in reversed(rest):
+            size = len(json.dumps(item, ensure_ascii=False))
+            if used + size > budget or len(kept) + 1 >= HISTORY_LIMIT:
+                break
+            kept.append(item)
+            used += size
+        kept.reverse()
+
+        while kept and cls._has_orphan_return(kept[0]):
+            kept.pop(0)
+
+        if len(kept) < len(rest):
+            head = head + [{
+                'kind': 'request',
+                'parts': [{
+                    'part_kind': 'user-prompt',
+                    'content': f'【历史已压缩】此前省略了 {len(rest) - len(kept)} 条较早的消息，'
+                               f'仅保留任务目标与最近的执行过程。',
+                }],
+            }]
+        return head + kept
 
 
 def _build_model(session):
@@ -454,7 +492,7 @@ def run_chat(session, question):
         if session.mode == 'chat' or not session.host_id:
             return _plain_chat(runner, question)
         deps = Deps(session=session, runner=runner, mode='agent', unattended=False)
-        max_loops = max(1, int(session.max_loops or 20))
+        max_loops = max(1, int(session.max_loops or 30))
         # 智能体构建与 SSH 建连都涉及 ORM，必须留在同步段：
         # Django 禁止在事件循环内直接访问数据库
         agent = build_agent(runner, _chat_instructions(session))
@@ -496,7 +534,7 @@ def resume_chat(session, approved):
 
     try:
         deps = Deps(session=session, runner=runner, mode='agent', unattended=False)
-        max_loops = max(1, int(session.max_loops or 20))
+        max_loops = max(1, int(session.max_loops or 30))
         agent = build_agent(runner, _chat_instructions(session))
         history = runner.load_history()
         with session.host.get_ssh() as ssh:
@@ -618,7 +656,7 @@ def run_session(session, verifier=None):
     context = _session_context(session)
     runner.record('context', context, emit=False)
     instructions = DIAGNOSE_PROMPT if session.mode == 'diagnose' else REPAIR_PROMPT
-    max_loops = max(1, int(session.max_loops or 3))
+    max_loops = max(1, int(session.max_loops or 15))
     deps = Deps(session=session, runner=runner, mode=session.mode, unattended=True)
 
     try:

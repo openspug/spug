@@ -284,7 +284,7 @@ class SessionView(View):
             Argument('mode', default='chat',
                      filter=lambda x: x in ('chat', 'diagnose', 'repair'), help='请选择正确的会话模式'),
             Argument('host_id', type=int, required=False),
-            Argument('max_loops', type=int, default=5),
+            Argument('max_loops', type=int, default=30),
             Argument('trigger_message', required=False),
         ).parse(request.body)
         if error is not None:

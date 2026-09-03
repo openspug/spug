@@ -77,7 +77,7 @@ class AgentSession(models.Model, ModelMixin):
     target = models.CharField(max_length=255, null=True)
     trigger_message = models.TextField(null=True)
     model_name = models.CharField(max_length=100, null=True)
-    max_loops = models.IntegerField(default=3)
+    max_loops = models.IntegerField(default=30)
     used_loops = models.IntegerField(default=0)
     # 当前已进行的对话轮次，用于在记录中区分每一次用户提问
     turn = models.IntegerField(default=0)

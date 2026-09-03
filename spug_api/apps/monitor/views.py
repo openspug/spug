@@ -51,7 +51,7 @@ class DetectionView(View):
             else:
                 form.ai_host_id = None
                 # 未启用时仍要给个合法值，字段本身不允许为空
-                form.ai_max_loops = form.ai_max_loops or 3
+                form.ai_max_loops = form.ai_max_loops or 15
 
             form.targets = json.dumps(form.targets)
             form.notify_grp = json.dumps(form.notify_grp)
