@@ -109,7 +109,7 @@ class Store {
   };
 
   rollback = (info) => {
-    this.record = lds.pick(info, ['app_id', 'deploy_id', 'host_ids', 'deploy_status']);
+    this.record = lds.pick(info, ['app_id', 'deploy_id', 'host_ids', 'deploy_status', 'app_extend']);
     this.record.app_host_ids = info.host_ids;
     this.record.name = t('{} - 回滚', info.name);
     this.rollbackVisible = true

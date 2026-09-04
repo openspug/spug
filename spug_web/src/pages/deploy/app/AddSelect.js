@@ -33,7 +33,9 @@ class AddSelect extends React.Component {
       rst_notify: {mode: '0'},
       host_ids: [],
       host_actions: [],
-      server_actions: []
+      server_actions: [],
+      rollback_host_actions: [],
+      rollback_server_actions: []
     }
   };
 

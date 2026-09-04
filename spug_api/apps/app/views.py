@@ -165,7 +165,9 @@ class DeployView(View):
             elif form.extend == '2':
                 extend_form, error = JsonParser(
                     Argument('server_actions', type=list, help='请输入执行动作'),
-                    Argument('host_actions', type=list, help='请输入执行动作')
+                    Argument('host_actions', type=list, help='请输入执行动作'),
+                    Argument('rollback_server_actions', type=list, default=[]),
+                    Argument('rollback_host_actions', type=list, default=[]),
                 ).parse(request.body)
                 if error:
                     return json_response(error=error)
@@ -174,6 +176,8 @@ class DeployView(View):
                 extend_form.require_upload = any(x.get('src_mode') == '1' for x in extend_form.host_actions)
                 extend_form.server_actions = json.dumps(extend_form.server_actions)
                 extend_form.host_actions = json.dumps(extend_form.host_actions)
+                extend_form.rollback_server_actions = json.dumps(extend_form.rollback_server_actions)
+                extend_form.rollback_host_actions = json.dumps(extend_form.rollback_host_actions)
                 if form.id:
                     Deploy.objects.filter(pk=form.id).update(**form)
                     DeployExtend2.objects.filter(deploy_id=form.id).update(**extend_form)

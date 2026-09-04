@@ -35,6 +35,8 @@ class Ext2Setup2 extends React.Component {
     info['extend'] = '2';
     info['host_actions'] = info['host_actions'].filter(x => (x.title && x.data) || (x.title && (x.src || x.src_mode === '1') && x.dst));
     info['server_actions'] = info['server_actions'].filter(x => x.title && x.data);
+    info['rollback_host_actions'] = (info['rollback_host_actions'] || []).filter(x => x.title && x.data);
+    info['rollback_server_actions'] = (info['rollback_server_actions'] || []).filter(x => x.title && x.data);
     http.post('/api/app/deploy/', info)
       .then(res => {
         message.success(t('保存成功'));
@@ -65,9 +67,21 @@ class Ext2Setup2 extends React.Component {
     this._doAction(actions, index, action)
   }
 
+  handleRollbackServerAction = (index, action) => {
+    const actions = store.deploy['rollback_server_actions'];
+    this._doAction(actions, index, action)
+  }
+
+  handleRollbackHostAction = (index, action) => {
+    const actions = store.deploy['rollback_host_actions'];
+    this._doAction(actions, index, action)
+  }
+
   render() {
     const server_actions = store.deploy['server_actions'];
     const host_actions = store.deploy['host_actions'];
+    const rollback_server_actions = store.deploy['rollback_server_actions'] || [];
+    const rollback_host_actions = store.deploy['rollback_host_actions'] || [];
     return (
       <Form labelCol={{span: 6}} wrapperCol={{span: 14}} className={styles.ext2Form}>
         {store.deploy.id === undefined && (
@@ -210,6 +224,90 @@ class Ext2Setup2 extends React.Component {
               disabled={store.isReadOnly || lds.findIndex(host_actions, x => x.type === 'transfer') !== -1}
               onClick={() => host_actions.push({type: 'transfer', title: t('数据传输'), mode: '0', src_mode: '0'})}>
               <PlusOutlined/>{t('添加数据传输动作（仅能添加一个）')}
+            </Button>
+          </Form.Item>
+        )}
+        <Divider orientation="left">{t('回滚动作（可选）')}</Divider>
+        <Alert
+          closable
+          showIcon
+          type="info"
+          message={t('回滚动作')}
+          style={{margin: '0 80px 20px'}}
+          description={t('当发布申请执行回滚时，将按顺序执行以下回滚动作。留空则该发布配置不支持回滚。')}
+        />
+        {rollback_server_actions.map((item, index) => (
+          <div key={index} style={{marginBottom: 30, position: 'relative'}}>
+            <Form.Item label={t('回滚本地动作{}', index + 1)}>
+              <Input disabled={store.isReadOnly} value={item['title']} onChange={e => item['title'] = e.target.value}
+                     placeholder={t('请输入')}/>
+            </Form.Item>
+
+            <Form.Item label={t('执行内容')}>
+              <ACEditor
+                readOnly={store.isReadOnly}
+                mode="sh"
+                theme="tomorrow"
+                width="100%"
+                height="100px"
+                value={item['data']}
+                onChange={v => item['data'] = cleanCommand(v)}
+                placeholder={t('请输入要执行的回滚动作')}/>
+            </Form.Item>
+            {!store.isReadOnly && (
+              <React.Fragment>
+                <Button type="dashed" icon={<UpOutlined/>} className={styles.upAction}
+                        onClick={() => this.handleRollbackServerAction(index, 'up')}/>
+                <div className={styles.delAction} onClick={() => rollback_server_actions.splice(index, 1)}>
+                  <MinusCircleOutlined/>{t('移除')}
+                </div>
+                <Button type="dashed" icon={<DownOutlined/>} className={styles.downAction}
+                        onClick={() => this.handleRollbackServerAction(index, 'down')}/>
+              </React.Fragment>
+            )}
+          </div>
+        ))}
+        {!store.isReadOnly && (
+          <Form.Item wrapperCol={{span: 14, offset: 6}}>
+            <Button type="dashed" block onClick={() => rollback_server_actions.push({})}>
+              <PlusOutlined/>{t('添加回滚本地执行动作（在服务端本地执行）')}
+            </Button>
+          </Form.Item>
+        )}
+        {rollback_host_actions.map((item, index) => (
+          <div key={index} style={{marginBottom: 30, position: 'relative'}}>
+            <Form.Item label={t('回滚目标主机动作{}', index + 1)}>
+              <Input disabled={store.isReadOnly} value={item['title']} onChange={e => item['title'] = e.target.value}
+                     placeholder={t('请输入')}/>
+            </Form.Item>
+            <Form.Item label={t('执行内容')}>
+              <ACEditor
+                readOnly={store.isReadOnly}
+                mode="sh"
+                theme="tomorrow"
+                width="100%"
+                height="100px"
+                value={item['data']}
+                onChange={v => item['data'] = cleanCommand(v)}
+                placeholder={t('请输入要执行的回滚动作')}/>
+            </Form.Item>
+            {!store.isReadOnly && (
+              <React.Fragment>
+                <Button type="dashed" icon={<UpOutlined/>} className={styles.upAction}
+                        onClick={() => this.handleRollbackHostAction(index, 'up')}/>
+                <div className={styles.delAction} onClick={() => rollback_host_actions.splice(index, 1)}>
+                  <MinusCircleOutlined/>{t('移除')}
+                </div>
+                <Button type="dashed" icon={<DownOutlined/>} className={styles.downAction}
+                        onClick={() => this.handleRollbackHostAction(index, 'down')}/>
+              </React.Fragment>
+            )}
+          </div>
+        ))}
+        {!store.isReadOnly && (
+          <Form.Item wrapperCol={{span: 14, offset: 6}}>
+            <Button type="dashed" block onClick={() => rollback_host_actions.push({})}>
+              <PlusOutlined/>{t('添加回滚目标主机执行动作（在部署目标主机执行）')}
             </Button>
           </Form.Item>
         )}
