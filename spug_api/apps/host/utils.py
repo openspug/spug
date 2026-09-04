@@ -239,8 +239,7 @@ def fetch_host_extend(ssh):
             if not item.isdigit():
                 continue
             size = math.ceil(int(item) / 1024 / 1024 / 1024)
-            if size > 10:
-                disks.append(size)
+            disks.append(size)
         response['disk'] = disks[:10]
     else:
         # 无 lsblk（如 Alpine/busybox）时回退 /proc/partitions，按整盘命名模式过滤分区
@@ -254,8 +253,7 @@ def fetch_host_extend(ssh):
                 if not WHOLE_DISK_REGEX.fullmatch(fields[3]):
                     continue
                 size = math.ceil(int(fields[2]) / 1024 / 1024)  # 块单位为 1KiB
-                if size > 10:
-                    disks.append(size)
+                disks.append(size)
             response['disk'] = disks[:10]
 
     code, out = ssh.exec_command_raw("dmidecode -t 17 2> /dev/null | grep -E 'Size: [0-9]+' | awk '{s+=$2} END {print s,$3}'")
