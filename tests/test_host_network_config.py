@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import ast
+import configparser
 import json
 import os
 from pathlib import Path
@@ -8,7 +9,9 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[1]
 COMPOSE = Path(os.environ.get("COMPOSE_FILE", ROOT / "docker-compose.yml"))
 NGINX = Path(os.environ.get("NGINX_FILE", ROOT / "docs/docker/nginx-host.conf"))
-REDIS = Path(os.environ.get("REDIS_FILE", ROOT / "docs/docker/redis-host.conf"))
+SUPERVISOR = Path(os.environ.get(
+    "SUPERVISOR_FILE", ROOT / "docs/docker/supervisor-host.conf"
+))
 SETTINGS = Path(os.environ.get("SETTINGS_FILE", ROOT / "spug_api/spug/settings.py"))
 
 
@@ -74,7 +77,7 @@ def main() -> None:
     service = compose_service()
     assert service.get("network_mode") == "host"
     assert not service.get("ports")
-    assert service["environment"]["SPUG_REDIS_PORT"] == "16379"
+    assert "SPUG_REDIS_PORT" not in service["environment"]
     assert "host.docker.internal=host-gateway" in service.get("extra_hosts", [])
 
     mounted_sources = {
@@ -82,7 +85,8 @@ def main() -> None:
     }
     assert mounted_sources.get("nginx-host.conf") == "/etc/nginx/nginx.conf"
     assert "nginx.conf" not in mounted_sources
-    assert mounted_sources.get("redis-host.conf") == "/etc/redis.conf"
+    assert mounted_sources.get("supervisor-host.conf") == "/etc/supervisor/conf.d/spug.conf"
+    assert "redis-host.conf" not in mounted_sources
 
     assert active_directives(NGINX, "listen") == [
         "listen       127.0.0.1:8089 default_server;"
@@ -91,10 +95,18 @@ def main() -> None:
         "include /etc/nginx/modules-enabled/*.conf;",
         "include             /etc/nginx/mime.types;",
     ]
-    assert active_directives(REDIS, "include") == []
-    assert active_directives(REDIS, "bind") == ["bind 127.0.0.1"]
-    assert active_directives(REDIS, "port") == ["port 16379"]
-    assert active_directives(REDIS, "pidfile") == ["pidfile /var/run/redis_16379.pid"]
+
+    supervisor = configparser.ConfigParser()
+    supervisor.read(SUPERVISOR)
+    assert "program:redis" not in supervisor.sections()
+    assert {
+        "program:nginx",
+        "program:spug-api",
+        "program:spug-ws",
+        "program:spug-worker",
+        "program:spug-monitor",
+        "program:spug-scheduler",
+    }.issubset(supervisor.sections())
 
     settings_tree = ast.parse(SETTINGS.read_text())
     assert same_expression(

@@ -18,8 +18,8 @@ services:
       - /opt/spug/releases/latest:/data/spug
       - /opt/spug/repos:/data/repos
       - /var/run/docker.sock:/var/run/docker.sock
-      # Host 网络下使用独立端口，避免误连宿主机已有的 6379 Redis。
-      - ./docs/docker/redis-host.conf:/etc/redis.conf:ro
+      # Host 网络复用宿主机现有 Redis，覆盖 Supervisor 配置以禁用容器内 Redis。
+      - ./docs/docker/supervisor-host.conf:/etc/supervisor/conf.d/spug.conf:ro
       # 覆盖镜像内置配置，为智能体 SSE 关闭缓冲，否则流式回复会被攒到最后一次性下发
       - ./docs/docker/nginx-host.conf:/etc/nginx/nginx.conf:ro
 
@@ -32,7 +32,6 @@ services:
       SPUG_DB_PASSWORD: "${SPUG_DB_PASSWORD:?SPUG_DB_PASSWORD is required}"
       SPUG_DB_HOST: "${SPUG_DB_HOST:?SPUG_DB_HOST is required}"
       SPUG_DB_PORT: "${SPUG_DB_PORT:?SPUG_DB_PORT is required}"
-      SPUG_REDIS_PORT: "16379"
 
     # 保留旧地址兼容性；主机管理连接本机时仍应使用 127.0.0.1。
     extra_hosts:

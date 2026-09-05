@@ -15,9 +15,8 @@
 - 新增生产 host 网络专用 Nginx 配置，仅监听宿主机回环地址的 `8089`；
   内部 API 与 WebSocket 服务仍通过 `127.0.0.1:9001` 和
   `127.0.0.1:9002` 访问。
-- 新增生产 host 网络专用 Redis 配置，将容器内置 Redis 调整到 `16379`，
-  并通过 `SPUG_REDIS_PORT` 让 Django 缓存与 Channels 使用同一端口，避免与
-  宿主机已有的 `6379` 冲突。
+- 生产环境复用宿主机已有 Redis（`127.0.0.1:6379`），并挂载 host 网络专用
+  Supervisor 配置禁用容器内置 Redis，避免两个 Redis 实例争用同一端口。
 - `docker-compose.local.yml` 保持桥接网络，避免改变 macOS 本地开发行为。
 
 ## 风险与约束
@@ -37,3 +36,4 @@
 - 使用必需环境变量运行 `docker compose config` 验证配置可解析。
 - 部署后在容器中检查 `127.0.0.1:<SSH 端口>` 返回 SSH banner，再在主机管理
   中执行连接验证。
+�行连接验证。

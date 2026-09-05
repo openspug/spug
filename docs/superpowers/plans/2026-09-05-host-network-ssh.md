@@ -4,7 +4,7 @@
 
 **目标：** 让生产 Spug 容器中的 `127.0.0.1` 指向宿主机，从主机管理连接宿主机 SSH，并保持 Web 入口仅在 `127.0.0.1:8089` 提供。
 
-**架构：** 生产 `spug` 服务改用 Linux host 网络，取消桥接网络的端口发布。Nginx 在宿主机回环地址监听 8089；内置 Redis 使用 16379，避免误连宿主机的默认 Redis；本地开发 Compose 不变。
+**架构：** 生产 `spug` 服务改用 Linux host 网络，取消桥接网络的端口发布。Nginx 在宿主机回环地址监听 8089；Spug 复用宿主机现有的 `redis-stack:6379`，并通过生产 Supervisor 配置禁用容器内置 Redis；本地开发 Compose 不变。
 
 **技术栈：** Docker Compose、Linux host networking、Nginx、Redis、Django 4.2
 
@@ -16,7 +16,7 @@
 - 修改：`docker-compose.yml`
 - 修改：`spug_api/spug/settings.py`
 - 创建：`docs/docker/nginx-host.conf`
-- 创建：`docs/docker/redis-host.conf`
+- 创建：`docs/docker/supervisor-host.conf`
 - 创建：`tests/test_host_network_config.py`
 - 创建：`tests/test_host_network_config.sh`
 
@@ -30,11 +30,11 @@ sh tests/test_host_network_config.sh
 
 - [x] **步骤 2：创建 host 网络服务配置**
 
-Nginx 仅监听 `127.0.0.1:8089`，并移除基础镜像可变的 `conf.d` 配置加载。Redis 仍绑定回环地址，但使用专用端口 16379。
+Nginx 仅监听 `127.0.0.1:8089`，并移除基础镜像可变的 `conf.d` 配置加载。生产 Supervisor 配置不包含 Redis 进程，复用已有的宿主机 Redis。
 
 - [x] **步骤 3：修改生产 Compose 与 Django Redis 地址**
 
-生产服务启用 `network_mode: host`，删除 `ports`，挂载两份 host 网络配置，并设置 `SPUG_REDIS_PORT=16379`。Django 缓存与 Channels 从环境变量读取 Redis 主机和端口，默认值仍保持 `127.0.0.1:6379`。
+生产服务启用 `network_mode: host`，删除 `ports`，挂载 Nginx 和 Supervisor 配置，移除专用 Redis 端口覆盖。Django 缓存与 Channels 默认连接 `127.0.0.1:6379`。
 
 - [x] **步骤 4：验证回归测试、Python 语法与 Compose 解析**
 
@@ -52,13 +52,13 @@ SPUG_SECRET_KEY=test SPUG_DB_ENGINE=django.db.backends.postgresql SPUG_DB_NAME=s
 docker compose run --rm --no-deps --entrypoint sh spug -c \
   "cd /data/spug/spug_api && python3 manage.py shell -c \"from django.db import connection; cursor = connection.cursor(); cursor.execute('SELECT 1'); assert cursor.fetchone()[0] == 1; cursor.close()\""
 docker compose stop
-if ss -lntp | grep -Eq ':(8089|9001|9002|16379)\\b'; then
+if ss -lntp | grep -Eq ':(8089|9001|9002)[[:space:]]'; then
   echo 'host-network port conflict' >&2
   exit 1
 fi
 ```
 
-预期：使用实际生产环境变量时 `SELECT 1` 成功；停止旧容器后四个端口均未被其他服务占用。`SPUG_DB_HOST` 若是旧 Compose 服务名，须先改为 host 网络可路由地址。端口检查失败时先用原版本 Compose 恢复旧容器，不继续部署。
+预期：使用实际生产环境变量时 `SELECT 1` 成功；停止旧容器后三个端口均未被其他服务占用。`SPUG_DB_HOST` 若是旧 Compose 服务名，须先改为 host 网络可路由地址。端口检查失败时先用原版本 Compose 恢复旧容器，不继续部署。
 
 - [ ] **步骤 6：部署后运行时验证**
 
