@@ -120,12 +120,15 @@ else:
         }
     }
 
+_REDIS_HOST = os.environ.get('SPUG_REDIS_HOST', '127.0.0.1')
+_REDIS_PORT = int(os.environ.get('SPUG_REDIS_PORT', '6379'))
+
 CACHES = {
     "default": {
         # django_redis is required, the deploy/build/pipeline consoles use
         # get_redis_connection() to stream their output through redis lists.
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "LOCATION": f"redis://{_REDIS_HOST}:{_REDIS_PORT}/1",
         "KEY_PREFIX": "spug",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
@@ -137,7 +140,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [(_REDIS_HOST, _REDIS_PORT)],
             "prefix": "spug:channel",
             "capacity": 1000,
             "expiry": 120,
