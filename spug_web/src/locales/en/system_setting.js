@@ -17,7 +17,7 @@ const dict = {
   '设置成功': 'Saved successfully',
 
   // AlarmSetting.js
-  '邮件服务连接成功': 'Email service connected successfully',
+  '测试邮件已发送，请检查收件箱和垃圾邮件': 'Test email sent. Check your inbox and spam folder.',
   '请完成邮件服务配置': 'Please complete the email service configuration',
   '邮件服务': 'Email Service',
   '用于通过邮件方式发送报警信息': 'Used to send alert notifications via email',

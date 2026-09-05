@@ -166,12 +166,16 @@ def email_test(request):
         Argument('port', type=int, help='请输入邮件服务端口号'),
         Argument('username', help='请输入邮箱账号'),
         Argument('password', help='请输入密码/授权码'),
+        Argument('nickname', required=False),
     ).parse(request.body)
     if error is None:
         try:
             mail = Mail(**form)
-            server = mail.get_server()
-            server.quit()
+            mail.send_text_mail(
+                [form.username],
+                'Spug 邮件服务测试',
+                '这是一封来自 Spug 的测试邮件，收到此邮件表示邮件服务配置正常。',
+            )
             return json_response()
         except Exception as e:
             error = f'{e}'
