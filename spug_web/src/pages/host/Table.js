@@ -9,6 +9,7 @@ import { Table, Modal, Dropdown, Button, Avatar, Tooltip, Space, Tag, Radio, Inp
 import { PlusOutlined, DownOutlined, SyncOutlined, FormOutlined, ExportOutlined } from '@ant-design/icons';
 import { Action, TableCard, AuthButton, AuthFragment } from 'components';
 import IPAddress from './IPAddress';
+import Metrics from './Metrics';
 import { http, hasPermission, blobToExcel, humanDate, t } from 'libs';
 import store from './store';
 import icons from './icons';
@@ -81,7 +82,7 @@ function ComTable() {
                 key: 'form',
                 label: (
                   <Space>
-                    <FormOutlined style={{fontSize: 16, marginRight: 4, color: '#1890ff'}}/>
+                    <FormOutlined style={{fontSize: 16, marginRight: 4, color: '#6c7cff'}}/>
                     <span>{t('新建主机')}</span>
                   </Space>
                 )
@@ -151,6 +152,9 @@ function ComTable() {
           <IPAddress ip={info.public_ip_address} isPublic/>
           <IPAddress ip={info.private_ip_address}/>
         </div>
+      )}/>
+      <Table.Column title={t('监控')} render={info => (
+        info.is_verified ? <Metrics id={info.id}/> : null
       )}/>
       <Table.Column title={t('配置信息')} render={info => (
         <Space>

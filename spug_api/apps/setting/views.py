@@ -8,8 +8,7 @@ from libs import JsonParser, Argument, json_response, auth
 from libs.utils import generate_random_str
 from libs.ldap import LDAP
 from libs.mail import Mail
-from libs.spug import send_login_wx_code
-from libs.push import get_balance, get_contacts
+from libs.push import get_balance, get_contacts, send_mfa_code
 from libs.mixins import AdminView
 from apps.setting.utils import AppSetting
 from apps.setting.models import Setting, KEYS_DEFAULT
@@ -53,10 +52,11 @@ class SettingView(AdminView):
 
 class MFAView(AdminView):
     def get(self, request):
-        if not request.user.wx_token:
-            return json_response(error='检测到当前账户未配置微信Token，请配置后再尝试启用MFA认证，否则可能造成系统无法正常登录。')
         code = generate_random_str(6)
-        send_login_wx_code(request.user.wx_token, code)
+        try:
+            send_mfa_code(request.user.wx_token, code)
+        except Exception as e:
+            return json_response(error=f'{e}')
         cache.set(f'{request.user.username}:code', code, 300)
         return json_response()
 
@@ -166,12 +166,16 @@ def email_test(request):
         Argument('port', type=int, help='请输入邮件服务端口号'),
         Argument('username', help='请输入邮箱账号'),
         Argument('password', help='请输入密码/授权码'),
+        Argument('nickname', required=False),
     ).parse(request.body)
     if error is None:
         try:
             mail = Mail(**form)
-            server = mail.get_server()
-            server.quit()
+            mail.send_text_mail(
+                [form.username],
+                'Spug 邮件服务测试',
+                '这是一封来自 Spug 的测试邮件，收到此邮件表示邮件服务配置正常。',
+            )
             return json_response()
         except Exception as e:
             error = f'{e}'
@@ -180,10 +184,11 @@ def email_test(request):
 
 @auth('admin')
 def mfa_test(request):
-    if not request.user.wx_token:
-        return json_response(error='检测到当前账户未配置微信Token，请配置后再尝试启用MFA认证，否则可能造成系统无法正常登录。')
     code = generate_random_str(6)
-    send_login_wx_code(request.user.wx_token, code)
+    try:
+        send_mfa_code(request.user.wx_token, code)
+    except Exception as e:
+        return json_response(error=f'{e}')
     cache.set(f'{request.user.username}:code', code, 300)
     return json_response()
 
@@ -205,6 +210,9 @@ def handle_push_bind(request):
     ).parse(request.body)
     if error is None:
         if not form.spug_push_key:
+            # 推送助手是 MFA 验证码的唯一下发通道，解绑前必须先关闭 MFA，否则所有人都登不进来
+            if AppSetting.get_default('MFA', {'enable': False}).get('enable'):
+                return json_response(error='已开启登录MFA认证，请先在安全设置中关闭MFA后再解除绑定。')
             AppSetting.delete('spug_push_key')
             return json_response()
 

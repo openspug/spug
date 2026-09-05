@@ -11,7 +11,14 @@ module.exports = override(
     lessOptions: {
       javascriptEnabled: true,
       modifyVars: {
-        '@primary-color': '#2563fc'
+        '@primary-color': '#6c7cff',
+        '@link-color': '#6c7cff',
+        '@success-color': '#3dd598',
+        '@warning-color': '#ffb648',
+        '@error-color': '#ff7a7a',
+        '@border-radius-base': '8px',
+        '@body-background': '#f5f7fb',
+        '@layout-body-background': '#f5f7fb'
       }
     }
   }),

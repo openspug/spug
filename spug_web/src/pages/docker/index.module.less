@@ -1,0 +1,105 @@
+.page {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  height: calc(100vh - 64px);
+  background: #f5f7fa;
+}
+
+.sidebar {
+  min-width: 0;
+  padding: 16px 14px;
+  border-right: 1px solid #e5e7eb;
+  background: #fff;
+  overflow: hidden;
+}
+
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px;
+  margin-bottom: 10px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.sidebarHeader :global(.anticon) { margin-right: 7px; }
+.hostSelect { width: 100%; }
+.listHeader { display: flex; align-items: center; justify-content: space-between; height: 42px; margin-top: 8px; color: #667085; font-size: 13px; }
+.projectList { overflow-y: auto; height: calc(100vh - 462px); min-height: 120px; }
+.resourceNav { border-top: 1px solid #f0f1f3; }
+.resourceNav .project, .resourceNav .activeProject { min-height: 40px; padding: 10px; }
+.resourceNav button:disabled { cursor: not-allowed; opacity: .45; }
+.resourceCount { color: #667085; font-size: 13px; }
+.project, .activeProject {
+  display: block;
+  width: 100%;
+  min-height: 58px;
+  padding: 9px 10px;
+  border: 0;
+  border-bottom: 1px solid #f0f1f3;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.project:hover { background: #f7f8fa; }
+.activeProject { background: #eaf3ff; box-shadow: inset 3px 0 #1677ff; }
+.project span, .activeProject span { display: block; color: #1f2937; font-weight: 500; }
+.project small, .activeProject small { display: block; margin-top: 4px; color: #8a94a3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 内容区改为纵向弹性布局：头部与容器表按内容占位，
+   下方的 Tab（Compose / 日志）吃掉全部剩余高度，不再留大片空白。 */
+.content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 22px 18px;
+}
+.header { flex: none; display: flex; justify-content: space-between; align-items: center; min-height: 76px; border-bottom: 1px solid #e3e7ed; }
+.header h2 { margin: 0 0 4px; font-size: 20px; letter-spacing: 0; }
+.header span { color: #7b8492; }
+.toolbar { flex: none; padding: 12px 0; }
+/* 容器表最多占四成高度，超出内部滚动，保证日志区始终有足够空间 */
+.containers { flex: none; max-height: 38%; overflow: auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; }
+.resourcePanel { flex: 1; min-height: 0; overflow: auto; margin-top: 16px; padding: 12px; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; }
+
+.editorArea { flex: 1; min-height: 240px; margin-top: 14px; display: flex; flex-direction: column; }
+.configBar { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+
+/* 让 antd Tabs 的内容区继承高度，Tab 面板才能真正铺满 */
+.fullTabs { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.fullTabs :global(.ant-tabs-nav) { flex: none; margin-bottom: 8px; }
+.fullTabs :global(.ant-tabs-content-holder) { flex: 1; min-height: 0; display: flex; }
+.fullTabs :global(.ant-tabs-content) { flex: 1; min-height: 0; }
+.fullTabs :global(.ant-tabs-tabpane) { height: 100%; }
+
+.paneSpin { height: 100%; }
+.paneSpin :global(.ant-spin-container) { height: 100%; }
+.pane { display: flex; flex-direction: column; height: 100%; }
+.editorBox { flex: 1; min-height: 0; }
+.editorBox :global(.ace_editor) { border: 1px solid #2f343d; border-radius: 4px; }
+
+.logs { display: flex; flex-direction: column; height: 100%; border: 1px solid #272b33; border-radius: 4px; background: #191c22; overflow: hidden; }
+.logToolbar { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px; border-bottom: 1px solid #30353f; background: #242830; }
+.logWrap { color: #b7bfcc; }
+.followTag { margin: 0; }
+.logCount { margin-left: auto; color: #7d8697; font-size: 12px; font-variant-numeric: tabular-nums; }
+.logs pre { flex: 1; min-height: 0; margin: 0; padding: 14px; overflow: auto; color: #d6dae1; font: 13px/1.6 'SFMono-Regular', Consolas, monospace; }
+.logWrapOn { white-space: pre-wrap; word-break: break-all; }
+.logWrapOff { white-space: pre; }
+
+.hintMuted { color: #8a94a3; font-size: 12px; }
+.pruneList { max-height: 180px; margin: 8px 0; padding: 8px 10px; overflow: auto; background: #f5f7fa; border-radius: 4px; color: #444; font-size: 12px; line-height: 1.6; }
+.usageValue { color: #1f2937; font-variant-numeric: tabular-nums; }
+.usageMem { line-height: 1.3; font-variant-numeric: tabular-nums; }
+.usageMem small { display: block; color: #8a94a3; }
+.usageIdle { color: #b6bcc7; }
+
+@media (max-width: 900px) {
+  .page { grid-template-columns: 220px minmax(0, 1fr); }
+  .content { padding: 0 12px 14px; }
+  .header { align-items: flex-start; gap: 10px; padding: 14px 0; }
+}

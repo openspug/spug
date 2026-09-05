@@ -140,7 +140,7 @@ function OutView(props) {
             <div key={key} className={[style.item, key === current ? style.active : ''].join(' ')}
                  onClick={() => handleSwitch(key)}>
               {item.status === -2 ? (
-                <LoadingOutlined style={{color: '#1890ff'}}/>
+                <LoadingOutlined style={{color: '#6c7cff'}}/>
               ) : item.status === 0 ? (
                 <CheckCircleOutlined style={{color: '#52c41a'}}/>
               ) : (

@@ -1,0 +1,254 @@
+.container {
+  display: flex;
+  height: calc(100vh - 180px);
+  min-height: 480px;
+  background: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.sider {
+  width: 260px;
+  flex-shrink: 0;
+  border-right: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+}
+
+.siderHeader {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.siderList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.sessionItem {
+  padding: 8px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 4px;
+  position: relative;
+
+  &:hover {
+    background: #f5f5f5;
+
+    .sessionDel {
+      display: block;
+    }
+  }
+}
+
+.sessionActive {
+  background: #e6f4ff;
+
+  &:hover {
+    background: #e6f4ff;
+  }
+}
+
+.sessionTitle {
+  font-size: 13px;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 18px;
+}
+
+.sessionMeta {
+  font-size: 11px;
+  color: #999;
+  margin-top: 2px;
+}
+
+.sessionDel {
+  display: none;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  color: #bbb;
+
+  &:hover {
+    color: #d9363e;
+  }
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.metrics {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 8px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+  flex-shrink: 0;
+}
+
+.metricItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 150px;
+}
+
+.metricLabel {
+  font-size: 12px;
+  color: #888;
+  width: 34px;
+  flex-shrink: 0;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+
+.empty {
+  color: #999;
+  text-align: center;
+  margin-top: 80px;
+}
+
+.msgRow {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+.msgRowUser {
+  justify-content: flex-end;
+}
+
+.bubble {
+  max-width: 76%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.bubbleUser {
+  background: #6c7cff;
+  color: #fff;
+}
+
+.bubbleAI {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.trace {
+  max-width: 76%;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.traceHeader {
+  padding: 6px 12px;
+  background: #fafafa;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  user-select: none;
+}
+
+.traceBody {
+  padding: 8px 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.traceItem {
+  margin-bottom: 8px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.code {
+  margin: 4px 0 0;
+  padding: 6px 10px;
+  background: #f6f6f6;
+  border-radius: 4px;
+  font-size: 12px;
+  max-height: 220px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.inputArea {
+  border-top: 1px solid #f0f0f0;
+  padding: 12px 16px;
+  flex-shrink: 0;
+}
+
+/* 流式输出光标 */
+.caret {
+  display: inline-block;
+  width: 6px;
+  height: 14px;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: #6c7cff;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* 高危命令确认卡片 */
+.confirmCard {
+  max-width: 76%;
+  border: 1px solid #ffe58f;
+  background: #fffbe6;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.confirmTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: #614700;
+}
+
+.confirmReason {
+  font-size: 12px;
+  color: #ad8b00;
+  margin-top: 4px;
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.tip {
+  font-size: 12px;
+  color: #999;
+  margin-left: auto;
+}

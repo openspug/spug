@@ -108,7 +108,7 @@ function MonitorCard() {
           })}
           <Tooltip title={t('自动刷新')}>
             <div className={styles.autoLoad} onClick={handleAutoReload}>
-              {autoReload ? <SyncOutlined spin style={{color: '#2563fc'}}/> : <ReloadOutlined/>}
+              {autoReload ? <SyncOutlined spin style={{color: '#6c7cff'}}/> : <ReloadOutlined/>}
             </div>
           </Tooltip>
         </div>

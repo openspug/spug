@@ -48,7 +48,7 @@ export default observer(function () {
   }
 
   function handleChangeMFA(v) {
-    if (v && !store.settings.spug_key) return message.error(t('开启MFA认证需要先在基本设置中配置调用凭据'));
+    if (v && !store.settings.spug_push_key) return message.error(t('开启MFA认证需要先在推送服务设置中绑定推送助手账户'));
     v ? setVisible(true) : handleMFAModify(false)
   }
 
@@ -99,8 +99,8 @@ export default observer(function () {
           label={t('登录MFA（两步）认证')}
           style={{marginTop: 24}}
           extra={visible ? t('输入验证码，通过验证后开启。') :
-            <span>{t('建议开启，登录时额外使用验证码进行身份验证。开启前至少要确保管理员账户配置了微信Token（账户管理/编辑），开启后未配置微信Token的账户将无法登录，')}<a
-              target="_blank" rel="noopener noreferrer" href="https://spug.cc/docs/wx-token/">{t('什么是微信Token？')}</a></span>}>
+            <span>{t('建议开启，登录时额外使用验证码进行身份验证。验证码通过推送助手下发，开启前需先在推送服务设置中绑定账户，并确保管理员账户配置了推送对象ID（账户管理/编辑），开启后未配置的账户将无法登录，')}<a
+              target="_blank" rel="noopener noreferrer" href="https://push.spug.cc/guide/spug">{t('配置手册')}</a></span>}>
           {visible ? (
             <div style={{display: 'flex', width: 490}}>
               <Form.Item noStyle extra={t('验证通过后开启MFA（两步验证）。')}>

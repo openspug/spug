@@ -7,7 +7,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apps.schedule.scheduler import Scheduler
 from apps.schedule.models import Task, History
-from apps.schedule.executors import dispatch_job
+from apps.schedule.executors import dispatch_job, resolve_status, _finish_history
 from apps.host.models import Host
 from django.conf import settings
 from libs import json_response, JsonParser, Argument, human_datetime, auth
@@ -30,6 +30,7 @@ class Schedule(View):
             Argument('interpreter', help='请选择执行解释器'),
             Argument('command', help='请输入任务内容'),
             Argument('rst_notify', type=dict, help='请选择执行失败通知方式'),
+            Argument('ai_analysis', type=bool, required=False, default=False),
             Argument('targets', type=list, filter=lambda x: len(x), help='请选择执行对象'),
             Argument('trigger', filter=lambda x: x in dict(Task.TRIGGERS), help='请选择触发器类型'),
             Argument('trigger_args', help='请输入触发器参数'),
@@ -132,19 +133,57 @@ class HistoryView(View):
             run_time=human_datetime(),
             output=json.dumps(outputs)
         )
+        if task.ai_analysis:
+            _finish_history(task, history, outputs)
         return json_response(history.id)
+
+    @auth('schedule.schedule.del')
+    def delete(self, request, t_id):
+        task = Task.objects.filter(pk=t_id).first()
+        if not task:
+            return json_response(error='未找到指定任务')
+        form, error = JsonParser(
+            Argument('id', type=int, required=False),
+        ).parse(request.GET)
+        if error:
+            return json_response(error=error)
+        records = History.objects.filter(task_id=t_id)
+        if form.id:
+            records = records.filter(pk=form.id)
+        # latest 是外键，直接删会触发 PROTECT；先摘除引用再删除。
+        if task.latest_id and records.filter(pk=task.latest_id).exists():
+            Task.objects.filter(pk=task.id).update(latest_id=None)
+        deleted, _ = records.delete()
+        return json_response(deleted)
 
     def _fetch_detail(self, h_id):
         record = History.objects.filter(pk=h_id).first()
+        if not record:
+            return {}
         outputs = json.loads(record.output)
         host_ids = (x for x in outputs.keys() if x != 'local')
         hosts_info = {str(x.id): x.name for x in Host.objects.filter(id__in=host_ids)}
-        data = {'run_time': record.run_time, 'success': 0, 'failure': 0, 'duration': 0, 'outputs': []}
+        data = {
+            'run_time': record.run_time,
+            'success': 0,
+            'failure': 0,
+            'interrupted': 0,
+            'duration': 0,
+            'outputs': [],
+            'ai_status': record.ai_status,
+            'ai_summary': record.ai_summary,
+            'ai_model': record.ai_model,
+        }
         for host_id, value in outputs.items():
             if not value:
                 continue
             code, duration, out = value
-            key = 'success' if code == 0 else 'failure'
+            if code == 0:
+                key = 'success'
+            elif code == EXIT_UNKNOWN:
+                key = 'interrupted'
+            else:
+                key = 'failure'
             data[key] += 1
             data['duration'] += duration
             data['outputs'].append({
@@ -152,7 +191,7 @@ class HistoryView(View):
                 'code': code,
                 'duration': duration,
                 'output': out})
-        data['duration'] = f"{data['duration'] / len(outputs):.3f}"
+        data['duration'] = f"{data['duration'] / len(outputs):.3f}" if outputs else '0.000'
         return data
 
 
@@ -178,6 +217,5 @@ def next_run_time(request):
         scheduler.shutdown()
         if run_time:
             return json_response({'success': True, 'msg': run_time.strftime('%Y-%m-%d %H:%M:%S')})
-        else:
-            return json_response({'success': False, 'msg': '无法被触发'})
+        return json_response({'success': False, 'msg': '无法被触发'})
     return json_response(error=error)

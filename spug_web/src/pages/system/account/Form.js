@@ -62,13 +62,13 @@ export default observer(function () {
         </Form.Item>
         <Form.Item
           name="wx_token"
-          label={t('微信Token')}
+          label={t('推送对象ID')}
           extra={(
             <span>
-              {t('如果启用了MFA（两步验证）则该项为必填。')}
-              <a target="_blank" rel="noopener noreferrer" href="https://spug.cc/docs/wx-token/">{t('什么是微信Token？')}</a>
+              {t('用于接收登录MFA（两步验证）验证码，启用MFA时该项为必填。')}
+              <a target="_blank" rel="noopener noreferrer" href="https://push.spug.cc/guide/spug">{t('配置手册')}</a>
             </span>)}>
-          <Input placeholder={t('请输入微信Token')}/>
+          <Input placeholder={t('请输入推送助手的推送对象ID')}/>
         </Form.Item>
       </Form>
     </Modal>

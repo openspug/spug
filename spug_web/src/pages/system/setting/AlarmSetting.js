@@ -21,7 +21,7 @@ export default observer(function () {
     const formData = form.getFieldsValue();
     http.post('/api/setting/email_test/', formData)
       .then(() => {
-        message.success(t('邮件服务连接成功'))
+        message.success(t('测试邮件已发送，请检查收件箱和垃圾邮件'))
       }).finally(() => setLoading(false))
   }
 

@@ -72,7 +72,7 @@ class Store {
         this.trigger_args = {[info.trigger]: info.trigger_args}
       }
     } else {
-      this.record = {interpreter: 'sh', rst_notify: {mode: '0'}, trigger: 'interval'}
+      this.record = {interpreter: 'sh', rst_notify: {mode: '0'}, trigger: 'interval', ai_analysis: false}
       this.trigger = 'interval'
       this.trigger_args = {}
     }

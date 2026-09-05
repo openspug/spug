@@ -35,5 +35,8 @@ urlpatterns = [
     path('file/', include('apps.file.urls')),
     path('credential/', include('apps.credential.urls')),
     path('pipeline/', include('apps.pipeline.urls')),
+    path('ai/', include('apps.ai.urls')),
+    path('database/', include('apps.database.urls')),
+    path('docker/', include('apps.docker.urls')),
     path('apis/', include('apps.apis.urls')),
 ]

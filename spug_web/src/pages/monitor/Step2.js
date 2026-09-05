@@ -6,15 +6,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react';
-import { Form, Select, Radio, Transfer, Checkbox, Button, message } from 'antd';
+import { Form, Select, Radio, Transfer, Checkbox, Button, InputNumber, Alert, message } from 'antd';
 import { http, t } from 'libs';
 import groupStore from '../alarm/group/store';
 import store from './store';
 import lds from 'lodash';
 
+// AI 前置任务的轮次上限与默认值，需与后端 apps/monitor/models.py 的 AI_LOOP_LIMITS 保持一致
+const AI_LOOP_LIMITS = {
+  '': {ceiling: 60, fallback: 15},
+  diagnose: {ceiling: 60, fallback: 15},
+  repair: {ceiling: 50, fallback: 20},
+};
+
 const modeOptions = [
-  {label: t('微信'), 'value': '1'},
-  {label: t('短信'), 'value': '2', disabled: true},
   {label: t('钉钉'), 'value': '3'},
   {label: t('邮件'), 'value': '4'},
   {label: t('企业微信'), 'value': '5'},
@@ -24,6 +29,8 @@ const modeOptions = [
 export default observer(function () {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [hosts, setHosts] = useState([]);
+  const [aiMode, setAiMode] = useState(store.record.ai_mode || '');
 
   useEffect(() => {
     const {type, addr} = store.record;
@@ -31,6 +38,7 @@ export default observer(function () {
       store.record.sitePrefix = addr.startsWith('http://') ? 'http://' : 'https://';
       store.record.domain = store.record.addr.replace(store.record.sitePrefix, '')
     }
+    http.get('/api/host/').then(res => setHosts(res.filter(x => x.is_verified)))
   }, [])
 
   function handleSubmit() {
@@ -48,8 +56,23 @@ export default observer(function () {
       }, () => setLoading(false))
   }
 
+  // 诊断与修复共用 ai_max_loops 字段但上限不同，切换模式时要把超出新上限的值夹回来，
+  // 否则从「修复20轮」切到诊断会提交一个越界值（后端虽有兜底，但界面显示会误导）
+  function handleAiModeChange(mode) {
+    setAiMode(mode);
+    if (!mode) return;
+    const {ceiling, fallback} = AI_LOOP_LIMITS[mode];
+    const current = form.getFieldValue('ai_max_loops');
+    if (!current) {
+      form.setFieldsValue({ai_max_loops: fallback})
+    } else if (current > ceiling) {
+      form.setFieldsValue({ai_max_loops: ceiling})
+    }
+  }
+
   function canNext() {
-    const {notify_grp, notify_mode} = form.getFieldsValue();
+    const {notify_grp, notify_mode, ai_mode, ai_host_id} = form.getFieldsValue();
+    if (ai_mode && !ai_host_id) return false;
     return notify_grp && notify_grp.length && notify_mode && notify_mode.length;
   }
 
@@ -74,6 +97,42 @@ export default observer(function () {
           <Radio value={5}>{t('{}次', 5)}</Radio>
         </Radio.Group>
       </Form.Item>
+      <Form.Item name="ai_mode" initialValue={info.ai_mode || ''} label={t('智能处理')}
+                 tooltip={t('达到报警阈值后立即发出告警通知，随后由智能体处理，处理完成再追加一条结论通知（共两条）')}>
+        <Radio.Group onChange={e => handleAiModeChange(e.target.value)}>
+          <Radio value="">{t('不启用')}</Radio>
+          <Radio value="diagnose">{t('AI诊断')}</Radio>
+          <Radio value="repair">{t('AI修复')}</Radio>
+        </Radio.Group>
+      </Form.Item>
+      {aiMode && (
+        <React.Fragment>
+          <Form.Item required name="ai_host_id" initialValue={info.ai_host_id} label={t('排查主机')}
+                     extra={t('智能体将通过SSH登录该主机进行排查，仅可选择已验证的主机。')}>
+            <Select showSearch allowClear optionFilterProp="children" placeholder={t('请选择主机')}>
+              {hosts.map(item => (
+                <Select.Option key={item.id} value={item.id}>{item.name}（{item.hostname}）</Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="ai_max_loops"
+            initialValue={info.ai_max_loops || AI_LOOP_LIMITS[aiMode].fallback}
+            label={aiMode === 'diagnose' ? t('最大排查轮次') : t('最大修复轮次')}
+            extra={aiMode === 'diagnose'
+              ? t('每轮为：AI给出命令 → 执行 → 分析；定位到原因会提前结束，达到该次数仍未定位则终止并通知。')
+              : t('每轮为：AI给出命令 → 执行 → 自动复检；超过该次数仍未恢复则终止并通知。')}>
+            <InputNumber min={1} max={AI_LOOP_LIMITS[aiMode].ceiling} style={{width: 160}} addonAfter={t('轮')}/>
+          </Form.Item>
+          <Form.Item wrapperCol={{span: 14, offset: 6}}>
+            <Alert
+              type={aiMode === 'repair' ? 'warning' : 'info'}
+              message={aiMode === 'repair'
+                ? t('故障时先发告警通知，随后AI在排查主机上执行修复命令（已内置高危命令拦截），修复结束再发一条结果通知，处理过程可在智能体模块查看。')
+                : t('故障时先发告警通知，随后AI只执行只读命令排查，不会修改服务器任何内容，排查结束再发一条结论通知。')}/>
+          </Form.Item>
+        </React.Fragment>
+      )}
       <Form.Item required name="notify_grp" valuePropName="targetKeys" initialValue={info.notify_grp} label={t('报警联系人组')}
                  extra={<>{t('去创建')} <Link to="/alarm/contact">{t('报警联系人')}</Link> {t('和')} <Link to="/alarm/group">{t('联系人组')}</Link>{t('。')}</>}>
         <Transfer

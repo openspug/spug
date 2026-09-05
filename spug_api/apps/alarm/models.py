@@ -9,12 +9,15 @@ import json
 
 class Alarm(models.Model, ModelMixin):
     MODES = (
-        ('1', '微信'),
-        ('2', '短信'),
         ('3', '钉钉'),
         ('4', '邮件'),
         ('5', '企业微信'),
         ('7', '飞书'),
+    )
+    # 已下线的报警方式，仅用于渲染历史告警记录，不再作为可选项
+    LEGACY_MODES = (
+        ('1', '微信'),
+        ('2', '短信'),
     )
     STATUS = (
         ('1', '报警发生'),
@@ -31,10 +34,11 @@ class Alarm(models.Model, ModelMixin):
 
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
-        modes = dict(self.MODES)
+        modes = dict(self.MODES + self.LEGACY_MODES)
         # *_alias 字段会被 TranslateMiddleware 按请求语言翻译，
         # type/duration 在建记录时就落库为中文展示值，故一并以 alias 形式输出
-        tmp['notify_mode_alias'] = [modes[x] for x in json.loads(self.notify_mode)]
+        # 用 get 兜底：历史记录里可能存着任何已下线的方式，取不到时原样回显而不是抛 KeyError
+        tmp['notify_mode_alias'] = [modes.get(x, x) for x in json.loads(self.notify_mode)]
         tmp['notify_mode'] = ','.join(tmp['notify_mode_alias'])
         tmp['notify_grp'] = json.loads(self.notify_grp)
         tmp['status_alias'] = self.get_status_display()

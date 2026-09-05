@@ -55,8 +55,8 @@ class FileManager extends React.Component {
     key: 'name',
     render: info => info.kind === 'd' ? (
       <div onClick={() => this.handleChdir(info.name, '1')} style={{cursor: 'pointer'}}>
-        <FolderOutlined style={{color: info.is_link ? '#008b8b' : '#2563fc'}}/>
-        <span style={{color: info.is_link ? '#008b8b' : '#2563fc', paddingLeft: 5}}>{info.name}</span>
+        <FolderOutlined style={{color: info.is_link ? '#008b8b' : '#6c7cff'}}/>
+        <span style={{color: info.is_link ? '#008b8b' : '#6c7cff', paddingLeft: 5}}>{info.name}</span>
       </div>
     ) : (
       <React.Fragment>

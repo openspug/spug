@@ -5,9 +5,8 @@ from django.views.generic import View
 from django.conf import settings
 from django_redis import get_redis_connection
 from libs import json_response, JsonParser, Argument, human_datetime, auth
-from apps.monitor.models import Detection
+from apps.monitor.models import Detection, AI_LOOP_LIMITS
 from apps.monitor.executors import dispatch
-from apps.setting.utils import AppSetting
 from datetime import datetime
 import json
 
@@ -34,11 +33,25 @@ class DetectionView(View):
             Argument('quiet', type=int, default=24 * 60),
             Argument('notify_grp', type=list, help='请选择报警联系组'),
             Argument('notify_mode', type=list, help='请选择报警方式'),
+            Argument('ai_mode', default='', filter=lambda x: x in ('', 'diagnose', 'repair'),
+                     help='请选择正确的AI前置任务类型'),
+            Argument('ai_host_id', type=int, required=False),
+            Argument('ai_max_loops', type=int, required=False),
         ).parse(request.body)
         if error is None:
-            if set(form.notify_mode).intersection(['1', '2', '4']):
-                if not AppSetting.get_default('spug_key'):
-                    return json_response(error='报警方式 微信、短信、邮件需要配置调用凭据（系统设置/基本设置），请配置后再启用该报警方式。')
+            # 报警方式不做任何前置拦截：渠道未配置时由 libs/spug.py 在实际发送阶段
+            # 给出站内通知，配置保存本身不再被阻断。
+            if form.ai_mode:
+                if not form.ai_host_id:
+                    return json_response(error='启用AI前置任务时必须选择用于排查的主机')
+                # 诊断是只读排查，定位到原因就该收尾，给太多轮次只会让模型发散，上限 10；
+                # 修复要多轮「执行→复检」试错，上限 20。前端已限幅，这里兜底防绕过。
+                ceiling, fallback = AI_LOOP_LIMITS[form.ai_mode]
+                form.ai_max_loops = max(1, min(form.ai_max_loops or fallback, ceiling))
+            else:
+                form.ai_host_id = None
+                # 未启用时仍要给个合法值，字段本身不允许为空
+                form.ai_max_loops = form.ai_max_loops or 15
 
             form.targets = json.dumps(form.targets)
             form.notify_grp = json.dumps(form.notify_grp)

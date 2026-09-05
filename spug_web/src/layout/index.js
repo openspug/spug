@@ -4,12 +4,12 @@
  * Released under the AGPL-3.0 License.
  */
 import React, { useState, useEffect } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, Redirect } from 'react-router-dom';
 import { Layout, message } from 'antd';
 import { NotFound } from 'components';
 import Sider from './Sider';
 import Header from './Header';
-import routes from '../routes';
+import routes, { getDefaultPath } from '../routes';
 import { hasPermission, isMobile, t } from 'libs';
 import styles from './layout.module.less';
 
@@ -46,6 +46,7 @@ export default function () {
         <Header collapsed={collapsed} toggle={() => setCollapsed(!collapsed)}/>
         <Layout.Content className={styles.content} id="spug-container">
           <Switch>
+            <Redirect exact from="/home" to={getDefaultPath()}/>
             {Routes}
             <Route component={NotFound}/>
           </Switch>

@@ -12,14 +12,18 @@ class History(models.Model, ModelMixin):
         (0, '执行中'),
         (1, '成功'),
         (2, '失败'),
+        (3, '已中断'),
     )
     task_id = models.IntegerField()
     status = models.SmallIntegerField(choices=STATUS)
     run_time = models.CharField(max_length=20)
     output = models.TextField()
+    ai_status = models.CharField(max_length=20, null=True)
+    ai_summary = models.TextField(null=True)
+    ai_model = models.CharField(max_length=100, null=True)
 
     def to_list(self):
-        tmp = super().to_dict(selects=('id', 'status', 'run_time'))
+        tmp = super().to_dict(selects=('id', 'status', 'run_time', 'ai_status'))
         tmp['status_alias'] = self.get_status_display()
         return tmp
 
@@ -46,6 +50,7 @@ class Task(models.Model, ModelMixin):
     desc = models.CharField(max_length=255, null=True)
     latest = models.ForeignKey(History, on_delete=models.PROTECT, null=True)
     rst_notify = models.CharField(max_length=255, null=True)
+    ai_analysis = models.BooleanField(default=False)
 
     created_at = models.CharField(max_length=20, default=human_datetime)
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')

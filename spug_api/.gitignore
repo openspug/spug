@@ -1,5 +1,6 @@
 *.pyc
 /venv/
+/spug/overrides.py
 __pycache__/
 /.idea/
 /db.sqlite3

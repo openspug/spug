@@ -85,6 +85,29 @@ const dict = {
   '通道沉默': 'Quiet Period',
   '相同的告警信息，沉默期内只发送一次。': 'Identical alerts are sent only once within the quiet period.',
 
+  // Step2.js - AI handling
+  '智能处理': 'AI Handling',
+  '达到报警阈值后立即发出告警通知，随后由智能体处理，处理完成再追加一条结论通知（共两条）':
+    'Once the threshold is reached an alert is sent immediately, then the agent takes over and sends a second notification with its conclusion (two notifications in total)',
+  '不启用': 'Disabled',
+  'AI诊断': 'AI Diagnosis',
+  'AI修复': 'AI Repair',
+  '排查主机': 'Target Host',
+  '请选择主机': 'Select a host',
+  '智能体将通过SSH登录该主机进行排查，仅可选择已验证的主机。':
+    'The agent connects to this host over SSH. Only verified hosts can be selected.',
+  '最大排查轮次': 'Max Diagnosis Rounds',
+  '最大修复轮次': 'Max Repair Rounds',
+  '轮': 'rounds',
+  '每轮为：AI给出命令 → 执行 → 分析；定位到原因会提前结束，达到该次数仍未定位则终止并通知。':
+    'Each round is: the AI proposes commands, they are executed, then analysed. It stops early once the cause is found; if the limit is reached without a conclusion it terminates and notifies you.',
+  '每轮为：AI给出命令 → 执行 → 自动复检；超过该次数仍未恢复则终止并通知。':
+    'Each round is: the AI proposes commands, they are executed, then the fault is re-checked automatically. If the service is still down after the limit it terminates and notifies you.',
+  '故障时先发告警通知，随后AI在排查主机上执行修复命令（已内置高危命令拦截），修复结束再发一条结果通知，处理过程可在智能体模块查看。':
+    'An alert is sent as soon as the fault is detected. The AI then runs repair commands on the target host (dangerous commands are blocked) and sends a second notification with the result. The full trace is available in the Agent module.',
+  '故障时先发告警通知，随后AI只执行只读命令排查，不会修改服务器任何内容，排查结束再发一条结论通知。':
+    'An alert is sent as soon as the fault is detected. The AI then investigates using read-only commands without changing anything on the server, and sends a second notification with its conclusion.',
+
   // Table.js
   '监控任务': 'Monitors',
   '确定要{}【{}】?': 'Are you sure you want to {} [{}]?',

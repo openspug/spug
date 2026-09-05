@@ -22,7 +22,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: #2563fc;
+      background-color: #6c7cff;
 
       img {
         height: 28px;
@@ -89,7 +89,7 @@
       user-select: none;
       padding: 8px 8px 8px 16px;
       margin: 0 -8px 0 -16px;
-      color: #2563fc;
+      color: #6c7cff;
     }
 
     .fileManger {
@@ -123,7 +123,7 @@
     }
 
     :global(.ant-tabs-tab-active) {
-      border-bottom: 2px solid #2563fc !important;
+      border-bottom: 2px solid #6c7cff !important;
       transition: unset;
     }
 
@@ -133,12 +133,21 @@
   }
 }
 
+.metricsBar {
+  height: 40px;
+  margin: 12px 12px 0;
+  border-radius: 6px;
+  background: #fafafa;
+  overflow: hidden;
+}
+
 .terminal {
   margin: 12px;
 
   :global(.xterm) {
     padding: 10px 0 6px 10px;
-    height: calc(100vh - 66px);
+    // 66px 原有上下留白 + 52px 监控条（40px 高 + 12px 上边距）
+    height: calc(100vh - 118px);
   }
 
   :global(.xterm-viewport) {
@@ -184,7 +193,7 @@
 
   .edit {
     display: none;
-    color: #2563fcbb;
+    color: #6c7cffbb;
     margin-left: 24px;
     cursor: pointer;
   }

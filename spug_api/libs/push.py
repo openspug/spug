@@ -56,3 +56,19 @@ def send_message(token, targets, source, dataset):
 
 def send_login_code(token, user, code):
     send_message(token, [user], 'mfa', {'code': code})
+
+
+def send_mfa_code(target, code):
+    """发送登录 MFA 验证码。
+
+    MFA 唯一的下发通道是推送助手，未绑定就发不出去；这里统一抛异常，
+    由调用方转成用户可见的错误，避免「提示已发送但其实没发」。
+    """
+    from apps.setting.utils import AppSetting
+
+    token = AppSetting.get_default('spug_push_key')
+    if not token:
+        raise Exception('未绑定推送助手账户，请在系统管理/系统设置/推送服务设置中绑定后再使用MFA认证。')
+    if not target:
+        raise Exception('当前账户未配置推送对象ID，请在账户管理中配置后再使用MFA认证。')
+    send_login_code(token, target, code)

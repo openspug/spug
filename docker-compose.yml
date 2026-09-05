@@ -1,0 +1,38 @@
+services:
+  spug:
+    image: spug-service-4.0:latest
+
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+      labels:
+        io.spug.app: spug-ai
+
+    container_name: spug
+    restart: always
+    privileged: true
+    # Linux 生产环境共享宿主机网络，使 127.0.0.1 可访问宿主机 SSH。
+    network_mode: host
+
+    volumes:
+      - /opt/spug/releases/latest:/data/spug
+      - /opt/spug/repos:/data/repos
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Host 网络复用宿主机现有 Redis，覆盖 Supervisor 配置以禁用容器内 Redis。
+      - ./docs/docker/supervisor-host.conf:/etc/supervisor/conf.d/spug.conf:ro
+      # 覆盖镜像内置配置，为智能体 SSE 关闭缓冲，否则流式回复会被攒到最后一次性下发
+      - ./docs/docker/nginx-host.conf:/etc/nginx/nginx.conf:ro
+
+    environment:
+      SPUG_SECRET_KEY: "${SPUG_SECRET_KEY:?SPUG_SECRET_KEY is required}"
+      SPUG_ALLOWED_HOSTS: "${SPUG_ALLOWED_HOSTS:-127.0.0.1,localhost}"
+      SPUG_DB_ENGINE: "${SPUG_DB_ENGINE:?SPUG_DB_ENGINE is required}"
+      SPUG_DB_NAME: "${SPUG_DB_NAME:?SPUG_DB_NAME is required}"
+      SPUG_DB_USER: "${SPUG_DB_USER:?SPUG_DB_USER is required}"
+      SPUG_DB_PASSWORD: "${SPUG_DB_PASSWORD:?SPUG_DB_PASSWORD is required}"
+      SPUG_DB_HOST: "${SPUG_DB_HOST:?SPUG_DB_HOST is required}"
+      SPUG_DB_PORT: "${SPUG_DB_PORT:?SPUG_DB_PORT is required}"
+
+    # 保留旧地址兼容性；主机管理连接本机时仍应使用 127.0.0.1。
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

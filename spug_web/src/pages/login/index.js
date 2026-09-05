@@ -22,6 +22,7 @@ import appStore from 'pages/config/app/store';
 import requestStore from 'pages/deploy/request/store';
 import execStore from 'pages/exec/task/store';
 import hostStore from 'pages/host/store';
+import { getDefaultPath } from '../../routes';
 
 export default function () {
   const [form] = Form.useForm();
@@ -88,7 +89,7 @@ export default function () {
     if (history.location.state && history.location.state['from']) {
       history.push(history.location.state['from'])
     } else {
-      history.push('/home')
+      history.push(getDefaultPath())
     }
   }
 

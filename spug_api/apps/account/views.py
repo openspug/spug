@@ -7,7 +7,7 @@ from django.http.response import HttpResponse
 from libs.mixins import AdminView, View
 from libs import JsonParser, Argument, human_datetime, json_response
 from libs.utils import get_request_real_ip, generate_random_str
-from libs.spug import send_login_wx_code
+from libs.push import send_mfa_code
 from apps.account.models import User, Role, History
 from apps.setting.utils import AppSetting
 from apps.account.utils import verify_password
@@ -186,7 +186,9 @@ def login(request):
         Argument('username', help='请输入用户名'),
         Argument('password', help='请输入密码'),
         Argument('captcha', required=False),
-        Argument('type', required=False)
+        # type 为空会写入 login_histories.type(NOT NULL) 导致登录接口异常，
+        # 与 User.type 保持同一默认值。
+        Argument('type', default='default', required=False)
     ).parse(request.body)
     if error is None:
         handle_response = partial(handle_login_record, request, form.username, form.type)
@@ -250,10 +252,11 @@ def handle_user_info(handle_response, request, user, captcha):
     else:
         mfa = AppSetting.get_default('MFA', {'enable': False})
         if mfa['enable']:
-            if not user.wx_token:
-                return handle_response(error='已启用登录双重认证，但您的账户未配置微信Token，请联系管理员')
             code = generate_random_str(6)
-            send_login_wx_code(user.wx_token, code)
+            try:
+                send_mfa_code(user.wx_token, code)
+            except Exception as e:
+                return handle_response(error=f'已启用登录双重认证，但验证码发送失败：{e}')
             cache.set(key, code, 300)
             return json_response({'required_mfa': True})
 

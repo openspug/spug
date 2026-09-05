@@ -1,0 +1,52 @@
+services:
+  db:
+    image: mariadb:10.8
+    container_name: spug4-db
+    restart: unless-stopped
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - spug4_mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: spug
+      MYSQL_USER: spug
+      MYSQL_PASSWORD: spug.cc
+      MYSQL_ROOT_PASSWORD: spug.cc
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  spug:
+    image: spug4-local
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    container_name: spug4
+    privileged: true
+    restart: unless-stopped
+    volumes:
+      - .:/data/spug
+      - spug4_repos:/data/repos
+      # Docker 类型 MCP 通过宿主机 Docker 启动临时 stdio 容器。
+      # 注意：该 socket 允许应用容器管理宿主机 Docker 资源。
+      - /var/run/docker.sock:/var/run/docker.sock
+      # 覆盖镜像内置配置，为智能体 SSE 关闭缓冲
+      - ./docs/docker/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "127.0.0.1:8000:80"
+    environment:
+      SPUG_DEBUG: "true"
+      SPUG_DB_ENGINE: django.db.backends.mysql
+      SPUG_DB_NAME: spug
+      SPUG_DB_USER: spug
+      SPUG_DB_PASSWORD: spug.cc
+      SPUG_DB_HOST: db
+      SPUG_DB_PORT: 3306
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  spug4_mysql:
+  spug4_repos:

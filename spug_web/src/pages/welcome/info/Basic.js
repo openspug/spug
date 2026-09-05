@@ -45,7 +45,7 @@ export default observer(function Basic(props) {
         <Form.Item required name="nickname" label={t('姓名')}>
           <Input placeholder={t('请输入')}/>
         </Form.Item>
-        <Form.Item name="wx_token" label={t('微信Token')} extra={<a target="_blank" rel="noopener noreferrer" href="https://spug.cc/docs/wx-token/">{t('什么是微信Token？')}</a>}>
+        <Form.Item name="wx_token" label={t('推送对象ID')} extra={<a target="_blank" rel="noopener noreferrer" href="https://push.spug.cc/guide/spug">{t('配置手册')}</a>}>
           <Input placeholder={t('请输入')}/>
         </Form.Item>
         <Form.Item>

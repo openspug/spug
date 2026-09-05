@@ -43,9 +43,8 @@ const dict = {
   // backend notifications pushed over WebSocket (Chinese text is the key)
   '通知发送失败': 'Failed to send the notification',
   '发送报警信息失败': 'Failed to send the alert',
-  '未配置报警服务调用凭据，请在系统管理/系统设置/基本设置/调用凭据中配置。': 'The alert service credential is not configured, please set it in System / System Settings / Basic Settings / API credential.',
-  '未配置报警服务调用凭据，请在系统管理/系统设置/报警服务设置中配置。': 'The alert service credential is not configured, please set it in System / System Settings / Alert Service.',
-  '未找到可用的通知对象，请确保设置了相关报警联系人的微信Token。': 'No available recipient, please make sure the alert contacts have a WeChat token configured.',
+  '未配置邮件服务，请在系统管理/系统设置/报警服务设置中配置。': 'The mail service is not configured, please set it in System / System Settings / Alert Service.',
+  '监控任务使用了已下线的报警方式，请编辑该任务重新选择报警方式。': 'The monitor task uses a retired alert method, please edit the task and select another one.',
   '未找到可用的通知对象，请确保设置了相关报警联系人的钉钉。': 'No available recipient, please make sure the alert contacts have DingTalk configured.',
   '未找到可用的通知对象，请确保设置了相关报警联系人的邮件地址。': 'No available recipient, please make sure the alert contacts have an email address configured.',
   '未找到可用的通知对象，请确保设置了相关报警联系人的企业微信。': 'No available recipient, please make sure the alert contacts have WeChat Work configured.',

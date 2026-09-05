@@ -96,14 +96,6 @@ export default observer(function () {
           </Form.Item>
           <Test mode="4" name="email"/>
         </Form.Item>
-        <Form.Item label={t('微信Token')} extra={
-          <a target="_blank" rel="noopener noreferrer"
-             href="https://spug.cc/docs/alarm-contact/">{t('如何获取微信 Token ？')}</a>}>
-          <Form.Item noStyle name="wx_token">
-            <Input placeholder={t('请输入微信token')}/>
-          </Form.Item>
-          <Test mode="1" name="wx_token"/>
-        </Form.Item>
         <Form.Item label={t('钉钉')} extra={<span>
             {t('钉钉收不到通知？请参考')}
             <a target="_blank" rel="noopener noreferrer"

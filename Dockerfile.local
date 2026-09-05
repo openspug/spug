@@ -1,0 +1,21 @@
+FROM openspug/spug-service:latest
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends docker.io \
+    && rm -rf /var/lib/apt/lists/*
+
+# 版本与 spug_api/requirements.txt 保持一致。
+# Django 4.2 起才支持 psycopg 3（PostgreSQL 需要），且要求 channels/daphne 4.x。
+RUN pip3 install --no-cache-dir \
+    'Django>=4.2.0,<4.3.0' \
+    'asgiref==3.7.2' \
+    'django_redis>=5.4.0,<6.0.0' \
+    'channels>=4.0.0,<5.0.0' \
+    'channels-redis>=4.1.0,<5.0.0' \
+    'daphne>=4.0.0,<5.0.0' \
+    'pydantic-ai-slim[openai]==2.37.0' \
+    'PyMySQL>=1.1.0,<2.0.0' \
+    'psycopg[binary]>=3.1.0,<4.0.0' \
+    'clickhouse-connect>=0.7.0,<1.0.0' \
+    'redis>=5.0.0,<7.0.0' \
+    'pydantic-ai-slim[openai]==2.37.0'
