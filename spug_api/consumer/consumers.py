@@ -53,7 +53,7 @@ class ComConsumer(BaseConsumer):
         if text_data.isdigit():
             index = int(text_data)
             response = self.get_response(index)
-            while response:
+            while response and not self.closed:
                 index += 1
                 self.send(text_data=response)
                 response = self.get_response(index)
@@ -69,7 +69,7 @@ class SSHConsumer(BaseConsumer):
 
     def loop_read(self):
         is_ready, buf_size = False, 4096
-        while True:
+        while not self.closed:
             data = self.chan.recv(buf_size)
             if not data:
                 self.close(3333)
@@ -163,7 +163,7 @@ class PubSubConsumer(BaseConsumer):
         if not self.p:
             return
         response = self.p.get_message(timeout=10)
-        while response:
+        while response and not self.closed:
             data = str_decode(response['data'])
             self.send(text_data=data)
             response = self.p.get_message(timeout=10)

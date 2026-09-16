@@ -3,6 +3,7 @@
 # Released under the AGPL-3.0 License.
 from django.db import close_old_connections
 from channels.generic.websocket import WebsocketConsumer
+from autobahn.exception import Disconnected
 from apps.account.models import User
 from apps.setting.utils import AppSetting
 from libs.utils import get_request_real_ip
@@ -19,6 +20,29 @@ class BaseConsumer(WebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super(BaseConsumer, self).__init__(*args, **kwargs)
         self.user = None
+        # set once the peer has gone away, either because daphne delivered
+        # websocket.disconnect or because a send() hit a closed protocol
+        self.closed = False
+
+    def send(self, text_data=None, bytes_data=None, close=False):
+        """
+        Sends a reply, swallowing the race where the client has already closed the
+        socket. When the browser closes a console/terminal the server side may still be
+        inside receive() (streaming redis output, waiting on a pubsub message or
+        replying 'pong'); autobahn then raises Disconnected("Attempt to send on a
+        closed protocol"), which used to bubble up as "Exception inside application"
+        and skip disconnect() cleanup. There is nobody left to talk to, so drop it.
+        """
+        if self.closed:
+            return
+        try:
+            super().send(text_data=text_data, bytes_data=bytes_data, close=close)
+        except Disconnected:
+            self.closed = True
+
+    def websocket_disconnect(self, message):
+        self.closed = True
+        super().websocket_disconnect(message)
 
     def close_with_message(self, content):
         self.send(text_data=f'\r\n\x1b[31m{content}\x1b[0m\r\n')
