@@ -71,7 +71,7 @@ class About extends React.Component {
                rel="noopener noreferrer">https://spug.cc/docs/change-log/</a>
           </Descriptions.Item>
         </Descriptions>
-        {info['spug_version'] !== VERSION && (
+        {info['spug_version'] && info['spug_version'] !== VERSION && (
           <Alert showIcon style={{width: 500}} type="warning" message={t('Spug API版本与Web版本不匹配，请尝试刷新浏览器后再次查看。')}/>
         )}
       </Spin>

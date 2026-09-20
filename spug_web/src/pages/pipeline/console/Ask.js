@@ -54,7 +54,8 @@ function Ask(props) {
           </Upload>
         </Form.Item>
       ) : (
-        <Form.Item key={idx} required={item.required} name={item.variable} label={item.name} tooltip={item.help}>
+        <Form.Item key={idx} required={item.required} name={item.variable} label={item.name} tooltip={item.help}
+                   initialValue={item.type === 'date' ? undefined : item.default}>
           <Parameter.Component data={item}/>
         </Form.Item>
       ))}
