@@ -40,6 +40,8 @@ class Helper(KitMixin):
         self.rds_key = rds_key
         # 发起本次执行的用户界面语言，用于翻译 Spug 自身产生的控制台文案
         self.language = language
+        # 执行结束后输出在 redis 中的保留秒数，开放 API 触发时会调大以便查询结果
+        self.ttl = 60
         self.buffers = defaultdict(str)
         self.flags = defaultdict(bool)
         self.already_clear = False
@@ -208,7 +210,7 @@ class Helper(KitMixin):
         for file in self.files.values():
             file.close()
         if self.rds.ttl(self.rds_key) == -1:
-            self.rds.expire(self.rds_key, 60)
+            self.rds.expire(self.rds_key, self.ttl)
 
     def progress_callback(self, key):
         def func(n, t):
