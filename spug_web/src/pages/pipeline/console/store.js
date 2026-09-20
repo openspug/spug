@@ -13,6 +13,9 @@ class Store {
   @observable nodes = [];
   @observable outputs = {};
   @observable dynamicParams = null;
+  // 历史回放：已结束的记录不再连 websocket，仍在执行的从 wsIndex 处接着收
+  @observable readonly = false;
+  @observable wsIndex = 0;
 
   @computed get nodeID() {
     if (['ssh_exec', 'data_transfer', 'data_upload'].includes(this.node.module)) {

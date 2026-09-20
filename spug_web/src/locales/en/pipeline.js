@@ -13,6 +13,18 @@ const dict = {
   '返回列表': 'Back to List',
   '该节点为起始节点且有多个下游节点无法删除': 'The start node cannot be deleted while it has multiple downstream nodes',
 
+  // execution history
+  '最近执行': 'Last run',
+  '记录': 'History',
+  '执行记录 - {}': 'Execution History - {}',
+  '序号': 'No.',
+  '执行人': 'Run by',
+  '耗时': 'Duration',
+  '暂无执行记录': 'No execution history yet',
+  '确定要删除该执行记录？': 'Delete this execution record?',
+  '历史记录回放': 'Replaying history',
+  '该执行记录没有可回放的内容': 'This record has nothing to replay',
+
   // pipeline form
   '编辑流程信息': 'Edit Pipeline Info',
   '请输入流程名称': 'Enter pipeline name',

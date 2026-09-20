@@ -5,11 +5,11 @@
  */
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Table, Modal, Popconfirm, message } from 'antd';
+import { Table, Modal, Popconfirm, Tag, Space, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { Action, TableCard, AuthButton } from 'components';
 import { http, hasPermission, history, t } from 'libs';
-import S from './store';
+import S, { STATUS_COLORS } from './store';
 
 function ComTable() {
   useEffect(() => {
@@ -57,17 +57,25 @@ function ComTable() {
       }}>
       <Table.Column title={t('流程名称')} dataIndex="name"/>
       <Table.Column ellipsis title={t('备注信息')} dataIndex="desc"/>
-      {hasPermission('pipeline.pipeline.edit|pipeline.pipeline.del|pipeline.pipeline.do') && (
-        <Table.Column width={210} title={t('操作')} render={info => (
-          <Action>
-            <Action.Button auth="pipeline.pipeline.edit" onClick={() => toDetail(info)}>{t('编辑')}</Action.Button>
+      <Table.Column width={260} title={t('最近执行')} render={info => info.latest_at ? (
+        <Space>
+          <Tag color={STATUS_COLORS[info.latest_status]}>{info.latest_status_alias}</Tag>
+          <span style={{color: '#999'}}>{info.latest_at}</span>
+        </Space>
+      ) : '-'}/>
+      <Table.Column width={260} title={t('操作')} render={info => (
+        <Action>
+          <Action.Button auth="pipeline.pipeline.edit" onClick={() => toDetail(info)}>{t('编辑')}</Action.Button>
+          {/* auth 挂在 Popconfirm 内部不生效，Action 只认直接子元素的 auth，须在外层判断 */}
+          {hasPermission('pipeline.pipeline.do') && (
             <Popconfirm title={t('确定要执行吗？')} onConfirm={() => S.showConsole(info)}>
-              <Action.Button auth="pipeline.pipeline.do">{t('执行')}</Action.Button>
+              <Action.Button>{t('执行')}</Action.Button>
             </Popconfirm>
-            <Action.Button danger auth="pipeline.pipeline.del" onClick={() => handleDelete(info)}>{t('删除')}</Action.Button>
-          </Action>
-        )}/>
-      )}
+          )}
+          <Action.Button onClick={() => S.showHistories(info)}>{t('记录')}</Action.Button>
+          <Action.Button danger auth="pipeline.pipeline.del" onClick={() => handleDelete(info)}>{t('删除')}</Action.Button>
+        </Action>
+      )}/>
     </TableCard>
   )
 }

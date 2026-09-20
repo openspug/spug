@@ -2,6 +2,7 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.conf import settings
+from django.db import close_old_connections
 from apps.credential.models import Credential
 from apps.host.models import Host
 from libs.utils import AttrDict, human_datetime, render_str
@@ -10,9 +11,10 @@ from libs.gitlib import RemoteGit
 from libs.push import send_message
 from libs import webhook
 from apps.pipeline.helper import Helper
+from apps.pipeline.models import PipeHistory
 from apps.setting.utils import AppSetting
 from functools import partial
-from threading import Thread
+from threading import Thread, Lock
 from concurrent import futures
 from pathlib import Path
 from uuid import uuid4
@@ -39,8 +41,29 @@ DEFAULT_PUSH_BODY = (
 )
 
 
+def fill_node_targets(nodes):
+    """把节点里的主机 id 补成展示名，控制台的主机分页和历史回放都依赖 _targets"""
+    ids = set()
+    for item in nodes:
+        if item.get('module') in ('ssh_exec', 'data_upload'):
+            ids.update(item.get('targets') or [])
+        elif item.get('module') == 'data_transfer':
+            ids.update(item['destination']['targets'])
+    host_map = {x.id: f'{x.name}({x.hostname})' for x in Host.objects.filter(id__in=ids)}
+    for item in nodes:
+        if item.get('module') in ('ssh_exec', 'data_upload'):
+            targets = item.get('targets') or []
+        elif item.get('module') == 'data_transfer':
+            targets = item['destination']['targets']
+        else:
+            continue
+        # 主机已被删除时退回显示 id，不要让整个执行接口 500
+        item['_targets'] = [{'id': x, 'name': host_map.get(x) or f'ID: {x}'} for x in targets]
+    return nodes
+
+
 class NodeExecutor:
-    def __init__(self, rds, token, nodes, params=None, pipe_name=None, language='zh'):
+    def __init__(self, rds, token, nodes, params=None, pipe_name=None, language='zh', history_id=None):
         self.rds = rds
         self.token = token
         self.pipe_name = pipe_name or ''
@@ -51,21 +74,66 @@ class NodeExecutor:
         self.env = {}
         if params:
             self.env.update({k: str(v) for k, v in params.items()})
+        # 流水线是多分支并行，没有单一结束点：用在途分支计数归零来判定整体结束
+        self.history_id = history_id
+        self.states = {}
+        self.pending = 0
+        self.lock = Lock()
 
     def run(self, node=None, state=None):
         if node:
+            self.states[node.id] = state
             downstream = getattr(node, 'downstream', [])
             down_nodes = [self.nodes[x] for x in downstream]
             available_nodes = [x for x in down_nodes if x.get('condition', 'success') in (state, 'always')]
             if len(available_nodes) >= 2:
-                for node in available_nodes[1:]:
-                    Thread(target=self._dispatch, args=(node, state)).start()
+                for item in available_nodes[1:]:
+                    # 计数必须在起线程前加：新线程尚未跑起来时本分支可能已经先归零
+                    self._enter()
+                    Thread(target=self._dispatch, args=(item, state)).start()
             if available_nodes:
+                self._enter()
                 self._dispatch(available_nodes[0], state)
         else:
+            self._enter()
             self._dispatch(self.node)
 
+    def _enter(self):
+        with self.lock:
+            self.pending += 1
+
+    def _leave(self):
+        with self.lock:
+            self.pending -= 1
+            is_finished = self.pending == 0
+        if is_finished:
+            self._finish()
+
+    def _finish(self):
+        # 主动收尾而不是等 Helper 被 GC，输出文件的落盘时机和 redis 过期时间才是确定的
+        self.helper.clear()
+        if not self.history_id:
+            return
+        is_success = all(x == 'success' for x in self.states.values())
+        try:
+            PipeHistory.finish(self.history_id, is_success)
+        except Exception as e:
+            print(f'update pipeline history {self.history_id} error: {e}')
+        finally:
+            close_old_connections()
+
     def _dispatch(self, node, state=None):
+        """调用方须先 _enter()，这里负责分支结束时减一，并在计数归零时收口执行记录"""
+        try:
+            self._do_dispatch(node, state)
+        except Exception as e:
+            # 兜底：未捕获异常若不记状态，这条记录会永远停在执行中
+            self.states[node.id] = 'error'
+            self.helper.send_error(node.id, f'Exception: {e}')
+        finally:
+            self._leave()
+
+    def _do_dispatch(self, node, state=None):
         if node.module == 'build':
             self._do_build(node)
         elif node.module == 'ssh_exec':

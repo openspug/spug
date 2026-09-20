@@ -5,9 +5,10 @@ from django.conf import settings
 from django_redis import get_redis_connection
 from apps.apis.utils import api_key_required, api_response, parse_json_body
 from apps.pipeline.models import Pipeline, PipeHistory
-from apps.pipeline.utils import NodeExecutor
+from apps.pipeline.utils import NodeExecutor, fill_node_targets
 from threading import Thread
 from uuid import uuid4
+import copy
 import json
 
 RESULT_TTL = 3600
@@ -62,13 +63,12 @@ def trigger(request, pipeline_id):
             item['dynamic_params'] = params
             break
 
-    latest_history = pipe.pipehistory_set.first()
-    ordinal = latest_history.ordinal + 1 if latest_history else 1
-    PipeHistory.objects.create(pipeline=pipe, ordinal=ordinal, created_by=pipe.created_by)
-
     token, rds = uuid4().hex, get_redis_connection()
+    # API 触发没有登录用户，归到流水线创建人名下，靠 trigger 区分来源
+    record = PipeHistory.make(pipe, fill_node_targets(copy.deepcopy(nodes)), pipe.created_by, token, trigger='api')
+
     rds.set(_marker_key(token), pipe.id, RESULT_TTL)
-    executor = NodeExecutor(rds, token, nodes, params, pipe_name=pipe.name)
+    executor = NodeExecutor(rds, token, nodes, params, pipe_name=pipe.name, history_id=record.id)
     executor.helper.ttl = RESULT_TTL
     Thread(target=executor.run).start()
     return api_response({'token': token}, status=202)

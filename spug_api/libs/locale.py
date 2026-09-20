@@ -44,6 +44,8 @@ MESSAGES = {
     '未找到指定应用': 'The specified app does not exist',
     '未找到指定构建记录': 'The specified build record does not exist',
     '未找到指定流程': 'The specified pipeline does not exist',
+    '未找到指定执行记录': 'The specified execution record does not exist',
+    '请指定流水线': 'Please specify the pipeline',
     '未找到指定环境': 'The specified environment does not exist',
     '未找到指定申请': 'The specified request does not exist',
     '未找到指定角色': 'The specified role does not exist',
@@ -366,6 +368,11 @@ CHOICES = {
     '正常': 'Normal',
     '异常': 'Abnormal',
     '执行中': 'Running',
+    # pipeline history status / trigger / duration
+    '已中断': 'Interrupted',
+    '页面执行': 'Manual',
+    '开放API': 'Open API',
+    '不足1秒': 'less than 1s',
     # misc module names
     '应用发布': 'Deployment',
     '监控中心': 'Monitoring',

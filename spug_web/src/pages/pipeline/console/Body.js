@@ -45,7 +45,9 @@ function Body() {
 
 
   useEffect(() => {
-    let index = 0;
+    // 回放已结束的记录：输出已随接口一次性取回，不需要再开连接
+    if (S.readonly) return;
+    let index = S.wsIndex;
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/pipeline/${S.token}/?x-token=${X_TOKEN}`);
     socket.onopen = () => {
@@ -114,7 +116,9 @@ function Body() {
     <div className={css.container}>
       <div className={css.header}>
         <div className={css.title}>{S.node?.name}</div>
-        {wsState === '0' ? (
+        {S.readonly ? (
+          <Badge status="default" text={t('历史记录回放')}/>
+        ) : wsState === '0' ? (
           <Badge status="processing" text={t('Websocket 正在连接中')}/>
         ) : wsState === '1' ? (
           <Badge status="success" text={t('Websocket 已连接')}/>

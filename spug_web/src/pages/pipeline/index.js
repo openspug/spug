@@ -8,6 +8,7 @@ import { observer } from 'mobx-react';
 import { AuthDiv, Breadcrumb } from 'components';
 import { t } from 'libs';
 import Table from './Table';
+import Record from './Record';
 import Console from './console';
 
 
@@ -19,6 +20,7 @@ function Index() {
         <Breadcrumb.Item>{t('流水线')}</Breadcrumb.Item>
       </Breadcrumb>
       <Table/>
+      <Record/>
       <Console/>
     </AuthDiv>
   )
