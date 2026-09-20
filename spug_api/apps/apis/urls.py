@@ -7,6 +7,7 @@ from apps.apis import config
 from apps.apis import deploy
 from apps.apis import exec
 from apps.apis import pipeline
+from apps.apis import host
 
 urlpatterns = [
     path('config/', config.get_configs),
@@ -15,4 +16,5 @@ urlpatterns = [
     path('exec/<int:template_id>/', exec.trigger),
     path('pipeline/result/<str:token>/', pipeline.result),
     path('pipeline/<int:pipeline_id>/', pipeline.trigger),
+    path('host/', host.get_inventory),
 ]
