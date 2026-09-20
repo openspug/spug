@@ -231,7 +231,7 @@ def fetch_host_extend(ssh):
                 private_ip_address.remove(ssh_hostname)
             private_ip_address = [ssh_hostname] + list(private_ip_address)
 
-    code, out = ssh.exec_command_raw('lsblk -dbn -o SIZE -e 11 2> /dev/null')
+    code, out = ssh.exec_command_raw('lsblk -dbn -o SIZE -e 1,7,11 2> /dev/null')  # 排除 ram / loop / cdrom 设备
     if code == 0 and out.strip():
         disks = []
         for item in out.strip().splitlines():
@@ -239,7 +239,7 @@ def fetch_host_extend(ssh):
             if not item.isdigit():
                 continue
             size = math.ceil(int(item) / 1024 / 1024 / 1024)
-            if size > 10:
+            if size >= 1:  # 向上取整后非 0 即采集，10GB 及以下的小盘不再被漏掉（#721）
                 disks.append(size)
         response['disk'] = disks[:10]
     else:
@@ -254,7 +254,7 @@ def fetch_host_extend(ssh):
                 if not WHOLE_DISK_REGEX.fullmatch(fields[3]):
                     continue
                 size = math.ceil(int(fields[2]) / 1024 / 1024)  # 块单位为 1KiB
-                if size > 10:
+                if size >= 1:
                     disks.append(size)
             response['disk'] = disks[:10]
 
