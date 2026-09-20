@@ -45,6 +45,9 @@ def trigger(request, pipeline_id):
             return api_response(error='Pipeline with data upload node is not supported', status=400)
         elif module == 'parameter':
             for x in item.get('dynamic_params') or []:
+                # 与页面的参数弹窗一致：未传的参数套用参数节点里配置的默认值
+                if x['variable'] not in params and x.get('default') not in (None, ''):
+                    params[x['variable']] = x['default']
                 if x.get('required'):
                     required.append(x['variable'])
         elif module == 'build' and item.get('git_mode') == 'tag' and item.get('git_tag') == 'selective':
