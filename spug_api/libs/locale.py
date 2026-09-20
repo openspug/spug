@@ -157,6 +157,7 @@ MESSAGES = {
     '请选择发布结果通知方式': 'Please select the deploy result notification method',
     '请选择应用': 'Please select an app',
     '请选择执行主机': 'Please select the hosts to execute on',
+    '未找到可重试的主机': 'No host available to retry',
     '请选择执行失败通知方式': 'Please select the failure notification method',
     '请选择执行对象': 'Please select the execution targets',
     '请选择执行解释器': 'Please select the interpreter',

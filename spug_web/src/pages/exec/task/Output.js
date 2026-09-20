@@ -5,7 +5,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
-import { PageHeader, Tooltip } from 'antd';
+import { PageHeader, Tooltip, Button, message } from 'antd';
 import {
   LoadingOutlined,
   CheckCircleOutlined,
@@ -13,6 +13,7 @@ import {
   CodeOutlined,
   ClockCircleOutlined,
   StopOutlined,
+  RedoOutlined,
 } from '@ant-design/icons';
 import { FitAddon } from 'xterm-addon-fit';
 import { Terminal } from 'xterm';
@@ -25,6 +26,7 @@ let gCurrent;
 
 function OutView(props) {
   const el = useRef()
+  const socketRef = useRef()
   const [term] = useState(new Terminal());
   const [fitPlugin] = useState(new FitAddon());
   const [current, setCurrent] = useState(Object.keys(store.outputs)[0]);
@@ -59,6 +61,7 @@ function OutView(props) {
   useEffect(() => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/subscribe/${store.token}/?x-token=${X_TOKEN}`);
+    socketRef.current = socket
     socket.onopen = () => {
       const message = '\r\x1b[K\x1b[36m### Waiting for scheduling ...\x1b[0m'
       for (let key of Object.keys(store.outputs)) {
@@ -115,12 +118,36 @@ function OutView(props) {
       .finally(() => setLoading(false))
   }
 
+  function handleRetry(keys) {
+    const socket = socketRef.current
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+      return message.error(t('连接已断开，请返回后重新执行'))
+    }
+    const tip = '\x1b[36m### Waiting for scheduling ...\x1b[0m'
+    for (let key of keys) {
+      store.outputs[key].status = -2
+      store.outputs[key].data = tip
+      if (key === gCurrent) {
+        term.reset()
+        term.write(tip)
+      }
+    }
+    const formData = fitPlugin.proposeDimensions() || {}
+    formData.token = store.token
+    formData.host_ids = keys.map(Number)
+    http.patch('/api/exec/do/', formData)
+      .catch(() => {
+        for (let key of keys) store.outputs[key].status = -1
+      })
+  }
+
   function openTerminal() {
     window.open(`/ssh?id=${current}`)
   }
 
   const {tag, items, counter} = store
   const cItem = store.outputs[current] || {}
+  const failedKeys = Object.keys(store.outputs).filter(x => ![-2, 0].includes(store.outputs[x].status))
   return (
     <div className={style.output}>
       <div className={style.side}>
@@ -145,6 +172,13 @@ function OutView(props) {
             <div>{counter['2']}</div>
           </div>
         </div>
+        {failedKeys.length > 0 && (
+          <div className={style.retry}>
+            <Button block danger size="small" icon={<RedoOutlined/>} onClick={() => handleRetry(failedKeys)}>
+              {t('重试全部失败主机')}（{failedKeys.length}）
+            </Button>
+          </div>
+        )}
 
         <div className={style.list}>
           {items.map(([key, item]) => (
@@ -174,6 +208,11 @@ function OutView(props) {
               ) : (
                 <StopOutlined className={style.icon} style={{color: '#dfdfdf'}}/>
               )}
+            </Tooltip>
+          )}
+          {failedKeys.includes(current) && (
+            <Tooltip title={t('重试')}>
+              <RedoOutlined className={style.icon} style={{color: '#ff4d4f'}} onClick={() => handleRetry([current])}/>
             </Tooltip>
           )}
           <Tooltip title={t('打开web终端')}>
