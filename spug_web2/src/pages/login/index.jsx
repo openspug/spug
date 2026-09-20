@@ -46,7 +46,7 @@ export default function Login() {
             content: <div>
               未能获取到访问者的真实IP，无法提供基于请求来源IP的合法性验证，详细信息请参考
               <a target="_blank"
-                 href="https://spug.cc/docs/practice/"
+                 href="https://ops.spug.cc/docs/practice/"
                  rel="noopener noreferrer">官方文档</a>。
             </div>,
             onOk: () => doLogin(data)
@@ -133,7 +133,7 @@ export default function Login() {
              rel="noopener noreferrer">官网</a>
           <a className={styles.links} title="Github" href="https://github.com/openspug/spug" target="_blank"
              rel="noopener noreferrer"><AiOutlineGithub/></a>
-          <a title="文档" href="https://spug.cc/docs/about-spug/" target="_blank"
+          <a title="文档" href="https://ops.spug.cc/docs/about-spug/" target="_blank"
              rel="noopener noreferrer">文档</a>
         </div>
         <div style={{color: 'rgba(0, 0, 0, .45)'}}>Copyright <AiOutlineCopyright/> {new Date().getFullYear()} By OpenSpug

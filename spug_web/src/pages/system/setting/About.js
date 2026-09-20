@@ -34,7 +34,7 @@ class About extends React.Component {
             top: 88,
             message: t('发现新版本 {}', res.version),
             icon: <SmileTwoTone/>,
-            btn: <a target="_blank" rel="noopener noreferrer" href="https://spug.cc/docs/update-version/">{t('如何升级？')}</a>,
+            btn: <a target="_blank" rel="noopener noreferrer" href="https://ops.spug.cc/docs/update-version/">{t('如何升级？')}</a>,
             description: <pre style={{lineHeight: '30px'}}>{res.content}<br/>{res.extra}</pre>
           })
         } else if (res.extra) {
@@ -67,8 +67,8 @@ class About extends React.Component {
             <a href="https://spug.cc" target="_blank" rel="noopener noreferrer">https://spug.cc</a>
           </Descriptions.Item>
           <Descriptions.Item label={t('更新日志')}>
-            <a href="https://spug.cc/docs/change-log/" target="_blank"
-               rel="noopener noreferrer">https://spug.cc/docs/change-log/</a>
+            <a href="https://ops.spug.cc/docs/change-log/" target="_blank"
+               rel="noopener noreferrer">https://ops.spug.cc/docs/change-log/</a>
           </Descriptions.Item>
         </Descriptions>
         {info['spug_version'] && info['spug_version'] !== VERSION && (

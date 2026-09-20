@@ -109,7 +109,7 @@ export default observer(function (props) {
           <span>
             {t('任务执行失败告警通知，')}
             <a target="_blank" rel="noopener noreferrer"
-               href="https://spug.cc/docs/use-problem#use-dd">{t('钉钉收不到通知？')}</a>
+               href="https://ops.spug.cc/docs/use-problem#use-dd">{t('钉钉收不到通知？')}</a>
           </span>)}>
           <Input
             value={store.record.rst_notify.value}

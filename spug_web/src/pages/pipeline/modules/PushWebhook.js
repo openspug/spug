@@ -16,7 +16,7 @@ const MODULES = {
     secret: true,
     secretTip: () => t('钉钉机器人安全设置选择「加签」时填写，未开启加签可留空。'),
     atTip: () => t('开启后会 @所有人，同时正文末尾会自动追加「@所有人」字样以便钉钉高亮显示。'),
-    doc: 'https://spug.cc/docs/use-problem#use-dd',
+    doc: 'https://ops.spug.cc/docs/use-problem#use-dd',
   },
   push_fs: {
     label: () => t('飞书'),

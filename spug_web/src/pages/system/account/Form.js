@@ -66,7 +66,7 @@ export default observer(function () {
           extra={(
             <span>
               {t('如果启用了MFA（两步验证）则该项为必填。')}
-              <a target="_blank" rel="noopener noreferrer" href="https://spug.cc/docs/wx-token/">{t('什么是微信Token？')}</a>
+              <a target="_blank" rel="noopener noreferrer" href="https://ops.spug.cc/docs/wx-token/">{t('什么是微信Token？')}</a>
             </span>)}>
           <Input placeholder={t('请输入微信Token')}/>
         </Form.Item>

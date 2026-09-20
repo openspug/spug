@@ -164,7 +164,7 @@ class Ext2Setup2 extends React.Component {
               ) : null,
               <Form.Item key={2} required label={t('目标路径')} extra={<a
                 target="_blank" rel="noopener noreferrer"
-                href="https://spug.cc/docs/deploy-config#transfer">{t('使用前请务必阅读官方文档。')}</a>}>
+                href="https://ops.spug.cc/docs/deploy-config#transfer">{t('使用前请务必阅读官方文档。')}</a>}>
                 <Input
                   disabled={store.isReadOnly}
                   spellCheck={false}

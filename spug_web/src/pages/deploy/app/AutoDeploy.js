@@ -69,7 +69,7 @@ export default observer(function AutoDeploy() {
           <Form.Item hidden={tagMode} required={!tagMode} label={t('选择分支')} extra={<span>
             {t('根据你的网络情况，首次刷新可能会很慢，请耐心等待。')}
             <a target="_blank" rel="noopener noreferrer"
-               href="https://spug.cc/docs/use-problem#clone">{t('刷新失败？')}</a>
+               href="https://ops.spug.cc/docs/use-problem#clone">{t('刷新失败？')}</a>
           </span>}>
             <Form.Item style={{display: 'inline-block', marginBottom: 0, width: '246px'}}>
               <Select placeholder={t('仅指定分支的事件触发自动发布')} value={branch} onChange={setBranch}>

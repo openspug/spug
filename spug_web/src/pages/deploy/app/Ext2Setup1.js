@@ -84,7 +84,7 @@ export default observer(function Ext2Setup1() {
       <Form.Item label={t('消息通知')} extra={<span>
         {t('应用审核及发布成功或失败结果通知，')}
         <a target="_blank" rel="noopener noreferrer"
-           href="https://spug.cc/docs/use-problem#use-dd">{t('钉钉收不到通知？')}</a>
+           href="https://ops.spug.cc/docs/use-problem#use-dd">{t('钉钉收不到通知？')}</a>
       </span>}>
         <Input
           addonBefore={(

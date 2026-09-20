@@ -78,7 +78,7 @@ export default observer(function () {
         <Form.Item
           label={t('访问IP校验')}
           extra={<span>{t('建议开启，校验是否获取了真实的访问者IP，防止因为增加的反向代理层导致基于IP的安全策略失效，当校验失败时会在登录时弹窗提醒。如果你在内网部署且仅在内网使用可以关闭该特性。')}<a
-            href="https://spug.cc/docs/practice"
+            href="https://ops.spug.cc/docs/practice"
             target="_blank" rel="noopener noreferrer">{t('为什么没有获取到真实IP？')}</a></span>}>
           <Switch
             checkedChildren={t('开启')}
@@ -100,7 +100,7 @@ export default observer(function () {
           style={{marginTop: 24}}
           extra={visible ? t('输入验证码，通过验证后开启。') :
             <span>{t('建议开启，登录时额外使用验证码进行身份验证。开启前至少要确保管理员账户配置了微信Token（账户管理/编辑），开启后未配置微信Token的账户将无法登录，')}<a
-              target="_blank" rel="noopener noreferrer" href="https://spug.cc/docs/wx-token/">{t('什么是微信Token？')}</a></span>}>
+              target="_blank" rel="noopener noreferrer" href="https://ops.spug.cc/docs/wx-token/">{t('什么是微信Token？')}</a></span>}>
           {visible ? (
             <div style={{display: 'flex', width: 490}}>
               <Form.Item noStyle extra={t('验证通过后开启MFA（两步验证）。')}>

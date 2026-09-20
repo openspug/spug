@@ -11,7 +11,7 @@ const Tips1 = (
   <a
     target="_blank"
     rel="noopener noreferrer"
-    href="https://spug.cc/docs/deploy-config#global-env">{t('内置全局变量')}</a>
+    href="https://ops.spug.cc/docs/deploy-config#global-env">{t('内置全局变量')}</a>
 )
 
 const Tips2 = (
