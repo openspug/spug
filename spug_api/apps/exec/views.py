@@ -95,6 +95,7 @@ class TaskView(View):
     def patch(self, request):
         form, error = JsonParser(
             Argument('token', help='参数错误'),
+            Argument('host_ids', type=list, required=False),
             Argument('cols', type=int, required=False),
             Argument('rows', type=int, required=False)
         ).parse(request.body)
@@ -104,7 +105,13 @@ class TaskView(View):
                 term = {'width': form.cols, 'height': form.rows}
             rds = get_redis_connection()
             task = ExecHistory.objects.get(digest=form.token)
-            for host in Host.objects.filter(id__in=json.loads(task.host_ids)):
+            host_ids = json.loads(task.host_ids)
+            if form.host_ids:
+                # 重试：只重新下发指定主机，且限定在该任务的主机范围内
+                host_ids = [x for x in host_ids if x in form.host_ids]
+                if not host_ids:
+                    return json_response(error='未找到可重试的主机')
+            for host in Host.objects.filter(id__in=host_ids):
                 data = dict(
                     key=host.id,
                     name=host.name,
