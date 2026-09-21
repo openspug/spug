@@ -40,9 +40,14 @@ def get_alarm(request):
         Argument('name', required=False)
     ).parse(request.GET, True)
     if error is None:
+        if form.get('type'):
+            # 前端传监控类型的原始键；报警记录落库的是中文展示名，不能拿 type_alias 直接过滤，
+            # 英文界面下 type_alias 已被翻成英文，永远匹配不上
+            form.type = dict(Detection.TYPES).get(form.type, form.type)
         now = datetime.now()
-        data = {human_date(now - timedelta(days=x + 1)): 0 for x in range(14)}
-        for alarm in Alarm.objects.filter(status='1', created_at__gt=human_date(now - timedelta(days=14)), **form):
+        # 含当天在内的最近 14 天、按日期升序；原先从昨天往前数，当天的报警要隔天才出现在图上
+        data = {human_date(now - timedelta(days=x)): 0 for x in range(13, -1, -1)}
+        for alarm in Alarm.objects.filter(status='1', created_at__gte=min(data), **form):
             date = alarm.created_at[:10]
             if date in data:
                 data[date] += 1

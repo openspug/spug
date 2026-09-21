@@ -27,7 +27,8 @@ export default function () {
       .then(res => {
         for (let item of res.detections) {
           if (!data[item.type]) {
-            data[item.type] = {value: item.type_alias, label: item.type_alias, children: []}
+            // 取值用类型原始键：type_alias 在英文界面下会被翻译，拿它过滤会匹配不到任何报警
+            data[item.type] = {value: item.type, label: item.type_alias, children: []}
           }
           data[item.type].children.push({value: item.name, label: item.name})
         }
