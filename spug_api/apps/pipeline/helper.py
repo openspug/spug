@@ -142,6 +142,15 @@ class Helper(KitMixin):
         self.rds.rpush(self.rds_key, json.dumps(message))
 
         file = self.get_file(key)
+        if status and not data:
+            # 落盘格式只在换行时带上状态，纯状态消息（send_status）按下面的逻辑永远写不进文件，
+            # redis 过期后回放就丢了多主机节点的终态。单独记一行；这类键只承载节点状态，
+            # 控制台总按 节点.主机 取输出，多出的换行不会显示出来
+            file.write(f'{status},{self.buffers[key]}\r\n')
+            file.flush()
+            self.buffers[key] = ''
+            self.flags[key] = False
+            return
         for idx, line in enumerate(data.split('\r\n')):
             if idx != 0:
                 tmp = [status, self.buffers[key] + '\r\n']
