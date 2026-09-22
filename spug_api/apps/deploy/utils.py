@@ -24,7 +24,12 @@ def dispatch_all(req):
         if not req.repository_id:
             with_local = True
     else:
-        if json.loads(req.deploy.extend_obj.server_actions):
+        extend_obj = req.deploy.extend_obj
+        if req.type == '2':
+            server_actions = json.loads(extend_obj.rollback_server_actions) if extend_obj.rollback_server_actions else []
+        else:
+            server_actions = json.loads(extend_obj.server_actions)
+        if server_actions:
             with_local = True
     dispatch(req, host_ids, with_local)
 
