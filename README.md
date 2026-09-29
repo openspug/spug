@@ -54,7 +54,7 @@ Push Assistant is a message push platform that integrates multiple channels such
 ## Install Doc
 
 - Home Page：https://ops.spug.cc/docs/install-docker/
-- Useage Doc：https://ops.spug.cc/docs/about-spug/
+- Usage Doc：https://ops.spug.cc/docs/about-spug/
 - Change Log：https://ops.spug.cc/docs/change-log/
 - FAQ：https://ops.spug.cc/docs/faq/
 - Spug Push：https://push.spug.cc
