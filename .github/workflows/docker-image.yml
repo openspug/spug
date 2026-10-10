@@ -99,7 +99,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          # plain Docker manifests so that old Docker clients can pull the image
+          # no attestation manifests: the index lists just the amd64 and arm64 images
           provenance: false
           sbom: false
 
