@@ -15,6 +15,18 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
 
 演示环境运行最新版本，数据每小时自动重置，可在页面右上角切换简体中文 / 英文界面。
 
+## 快速开始
+
+需要 Docker 20.10.10 及以上版本和 Compose 插件。镜像支持 amd64 / arm64，已内置后端与前端，容器启动时不再下载任何东西。
+
+```bash
+curl -fsSLO https://raw.githubusercontent.com/openspug/spug/4.0/docker-compose.yml
+docker compose up -d
+docker compose logs spug | grep password
+```
+
+用浏览器打开 `http://<服务器地址>/`，账号 `admin`，密码是最后一条命令输出的随机密码（首次启动时生成）。国内使用请先把 [docker-compose.yml](./docker-compose.yml) 里的 `TZ` 改为 `Asia/Shanghai`；访问 GitHub、Docker Hub 不稳定时，可按[安装文档](https://ops.spug.cc/docs/install-docker/)的方式安装。
+
 ## 🔥推送助手
 
 推送助手是一个集成了电话、短信、邮件、飞书、钉钉、微信、企业微信等多通道的消息推送平台，可以3分钟实现Zabbix、Prometheus、夜莺等监控系统的电话短信报警，点击体验：[https://push.spug.cc](https://push.spug.cc)
@@ -54,6 +66,7 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
 - 使用文档：https://ops.spug.cc/docs/about-spug/
 - 更新日志：https://ops.spug.cc/docs/change-log/
 - 常见问题：https://ops.spug.cc/docs/faq/
+- 问题反馈：https://github.com/openspug/spug/issues（中英文均可）
 - 推送助手：https://push.spug.cc
 
 

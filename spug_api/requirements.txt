@@ -6,6 +6,8 @@ daphne >= 4.0.0, < 5.0.0
 gunicorn >= 21.0.0
 channels-redis >= 4.1.0, < 5.0.0
 django_redis >= 5.4.0, < 6.0.0
+# redis-py 8 默认 socket_timeout=5s，worker/scheduler/monitor 里不带超时的 BLPOP/BRPOP 会每 5 秒抛 TimeoutError 退出
+redis >= 4.6.0, < 8.0.0
 asgiref==3.7.2
 requests >= 2.31.0, < 3.0.0
 python-ldap==3.4.3

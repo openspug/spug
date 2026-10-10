@@ -1,0 +1,116 @@
+name: docker image
+
+# Builds the all-in-one image from the Dockerfile at the repository root for amd64 and arm64.
+#   - tag push v4.1.0 -> 4.1.0, 4.1 and latest on Docker Hub (openspug/spug) and GHCR
+#   - manual run      -> builds the selected branch; pushes sha-<commit> only if asked to
+# Docker Hub needs the repository secrets DOCKERHUB_USERNAME and DOCKERHUB_TOKEN; without
+# them the image only goes to GHCR (ghcr.io/<owner>/<repo>).
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      push:
+        description: 'Push the image (tagged sha-<commit>) instead of only building it'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: docker-image-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      HUB_REPO: ${{ vars.DOCKERHUB_REPOSITORY || 'openspug/spug' }}
+      HUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      HUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      PUSH: ${{ github.event_name == 'push' || inputs.push }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # the tag, the API version and the web UI version must agree, otherwise
+      # "System settings > About" reports a version mismatch
+      - name: Check version consistency
+        if: github.event_name == 'push'
+        run: |
+          api=$(sed -n "s/^SPUG_VERSION = '\(.*\)'/\1/p" spug_api/spug/settings.py)
+          web=$(sed -n "s/^export const VERSION = '\(.*\)';/\1/p" spug_web/src/libs/index.js)
+          echo "tag=$GITHUB_REF_NAME api=$api web=$web"
+          if [ "$api" != "$GITHUB_REF_NAME" ] || [ "$web" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match SPUG_VERSION ($api) / web VERSION ($web)"
+            exit 1
+          fi
+
+      - name: Select registries
+        id: registries
+        run: |
+          images="ghcr.io/${GITHUB_REPOSITORY,,}"
+          if [ -n "$HUB_USERNAME" ] && [ -n "$HUB_TOKEN" ]; then
+            images="$images"$'\n'"docker.io/$HUB_REPO"
+          else
+            echo "::warning::DOCKERHUB_USERNAME / DOCKERHUB_TOKEN not set, pushing to GHCR only"
+          fi
+          {
+            echo 'images<<EOF'
+            echo "$images"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: docker/metadata-action@v6
+        id: meta
+        with:
+          images: ${{ steps.registries.outputs.images }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix=sha-,enable=${{ github.event_name == 'workflow_dispatch' }}
+
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/login-action@v4
+        if: env.PUSH == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/login-action@v4
+        if: env.PUSH == 'true' && env.HUB_USERNAME != '' && env.HUB_TOKEN != ''
+        with:
+          username: ${{ env.HUB_USERNAME }}
+          password: ${{ env.HUB_TOKEN }}
+
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: ${{ env.PUSH == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          # plain Docker manifests so that old Docker clients can pull the image
+          provenance: false
+          sbom: false
+
+      - name: Sync the Docker Hub description with README.md
+        if: github.event_name == 'push' && env.HUB_USERNAME != '' && env.HUB_TOKEN != ''
+        continue-on-error: true
+        uses: peter-evans/dockerhub-description@v5
+        with:
+          username: ${{ env.HUB_USERNAME }}
+          password: ${{ env.HUB_TOKEN }}
+          repository: ${{ env.HUB_REPO }}
+          short-description: 'Agentless ops platform: hosts, web terminal, deployments, pipelines, cron jobs, monitoring'
+          readme-filepath: ./README.md
+          enable-url-completion: true

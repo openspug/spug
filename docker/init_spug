@@ -1,0 +1,11 @@
+#!/bin/bash
+# Usage: docker exec spug init_spug <username> <password>
+#
+# Kept for the older install docs. The entrypoint already initializes the database and the
+# first admin, so this creates the account if it is missing and otherwise resets its password.
+set -eu
+
+cd /data/spug/spug_api
+python3 manage.py updatedb > /dev/null
+python3 manage.py user add -u "$1" -p "$2" -n 管理员 -s 2> /dev/null
+python3 manage.py user reset -u "$1" -p "$2"

@@ -12,9 +12,22 @@ Spug is a lightweight agent-free automatic operation and maintenance platform de
 
 ## Demo
 
-Demo：https://demo.spug.cc
+Demo: https://demo.spug.cc (username `admin`, password `spug.cc`)
 
 The demo environment runs the latest version and resets its data every hour, both the English and the Simplified Chinese interface are available from the globe icon in the header.
+
+
+## Quick start
+
+You need Docker 20.10.10 or later with the Compose plugin. The image runs on amd64 and arm64 and has the back end and the web UI built in, so nothing is downloaded when the container starts.
+
+```bash
+curl -fsSLO https://raw.githubusercontent.com/openspug/spug/4.0/docker-compose.yml
+docker compose up -d
+docker compose logs spug | grep password
+```
+
+Open `http://<your-server>/` and log in as `admin` with the password printed by the last command (it is generated on the first start). Time zone, port and database password are set in [docker-compose.yml](./docker-compose.yml), and the image is also published as `ghcr.io/openspug/spug`. For a quick look without the database container, `docker run -d --name spug -p 8080:80 openspug/spug:4.1` starts a single container on SQLite (get the password with `docker logs spug | grep password`). Upgrades and other ways to install are covered in the [installation guide](https://ops.spug.cc/en/docs/install-docker/).
 
 
 
@@ -51,13 +64,14 @@ Push Assistant is a message push platform that integrates multiple channels such
 * React 16.13
 * Redis 5.0+
 
-## Install Doc
+## Documentation
 
-- Home Page：https://ops.spug.cc/docs/install-docker/
-- Useage Doc：https://ops.spug.cc/docs/about-spug/
-- Change Log：https://ops.spug.cc/docs/change-log/
-- FAQ：https://ops.spug.cc/docs/faq/
-- Spug Push：https://push.spug.cc
+- Installation: https://ops.spug.cc/en/docs/install-docker/
+- User guide: https://ops.spug.cc/en/docs/about-spug/
+- Change log: https://ops.spug.cc/en/docs/change-log/
+- FAQ: https://ops.spug.cc/en/docs/faq/
+- Issues: https://github.com/openspug/spug/issues (English or Chinese are both welcome)
+- Spug Push: https://push.spug.cc
 
 
 ## Recommended 

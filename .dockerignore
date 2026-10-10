@@ -1,0 +1,32 @@
+# Only spug_api, spug_web, docker/ and docs/docker are needed to build the image.
+.git
+.github
+.claude
+.workbuddy
+.idea
+**/.DS_Store
+**/__pycache__
+**/*.pyc
+**/node_modules
+*.md
+docs/*
+!docs/docker
+
+spug_web/build
+spug_web/pnpm-lock.yaml
+spug_web2
+
+# local development state must never end up in the image
+spug_api/venv
+spug_api/db.sqlite3
+spug_api/dump.rdb
+spug_api/access.log
+spug_api/spug/overrides.py
+spug_api/apps/*/migrations
+spug_api/repos
+spug_api/logs/*
+!spug_api/logs/.gitkeep
+spug_api/storage/deploy/*
+!spug_api/storage/deploy/.gitkeep
+spug_api/storage/transfer/*
+!spug_api/storage/transfer/.gitkeep
