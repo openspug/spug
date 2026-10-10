@@ -1,0 +1,60 @@
+# Spug: https://github.com/openspug/spug
+#
+#   docker compose up -d
+#   docker compose logs spug | grep password    # first start only: the generated admin password
+#
+# then open http://<this host>/ and log in as admin. Upgrade later with
+# `docker compose pull && docker compose up -d`; data stays in the two named volumes.
+
+services:
+  spug:
+    image: openspug/spug:4.0    # or ghcr.io/openspug/spug:4.0; pin an exact version such as 4.0.2 if you prefer
+    container_name: spug
+    restart: unless-stopped
+    ports:
+      - "80:80"                 # change the left side if port 80 is taken, e.g. "8080:80"
+    environment:
+      TZ: UTC                   # used by scheduled tasks and timestamps, e.g. America/New_York, Europe/Berlin
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: spug
+      MYSQL_USER: spug
+      MYSQL_PASSWORD: ${SPUG_DB_PASSWORD:-spug.cc}
+      # SPUG_ADMIN_PASSWORD: change-me    # first admin's password; a random one is printed to the log if unset
+    volumes:
+      - spug-data:/data
+    # Distributing files from a host and the pipeline "data transfer" node mount the source
+    # host with sshfs (FUSE). These three settings allow exactly that instead of privileged
+    # mode; remove them if you don't use those two features.
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    security_opt:
+      - apparmor:unconfined
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mariadb:10.11
+    container_name: spug-db
+    restart: unless-stopped
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MARIADB_DATABASE: spug
+      MARIADB_USER: spug
+      MARIADB_PASSWORD: ${SPUG_DB_PASSWORD:-spug.cc}    # only reachable from the spug container
+      MARIADB_RANDOM_ROOT_PASSWORD: "1"
+    volumes:
+      - spug-db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+volumes:
+  spug-data:
+  spug-db:
