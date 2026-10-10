@@ -12,7 +12,7 @@ Spug is a lightweight agent-free automatic operation and maintenance platform de
 
 ## Demo
 
-Demo：https://demo.spug.cc
+Demo: https://demo.spug.cc (username `admin`, password `spug.cc`)
 
 The demo environment runs the latest version and resets its data every hour, both the English and the Simplified Chinese interface are available from the globe icon in the header.
 
