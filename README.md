@@ -27,7 +27,7 @@ docker compose up -d
 docker compose logs spug | grep password
 ```
 
-Open `http://<your-server>/` and log in as `admin` with the password printed by the last command (it is generated on the first start). Time zone, port and database password are set in [docker-compose.yml](./docker-compose.yml), and the image is also published as `ghcr.io/openspug/spug`. For a quick look without the database container, `docker run -d --name spug -p 8080:80 openspug/spug:4.0` starts a single container on SQLite (get the password with `docker logs spug | grep password`). Upgrades and other ways to install are covered in the [installation guide](https://ops.spug.cc/en/docs/install-docker/).
+Open `http://<your-server>/` and log in as `admin` with the password printed by the last command (it is generated on the first start). Time zone, port and database password are set in [docker-compose.yml](./docker-compose.yml), and the image is also published as `ghcr.io/openspug/spug`. For a quick look without the database container, `docker run -d --name spug -p 8080:80 openspug/spug:4.1` starts a single container on SQLite (get the password with `docker logs spug | grep password`). Upgrades and other ways to install are covered in the [installation guide](https://ops.spug.cc/en/docs/install-docker/).
 
 
 

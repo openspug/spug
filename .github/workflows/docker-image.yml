@@ -1,7 +1,7 @@
 name: docker image
 
 # Builds the all-in-one image from the Dockerfile at the repository root for amd64 and arm64.
-#   - tag push v4.0.2 -> 4.0.2, 4.0 and latest on Docker Hub (openspug/spug) and GHCR
+#   - tag push v4.1.0 -> 4.1.0, 4.1 and latest on Docker Hub (openspug/spug) and GHCR
 #   - manual run      -> builds the selected branch; pushes sha-<commit> only if asked to
 # Docker Hub needs the repository secrets DOCKERHUB_USERNAME and DOCKERHUB_TOKEN; without
 # them the image only goes to GHCR (ghcr.io/<owner>/<repo>).

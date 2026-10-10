@@ -14,4 +14,4 @@ export * from './i18n';
 export * from './router';
 export const http = _http;
 export const history = _history;
-export const VERSION = 'v4.0.1';
+export const VERSION = 'v4.1.0';
