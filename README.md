@@ -122,43 +122,6 @@ Orchestrate build, command, data transfer, upload and notification nodes into a 
 ![monitoring](docs/img/4.0/en/monitor.jpg)
 ![alarm](docs/img/4.0/en/alarm.jpg)
 
-
-
-## Sponsor
-<table>
-  <thead>
-    <tr>
-      <th align="center" style="width: 115px;">
-        <a href="https://www.ucloud.cn/site/active/kuaijie.html?invitation_code=C1xD0E5678FBA77">
-          <img src="https://cdn.spug.cc/img/ucloud.png" width="115px"><br>
-          <sub>UCloud</sub><br>
-          <sub>5 元/月云主机</sub>
-        </a>
-      </th>
-        <th align="center" style="width: 115px;">
-        <a href="https://www.aliyun.com/minisite/goods?userCode=8vdj3myc">
-          <img src="https://cdn.spug.cc/img/aliyun_quan.png" width="115px"><br>
-          <sub>阿里云通用券</sub><br>
-          <sub>300元限量免费领</sub>
-        </a>
-      </th>
-      <th align="center" style="width: 125px;">
-        <a href="http://www.magedu.com">
-          <img src="https://cdn.spug.cc/img/magedu-logo.jpeg" width="115px"><br>
-          <sub>马哥教育</sub><br>
-          <sub>IT人高薪职业学院</sub>
-        </a>
-      </th>
-    </tr>
-  </thead>
-</table>
-
-## Developer Group
-#### Follow the Spug operation and maintenance public number to add WeChat group, QQ group, and get the latest product dynamics
-<div >
-   <img src="https://cdn.spug.cc/img/spug-club.jpg" width = "300" height = "300" alt="spug-qq" align=center />
-<div>
- 
  
 ## License & Copyright
 [AGPL-3.0](https://opensource.org/licenses/AGPL-3.0)
