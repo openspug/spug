@@ -10,7 +10,7 @@ django_redis >= 5.4.0, < 6.0.0
 redis >= 4.6.0, < 8.0.0
 asgiref==3.7.2
 requests >= 2.31.0, < 3.0.0
-python-ldap==3.4.3
-GitPython==3.1.40
+python-ldap==3.4.8
+GitPython==3.1.62
 openpyxl==3.1.2
 user_agents==2.2.0
