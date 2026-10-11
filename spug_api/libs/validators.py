@@ -2,7 +2,11 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 import ipaddress
+import re
 from datetime import datetime
+
+# 空白与 shell 元字符：路径会经 SSH 交给远端 shell，或作为 rsync/sshfs 的远端参数被远端 shell 再解析一次
+_unsafe_path_chars = re.compile(r'[\s;|&$`<>()\'"\\*?{}\[\]!]')
 
 
 # 判断是否是ip地址
@@ -27,3 +31,11 @@ def date_validator(value: str) -> bool:
     except ValueError:
         pass
     return False
+
+
+# 判断是否是可安全交给远端 shell 的绝对路径：以 / 开头，不含空白与 shell 元字符
+def path_validator(value) -> bool:
+    if not isinstance(value, str):
+        return False
+    value = value.strip()
+    return value.startswith('/') and not _unsafe_path_chars.search(value)

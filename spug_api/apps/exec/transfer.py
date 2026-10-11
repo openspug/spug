@@ -10,12 +10,14 @@ from apps.account.utils import has_host_perm
 from apps.host.models import Host
 from apps.setting.utils import AppSetting
 from libs import json_response, JsonParser, Argument, auth
-from libs.utils import str_decode, human_seconds_time
+from libs.utils import str_decode, human_seconds_time, remove_mount_dir
+from libs.validators import path_validator
 from libs.locale import get_request_language, translate_console
 from concurrent import futures
 from threading import Thread
 import subprocess
 import tempfile
+import shlex
 import uuid
 import json
 import time
@@ -32,8 +34,8 @@ class TransferView(View):
     def post(self, request):
         data = request.POST.get('data')
         form, error = JsonParser(
-            Argument('host', required=False),
-            Argument('dst_dir', help='请输入目标路径'),
+            Argument('host', type=list, required=False, help='请选择数据源主机'),
+            Argument('dst_dir', filter=path_validator, help='目标路径必须为绝对路径，且不能包含空格及特殊字符'),
             Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择目标主机'),
         ).parse(data)
         if error is None:
@@ -43,12 +45,18 @@ class TransferView(View):
             token = uuid.uuid4().hex
             base_dir = os.path.join(settings.TRANSFER_DIR, token)
             if form.host:
-                host_id, path = json.loads(form.host)
-                if not path.strip('/'):
-                    return json_response(error='请输入正确的数据源路径')
+                if len(form.host) != 2:
+                    return json_response(error='请选择数据源主机')
+                host_id, path = form.host
+                # 数据源主机同样会被 SSH 登录并执行命令，与目标主机一样要校验权限
+                if not has_host_perm(request.user, [host_id]):
+                    return json_response(error='无权访问主机，请联系管理员')
+                if not path_validator(path) or not path.strip().strip('/'):
+                    return json_response(error='数据源路径必须为绝对路径，且不能包含空格及特殊字符')
+                path = path.strip()
                 host = Host.objects.get(pk=host_id)
                 with host.get_ssh() as ssh:
-                    code, _ = ssh.exec_command_raw(f'[ -d {path} ]')
+                    code, _ = ssh.exec_command_raw(f'[ -d {shlex.quote(path)} ]')
                     if code != 0:
                         return json_response(error='数据源路径必须为该主机上已存在的目录')
                 os.makedirs(base_dir)
@@ -56,10 +64,15 @@ class TransferView(View):
                     fp.write(host.pkey or AppSetting.get('private_key'))
                     fp.flush()
                     target = f'{host.username}@{host.hostname}:{path}'
-                    command = f'sshfs -o ro -o ssh_command="ssh -p {host.port} -i {fp.name}" {target} {base_dir}'
-                    task = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                    command = ['sshfs', '-o', 'ro', '-o', f'ssh_command=ssh -p {host.port} -i {fp.name}', target, base_dir]
+                    try:
+                        task = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                    except FileNotFoundError:
+                        # 不经 shell 执行时缺少命令会直接抛异常，而不是返回 127
+                        remove_mount_dir(base_dir, False)
+                        return json_response(error='数据源为主机时需要在 Spug 服务端安装 sshfs')
                     if task.returncode != 0:
-                        os.system(f'umount -f {base_dir} > /dev/null 2>&1; rm -rf {base_dir}')
+                        remove_mount_dir(base_dir)
                         return json_response(error=task.stdout.decode())
             else:
                 os.makedirs(base_dir)
@@ -111,11 +124,7 @@ def _dispatch_sync(task, language='zh'):
                     t.token,
                     json.dumps({'key': t.key, 'status': -1, 'data': f'\x1b[31mException: {exc}\x1b[0m'})
                 )
-    if task.host_id:
-        command = f'umount -f {task.src_dir} && rm -rf {task.src_dir}'
-    else:
-        command = f'rm -rf {task.src_dir}'
-    subprocess.run(command, shell=True)
+    remove_mount_dir(task.src_dir, task.host_id)
     close_old_connections()
 
 
@@ -128,10 +137,10 @@ def _do_sync(rds, task, host, language='zh'):
         fp.flush()
 
         flag = time.time()
-        options = '-azv --progress' if task.host_id else '-rzv --progress'
-        argument = f'{task.src_dir}/ {host.username}@{host.hostname}:{task.dst_dir}'
-        command = f'rsync {options} -h -e "ssh -p {host.port} -o StrictHostKeyChecking=no -i {fp.name}" {argument}'
-        task = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        options = ['-azv', '--progress'] if task.host_id else ['-rzv', '--progress']
+        command = ['rsync', *options, '-h', '-e', f'ssh -p {host.port} -o StrictHostKeyChecking=no -i {fp.name}',
+                   f'{task.src_dir}/', f'{host.username}@{host.hostname}:{task.dst_dir}']
+        task = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         message = b''
         while True:
             output = task.stdout.read(1)

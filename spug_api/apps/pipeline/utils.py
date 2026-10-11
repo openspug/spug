@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db import close_old_connections
 from apps.credential.models import Credential
 from apps.host.models import Host
-from libs.utils import AttrDict, human_datetime, render_str
+from libs.utils import AttrDict, human_datetime, render_str, remove_mount_dir
 from libs.executor import Executor
 from libs.gitlib import RemoteGit
 from libs.push import send_message
@@ -21,6 +21,7 @@ from uuid import uuid4
 import subprocess
 import tempfile
 import shutil
+import shlex
 import time
 import os
 
@@ -339,7 +340,7 @@ class NodeExecutor:
             os.makedirs(local_dir)
             remote_dir = f'{host.username}@{host.hostname}:{source.path}'
             with host.get_ssh() as ssh:
-                code, _ = ssh.exec_command_raw(f'[ -f {source.path} ]')
+                code, _ = ssh.exec_command_raw(f'[ -f {shlex.quote(source.path)} ]')
             if code == 0:
                 remote_dir = f'{host.username}@{host.hostname}:{os.path.dirname(source.path)}'
                 local_path = os.path.join(local_dir, os.path.basename(source.path))
@@ -350,12 +351,12 @@ class NodeExecutor:
                 fp.write(host.pkey or AppSetting.get('private_key'))
                 fp.flush()
 
-                command = f'sshfs -o ro -o ssh_command="ssh -p {host.port} -i {fp.name}" {remote_dir} {local_dir}'
-                task = subprocess.run(command, shell=True, capture_output=True)
+                command = ['sshfs', '-o', 'ro', '-o', f'ssh_command=ssh -p {host.port} -i {fp.name}', remote_dir, local_dir]
+                task = subprocess.run(command, capture_output=True)
                 if task.returncode != 0:
                     raise Exception(task.stderr.decode())
         except Exception as e:
-            os.system(f'umount -f {local_dir} > /dev/null 2>&1; rm -rf {local_dir}')
+            remove_mount_dir(local_dir)
             for host_id in destination.targets:
                 self.helper.send_error(f'{node.id}.{host_id}', f'{e}')
             self.helper.send_error(node.id, f'{e}')
@@ -367,7 +368,7 @@ class NodeExecutor:
                 t = executor.submit(self._data_transfer, node, host, local_path, destination.path)
                 threads.append(t)
             results = [x.result() for x in futures.as_completed(threads)]
-        os.system(f'umount -f {local_dir} > /dev/null 2>&1; rm -rf {local_dir}')
+        remove_mount_dir(local_dir)
         state = 'success' if all(results) else 'error'
         self.helper.send_status(node.id, state)
         self.run(node, state)
@@ -384,8 +385,10 @@ class NodeExecutor:
                 fp.flush()
 
                 options = '-avz --progress -h'
-                argument = f'{local_path} {host.username}@{host.hostname}:{remote_path}'
-                command = f'rsync {options} -e "ssh -p {host.port} -o StrictHostKeyChecking=no -i {fp.name}" {argument}'
+                # 命令交给控制端本地 bash 执行，路径来自节点配置，必须转义
+                argument = f'{shlex.quote(local_path)} {shlex.quote(f"{host.username}@{host.hostname}:{remote_path}")}'
+                ssh_command = shlex.quote(f'ssh -p {host.port} -o StrictHostKeyChecking=no -i {fp.name}')
+                command = f'rsync {options} -e {ssh_command} {argument}'
                 with Executor() as et:
                     self.rds.set(pid_key, f'local.{et.pid}', 3600)
                     is_success = self.helper.local_exec(key, et, command)

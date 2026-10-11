@@ -6,9 +6,12 @@ from django.db.models import QuerySet
 from datetime import datetime, date as datetime_date
 from decimal import Decimal
 from string import Template
+import subprocess
 import string
 import random
+import shutil
 import json
+import os
 
 
 class SpugError(Exception):
@@ -155,3 +158,13 @@ def get_request_real_ip(headers: dict):
         x_real_ip = headers.get('x-real-ip', '')
     x_real_ip = x_real_ip.split(',')[0]
     return x_real_ip.split(':')[0]
+
+
+# 卸载 sshfs 挂载点后删除目录；卸载失败（仍处于挂载状态）时不删，避免删到挂载进来的远端文件
+def remove_mount_dir(path, is_mounted=True):
+    path = str(path)
+    if is_mounted:
+        subprocess.run(['umount', '-f', path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if os.path.ismount(path):
+            return
+    shutil.rmtree(path, ignore_errors=True)

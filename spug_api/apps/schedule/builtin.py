@@ -12,13 +12,12 @@ from apps.exec.models import ExecHistory, Transfer
 from apps.notify.models import Notify
 from apps.deploy.utils import dispatch_all
 from apps.repository.models import Repository
-from libs.utils import parse_time, human_datetime, human_date
+from libs.utils import parse_time, human_datetime, human_date, remove_mount_dir
 from datetime import datetime, timedelta
 from threading import Thread
 from collections import defaultdict
 from pathlib import Path
 import time
-import os
 
 
 def auto_run_by_day():
@@ -70,7 +69,7 @@ def auto_run_by_day():
                 if item.name != '.gitkeep':
                     if item.stat().st_atime < timestamp:
                         transfer_dir = item.absolute()
-                        os.system(f'umount -f {transfer_dir} > /dev/null 2>&1; rm -rf {transfer_dir}')
+                        remove_mount_dir(transfer_dir)
     finally:
         connections.close_all()
 
