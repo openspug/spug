@@ -29,6 +29,8 @@ docker compose logs spug | grep password
 
 Open `http://<your-server>/` and log in as `admin` with the password printed by the last command (it is generated on the first start). Time zone, port and database password are set in [docker-compose.yml](./docker-compose.yml), and the image is also published as `ghcr.io/openspug/spug`. For a quick look without the database container, `docker run -d --name spug -p 8080:80 openspug/spug:4.1` starts a single container on SQLite (get the password with `docker logs spug | grep password`). Upgrades and other ways to install are covered in the [installation guide](https://ops.spug.cc/en/docs/install-docker/).
 
+Would you rather not run it yourself? We are looking into Spug Cloud, a hosted version where we run the control panel and reach your servers over SSH with a separate key for each one, so there is still no agent to install. If that sounds useful, [join the waitlist](https://spug.cc/cloud?lang=en&ref=github).
+
 
 
 ## 🔥Push Assistant 
