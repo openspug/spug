@@ -10,6 +10,7 @@ import ipaddress
 import platform
 import requests
 import logging
+import shlex
 import json
 import time
 import re
@@ -86,6 +87,12 @@ def ping_check(addr):
         return False, f'异常信息：{e}'
 
 
+def build_process_command(extra):
+    # 进程名是用户输入，必须整体转义后再拼进被管主机的 shell；repr() 不是 shell 转义，
+    # 名称里一旦有单引号就会改用双引号包裹，$() 与反引号照样执行
+    return f'ps -ef|grep -v grep|grep -- {shlex.quote(extra)}'
+
+
 def host_executor(host, command):
     try:
         with host.get_ssh() as ssh:
@@ -110,7 +117,7 @@ def monitor_worker_handler(job):
     elif tp not in ('3', '4'):
         is_ok, message = False, f'invalid monitor type for {tp!r}'
     else:
-        command = f'ps -ef|grep -v grep|grep {extra!r}' if tp == '3' else extra
+        command = build_process_command(extra) if tp == '3' else extra
         host = Host.objects.filter(pk=addr).first()
         if not host:
             is_ok, message = False, f'unknown host id for {addr!r}'
@@ -144,7 +151,7 @@ def dispatch(tp, addr, extra):
     elif tp == '5':
         return ping_check(addr)
     elif tp == '3':
-        command = f'ps -ef|grep -v grep|grep {extra!r}'
+        command = build_process_command(extra)
     elif tp == '4':
         command = extra
     else:

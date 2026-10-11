@@ -7,9 +7,26 @@ from django_redis import get_redis_connection
 from libs import json_response, JsonParser, Argument, human_datetime, auth
 from apps.monitor.models import Detection
 from apps.monitor.executors import dispatch
+from apps.account.utils import has_host_perm
 from apps.setting.utils import AppSetting
 from datetime import datetime
 import json
+
+
+def _verify_host_targets(user, tp, targets, extra):
+    # 进程检测(3)和自定义脚本(4)会经 SSH 在被管主机上执行，必须与批量执行一样校验主机权限，
+    # 否则只有监控页面权限的用户也能在任意主机上执行命令
+    if tp not in ('3', '4'):
+        return None
+    if tp == '3' and not extra:
+        return '请输入进程名称'
+    try:
+        host_ids = [int(x) for x in targets]
+    except (TypeError, ValueError):
+        return '请选择监控主机'
+    if not has_host_perm(user, host_ids):
+        return '无权访问主机，请联系管理员'
+    return None
 
 
 class DetectionView(View):
@@ -36,6 +53,9 @@ class DetectionView(View):
             Argument('notify_mode', type=list, help='请选择报警方式'),
         ).parse(request.body)
         if error is None:
+            error = _verify_host_targets(request.user, form.type, form.targets, form.extra)
+            if error:
+                return json_response(error=error)
             if set(form.notify_mode).intersection(['1', '2', '4']):
                 if not AppSetting.get_default('spug_key'):
                     return json_response(error='报警方式 微信、短信、邮件需要配置调用凭据（系统设置/基本设置），请配置后再启用该报警方式。')
@@ -68,10 +88,17 @@ class DetectionView(View):
             Argument('is_active', type=bool, required=False)
         ).parse(request.body, True)
         if error is None:
+            task = Detection.objects.filter(pk=form.id).first()
+            if not task:
+                return json_response(error='未找到指定监控项')
+            if form.get('is_active'):
+                error = _verify_host_targets(request.user, task.type, json.loads(task.targets), task.extra)
+                if error:
+                    return json_response(error=error)
             Detection.objects.filter(pk=form.id).update(**form)
             if form.get('is_active') is not None:
                 if form.is_active:
-                    task = Detection.objects.filter(pk=form.id).first()
+                    task.refresh_from_db()
                     message = {'id': form.id, 'action': 'add'}
                     message.update(task.to_dict(selects=('targets', 'extra', 'rate', 'type', 'threshold', 'quiet')))
                 else:
@@ -102,6 +129,9 @@ def run_test(request):
         Argument('extra', required=False)
     ).parse(request.body)
     if error is None:
+        error = _verify_host_targets(request.user, form.type, form.targets[:1], form.extra)
+        if error:
+            return json_response(error=error)
         is_success, message = dispatch(form.type, form.targets[0], form.extra)
         return json_response({'is_success': is_success, 'message': message})
     return json_response(error=error)
