@@ -8,7 +8,7 @@
 
 services:
   spug:
-    image: openspug/spug:4.1    # or ghcr.io/openspug/spug:4.1; pin an exact version such as 4.1.0 if you prefer
+    image: openspug/spug:4.1    # or ghcr.io/openspug/spug:4.1; pin an exact version such as 4.1.1 if you prefer
     container_name: spug
     restart: unless-stopped
     ports:
