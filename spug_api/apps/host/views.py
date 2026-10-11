@@ -43,10 +43,15 @@ class HostView(View):
             Argument('hostname', handler=str.strip, help='请输入主机名或IP'),
             Argument('port', type=int, help='请输入SSH端口'),
             Argument('pkey', required=False),
+            Argument('keep_pkey', type=bool, default=False),
             Argument('desc', required=False),
             Argument('password', required=False),
         ).parse(request.body)
         if error is None:
+            # 前端拿不到已保存的私钥，编辑时用 keep_pkey 表示沿用原独立密钥；不传 pkey 且不保留则清除
+            keep_pkey = form.pop('keep_pkey')
+            if form.id and keep_pkey and not form.pkey:
+                form.pkey = Host.objects.filter(pk=form.id).values_list('pkey', flat=True).first()
             if not _do_host_verify(form):
                 return json_response('auth fail')
 

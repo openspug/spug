@@ -18,8 +18,9 @@ export default observer(function () {
   const [fileList, setFileList] = useState([]);
 
   useEffect(() => {
-    if (store.record.pkey) {
-      setFileList([{uid: '0', name: t('独立密钥'), data: store.record.pkey}])
+    if (store.record.has_pkey) {
+      // 后端不再返回私钥原文，用 keep 标记沿用已保存的独立密钥
+      setFileList([{uid: '0', name: t('独立密钥'), keep: true}])
     }
   }, [])
 
@@ -28,12 +29,16 @@ export default observer(function () {
     const formData = form.getFieldsValue();
     formData['id'] = store.record.id;
     const file = fileList[0];
-    if (file && file.data) formData['pkey'] = file.data;
+    if (file && file.data) {
+      formData['pkey'] = file.data;
+    } else if (file && file.keep) {
+      formData['keep_pkey'] = true;
+    }
     http.post('/api/host/', formData)
       .then(res => {
         if (res === 'auth fail') {
           setLoading(false)
-          if (formData.pkey) {
+          if (formData.pkey || formData.keep_pkey) {
             message.error(t('独立密钥认证失败'))
           } else {
             const onChange = v => formData.password = v;

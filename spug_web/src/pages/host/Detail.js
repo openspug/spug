@@ -124,7 +124,7 @@ export default observer(function () {
         <Descriptions.Item label={t('主机名称')}>{host.name}</Descriptions.Item>
         <Descriptions.Item label={t('连接地址')}>{host.username}@{host.hostname}</Descriptions.Item>
         <Descriptions.Item label={t('连接端口')}>{host.port}</Descriptions.Item>
-        <Descriptions.Item label={t('独立密钥')}>{host.pkey ? t('是') : t('否')}</Descriptions.Item>
+        <Descriptions.Item label={t('独立密钥')}>{host.has_pkey ? t('是') : t('否')}</Descriptions.Item>
         <Descriptions.Item label={t('描述信息')}>{host.desc}</Descriptions.Item>
         <Descriptions.Item label={t('所属分组')}>
           <List>

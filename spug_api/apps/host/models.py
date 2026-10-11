@@ -29,7 +29,9 @@ class Host(models.Model, ModelMixin):
         return SSH(self.hostname, self.port, self.username, pkey, default_env=default_env)
 
     def to_view(self):
-        tmp = self.to_dict()
+        # 独立密钥只在服务端使用，任何接口都不返回私钥原文
+        tmp = self.to_dict(excludes=('pkey',))
+        tmp['has_pkey'] = bool(self.pkey)
         if hasattr(self, 'hostextend'):
             tmp.update(self.hostextend.to_view())
         tmp['group_ids'] = []
