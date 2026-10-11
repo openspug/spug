@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, Radio, Button, Alert, message } from 'antd';
 import { LoadingOutlined, SyncOutlined } from '@ant-design/icons';
-import { http, t } from 'libs';
+import { http, t, docsUrl } from 'libs';
 import store from './store';
 import styles from './index.module.css';
 
@@ -69,7 +69,7 @@ export default observer(function AutoDeploy() {
           <Form.Item hidden={tagMode} required={!tagMode} label={t('选择分支')} extra={<span>
             {t('根据你的网络情况，首次刷新可能会很慢，请耐心等待。')}
             <a target="_blank" rel="noopener noreferrer"
-               href="https://ops.spug.cc/docs/use-problem#clone">{t('刷新失败？')}</a>
+               href={docsUrl('use-problem#clone')}>{t('刷新失败？')}</a>
           </span>}>
             <Form.Item style={{display: 'inline-block', marginBottom: 0, width: '246px'}}>
               <Select placeholder={t('仅指定分支的事件触发自动发布')} value={branch} onChange={setBranch}>

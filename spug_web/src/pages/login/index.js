@@ -15,7 +15,7 @@ import {
 } from '@ant-design/icons';
 import styles from './login.module.css';
 import history from 'libs/history';
-import { http, updatePermissions, t, langMode, setLanguage } from 'libs';
+import { http, updatePermissions, t, langMode, setLanguage, docsUrl } from 'libs';
 import logo from 'layout/logo-spug-txt.png';
 import envStore from 'pages/config/environment/store';
 import appStore from 'pages/config/app/store';
@@ -66,7 +66,7 @@ export default function () {
             content: <div>
               {t('未能获取到访问者的真实IP，无法提供基于请求来源IP的合法性验证，详细信息请参考')}
               <a target="_blank"
-                 href="https://ops.spug.cc/docs/practice/"
+                 href={docsUrl('practice/')}
                  rel="noopener noreferrer">{t('官方文档')}</a>。
             </div>,
             onOk: () => doLogin(data)
@@ -181,7 +181,7 @@ export default function () {
              rel="noopener noreferrer">{t('官网')}</a>
           <a className={styles.links} title="Github" href="https://github.com/openspug/spug" target="_blank"
              rel="noopener noreferrer"><GithubOutlined/></a>
-          <a title={t('文档')} href="https://ops.spug.cc/docs/about-spug/" target="_blank"
+          <a title={t('文档')} href={docsUrl('about-spug/')} target="_blank"
              rel="noopener noreferrer">{t('文档')}</a>
         </div>
         <div style={{color: 'rgba(0, 0, 0, .45)'}}>Copyright <CopyrightOutlined/> {new Date().getFullYear()} By OpenSpug</div>

@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Button, Form, Input, Spin, message } from 'antd';
 import styles from './index.module.css';
-import { http, t } from 'libs';
+import { http, t, docsUrl } from 'libs';
 import store from './store';
 
 
@@ -45,7 +45,7 @@ export default observer(function Basic(props) {
         <Form.Item required name="nickname" label={t('姓名')}>
           <Input placeholder={t('请输入')}/>
         </Form.Item>
-        <Form.Item name="wx_token" label={t('微信Token')} extra={<a target="_blank" rel="noopener noreferrer" href="https://ops.spug.cc/docs/wx-token/">{t('什么是微信Token？')}</a>}>
+        <Form.Item name="wx_token" label={t('微信Token')} extra={<a target="_blank" rel="noopener noreferrer" href={docsUrl('wx-token/')}>{t('什么是微信Token？')}</a>}>
           <Input placeholder={t('请输入')}/>
         </Form.Item>
         <Form.Item>

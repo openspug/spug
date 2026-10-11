@@ -8,7 +8,7 @@ import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, DatePicker, Button, message } from 'antd';
 import { LoadingOutlined, SyncOutlined } from '@ant-design/icons';
 import HostSelector from './HostSelector';
-import { http, history, includes, t } from 'libs';
+import { http, history, includes, t, docsUrl } from 'libs';
 import store from './store';
 import lds from 'lodash';
 import moment from 'moment';
@@ -154,7 +154,7 @@ export default observer(function () {
         <Form.Item required label={t('选择分支/标签/版本')} style={{marginBottom: 12}} extra={<span>
             {t('根据网络情况，首次刷新可能会很慢，请耐心等待。')}
             <a target="_blank" rel="noopener noreferrer"
-               href="https://ops.spug.cc/docs/use-problem#clone">{t('clone 失败？')}</a>
+               href={docsUrl('use-problem#clone')}>{t('clone 失败？')}</a>
           </span>}>
           <Form.Item style={{display: 'inline-block', marginBottom: 0, width: '450px'}}>
             <Input.Group compact>

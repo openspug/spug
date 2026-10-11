@@ -12,7 +12,7 @@ import HostSelector from 'pages/host/Selector';
 import TemplateSelector from './TemplateSelector';
 import Parameter from './Parameter';
 import Output from './Output';
-import { http, cleanCommand, t } from 'libs';
+import { http, cleanCommand, t, docsUrl } from 'libs';
 import moment from 'moment';
 import store from './store';
 import gStore from 'gStore';
@@ -99,7 +99,7 @@ function TaskIndex() {
               <Radio.Button value="sh" style={{width: 80, textAlign: 'center'}}>Shell</Radio.Button>
               <Radio.Button value="python" style={{width: 80, textAlign: 'center'}}>Python</Radio.Button>
             </Radio.Group>
-            <a href="https://ops.spug.cc/docs/batch-exec" target="_blank" rel="noopener noreferrer"
+            <a href={docsUrl('batch-exec')} target="_blank" rel="noopener noreferrer"
                className={style.tips}><BulbOutlined/> {t('使用全局变量？')}</a>
             <Button style={{float: 'right'}} icon={<PlusOutlined/>} onClick={store.switchTemplate}>{t('从执行模版中选择')}</Button>
             <ACEditor className={style.editor} mode={interpreter} value={command} width="100%" onChange={setCommand}/>

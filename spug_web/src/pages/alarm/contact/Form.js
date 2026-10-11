@@ -8,7 +8,7 @@ import { observer } from 'mobx-react';
 import { Modal, Form, Input, Tooltip, message } from 'antd';
 import { ThunderboltOutlined, LoadingOutlined } from '@ant-design/icons';
 import http from 'libs/http';
-import { t } from 'libs';
+import { t, docsUrl } from 'libs';
 import store from './store';
 
 export default observer(function () {
@@ -98,7 +98,7 @@ export default observer(function () {
         </Form.Item>
         <Form.Item label={t('微信Token')} extra={
           <a target="_blank" rel="noopener noreferrer"
-             href="https://ops.spug.cc/docs/alarm-contact/">{t('如何获取微信 Token ？')}</a>}>
+             href={docsUrl('alarm-contact/')}>{t('如何获取微信 Token ？')}</a>}>
           <Form.Item noStyle name="wx_token">
             <Input placeholder={t('请输入微信token')}/>
           </Form.Item>
@@ -107,7 +107,7 @@ export default observer(function () {
         <Form.Item label={t('钉钉')} extra={<span>
             {t('钉钉收不到通知？请参考')}
             <a target="_blank" rel="noopener noreferrer"
-               href="https://ops.spug.cc/docs/use-problem#use-dd">{t('官方文档')}</a>
+               href={docsUrl('use-problem#use-dd')}>{t('官方文档')}</a>
           </span>}>
           <Form.Item noStyle name="ding">
             <Input placeholder="https://oapi.dingtalk.com/robot/send?access_token=xxx"/>

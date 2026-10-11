@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
 import { Form, Switch, Select, Button, Input, Radio } from 'antd';
-import { t } from 'libs';
+import { t, docsUrl } from 'libs';
 import envStore from 'pages/config/environment/store';
 import HostSelector from 'pages/host/Selector';
 import store from './store';
@@ -84,7 +84,7 @@ export default observer(function Ext2Setup1() {
       <Form.Item label={t('消息通知')} extra={<span>
         {t('应用审核及发布成功或失败结果通知，')}
         <a target="_blank" rel="noopener noreferrer"
-           href="https://ops.spug.cc/docs/use-problem#use-dd">{t('钉钉收不到通知？')}</a>
+           href={docsUrl('use-problem#use-dd')}>{t('钉钉收不到通知？')}</a>
       </span>}>
         <Input
           addonBefore={(

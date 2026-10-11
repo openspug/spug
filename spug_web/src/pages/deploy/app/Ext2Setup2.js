@@ -9,7 +9,7 @@ import { MinusCircleOutlined, PlusOutlined, UpOutlined, DownOutlined } from '@an
 import { Form, Input, Button, message, Divider, Alert, Select } from 'antd';
 import { ACEditor } from 'components';
 import styles from './index.module.css';
-import { http, cleanCommand, t } from 'libs';
+import { http, cleanCommand, t, docsUrl } from 'libs';
 import Tips from './Tips';
 import store from './store';
 import lds from 'lodash';
@@ -164,7 +164,7 @@ class Ext2Setup2 extends React.Component {
               ) : null,
               <Form.Item key={2} required label={t('目标路径')} extra={<a
                 target="_blank" rel="noopener noreferrer"
-                href="https://ops.spug.cc/docs/deploy-config#transfer">{t('使用前请务必阅读官方文档。')}</a>}>
+                href={docsUrl('deploy-config#transfer')}>{t('使用前请务必阅读官方文档。')}</a>}>
                 <Input
                   disabled={store.isReadOnly}
                   spellCheck={false}

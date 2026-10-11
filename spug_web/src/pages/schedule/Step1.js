@@ -9,7 +9,7 @@ import { Form, Input, Select, Modal, Button, Radio } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { LinkButton, ACEditor, Container } from 'components';
 import TemplateSelector from '../exec/task/TemplateSelector';
-import { cleanCommand, t } from 'libs';
+import { cleanCommand, t, docsUrl } from 'libs';
 import store from './store';
 
 export default observer(function (props) {
@@ -109,7 +109,7 @@ export default observer(function (props) {
           <span>
             {t('任务执行失败告警通知，')}
             <a target="_blank" rel="noopener noreferrer"
-               href="https://ops.spug.cc/docs/use-problem#use-dd">{t('钉钉收不到通知？')}</a>
+               href={docsUrl('use-problem#use-dd')}>{t('钉钉收不到通知？')}</a>
           </span>)}>
           <Input
             value={store.record.rst_notify.value}

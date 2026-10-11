@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react';
 import { Modal, Form, Select, Input, message } from 'antd';
 import http from 'libs/http';
-import { t } from 'libs';
+import { t, docsUrl } from 'libs';
 import store from './store';
 import rStore from '../role/store';
 
@@ -66,7 +66,7 @@ export default observer(function () {
           extra={(
             <span>
               {t('如果启用了MFA（两步验证）则该项为必填。')}
-              <a target="_blank" rel="noopener noreferrer" href="https://ops.spug.cc/docs/wx-token/">{t('什么是微信Token？')}</a>
+              <a target="_blank" rel="noopener noreferrer" href={docsUrl('wx-token/')}>{t('什么是微信Token？')}</a>
             </span>)}>
           <Input placeholder={t('请输入微信Token')}/>
         </Form.Item>

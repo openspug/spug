@@ -6,7 +6,7 @@
 import React from 'react';
 import { Layout } from 'antd';
 import { CopyrightOutlined, GithubOutlined } from '@ant-design/icons';
-import { t } from 'libs';
+import { t, docsUrl } from 'libs';
 import styles from './layout.module.less';
 
 
@@ -19,7 +19,7 @@ export default function () {
              rel="noopener noreferrer">{t('官网')}</a>
           <a className={styles.item} title="Github" href="https://github.com/openspug/spug" target="_blank"
              rel="noopener noreferrer"><GithubOutlined/></a>
-          <a title={t('文档')} href="https://ops.spug.cc/docs/about-spug/" target="_blank"
+          <a title={t('文档')} href={docsUrl('about-spug/')} target="_blank"
              rel="noopener noreferrer">{t('文档')}</a>
         </div>
         <div style={{color: 'rgba(0, 0, 0, .45)'}}>

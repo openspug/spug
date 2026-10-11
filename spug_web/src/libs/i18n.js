@@ -21,6 +21,11 @@ export function setLanguage(lang) {
 export const langMode = getLanguage();
 export const isEN = langMode === 'en';
 
+// 产品内的文档链接：英文界面指向英文文档站，两边路径与锚点一致，如 docsUrl('use-problem#clone')
+export function docsUrl(path) {
+  return `https://ops.spug.cc${isEN ? '/en' : ''}/docs/${path}`;
+}
+
 // 词典约 80KB，仅英文模式需要；切换语言会整页 reload，因此可在模块加载期一次性决定
 const translations = isEN ? require('../locales/en').default : {};
 
