@@ -44,6 +44,7 @@ class CredView(View):
         return json_response(error=error)
 
 
+@auth('deploy.app.add|deploy.app.edit|config.app.add|config.app.edit|pipeline.pipeline.add|pipeline.pipeline.edit')
 def handle_check(request):
     form, error = JsonParser(
         Argument('id', type=int, required=False),
@@ -53,7 +54,10 @@ def handle_check(request):
     if error is None:
         credential = None
         if form.id:
-            credential = Credential.objects.get(pk=form.id)
+            # 只能使用自己创建的或共享的凭据，否则可以把他人的私有凭据发往任意地址
+            credential = Credential.objects.filter(Q(created_by=request.user) | Q(is_public=True), pk=form.id).first()
+            if not credential:
+                return json_response(error='未找到指定凭据')
         if form.type == 'git':
             is_pass, message = RemoteGit.check_auth(form.data, credential)
             return json_response({'is_pass': is_pass, 'message': message})

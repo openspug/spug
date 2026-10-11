@@ -8,7 +8,44 @@ from io import StringIO
 from functools import partial
 import subprocess
 import shutil
+import shlex
 import os
+import re
+
+# 允许的仓库地址：http(s)/ssh/git/file 协议、scp 风格的 user@host:path 以及本地绝对路径。
+# 拒绝 ext:: 等能直接执行命令的传输方式，以及以 - 开头会被 git/ssh 当成选项的地址或主机名
+_git_url_regex = re.compile(r'((https?|ssh|git|file)://(?!-)|[\w.-]+@(?!-)[\w.-]+:|/)\S+\Z')
+
+
+def is_valid_git_url(url):
+    return isinstance(url, str) and not url.startswith('-') and bool(_git_url_regex.match(url))
+
+
+def validate_git_url(url):
+    if not is_valid_git_url(url):
+        raise ValueError(f'不支持的Git仓库地址：{url}')
+    return url
+
+
+def _quote_path(path):
+    # 远端路径整体转义，但保留开头 ~/ 的展开
+    if path == '~':
+        return path
+    if path.startswith('~/'):
+        return '~/' + shlex.quote(path[2:])
+    return shlex.quote(path)
+
+
+def _make_askpass_body(credential):
+    # 用户名/密码原样写进脚本会被 shell 解析，必须转义
+    body = '#!/bin/bash\n'
+    body += 'case "$1" in\n'
+    body += '  Username*)\n'
+    body += f'    printf "%s\\n" {shlex.quote(credential.username)};;\n'
+    body += '  Password*)\n'
+    body += f'    printf "%s\\n" {shlex.quote(credential.secret)};;\n'
+    body += 'esac'
+    return body
 
 
 class Git:
@@ -67,6 +104,7 @@ class Git:
                     shutil.rmtree(self.repo_dir)
                 else:
                     os.remove(self.repo_dir)
+        validate_git_url(self.git_repo)
         os.makedirs(self.repo_dir, exist_ok=True)
         try:
             repo = Repo.clone_from(self.git_repo, self.repo_dir)
@@ -113,6 +151,7 @@ class Git:
 
 class RemoteGit:
     def __init__(self, host, url, path, credential=None):
+        url = validate_git_url((url or '').strip())
         self.ssh = host.get_ssh()
         self.url = url
         self.path = path
@@ -128,14 +167,7 @@ class RemoteGit:
         ask_file = f'{self.ssh.exec_file}.1'
         if self.credential.type == 'pw':
             self._ask_env = dict(GIT_ASKPASS=ask_file)
-            body = '#!/bin/bash\n'
-            body += 'case "$1" in\n'
-            body += '  Username*)\n'
-            body += '    echo "{0.username}";;\n'
-            body += '  Password*)\n'
-            body += '    echo "{0.secret}";;\n'
-            body += 'esac'
-            body = body.format(self.credential)
+            body = _make_askpass_body(self.credential)
             self.ssh.put_file_by_fl(StringIO(body), ask_file)
         else:
             self._ask_env = dict(GIT_SSH=ask_file)
@@ -148,13 +180,13 @@ class RemoteGit:
         return self._ask_env
 
     def _check_path(self):
-        body = f'git rev-parse --resolve-git-dir {self.path}/.git'
+        body = f'git rev-parse --resolve-git-dir {_quote_path(self.path + "/.git")}'
         code, _ = self.ssh.exec_command(body)
         return code == 0
 
     def _clone(self):
         env = self._make_ask_env()
-        return self.remote_exec(f'git clone  {self.url} {self.path}', env)
+        return self.remote_exec(f'git clone {shlex.quote(self.url)} {_quote_path(self.path)}', env)
 
     def set_remote_exec(self, remote_exec):
         self.remote_exec = partial(remote_exec, self.ssh)
@@ -165,14 +197,7 @@ class RemoteGit:
         env, files = dict(), []
         if credential:
             if credential.type == 'pw':
-                ask_command = '#!/bin/bash\n'
-                ask_command += 'case "$1" in\n'
-                ask_command += '  Username*)\n'
-                ask_command += '    echo "{0.username}";;\n'
-                ask_command += '  Password*)\n'
-                ask_command += '    echo "{0.secret}";;\n'
-                ask_command += 'esac'
-                ask_command = ask_command.format(credential)
+                ask_command = _make_askpass_body(credential)
                 ask_file = NamedTemporaryFile()
                 ask_file.write(ask_command.encode())
                 ask_file.flush()
@@ -191,14 +216,20 @@ class RemoteGit:
                 os.chmod(ask_file.name, 0o755)
                 env.update(GIT_SSH=ask_file.name)
                 files.extend([key_file, ask_file])
+        # 不经 shell 直接执行 git，需要显式带上 PATH
+        env.update(PATH=os.environ.get('PATH', os.defpath))
         return env, files
 
     @classmethod
     def check_auth(cls, url, credential=None):
+        url = (url or '').strip()
+        if not is_valid_git_url(url):
+            return False, f'不支持的Git仓库地址：{url}'
         env, files = cls._make_local_ask_env(credential)
-        command = f'git ls-remote -h {url}'
+        # 参数列表方式执行，不经 shell；url 已拒绝 - 开头，避免被当成 --upload-pack 等选项
+        command = ['git', 'ls-remote', '-h', url]
         try:
-            res = subprocess.run(command, shell=True, capture_output=True, env=env, timeout=30)
+            res = subprocess.run(command, capture_output=True, env=env, timeout=30)
         except subprocess.TimeoutExpired:
             return False, f'git ls-remote timeout: {url}'
         if res.returncode == 0:
@@ -210,11 +241,14 @@ class RemoteGit:
     @classmethod
     def fetch_remote_tags(cls, url, credential=None):
         """List remote tag names via a local `git ls-remote`, newest last."""
+        url = (url or '').strip()
+        if not is_valid_git_url(url):
+            return False, f'不支持的Git仓库地址：{url}'
         env, files = cls._make_local_ask_env(credential)
-        command = f'git ls-remote --tags --refs {url}'
+        command = ['git', 'ls-remote', '--tags', '--refs', url]
         # 在请求线程内同步执行，必须限时，避免不可达的 git 服务拖死 worker
         try:
-            res = subprocess.run(command, shell=True, capture_output=True, env=env, timeout=15)
+            res = subprocess.run(command, capture_output=True, env=env, timeout=15)
         except subprocess.TimeoutExpired:
             return False, f'git ls-remote timeout: {url}'
         if res.returncode == 0:
@@ -226,7 +260,7 @@ class RemoteGit:
         return False, res.stderr.decode()
 
     def fetch_branches_tags(self):
-        body = f'set -e\ncd {self.path}\n'
+        body = f'set -e\ncd {_quote_path(self.path)}\n'
         if not self._check_path():
             # _clone() returns (code, out) by default, but a bool once
             # set_remote_exec() replaced the executor with a streaming one
@@ -264,7 +298,10 @@ class RemoteGit:
         return branches, tags
 
     def checkout(self, marker=None):
-        body = f'set -e\ncd {self.path}\n'
+        # marker 可能来自开放服务 API 传入的参数，必须转义；- 开头会被 git checkout 当成选项
+        if marker and marker.startswith('-'):
+            raise ValueError(f'无效的Git版本：{marker}')
+        body = f'set -e\ncd {_quote_path(self.path)}\n'
         if not self._check_path():
             is_success = self._clone()
             if not is_success:
@@ -273,7 +310,7 @@ class RemoteGit:
             body += 'git fetch -q --tags --force\n'
 
         if marker:
-            body += f'git checkout -f {marker}'
+            body += f'git checkout -f {shlex.quote(marker)}'
         else:  # checkout the latest tag
             body += 'marker=$(git tag --sort=-creatordate | head -1)\n'
             body += '[ -n "$marker" ] || { echo "no tags found in the repository"; exit 1; }\n'

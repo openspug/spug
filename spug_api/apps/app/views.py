@@ -8,6 +8,7 @@ from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
 from apps.config.models import Config, ConfigHistory, Service
 from apps.app.utils import fetch_versions, remove_repo
 from apps.setting.utils import AppSetting
+from libs.gitlib import is_valid_git_url
 import json
 import re
 
@@ -139,7 +140,8 @@ class DeployView(View):
             form.rst_notify = json.dumps(form.rst_notify)
             if form.extend == '1':
                 extend_form, error = JsonParser(
-                    Argument('git_repo', handler=str.strip, help='请输入git仓库地址'),
+                    Argument('git_repo', filter=lambda x: is_valid_git_url(str(x).strip()), handler=str.strip,
+                             help='请输入正确的git仓库地址'),
                     Argument('dst_dir', handler=str.strip, help='请输入发布部署路径'),
                     Argument('dst_repo', handler=str.strip, help='请输入发布存储路径'),
                     Argument('versions', type=int, filter=lambda x: x > 0, help='请输入发布保留版本数量'),
