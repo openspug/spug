@@ -70,10 +70,6 @@ docker compose logs spug | grep password
 - 推送助手：https://push.spug.cc
 
 
-## 推荐项目
-[Yearning — MYSQL 开源SQL语句审核平台](https://github.com/cookieY/Yearning)
-
-
 ## 预览
 
 ### 工作台

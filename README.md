@@ -76,9 +76,6 @@ Push Assistant is a message push platform that integrates multiple channels such
 - Spug Push: https://push.spug.cc
 
 
-## Recommended 
-[Yearning — MYSQL open source SQL statement review platform](https://github.com/cookieY/Yearning)
-
 
 ## PreView
 
