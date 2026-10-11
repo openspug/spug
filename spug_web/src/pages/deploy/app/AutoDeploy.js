@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, Radio, Button, Alert, message } from 'antd';
 import { LoadingOutlined, SyncOutlined } from '@ant-design/icons';
-import { http, t, docsUrl } from 'libs';
+import { http, t, docsUrl, hasPermission } from 'libs';
 import store from './store';
 import styles from './index.module.css';
 
@@ -14,13 +14,16 @@ export default observer(function AutoDeploy() {
   const [branch, setBranch] = useState();
   const [url, setURL] = useState();
   const [key, setKey] = useState();
+  const isAdmin = hasPermission('admin');
 
   useEffect(() => {
     if (store.deploy.extend === '1') {
       fetchVersions()
     }
-    http.post('/api/app/kit/key/', {key: 'api_key'})
-      .then(res => setKey(res))
+    if (isAdmin) {
+      http.post('/api/app/kit/key/', {key: 'api_key'})
+        .then(res => setKey(res))
+    }
   }, [])
 
   useEffect(() => {
@@ -111,7 +114,9 @@ export default observer(function AutoDeploy() {
           </Form.Item>
         ) : (
           <Form.Item label="Secret Token" tooltip={t('调用该Webhook接口的访问凭据，在Gitee中为WebHook密码，Gogs中为密钥文本。')}>
-            <div style={{color: '#ff4d4f'}}>{t('请在系统管理/系统设置/开放服务设置中设置。')}</div>
+            <div style={{color: '#ff4d4f'}}>
+              {isAdmin ? t('请在系统管理/系统设置/开放服务设置中设置。') : t('Secret Token 仅管理员可见，请联系管理员获取。')}
+            </div>
           </Form.Item>
         )}
       </Form>

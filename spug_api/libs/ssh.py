@@ -12,6 +12,8 @@ from uuid import uuid4
 import time
 import re
 
+_env_name = re.compile(r'[A-Za-z_][A-Za-z0-9_]*\Z')
+
 # POSIX sh 语法（勿用 bash 专属的 function 关键字），需兼容 dash/ash 等登录 shell
 KILLER = '''
 kill_tree() {
@@ -254,9 +256,14 @@ class SSH:
         str_envs = []
         for k, v in environment.items():
             k = k.replace('-', '_')
+            # 变量名无法转义，原样拼进 export 会造成命令注入；非法变量名本就无法 export，直接跳过
+            if not _env_name.match(k):
+                continue
             if isinstance(v, str):
                 v = v.replace("'", "'\"'\"'")
             str_envs.append(f"{k}='{v}'")
+        if not str_envs:
+            return ''
         str_envs = ' '.join(str_envs)
         return f'export {str_envs}\n'
 

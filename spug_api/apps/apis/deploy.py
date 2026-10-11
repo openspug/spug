@@ -36,6 +36,9 @@ def auto_deploy(request, deploy_id, kind):
 
 def _parse_request(request):
     api_key = AppSetting.get_default('api_key')
+    # 未配置 api_key 时一律拒绝，否则空的 X-Gitlab-Token 会与空凭据相等而通过校验
+    if not api_key:
+        return None, None
     token, repo, body = None, None, None
     token = request.headers.get('X-Gitlab-Token')
     if 'X-Gitlab-Token' in request.headers:
@@ -61,15 +64,15 @@ def _parse_request(request):
         repo = 'Gitlab'
 
     if repo in ['Gitlab', 'Gitee', 'Codeup']:
-        if token != api_key:
+        if not hmac.compare_digest(token.encode(), api_key.encode()):
             return None, None
     elif repo in ['Github', 'Gogs']:
         en_api_key = hmac.new(api_key.encode(), request.body, hashlib.sha256).hexdigest()
-        if token != en_api_key:
+        if not hmac.compare_digest(token.encode(), en_api_key.encode()):
             return None, None
     elif repo in ['Coding']:
         en_api_key = hmac.new(api_key.encode(), request.body, hashlib.sha1).hexdigest()
-        if token != en_api_key:
+        if not hmac.compare_digest(token.encode(), en_api_key.encode()):
             return None, None
     else:
         return None, None

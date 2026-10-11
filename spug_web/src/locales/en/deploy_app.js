@@ -36,6 +36,7 @@ const dict = {
   '调用该Webhook接口的访问凭据，在Gitee中为WebHook密码，Gogs中为密钥文本。': 'Access credential for calling this webhook endpoint — the "WebHook password" in Gitee, or the "secret" in Gogs.',
   '点击复制，老版本gitlab等无该项设置的可以在上述Webhook URL后边附加 &token={}': 'Click to copy. For older GitLab versions without this setting, append &token={} to the webhook URL above.',
   '请在系统管理/系统设置/开放服务设置中设置。': 'Set it in System / Settings / Open Service settings.',
+  'Secret Token 仅管理员可见，请联系管理员获取。': 'The Secret Token is visible to administrators only, please ask an administrator for it.',
 
   // CloneConfirm.js
   '克隆的应用': 'Source app',

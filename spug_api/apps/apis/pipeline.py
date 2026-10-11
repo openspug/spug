@@ -6,6 +6,7 @@ from django_redis import get_redis_connection
 from apps.apis.utils import api_key_required, api_response, parse_json_body
 from apps.pipeline.models import Pipeline, PipeHistory
 from apps.pipeline.utils import NodeExecutor, fill_node_targets
+from libs.validators import is_env_name
 from threading import Thread
 from uuid import uuid4
 import copy
@@ -35,6 +36,8 @@ def trigger(request, pipeline_id):
     params = body.get('params') or {}
     if not isinstance(params, dict):
         return api_response(error='params must be an object', status=400)
+    if not all(map(is_env_name, params)):
+        return api_response(error='Invalid param name', status=400)
     for k, v in params.items():
         if isinstance(v, list):
             params[k] = ','.join(str(x) for x in v)

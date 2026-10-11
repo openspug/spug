@@ -6,6 +6,7 @@ from django_redis import get_redis_connection
 from apps.apis.utils import api_key_required, api_response, parse_json_body
 from apps.exec.models import ExecTemplate
 from apps.host.models import Host
+from libs.validators import is_env_name
 import json
 import uuid
 
@@ -27,9 +28,15 @@ def trigger(request, template_id):
     if not template:
         return api_response(error='Template not found', status=404)
 
-    host_ids = body.get('host_ids') or json.loads(template.host_ids)
-    if not isinstance(host_ids, list) or not host_ids:
-        return api_response(error='host_ids is required, the template has no default hosts', status=400)
+    # 开放服务没有登录用户，只能以模板预设的主机为边界：host_ids 只能缩小范围，不能扩大
+    allowed_ids = set(json.loads(template.host_ids))
+    if not allowed_ids:
+        return api_response(error='The template has no default hosts', status=400)
+    host_ids = body.get('host_ids') or list(allowed_ids)
+    if not isinstance(host_ids, list) or not all(isinstance(x, int) for x in host_ids):
+        return api_response(error='host_ids must be a list of host id', status=400)
+    if not set(host_ids).issubset(allowed_ids):
+        return api_response(error=f'Host not in template: {sorted(set(host_ids) - allowed_ids)}', status=403)
     hosts = list(Host.objects.filter(id__in=host_ids))
     missing = set(host_ids) - {x.id for x in hosts}
     if missing:
@@ -38,6 +45,8 @@ def trigger(request, template_id):
     params = body.get('params') or {}
     if not isinstance(params, dict):
         return api_response(error='params must be an object', status=400)
+    if not all(map(is_env_name, params)):
+        return api_response(error='Invalid param name', status=400)
     for item in json.loads(template.parameters):
         if item['variable'] not in params and item.get('default') not in (None, ''):
             params[item['variable']] = item['default']

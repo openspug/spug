@@ -7,6 +7,7 @@ from datetime import datetime
 
 # 空白与 shell 元字符：路径会经 SSH 交给远端 shell，或作为 rsync/sshfs 的远端参数被远端 shell 再解析一次
 _unsafe_path_chars = re.compile(r'[\s;|&$`<>()\'"\\*?{}\[\]!]')
+_env_name = re.compile(r'[A-Za-z_][A-Za-z0-9_-]*\Z')
 
 
 # 判断是否是ip地址
@@ -39,3 +40,8 @@ def path_validator(value) -> bool:
         return False
     value = value.strip()
     return value.startswith('/') and not _unsafe_path_chars.search(value)
+
+
+# 判断是否是合法的环境变量名（参数名会作为环境变量名拼进 export 语句）；连字符会在 export 前被替换为下划线
+def is_env_name(value) -> bool:
+    return isinstance(value, str) and bool(_env_name.match(value))

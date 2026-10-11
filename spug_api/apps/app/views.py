@@ -214,6 +214,9 @@ def kit_key(request):
         Argument('key', filter=lambda x: x in ('api_key', 'public_key'), help='参数错误')
     ).parse(request.body)
     if error is None:
+        # api_key 是开放服务的全局凭据（可触发执行、流水线并读取全部配置），只有管理员可以读取
+        if form.key == 'api_key' and not request.user.is_supper:
+            return json_response(error='权限拒绝')
         api_key = AppSetting.get_default(form.key)
         return json_response(api_key)
     return json_response(error=error)
