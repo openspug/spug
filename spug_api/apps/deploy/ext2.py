@@ -17,8 +17,14 @@ REPOS_DIR = settings.REPOS_DIR
 def ext2_deploy(req, helper, env, with_local):
     flag = time.time()
     extend, step = req.deploy.extend_obj, 1
-    host_actions = json.loads(extend.host_actions)
-    server_actions = json.loads(extend.server_actions)
+    if req.type == '2':
+        host_actions = json.loads(extend.rollback_host_actions) if extend.rollback_host_actions else []
+        server_actions = json.loads(extend.rollback_server_actions) if extend.rollback_server_actions else []
+        if not host_actions and not server_actions:
+            helper.send_error('local', '该发布配置未设置回滚动作，无法回滚')
+    else:
+        host_actions = json.loads(extend.host_actions)
+        server_actions = json.loads(extend.server_actions)
     env.update({'SPUG_RELEASE': req.version})
     if req.version:
         for index, value in enumerate(req.version.split()):

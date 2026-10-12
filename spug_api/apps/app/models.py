@@ -110,11 +110,15 @@ class DeployExtend2(models.Model, ModelMixin):
     server_actions = models.TextField()
     host_actions = models.TextField()
     require_upload = models.BooleanField(default=False)
+    rollback_server_actions = models.TextField(null=True)
+    rollback_host_actions = models.TextField(null=True)
 
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
         tmp['server_actions'] = json.loads(self.server_actions)
         tmp['host_actions'] = json.loads(self.host_actions)
+        tmp['rollback_server_actions'] = json.loads(self.rollback_server_actions) if self.rollback_server_actions else []
+        tmp['rollback_host_actions'] = json.loads(self.rollback_host_actions) if self.rollback_host_actions else []
         return tmp
 
     def __repr__(self):
