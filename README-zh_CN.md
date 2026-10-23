@@ -27,6 +27,8 @@ docker compose logs spug | grep password
 
 用浏览器打开 `http://<服务器地址>/`，账号 `admin`，密码是最后一条命令输出的随机密码（首次启动时生成）。国内使用请先把 [docker-compose.yml](./docker-compose.yml) 里的 `TZ` 改为 `Asia/Shanghai`；访问 GitHub、Docker Hub 不稳定时，可按[安装文档](https://ops.spug.cc/docs/install-docker/)的方式安装。
 
+不想自己维护 Spug 控制台？**Spug Cloud 正在调研，尚未开放使用。** 计划由我们托管控制台，通过 SSH 连接你的服务器，预计 **$4.9/台/月**。如果你愿意考虑按这个价格试用，请[加入调研候补名单](https://www.spug.cc/cloud?lang=zh&ref=github)，告诉我们服务器台数和主要用途。自托管版继续免费开源。
+
 ## 🔥推送助手
 
 推送助手是一个集成了电话、短信、邮件、飞书、钉钉、微信、企业微信等多通道的消息推送平台，可以3分钟实现Zabbix、Prometheus、夜莺等监控系统的电话短信报警，点击体验：[https://push.spug.cc](https://push.spug.cc)
