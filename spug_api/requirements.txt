@@ -1,6 +1,6 @@
 apscheduler==3.10.4
 Django >= 4.2.0, < 4.3.0
-paramiko==3.4.0
+paramiko==5.0.0
 channels >= 4.0.0, < 5.0.0
 daphne >= 4.0.0, < 5.0.0
 gunicorn >= 21.0.0
