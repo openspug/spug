@@ -1,6 +1,7 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
+from django.db import transaction
 from apps.config.models import Config, Service, Environment, ConfigHistory
 from apps.app.models import App
 from libs.utils import SpugError, human_datetime
@@ -35,6 +36,7 @@ def compose_configs(app, env_id, no_prefix=False):
     return configs
 
 
+@transaction.atomic
 def update_config_by_var(val):
     try:
         keys, value = val.split('=', 1)
@@ -61,6 +63,7 @@ def update_config_by_var(val):
             config.updated_at = human_datetime()
             config.updated_by_id = None
             config.desc = '通过SPUG_SET动态更新'
+            config.save()
             ConfigHistory.objects.create(
                 action='2',
                 old_value=old_value,
